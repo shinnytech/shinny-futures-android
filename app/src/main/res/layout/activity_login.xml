@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+    </data>
+
+    <android.support.design.widget.CoordinatorLayout
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".view.activity.LoginActivity">
+
+        <include layout="@layout/view_toolbar"></include>
+
+        <!-- Login progress -->
+
+        <ScrollView
+            android:id="@+id/sv_id_login"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="?attr/actionBarSize">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_marginLeft="@dimen/margin_10dp"
+                    android:layout_marginRight="@dimen/margin_20dp"
+                    android:id="@+id/broker"
+                    android:textColor="@color/gray"
+                    android:layout_alignParentLeft="true"
+                    android:gravity="center_vertical"
+                    android:padding="@dimen/padding_5dp"
+                    android:layout_marginTop="@dimen/margin_32dp"
+                    android:textSize="@dimen/font_size_normal"
+                    android:text="期货公司"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <android.support.v7.widget.AppCompatSpinner
+                    android:layout_alignBottom="@id/broker"
+                    android:layout_toRightOf="@id/broker"
+                    android:id="@+id/spinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"></android.support.v7.widget.AppCompatSpinner>
+
+                <View
+                    android:id="@+id/line_spinner"
+                    android:layout_marginBottom="@dimen/margin_16dp"
+                    android:layout_below="@id/broker"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/line_width"
+                    android:background="@color/gray"></View>
+
+
+                <TextView
+                    android:layout_marginLeft="@dimen/margin_10dp"
+                    android:id="@+id/phone"
+                    android:textColor="@color/gray"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@id/line_spinner"
+                    android:gravity="center_vertical"
+                    android:padding="@dimen/padding_5dp"
+                    android:textSize="@dimen/font_size_normal"
+                    android:text="用户名"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                    <AutoCompleteTextView
+                        android:layout_alignBottom="@id/phone"
+                        android:layout_alignLeft="@id/spinner"
+                        android:gravity="center_vertical"
+                        android:id="@+id/tv_id_phone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:completionThreshold="1"
+                        android:inputType="phone"
+                        android:padding="@dimen/padding_5dp"
+                        android:background="@null"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_size_normal"
+                        android:maxLines="1"/>
+
+                <View
+                    android:id="@+id/line_phone"
+                    android:layout_marginBottom="@dimen/margin_16dp"
+                    android:layout_below="@id/phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/line_width"
+                    android:background="@color/gray"></View>
+
+
+                <TextView
+                    android:layout_marginLeft="@dimen/margin_10dp"
+                    android:id="@+id/password"
+                    android:textColor="@color/gray"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@id/line_phone"
+                    android:gravity="center_vertical"
+                    android:padding="@dimen/padding_5dp"
+                    android:textSize="@dimen/font_size_normal"
+                    android:text="密码"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                    <EditText
+                        android:layout_alignBottom="@id/password"
+                        android:layout_alignLeft="@id/spinner"
+                        android:gravity="center_vertical"
+                        android:padding="@dimen/padding_5dp"
+                        android:id="@+id/et_id_password"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeActionLabel="@string/login_activity_action_sign_in_short"
+                        android:imeOptions="actionUnspecified"
+                        android:inputType="textPassword"
+                        android:textColor="@color/white"
+                        android:background="@null"
+                        android:textSize="@dimen/font_size_normal"
+                        android:maxLines="1"/>
+
+                <View
+                    android:id="@+id/line_password"
+                    android:layout_marginBottom="@dimen/margin_32dp"
+                    android:layout_below="@id/password"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/line_width"
+                    android:background="@color/gray"></View>
+
+                <Button
+                    android:id="@+id/button_id_login"
+                    style="?android:textAppearanceSmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/line_password"
+                    android:layout_marginLeft="@dimen/margin_10dp"
+                    android:layout_marginRight="@dimen/margin_10dp"
+                    android:layout_marginBottom="@dimen/margin_16dp"
+                    android:background="@drawable/login_selector"
+                    android:gravity="center"
+                    android:textSize="@dimen/font_size_normal_high"
+                    android:text="@string/login_activity_btn_login"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"/>
+
+                <ProgressBar
+                    android:id="@+id/pb_id_login"
+                    style="?android:attr/progressBarStyleLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@+id/line_phone"
+                    android:layout_centerHorizontal="true"
+                    android:visibility="gone"/>
+
+            </RelativeLayout>
+
+        </ScrollView>
+
+    </android.support.design.widget.CoordinatorLayout>
+
+</layout>

@@ -1,0 +1,58 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen xmlns:tools="http://schemas.android.com/tools"
+           name="design_navigation_separator_vertical_padding" tools:override="true">0dp
+    </dimen>
+    <dimen name="order_dialog_width">220dp</dimen>
+    <dimen name="order_dialog_width1">270dp</dimen>
+    <dimen name="order_dialog_height">115dp</dimen>
+    <dimen name="order_dialog_height1">120dp</dimen>
+
+    <dimen name="margin_1dp">1dp</dimen>
+    <dimen name="margin_2dp">2dp</dimen>
+    <dimen name="margin_2.5dp">2.5dp</dimen>
+    <dimen name="margin_3dp">3dp</dimen>
+    <dimen name="margin_5dp">5dp</dimen>
+    <dimen name="margin_10dp">10dp</dimen>
+    <dimen name="margin_15dp">15dp</dimen>
+    <dimen name="margin_16dp">16dp</dimen>
+    <dimen name="margin_20dp">20dp</dimen>
+    <dimen name="margin_30dp">30dp</dimen>
+    <dimen name="margin_32dp">32dp</dimen>
+    <dimen name="margin_45dp">45dp</dimen>
+
+    <dimen name="line_width">1dp</dimen>
+    <dimen name="radio_group_height">30dp</dimen>
+    <dimen name="radio_group_height_small">20dp</dimen>
+    <dimen name="spinner_height">35dp</dimen>
+    <dimen name="image_view_size">45dp</dimen>
+
+    <dimen name="layout_height_item_activity_search_quote">35dp</dimen>
+    <dimen name="layout_height_item_fragment_quote">40dp</dimen>
+    <dimen name="layout_height_popup_fragment_quote">42dp</dimen>
+    <dimen name="layout_height_item_activity_nav_quote">45dp</dimen>
+    <dimen name="layout_height_view_dialog_cancel_order">115dp</dimen>
+
+    <dimen name="layout_width_view_dialog_cancel_order">220dp</dimen>
+    <dimen name="layout_width_item_activity_nav_quote">40dp</dimen>
+
+    <dimen name="scroll_bar_size_small">2dp</dimen>
+    <dimen name="scroll_bar_size">4dp</dimen>
+
+    <dimen name="padding_0dp">0dp</dimen>
+    <dimen name="padding_4dp">4dp</dimen>
+    <dimen name="padding_5dp">5dp</dimen>
+    <dimen name="padding_10dp">10dp</dimen>
+
+    <dimen name="font_size_tiny_high">8sp</dimen>
+    <dimen name="font_size_tiny">10sp</dimen>
+    <dimen name="font_size_small_high">12sp</dimen>
+    <dimen name="font_size_small">13sp</dimen>
+    <dimen name="font_size_normal">15sp</dimen>
+    <dimen name="font_size_normal_high">20sp</dimen>
+    <dimen name="font_size_large">25sp</dimen>
+    <dimen name="font_size_large_high">30sp</dimen>
+    <dimen name="app_bar_height">180dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+</resources>

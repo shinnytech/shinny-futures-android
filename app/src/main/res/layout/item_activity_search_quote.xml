@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data></data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/layout_height_item_activity_search_quote"
+        android:background="@color/black_light_more"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:id="@+id/rl_search_jump"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/margin_5dp"
+            android:layout_marginEnd="@dimen/margin_5dp"
+            android:layout_marginStart="@dimen/margin_10dp"
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_search_instrument_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-"
+                    android:textColor="@color/white"/>
+
+                <TextView
+                    android:id="@+id/tv_search_instrument_id"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-"
+                    android:textColor="@color/instrument_id"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_search_exchange_Name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="-"
+                android:textColor="@color/text_gray_light"/>
+
+        </RelativeLayout>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/margin_3dp"
+            android:layout_marginTop="@dimen/margin_3dp"
+            android:background="@color/black"></View>
+
+        <ImageView
+            android:id="@+id/iv_search_collect"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:contentDescription="collect"
+            android:src="@mipmap/ic_favorite_border_white_24dp"/>
+
+    </LinearLayout>
+</layout>

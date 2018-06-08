@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><!-- 数字键盘 -->
+<Keyboard xmlns:android="http://schemas.android.com/apk/res/android"
+          android:keyHeight="8%p"
+          android:keyWidth="20%p">
+
+    <Row>
+        <Key
+            android:codes="@integer/keycode_line_up_price"
+            android:keyEdgeFlags="left"
+            android:keyLabel="排队价"/>
+
+        <Key
+            android:codes="@integer/keycode_opponent_price"
+            android:keyLabel="对手价"/>
+
+        <Key
+            android:codes="@integer/keycode_market_price"
+            android:keyLabel="市价"/>
+
+        <Key
+            android:codes="@integer/keycode_last_price"
+            android:keyEdgeFlags="right"
+            android:keyLabel="最新价"/>
+
+    </Row>
+
+    <Row>
+        <Key
+            android:codes="49"
+            android:keyEdgeFlags="left"
+            android:keyLabel="1"/>
+
+        <Key
+            android:codes="50"
+            android:keyLabel="2"/>
+
+        <Key
+            android:codes="51"
+            android:keyLabel="3"/>
+
+        <Key
+            android:codes="@integer/keycode_add"
+            android:isRepeatable="true"
+            android:keyEdgeFlags="right"
+            android:keyIcon="@mipmap/ic_add_white_24dp"/>
+
+    </Row>
+
+    <Row>
+        <Key
+            android:codes="52"
+            android:keyEdgeFlags="left"
+            android:keyLabel="4"/>
+
+        <Key
+            android:codes="53"
+            android:keyLabel="5"/>
+
+        <Key
+            android:codes="54"
+            android:keyLabel="6"/>
+
+        <Key
+            android:codes="@integer/keycode_sub"
+            android:isRepeatable="true"
+            android:keyEdgeFlags="right"
+            android:keyIcon="@mipmap/ic_remove_white_24dp"/>
+    </Row>
+
+    <Row>
+        <Key
+            android:codes="55"
+            android:keyEdgeFlags="left"
+            android:keyLabel="7"/>
+
+        <Key
+            android:codes="56"
+            android:keyLabel="8"/>
+
+        <Key
+            android:codes="57"
+            android:keyLabel="9"/>
+
+        <Key
+            android:codes="@integer/keycode_empty_text"
+            android:keyEdgeFlags="right"
+            android:keyLabel="清空"/>
+
+    </Row>
+
+    <Row>
+        <Key
+            android:codes="46"
+            android:keyEdgeFlags="left"
+            android:keyLabel="."/>
+
+        <Key
+            android:codes="48"
+            android:keyLabel="0"/>
+
+        <Key
+            android:codes="-5"
+            android:isRepeatable="true"
+            android:keyEdgeFlags="right"
+            android:keyIcon="@mipmap/ic_keyboard_backspace_white_24dp"/>
+
+        <Key
+            android:codes="-4"
+            android:keyEdgeFlags="right"
+            android:keyLabel="确定"/>
+    </Row>
+
+</Keyboard>

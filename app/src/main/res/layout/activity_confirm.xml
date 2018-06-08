@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+    </data>
+
+    <LinearLayout
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".view.activity.ConfirmActivity">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/black_dark"
+            android:orientation="horizontal"
+            android:padding="@dimen/padding_4dp">
+
+            <Button
+                android:id="@+id/not_now"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/rectangle_border_settlement"
+                android:gravity="center"
+                android:text="@string/confirm_activity_not_now"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/confirm_activity_title"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_large"/>
+
+            <Button
+                android:id="@+id/confirm"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/rectangle_border_settlement"
+                android:gravity="center"
+                android:text="@string/confirm_activity_settlement"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal"/>
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/settlement_background">
+
+            <HorizontalScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scrollbarSize="@dimen/scroll_bar_size">
+
+                <TextView
+                    android:id="@+id/settlement_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="horizontal|vertical"
+                    android:textColor="@color/white"/>
+
+            </HorizontalScrollView>
+
+        </ScrollView>
+
+    </LinearLayout>
+</layout>
+

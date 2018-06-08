@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/down_fragment"
+        android:orientation="vertical">
+
+
+        <LinearLayout
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/padding_4dp"
+            android:paddingTop="@dimen/padding_4dp">
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.4"
+                android:gravity="center"
+                android:text="@string/order_fragment_instrument_id"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal"/>
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.2"
+                android:gravity="center"
+                android:text="@string/order_fragment_status"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal"/>
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/order_fragment_direction"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal"/>
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.2"
+                android:gravity="center"
+                android:text="委托价"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/order_fragment_volume"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.2"
+                android:gravity="center"
+                android:text="@string/order_fragment_date"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal"/>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/line_width"
+            android:background="@color/alpha_white"></View>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <RadioGroup
+            android:id="@+id/rg_order"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/radio_group_height_small"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rb_all_order"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:buttonTint="@color/colorAccent"
+                android:checked="true"
+                android:scaleX="0.8"
+                android:scaleY="0.8"
+                android:text="@string/order_fragment_all"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal"/>
+
+            <RadioButton
+                android:id="@+id/rb_undone_order"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="20dp"
+                android:buttonTint="@color/colorAccent"
+                android:scaleX="0.8"
+                android:scaleY="0.8"
+                android:text="@string/order_fragment_undone"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal"/>
+        </RadioGroup>
+
+    </LinearLayout>
+</layout>

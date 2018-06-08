@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data></data>
+
+    <android.support.design.widget.CoordinatorLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".view.activity.SearchActivity">
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay"
+            tools:layout_editor_absoluteX="8dp"
+            tools:layout_editor_absoluteY="0dp">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar_search"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/AppTheme.PopupOverlay">
+
+                <TextView
+                    android:id="@+id/title_toolbar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/font_size_normal_high"
+                    android:visibility="gone"/>
+
+                <android.support.v7.widget.SearchView
+                    android:id="@+id/search_edit_frame"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:iconifiedByDefault="false"
+                    app:queryHint="@string/search_activity_hint"></android.support.v7.widget.SearchView>
+
+            </android.support.v7.widget.Toolbar>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_search_quote_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:fadeScrollbars="false"
+            android:scrollbarSize="@dimen/scroll_bar_size_small"
+            android:scrollbarThumbVertical="@color/text_gray_light"
+            android:scrollbars="vertical"></android.support.v7.widget.RecyclerView>
+
+    </android.support.design.widget.CoordinatorLayout>
+
+</layout>

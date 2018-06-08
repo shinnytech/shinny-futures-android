@@ -1,0 +1,143 @@
+<resources>
+    <!--related to main activity-->
+    <string name="main_activity_exit">再按一次退出程序</string>
+    <string name="main_activity_openDrawer">open</string>
+    <string name="main_activity_closeDrawer">close</string>
+
+    <!--related to future info activity -->
+    <string name="future_info_activity_current_day">当日</string>
+    <string name="future_info_activity_day">日线</string>
+    <string name="future_info_activity_hour">小时</string>
+    <string name="future_info_activity_five_minute">5分钟</string>
+    <string name="future_info_activity_set">设置</string>
+    <string name="future_info_activity_handicap">信息</string>
+    <string name="future_info_activity_position">持仓</string>
+    <string name="future_info_activity_order">委托</string>
+    <string name="future_info_activity_transaction">交易</string>
+    <string name="future_info_activity_position_set_up">持仓</string>
+    <string name="future_info_activity_order_set_up">挂单</string>
+    <string name="future_info_activity_average_set_up">均线</string>
+
+    <!-- Strings related to login activity -->
+    <string name="login_activity_btn_login">登录</string>
+    <string name="login_activity_title_login">登录</string>
+    <string name="login_activity_action_sign_in_short">登录</string>
+    <string name="login_activity_error_invalid_password">密码不能为空</string>
+    <string name="login_activity_error_field_required">用户名不能为空</string>
+    <string name="login_activity_error_incorrect_password">用户名/密码错误</string>
+
+    <!--related to search activity -->
+    <string name="search_activity_name">SearchQuote</string>
+    <string name="search_activity_hint">合约代码\\拼音\\中文\\交易所</string>
+    <string name="search_activity_title">主力合约</string>
+
+    <!--related to account activity-->
+    <string name="account_activity_date">日期</string>
+    <string name="account_activity_static_balance">=静态权益</string>
+    <string name="account_activity_close_profit">+平仓盈亏</string>
+    <string name="account_activity_position_profit">+持仓盈亏</string>
+    <string name="account_activity_premium">+权利金</string>
+    <string name="account_activity_commission">-手续费</string>
+    <string name="account_activity_balance">=动态权益</string>
+    <string name="account_activity_margin_using">-占用保证金</string>
+    <string name="account_activity_margin_frozen">-冻结保证金</string>
+    <string name="account_activity_commission_frozen">-冻结手续费</string>
+    <string name="account_activity_premium_frozen">-冻结权利金</string>
+    <string name="account_activity_credit">+信用额度</string>
+    <string name="account_activity_available">=可用资金</string>
+    <string name="account_activity_deposit">入金金额</string>
+    <string name="account_activity_withdraw">出金金额</string>
+
+    <!--related to trade activity-->
+    <string name="trade_activity_instrument_id">合约名称</string>
+    <string name="trade_activity_direction">开平</string>
+    <string name="trade_activity_amount">成交价</string>
+    <string name="trade_activity_volume">成交量</string>
+    <string name="trade_activity_time">成交时间</string>
+
+    <!--related to handicap fragment -->
+    <string name="handicap_fragment_ask_price1">卖一</string>
+    <string name="handicap_fragment_ask_volume1">卖量</string>
+    <string name="handicap_fragment_bid_price1">买一</string>
+    <string name="handicap_fragment_bid_volume1">买量</string>
+    <string name="handicap_fragment_last_price">最新</string>
+    <string name="handicap_fragment_change">涨跌</string>
+    <string name="handicap_fragment_open">开盘</string>
+    <string name="handicap_fragment_volume">成交量</string>
+    <string name="handicap_fragment_highest">最高</string>
+    <string name="handicap_fragment_open_interest">持仓量</string>
+    <string name="handicap_fragment_lowest">最低</string>
+    <string name="handicap_fragment_pre_open_interest">日增仓</string>
+    <string name="handicap_fragment_average">均价</string>
+    <string name="handicap_fragment_settlement">结算价</string>
+    <string name="handicap_fragment_pre_close">昨收</string>
+    <string name="handicap_fragment_upper_limit">涨停</string>
+    <string name="handicap_fragment_pre_settlement">昨结</string>
+    <string name="handicap_fragment_lower_limit">跌停</string>
+
+    <!--related to order fragment -->
+    <string name="order_fragment_instrument_id">合约</string>
+    <string name="order_fragment_status">状态</string>
+    <string name="order_fragment_direction">开平</string>
+    <string name="order_fragment_volume">数量</string>
+    <string name="order_fragment_date">时间</string>
+    <string name="order_fragment_all">所有委托</string>
+    <string name="order_fragment_undone">未成交单</string>
+
+    <!--related to position fragment-->
+    <string name="position_fragment_instrument_id">合约</string>
+    <string name="position_fragment_direction">多空</string>
+    <string name="position_fragment_volume">手数</string>
+    <string name="position_fragment_available">可用</string>
+    <string name="position_fragment_average_open_price">开仓均价</string>
+    <string name="position_fragment_profit_each">逐笔盈亏</string>
+
+    <!--related to transaction fragment-->
+    <string name="transaction_fragment_balance">权益：</string>
+    <string name="transaction_fragment_available">可用：</string>
+    <string name="transaction_fragment_using_ratio">使用率：</string>
+    <string name="transaction_fragment_price">价格</string>
+    <string name="transaction_fragment_volume">手数</string>
+    <string name="transaction_fragment_ask_price1">卖</string>
+    <string name="transaction_fragment_last_price">新</string>
+    <string name="transaction_fragment_bid_price1">买</string>
+    <string name="transaction_fragment_bid_direction">买多</string>
+    <string name="transaction_fragment_ask_direction">卖空</string>
+    <string name="transaction_fragment_close_direction">平仓</string>
+    <string name="transaction_fragment_close_status">先开先平</string>
+
+    <!--related to quote fragment-->
+    <string name="quote_fragment_up_down">涨跌幅%</string>
+    <string name="quote_fragment_open_interest">持仓量</string>
+    <string name="quote_fragment_latest">最新价</string>
+    <string name="quote_fragment_name">合约名称</string>
+
+    <!--related to dialog change quote view-->
+    <string name="select_from_optional">从自选列表中选择合约</string>
+
+    <!--related to confirm activity-->
+    <string name="confirm_activity_title">账单确认</string>
+    <string name="confirm_activity_not_now">暂不确认</string>
+    <string name="confirm_activity_settlement">确认账单</string>
+
+    <string name="large_text">
+        "免责条款声明\n\n"
+
+        "上海信易信息科技股份有限公司（其中包括但不限于公司的董事、执行官、雇员、顾问和代理商）明确拒绝对快期软件做"
+        "任何明示或暗示的担保。由于软件系统开发本身的复杂性，无法保证软件完全没有错误。您选择使用快期期货交易终端软件"
+        "即表示您同意错误和/或遗漏的存在，在任何情况下上海信易信息科技股份有限公司对于直接、间接、特殊的、偶然的、或"
+        "间接产生的、使用或无法使用本软件进行交易和投资造成的盈亏、直接或间接引起的赔偿、损失、债务或是任何交易中止均"
+        "不承担责任和义务。\n\n"
+
+        "本公司授权用户在协议约定的服务期限内可以使用本软件及随本软件提供的服务。本软件作为客户端软件，是整体软件系统"
+        "的一个组成部分；任何情况下，本公司不向任何客户转让本软件的所有权。\n\n"
+
+        "此声明永久有效。\n\n"
+
+        "上海信易信息科技股份有限公司\n\n"
+
+    </string>
+    <string name="welcome_activity_disagree">不同意</string>
+    <string name="welcome_activity_agree">同意</string>
+
+</resources>

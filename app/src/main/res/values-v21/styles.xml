@@ -1,0 +1,110 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:listDivider">@drawable/divider_quote</item>
+        <item name="android:windowBackground">@null</item>
+
+        <!--不显示开机空白页,只是显得有点卡顿-->
+        <!--<item name="android:windowIsTranslucent">true</item>-->
+    </style>
+
+    <style name="MainActivityTheme" parent="AppTheme">
+        <!--preview window添加背景图-->
+        <!--<item name="android:windowBackground">@mipmap/ic_splash</item>-->
+
+        <item name="android:windowBackground">@color/black_dark_more</item>
+    </style>
+
+    <style name="LoginActivityTheme" parent="AppTheme">
+        <!--preview window添加背景图-->
+        <item name="android:windowBackground">@color/black_light</item>
+    </style>
+
+    <style name="SearchActivityTheme" parent="AppTheme">
+        <!--preview window添加背景图-->
+        <item name="android:windowBackground">@color/black_light_more</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+
+    <!-- 侧滑栏主题 -->
+    <style name="NavigationTheme" parent="AppTheme">
+        <item name="android:listPreferredItemHeightSmall">40dp</item>
+    </style>
+
+    <!--下单/撤单/自选合约弹出框,固定大小-->
+    <style name="Theme.Light.Dialog" parent="android:style/Theme.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:scrollHorizontally">true</item>
+    </style>
+
+    <!--免责条款弹出框,全屏-->
+    <style name="responsibilityDialog">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!--popupWindow样式框，左进右出-->
+    <style name="anim_menu_set_up">
+        <item name="android:windowEnterAnimation">@anim/popup_left_in</item>
+        <item name="android:windowExitAnimation">@anim/popup_right_out</item>
+    </style>
+
+    <!--popupWindow样式框，淡入淡出-->
+    <style name="anim_menu_quote">
+        <item name="android:windowEnterAnimation">@anim/popup_in</item>
+        <item name="android:windowExitAnimation">@anim/popup_out</item>
+    </style>
+
+    <style name="RadioButtonTabUp">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">30dp</item>
+        <item name="android:button">@null</item>
+        <item name="android:textColor">@drawable/txtcolor_yellow2gray_check</item>
+        <item name="android:background">@drawable/bgcolor_gray2yellow_check_up</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="RadioButtonSetUp">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:gravity">right|center</item>
+    </style>
+
+    <style name="RadioButtonTabDown">
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">30dp</item>
+        <item name="android:button">@null</item>
+        <item name="android:textColor">@drawable/txtcolor_yellow2gray_check</item>
+        <item name="android:background">@drawable/bgcolor_gray2yellow_check_down</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="RadioButtonTabDownTransaction">
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">30dp</item>
+        <item name="android:button">@null</item>
+        <item name="android:textColor">@drawable/txtcolor_yellow2white_check</item>
+        <item name="android:background">@drawable/bgcolor_gray2yellow_check_down_transaction</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="toolBarTitle">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+</resources>

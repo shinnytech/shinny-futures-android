@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+    </data>
+
+    <android.support.design.widget.CoordinatorLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:orientation="vertical"
+        tools:context=".view.activity.FutureInfoActivity">
+
+
+        <include layout="@layout/view_toolbar"></include>
+
+        <LinearLayout
+            android:id="@+id/fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/black_light"
+            android:orientation="vertical"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            tools:context=".view.activity.FutureInfoActivity"
+            tools:showIn="@layout/activity_future_info">
+
+            <RadioGroup
+                android:id="@+id/rg_tab_up"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/radio_group_height"
+                android:layout_gravity="center_vertical"
+                android:background="@color/nav_normal"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rb_current_day_up"
+                    style="@style/RadioButtonTabUp"
+                    android:checked="true"
+                    android:text="@string/future_info_activity_current_day"
+                    android:textSize="@dimen/font_size_normal"/>
+
+                <RadioButton
+                    android:id="@+id/rb_day_up"
+                    style="@style/RadioButtonTabUp"
+                    android:text="@string/future_info_activity_day"
+                    android:textSize="@dimen/font_size_normal"/>
+
+                <RadioButton
+                    android:id="@+id/rb_hour_up"
+                    style="@style/RadioButtonTabUp"
+                    android:text="@string/future_info_activity_hour"
+                    android:textSize="@dimen/font_size_normal"/>
+
+                <RadioButton
+                    android:id="@+id/rb_minute_up"
+                    style="@style/RadioButtonTabUp"
+                    android:text="@string/future_info_activity_five_minute"
+                    android:textSize="@dimen/font_size_normal"/>
+
+                <Button
+                    android:id="@+id/rb_set_up"
+                    style="@style/RadioButtonSetUp"
+                    android:background="@drawable/set_up_button_background"
+                    android:drawableEnd="@mipmap/ic_expand_more_white_24dp"
+                    android:paddingEnd="@dimen/padding_10dp"
+                    android:paddingStart="@dimen/padding_0dp"
+                    android:text="@string/future_info_activity_set"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/font_size_normal"/>
+            </RadioGroup>
+
+            <FrameLayout
+                android:id="@+id/fl_content_up"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1.5"
+                android:background="@color/black"></FrameLayout>
+
+            <RadioGroup
+                android:id="@+id/rg_tab_info"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/radio_group_height"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rb_handicap_info"
+                    style="@style/RadioButtonTabDown"
+                    android:checked="true"
+                    android:text="@string/future_info_activity_handicap"
+                    android:textSize="@dimen/font_size_normal"/>
+
+
+                <RadioButton
+                    android:id="@+id/rb_position_info"
+                    style="@style/RadioButtonTabDown"
+                    android:text="@string/future_info_activity_position"
+                    android:textSize="@dimen/font_size_normal"/>
+
+                <RadioButton
+                    android:id="@+id/rb_order_info"
+                    style="@style/RadioButtonTabDown"
+                    android:text="@string/future_info_activity_order"
+                    android:textSize="@dimen/font_size_normal"/>
+
+                <RadioButton
+                    android:id="@+id/rb_transaction_info"
+                    style="@style/RadioButtonTabDownTransaction"
+                    android:text="@string/future_info_activity_transaction"
+                    android:textSize="@dimen/font_size_normal"/>
+            </RadioGroup>
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/vp_info_content"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"></android.support.v4.view.ViewPager>
+
+        </LinearLayout>
+
+    </android.support.design.widget.CoordinatorLayout>
+</layout>

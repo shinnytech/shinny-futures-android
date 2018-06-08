@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <import type="com.xinyi.shinnyfutures.utils.MathUtils"></import>
+
+        <variable
+            name="handicap"
+            type="com.xinyi.shinnyfutures.model.bean.futureinfobean.QuoteEntity"></variable>
+    </data>
+
+    <LinearLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/content_future_info"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/down_fragment"
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:context=".view.activity.FutureInfoActivity">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_ask_price1"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_ask_price1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.ask_price1}"
+                android:textColor="@color/white"/>
+
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/handicap_cross"></View>
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_ask_volume1"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_ask_volume1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.ask_volume1}"
+                android:textColor="@color/white"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_bid_price1"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_bid_price1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.bid_price1}"
+                android:textColor="@color/white"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/handicap_cross"></View>
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_bid_volume1"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_bid_volume1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.bid_volume1}"
+                android:textColor="@color/white"/>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/handicap_cross"></View>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_last_price"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_last_price"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.last_price}"
+                android:textColor="@color/white"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/handicap_cross"></View>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_change"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_change"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.change}"
+                android:textColor="@color/white"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_open"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_open"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.open}"
+                android:textColor="@color/white"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/handicap_cross"></View>
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_volume"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_volume"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.volume}"
+                android:textColor="@color/white"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_highest"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_highest"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.highest}"
+                android:textColor="@color/white"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/handicap_cross"></View>
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_open_interest"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_open_interest"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.open_interest}"
+                android:textColor="@color/white"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_lowest"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_lowest"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.lowest}"
+                android:textColor="@color/white"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/handicap_cross"></View>
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_pre_open_interest"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_pre_open_interest"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{MathUtils.subtract(handicap.open_interest, handicap.pre_open_interest)}"
+                android:textColor="@color/white"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_average"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_average"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.average}"
+                android:textColor="@color/white"/>
+
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/handicap_cross"></View>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_settlement"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_settlement"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.settlement}"
+                android:textColor="@color/white"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_pre_close"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_pre_close"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.pre_close}"
+                android:textColor="@color/white"/>
+
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/handicap_cross"></View>
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_upper_limit"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_upper_limit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.upper_limit}"
+                android:textColor="@color/white"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_pre_settlement"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_pre_settlement"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.pre_settlement}"
+                android:textColor="@color/white"/>
+
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/handicap_cross"></View>
+
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_20dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="@string/handicap_fragment_lower_limit"
+                android:textColor="@color/handicap_text"/>
+
+            <TextView
+                android:id="@+id/tv_id_handicap_lower_limit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:layout_marginTop="@dimen/margin_1dp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="@{handicap.lower_limit}"
+                android:textColor="@color/white"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</layout>

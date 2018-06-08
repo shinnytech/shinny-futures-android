@@ -1,0 +1,495 @@
+apply plugin: 'com.android.application'
+// bugly热更新依赖插件脚本
+apply from: 'tinker-support.gradle'
+
+
+android {
+    compileSdkVersion 26
+    defaultConfig {
+        applicationId "com.xinyi.shinnyfutures"
+        minSdkVersion 19
+        targetSdkVersion 23
+        versionCode APP_CODE as Integer
+        versionName APP_VERSION
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        resValue("string", "app_name", "ShinnyFutures")
+        flavorDimensions("shinny")
+        // 开启multidex
+        multiDexEnabled true
+    }
+    signingConfigs {
+        config {
+            storeFile file(System.properties['keyStore'])
+            storePassword System.properties['keyStorePassword']
+            keyAlias System.properties['keyAlias']
+            keyPassword System.properties['keyAliasPassword']
+        }
+    }
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+        }
+        release {
+            minifyEnabled true
+            zipAlignEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            applicationIdSuffix ".release"
+            signingConfig signingConfigs.config
+        }
+    }
+    productFlavors {
+        bhfcc {
+            buildConfigField "String", "BROKER_ID", "\"渤海期货\""
+            resValue("string", "app_name", "渤海期货")
+            applicationIdSuffix ".bhfcc"
+            dimension "shinny"
+        }
+
+        scqh {
+            buildConfigField "String", "BROKER_ID", "\"北京首创\""
+            resValue("string", "app_name", "北京首创")
+            applicationIdSuffix ".scqh"
+            dimension "shinny"
+        }
+
+        ces {
+            buildConfigField "String", "BROKER_ID", "\"东航期货\""
+            resValue("string", "app_name", "东航期货")
+            applicationIdSuffix ".ces"
+            dimension "shinny"
+        }
+
+        dsqh {
+            buildConfigField "String", "BROKER_ID", "\"德盛期货\""
+            resValue("string", "app_name", "德盛期货")
+            applicationIdSuffix ".dsqh"
+            dimension "shinny"
+        }
+
+        fzzq {
+            buildConfigField "String", "BROKER_ID", "\"方正中期\""
+            resValue("string", "app_name", "方正中期")
+            applicationIdSuffix ".fzzq"
+            dimension "shinny"
+        }
+
+        gfqh {
+            buildConfigField "String", "BROKER_ID", "\"广发期货\""
+            resValue("string", "app_name", "广发期货")
+            applicationIdSuffix ".gfqh"
+            dimension "shinny"
+        }
+
+        gzf {
+            buildConfigField "String", "BROKER_ID", "\"广州期货\""
+            resValue("string", "app_name", "广州期货")
+            applicationIdSuffix ".gzf"
+            dimension "shinny"
+        }
+
+        gdqh {
+            buildConfigField "String", "BROKER_ID", "\"光大期货\""
+            resValue("string", "app_name", "光大期货")
+            applicationIdSuffix ".gdqh"
+            dimension "shinny"
+        }
+
+        cifco {
+            buildConfigField "String", "BROKER_ID", "\"国际期货\""
+            resValue("string", "app_name", "国际期货")
+            applicationIdSuffix ".cifco"
+            dimension "shinny"
+        }
+
+        sdic {
+            buildConfigField "String", "BROKER_ID", "\"国投安信\""
+            resValue("string", "app_name", "国投安信")
+            applicationIdSuffix ".sdic"
+            dimension "shinny"
+        }
+
+        gffcc {
+            buildConfigField "String", "BROKER_ID", "\"国富期货\""
+            resValue("string", "app_name", "国富期货")
+            applicationIdSuffix ".gffcc"
+            dimension "shinny"
+        }
+
+        gjqh {
+            buildConfigField "String", "BROKER_ID", "\"国金期货\""
+            resValue("string", "app_name", "国金期货")
+            applicationIdSuffix ".gjqh"
+            dimension "shinny"
+        }
+
+        itf {
+            buildConfigField "String", "BROKER_ID", "\"国贸期货\""
+            resValue("string", "app_name", "国贸期货")
+            applicationIdSuffix ".itf"
+            dimension "shinny"
+        }
+
+        gtjaqh {
+            buildConfigField "String", "BROKER_ID", "\"国泰君安\""
+            resValue("string", "app_name", "国泰君安")
+            applicationIdSuffix ".gtjaqh"
+            dimension "shinny"
+        }
+
+        htqh {
+            buildConfigField "String", "BROKER_ID", "\"华泰期货\""
+            resValue("string", "app_name", "华泰期货")
+            applicationIdSuffix ".htqh"
+            dimension "shinny"
+        }
+
+        htfutures {
+            buildConfigField "String", "BROKER_ID", "\"海通期货\""
+            resValue("string", "app_name", "海通期货")
+            applicationIdSuffix ".htfutures"
+            dimension "shinny"
+        }
+
+        htfuturessim {
+            buildConfigField "String", "BROKER_ID", "\"海通股指仿真\""
+            resValue("string", "app_name", "海通股指仿真")
+            applicationIdSuffix ".htfuturessim"
+            dimension "shinny"
+        }
+
+        hongyuanqh {
+            buildConfigField "String", "BROKER_ID", "\"宏源期货\""
+            resValue("string", "app_name", "宏源期货")
+            applicationIdSuffix ".hongyuanqh"
+            dimension "shinny"
+        }
+
+        huaxiqh {
+            buildConfigField "String", "BROKER_ID", "\"华西期货\""
+            resValue("string", "app_name", "华西期货")
+            applicationIdSuffix ".huaxiqh"
+            dimension "shinny"
+        }
+
+        chaosqh {
+            buildConfigField "String", "BROKER_ID", "\"混沌天成\""
+            resValue("string", "app_name", "混沌天成")
+            applicationIdSuffix ".chaosqh"
+            dimension "shinny"
+        }
+
+        cffc {
+            buildConfigField "String", "BROKER_ID", "\"华鑫期货\""
+            resValue("string", "app_name", "华鑫期货")
+            applicationIdSuffix ".cffc"
+            dimension "shinny"
+        }
+
+        cnhtqh {
+            buildConfigField "String", "BROKER_ID", "\"恒泰期货\""
+            resValue("string", "app_name", "恒泰期货")
+            applicationIdSuffix ".cnhtqh"
+            dimension "shinny"
+        }
+
+        hsqh {
+            buildConfigField "String", "BROKER_ID", "\"徽商期货\""
+            resValue("string", "app_name", "徽商期货")
+            applicationIdSuffix ".hsqh"
+            dimension "shinny"
+        }
+
+        hnjyqh {
+            buildConfigField "String", "BROKER_ID", "\"金元期货\""
+            resValue("string", "app_name", "金元期货")
+            applicationIdSuffix ".hnjyqh"
+            dimension "shinny"
+        }
+
+        ccbfutures {
+            buildConfigField "String", "BROKER_ID", "\"建信期货\""
+            resValue("string", "app_name", "建信期货")
+            applicationIdSuffix ".ccbfutures"
+            dimension "shinny"
+        }
+
+        jcqh {
+            buildConfigField "String", "BROKER_ID", "\"集成期货\""
+            resValue("string", "app_name", "集成期货")
+            applicationIdSuffix ".jcqh"
+            dimension "shinny"
+        }
+
+        hxqh {
+            buildConfigField "String", "BROKER_ID", "\"江海汇鑫\""
+            resValue("string", "app_name", "江海汇鑫")
+            applicationIdSuffix ".hxqh"
+            dimension "shinny"
+        }
+
+        lzqh {
+            buildConfigField "String", "BROKER_ID", "\"鲁证期货\""
+            resValue("string", "app_name", "鲁证期货")
+            applicationIdSuffix ".lzqh"
+            dimension "shinny"
+        }
+
+        mkqh {
+            buildConfigField "String", "BROKER_ID", "\"迈科期货\""
+            resValue("string", "app_name", "迈科期货")
+            applicationIdSuffix ".mkqh"
+            dimension "shinny"
+        }
+
+        mfc {
+            buildConfigField "String", "BROKER_ID", "\"美尔雅期货\""
+            resValue("string", "app_name", "美尔雅期货")
+            applicationIdSuffix ".mfc"
+            dimension "shinny"
+        }
+
+        nhqh {
+            buildConfigField "String", "BROKER_ID", "\"南华期货\""
+            resValue("string", "app_name", "南华期货")
+            applicationIdSuffix ".nhqh"
+            dimension "shinny"
+        }
+
+        sywg {
+            buildConfigField "String", "BROKER_ID", "\"申万期货\""
+            resValue("string", "app_name", "申万期货")
+            applicationIdSuffix ".sywg"
+            dimension "shinny"
+        }
+
+        simnow {
+            buildConfigField "String", "BROKER_ID", "\"sim\""
+            resValue("string", "app_name", "上期技术")
+            applicationIdSuffix ".simnow"
+            dimension "shinny"
+        }
+
+        shcifco {
+            buildConfigField "String", "BROKER_ID", "\"上海中期\""
+            resValue("string", "app_name", "上海中期")
+            applicationIdSuffix ".shcifco"
+            dimension "shinny"
+        }
+
+        dzqh {
+            buildConfigField "String", "BROKER_ID", "\"上海东证\""
+            resValue("string", "app_name", "上海东证")
+            applicationIdSuffix ".dzqh"
+            dimension "shinny"
+        }
+
+        sdqh {
+            buildConfigField "String", "BROKER_ID", "\"盛达期货CTP\""
+            resValue("string", "app_name", "盛达期货CTP")
+            applicationIdSuffix ".sdqh"
+            dimension "shinny"
+        }
+
+        rlqh {
+            buildConfigField "String", "BROKER_ID", "\"瑞龙期货\""
+            resValue("string", "app_name", "瑞龙期货")
+            applicationIdSuffix ".rlqh"
+            dimension "shinny"
+        }
+
+        dfqh {
+            buildConfigField "String", "BROKER_ID", "\"上海东方\""
+            resValue("string", "app_name", "上海东方")
+            applicationIdSuffix ".dfqh"
+            dimension "shinny"
+        }
+
+        jyqh {
+            buildConfigField "String", "BROKER_ID", "\"铜冠金源\""
+            resValue("string", "app_name", "铜冠金源")
+            applicationIdSuffix ".jyqh"
+            dimension "shinny"
+        }
+
+        txjhqh {
+            buildConfigField "String", "BROKER_ID", "\"同信久恒\""
+            resValue("string", "app_name", "同信久恒")
+            applicationIdSuffix ".txjhqh"
+            dimension "shinny"
+        }
+
+        thqh {
+            buildConfigField "String", "BROKER_ID", "\"天鸿期货\""
+            resValue("string", "app_name", "天鸿期货")
+            applicationIdSuffix ".thqh"
+            dimension "shinny"
+        }
+
+        tianfu {
+            buildConfigField "String", "BROKER_ID", "\"天富期货\""
+            resValue("string", "app_name", "天富期货")
+            applicationIdSuffix ".tianfu"
+            dimension "shinny"
+        }
+
+        wkjy {
+            buildConfigField "String", "BROKER_ID", "\"五矿经易\""
+            resValue("string", "app_name", "五矿经易")
+            applicationIdSuffix ".wkjy"
+            dimension "shinny"
+        }
+
+        xzfutures {
+            buildConfigField "String", "BROKER_ID", "\"兴证期货\""
+            resValue("string", "app_name", "兴证期货")
+            applicationIdSuffix ".xzfutures"
+            dimension "shinny"
+        }
+
+        xyqh {
+            buildConfigField "String", "BROKER_ID", "\"兴业期货\""
+            resValue("string", "app_name", "兴业期货")
+            applicationIdSuffix ".xyqh"
+            dimension "shinny"
+        }
+
+        xinhu {
+            buildConfigField "String", "BROKER_ID", "\"新湖期货\""
+            resValue("string", "app_name", "新湖期货")
+            applicationIdSuffix ".xinhu"
+            dimension "shinny"
+        }
+
+        xbqh {
+            buildConfigField "String", "BROKER_ID", "\"西部期货\""
+            resValue("string", "app_name", "西部期货")
+            applicationIdSuffix ".xbqh"
+            dimension "shinny"
+        }
+
+        yhqhkh {
+            buildConfigField "String", "BROKER_ID", "\"银河期货\""
+            resValue("string", "app_name", "银河期货")
+            applicationIdSuffix ".yhqhkh"
+            dimension "shinny"
+        }
+
+        citicsf {
+            buildConfigField "String", "BROKER_ID", "\"中信期货\""
+            resValue("string", "app_name", "中信期货")
+            applicationIdSuffix ".citicsf"
+            dimension "shinny"
+        }
+
+        zxjtqh {
+            buildConfigField "String", "BROKER_ID", "\"中信建投\""
+            resValue("string", "app_name", "中信建投")
+            applicationIdSuffix ".zxjtqh"
+            dimension "shinny"
+        }
+
+        zrhxqh {
+            buildConfigField "String", "BROKER_ID", "\"中融汇信\""
+            resValue("string", "app_name", "中融汇信")
+            applicationIdSuffix ".zrhxqh"
+            dimension "shinny"
+        }
+
+        zhqh {
+            buildConfigField "String", "BROKER_ID", "\"中辉期货\""
+            resValue("string", "app_name", "中辉期货")
+            applicationIdSuffix ".zhqh"
+            dimension "shinny"
+        }
+
+        zjfco {
+            buildConfigField "String", "BROKER_ID", "\"招金期货\""
+            resValue("string", "app_name", "招金期货")
+            applicationIdSuffix ".zjfco"
+            dimension "shinny"
+        }
+
+        zcqh {
+            buildConfigField "String", "BROKER_ID", "\"中财期货\""
+            resValue("string", "app_name", "中财期货")
+            applicationIdSuffix ".zcqh"
+            dimension "shinny"
+        }
+
+        xrqh {
+            buildConfigField "String", "BROKER_ID", "\"先融期货\""
+            resValue("string", "app_name", "先融期货")
+            applicationIdSuffix ".xrqh"
+            dimension "shinny"
+        }
+
+        zygj {
+            buildConfigField "String", "BROKER_ID", "\"中银国际\""
+            resValue("string", "app_name", "中银国际")
+            applicationIdSuffix ".zygj"
+            dimension "shinny"
+        }
+
+        kuaiqixiaoq {
+            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
+            resValue("string", "app_name", "快期小Q")
+            applicationIdSuffix ".kuaiqixiaoq"
+            dimension "shinny"
+        }
+
+    }
+
+    applicationVariants.all { variant ->
+        if ("true".equals(IS_JENKINS)) {
+            variant.getPackageApplication().outputDirectory = new File(BUILD_PATH)
+        }
+//        variant.outputs.all { output ->
+//            def outputFile = output.outputFile
+//            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+//                outputFileName = "${variant.flavorName}-${variant.versionName}.apk"
+//            }
+//        }
+    }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES.txt'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/dependencies.txt'
+        exclude 'META-INF/LGPL2.1'
+    }
+    lintOptions {
+        abortOnError false
+    }
+    dataBinding {
+        enabled = true
+    }
+    compileOptions {
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support:design:26.1.0'
+    implementation 'com.android.support:support-v4:26.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    implementation 'com.google.code.gson:gson:2.8.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.6.0'
+    implementation 'com.squareup.okio:okio:1.11.0'
+    implementation 'org.greenrobot:eventbus:3.0.0'
+    implementation 'org.java-websocket:Java-WebSocket:1.3.0'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.0.2'
+    implementation 'com.lzy.net:okgo:3.0.4'
+    implementation 'com.tencent.bugly:crashreport_upgrade:latest.release'
+    implementation 'com.android.support:multidex:1.0.2'
+    implementation 'com.tencent.tinker:tinker-android-lib:1.9.1'
+}

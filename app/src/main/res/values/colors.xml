@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="visible" type="id"/>
+    <item name="masked" type="id"/>
+
+    <color name="colorPrimary">#111111</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#FF4081</color>
+    <!--状态栏颜色-->
+    <color name="black">#000000</color>
+    <!--标题栏颜色-->
+    <color name="black_dark">#1d1d1d</color>
+    <!--列表页表内容颜色-->
+    <color name="black_dark_more">#101410</color>
+    <!--列表页表头名称、最新、页尾品种导航、左上角菜单、账户页、成交页、登录页颜色-->
+    <color name="black_light">#444444</color>
+    <!--列表页表头涨跌和持仓颜色-->
+    <color name="black_light_more">#636363</color>
+    <!--一般字体颜色-->
+    <color name="white">#ffffff</color>
+    <!--搜索页列表合约代码字体颜色-->
+    <color name="instrument_id">#333333</color>
+    <!--一般分隔线颜色-->
+    <color name="alpha_white">#49ffffff</color>
+    <color name="text_gray_light">#A7ADBC</color>
+    <color name="gray">#6A6A6A</color>
+    <color name="bg_gray_light">#cdcdcd</color>
+    <color name="bg_gray_light_more">#f9f9f9</color>
+    ---------------------------------------------------------------
+    <!--下单、确认结算单颜色-->
+    <color name="dialog_order">#d9d9d9</color>
+    <!--下单确认的按钮分割线颜色-->
+    <color name="dialog_order_divider">#797979</color>
+    <!--下单确认的确认和取消按钮的字色-->
+    <color name="dialog_order_button_text">#1690D5</color>
+    <!--下单确认的下字色-->
+    <color name="dialog_order_xia_text">#A01414</color>
+    <!--详情页选择合约的外框底色-->
+    <color name="dialog_optional_out">#636363</color>
+    <!--详情页选择合约的外框字色-->
+    <color name="dialog_optional_out_text">#FFFFFF</color>
+    <!--详情页选择合约的九宫格底色-->
+    <color name="dialog_optional">#D9D9D9</color>
+    <!--合约列表/九宫格分割线颜色-->
+    <color name="quote_divider">#1e1e1e</color>
+    <!--九宫格字色-->
+    <color name="dialog_optional_text">#797979</color>
+    <!--加多按钮颜色-->
+    <color name="bid">#b34545</color>
+    <!--加空按钮颜色-->
+    <color name="ask">#368e5f</color>
+    <!--平仓按钮颜色-->
+    <color name="close">#dcdcdc</color>
+    <!--交易页内浅颜色-->
+    <color name="transaction_light">#444444</color>
+    <!--交易页内深颜色-->
+    <color name="transaction_dark">#333333</color>
+    <!--所有涉及红字颜色-->
+    <color name="text_red">#be1414</color>
+    <!--所有涉及绿字颜色-->
+    <color name="text_green">#1ac51a</color>
+    <!--断线重连提示颜色-->
+    <color name="off_line">#ffff99</color>
+    <!--上下导航按钮的底色-->
+    <color name="nav_normal">#444444</color>
+    <!--上下导航按钮字色-->
+    <color name="nav_normal_text">#999999</color>
+    <!--上下导航高亮字和框色-->
+    <color name="nav_highlight_text_border">#ffff00</color>
+    <!--下导航交易按钮底色-->
+    <color name="transaction">#da0000</color>
+    <!--盘口、持仓、挂单页背景色-->
+    <color name="down_fragment">#444444</color>
+    <!--标题背景色-->
+    <color name="title">#000000</color>
+    <!--信息页上中文颜色 -->
+    <color name="handicap_text">#9f9f9f</color>
+    <!--信息页上十字分割线颜色 -->
+    <color name="handicap_cross">#9f9f9f</color>
+    ---------------------------------------------------------------
+    <!--绿K线-->
+    <color name="kline_green">#00fcfc</color>
+    <!--红K线-->
+    <color name="kline_red">#da0000</color>
+    <!--分时图颜色 -->
+    <color name="kline_one_minute">#ffffff</color>
+    <!--均线颜色 -->
+    <color name="kline_average">#ffff00</color>
+    <!--K线XY轴颜色 -->
+    <color name="kline_axis">#9f9f9f</color>
+    <!--K线网格颜色 -->
+    <color name="kline_grid">#6c0000</color>
+    <!--K线坐标轴上数字颜色 -->
+    <color name="kline_text">#9f9f9f</color>
+    <!--K线背景颜色 -->
+    <color name="kline_background">#000000</color>
+    <!--K线持仓线颜色 -->
+    <color name="kline_position">#a01414</color>
+    <!--K线挂单线颜色 -->
+    <color name="kline_order">#1ac51a</color>
+    <!--均线5-->
+    <color name="kline_ma5">#ffffff</color>
+    <!--均线10-->
+    <color name="kline_ma10">#ffff00</color>
+    <!--均线20-->
+    <color name="kline_ma20">#c600df</color>
+    ---------------------------------------------------------------
+    <!--确认结算单按钮框色-->
+    <color name="settlement_border">#797979</color>
+    <!--结算单背景色-->
+    <color name="settlement_background">#686868</color>
+    ---------------------------------------------------------------
+    <!--related to my chart-->
+    <color name="minute_yellow">#E7B448</color>
+</resources>

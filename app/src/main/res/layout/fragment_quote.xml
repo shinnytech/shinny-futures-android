@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data></data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black_light"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/black_light"
+                android:gravity="start"
+                android:padding="@dimen/padding_5dp"
+                android:text="@string/quote_fragment_name"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/font_size_normal"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/black_light"
+                android:gravity="end"
+                android:paddingEnd="@dimen/padding_5dp"
+                android:paddingStart="@dimen/padding_0dp"
+                android:text="@string/quote_fragment_latest"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/font_size_normal"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tv_change_percent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/black_light_more"
+                android:drawableEnd="@mipmap/ic_signal_cellular_4_bar_white_18dp"
+                android:gravity="center"
+                android:padding="@dimen/padding_5dp"
+                android:text="@string/quote_fragment_up_down"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal"
+                android:textStyle="bold"/>
+
+
+            <View
+                android:layout_width="@dimen/line_width"
+                android:layout_height="match_parent"
+                android:background="@color/black"></View>
+
+            <TextView
+                android:id="@+id/tv_open_interest"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/black_light_more"
+                android:drawableEnd="@mipmap/ic_signal_cellular_4_bar_white_18dp"
+                android:gravity="center"
+                android:padding="@dimen/padding_5dp"
+                android:text="@string/quote_fragment_open_interest"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal"
+                android:textStyle="bold"/>
+
+        </LinearLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_quote"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/black_dark_more"
+            android:fadeScrollbars="false"
+            android:scrollbarSize="@dimen/scroll_bar_size_small"
+            android:scrollbarThumbVertical="@color/text_gray_light"
+            android:scrollbars="vertical"/>
+
+    </LinearLayout>
+
+</layout>

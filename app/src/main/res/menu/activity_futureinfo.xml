@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context=".view.activity.FutureInfoActivity">
+
+    <item
+        android:id="@+id/action_collect"
+        android:icon="@mipmap/ic_favorite_border_white_24dp"
+        android:orderInCategory="100"
+        android:title="收藏"
+        app:showAsAction="always"/>
+
+</menu>

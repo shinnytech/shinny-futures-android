@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--基础键盘-->
+    <integer name="keycode_empty_text">-10000</integer>
+    <integer name="keycode_add">-10002</integer>
+    <integer name="keycode_sub">-10003</integer>
+
+    <!--期货价格键盘-->
+    <integer name="keycode_line_up_price">-10200</integer>
+    <integer name="keycode_opponent_price">-10201</integer>
+    <integer name="keycode_market_price">-10202</integer>
+    <integer name="keycode_last_price">-10203</integer>
+
+    <item name="keyboard_view_move_height" type="id"/>
+    <item name="edit_text_bind_keyboard" type="id"/>
+</resources>

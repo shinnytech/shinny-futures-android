@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data></data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/item_touch_bg"
+        android:clickable="true"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/padding_4dp"
+        android:paddingTop="@dimen/padding_4dp">
+
+        <TextView
+            android:id="@+id/tv_trade_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="-"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/font_size_small"/>
+
+        <TextView
+            android:id="@+id/tv_trade_offset"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="-"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/font_size_small"/>
+
+        <TextView
+            android:id="@+id/tv_trade_price"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="-"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/font_size_small"/>
+
+        <TextView
+            android:id="@+id/tv_trade_volume"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="-"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/font_size_small"/>
+
+        <TextView
+            android:id="@+id/tv_trade_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="-"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/font_size_small"/>
+
+    </LinearLayout>
+
+</layout>
