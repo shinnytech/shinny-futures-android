@@ -32,7 +32,7 @@
 - bugly：项目中嵌入了bugly平台的升级和热更新模块，具体使用见[bugly文档中心](https://bugly.qq.com/docs/)
 - 行情服务器地址：项目中的CommonConstants中的MARKET_URL
 - 交易服务器地址：项目中的CommonConstants中的TRANSACTION_URL
-- 期货公司版本：在模块的build.gradle文件中包含多个期货公司版本，您可以在AS的`Build Variant`中选择simnow版本进行测试（账号：022631，密码：123456）
+- 期货公司版本：在模块的build.gradle文件中包含多个期货公司版本，您可以在AS的`Build Variant`中选择simnow版本进行测试[simnow账号注册](http://www.simnow.com.cn/)
 ## 代码架构
 ### 数据层面
 根据websocket协议进行实时数据更新
