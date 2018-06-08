@@ -1,8 +1,7 @@
 # shinny-futures-android
 一个开源的 android 平台期货行情交易终端</br>
 ## 预览
-<p><img src="screenshot/主力合约.jpg" width="24%"/> <img src="screenshot/成交记录.jpg" width="24%"/> <img src="screenshot/信息.jpg" width="24%"/> <img src="screenshot/交易.jpg" width="24%"/></p>
-
+<img src="screenshot/主力合约.jpg" width="280"/> <img src="screenshot/信息.jpg" width="280"/> <img src="screenshot/交易.jpg" width="280"/><br>
 ## 功能架构
 软件的主要功能：查看行情以及进行交易<br>
 - 首页
@@ -24,6 +23,16 @@
   - 持仓：显示账户持仓列表
   - 委托：显示账户下单情况
   - 交易：三键下单板进行交易
+## 安装运行
+*快速点亮:* 您可以点击代码仓库的`Release`标签，安装相应版本的apk文件至手机端，Android系统最低要求是`4.4`<br>
+当然，您也可以下载导入`Android Studio`中运行安装，下面着重介绍一下开发配置：
+- Android Studio版本：3.1.2
+- Gradle版本：4.4
+- JDK：使用AS内置jre
+- bugly：项目中嵌入了bugly平台的升级和热更新模块，具体使用见[bugly文档中心](https://bugly.qq.com/docs/)
+- 行情服务器地址：项目中的CommonConstants中的MARKET_URL
+- 交易服务器地址：项目中的CommonConstants中的TRANSACTION_URL
+- 期货公司版本：在模块的build.gradle文件中包含多个期货公司版本，您可以在AS的`Build Variant`中选择simnow版本进行测试[simnow账号注册](http://www.simnow.com.cn/)
 ## 代码架构
 ### 数据层面
 根据websocket协议进行实时数据更新
@@ -37,7 +46,7 @@
 - 利用MPAndroidChart框架完成Ｋ线图的绘制
 - 利用dataBinding框架部分页面数据的绑定，简化代码
 - 自定义下单软键盘
-## 主要第三方库
+### 主要第三方库
 - [Gson](https://github.com/google/gson)
 - [EventBus](https://github.com/greenrobot/EventBus)
 - [Okhttp](https://github.com/square/okhttp)
