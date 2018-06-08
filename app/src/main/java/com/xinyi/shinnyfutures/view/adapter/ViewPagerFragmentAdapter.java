@@ -1,4 +1,4 @@
-package com.xinyi.shinnyfutures.model.adapter;
+package com.xinyi.shinnyfutures.view.adapter;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

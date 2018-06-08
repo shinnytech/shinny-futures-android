@@ -31,7 +31,7 @@ import android.widget.TextView;
 import com.xinyi.shinnyfutures.R;
 import com.xinyi.shinnyfutures.application.BaseApplicationLike;
 import com.xinyi.shinnyfutures.databinding.FragmentQuoteBinding;
-import com.xinyi.shinnyfutures.model.adapter.QuoteAdapter;
+import com.xinyi.shinnyfutures.view.adapter.QuoteAdapter;
 import com.xinyi.shinnyfutures.model.bean.eventbusbean.PositionEvent;
 import com.xinyi.shinnyfutures.model.bean.eventbusbean.UpdateEvent;
 import com.xinyi.shinnyfutures.model.bean.futureinfobean.QuoteEntity;

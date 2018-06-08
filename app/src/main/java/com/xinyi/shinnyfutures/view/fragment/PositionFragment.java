@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 
 import com.xinyi.shinnyfutures.R;
 import com.xinyi.shinnyfutures.databinding.FragmentPositionBinding;
-import com.xinyi.shinnyfutures.model.adapter.PositionAdapter;
+import com.xinyi.shinnyfutures.view.adapter.PositionAdapter;
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.PositionEntity;
 import com.xinyi.shinnyfutures.model.bean.eventbusbean.IdEvent;
 import com.xinyi.shinnyfutures.model.engine.DataManager;

@@ -24,7 +24,7 @@ import android.widget.TextView;
 import com.xinyi.shinnyfutures.R;
 import com.xinyi.shinnyfutures.application.BaseApplicationLike;
 import com.xinyi.shinnyfutures.databinding.FragmentOrderBinding;
-import com.xinyi.shinnyfutures.model.adapter.OrderAdapter;
+import com.xinyi.shinnyfutures.view.adapter.OrderAdapter;
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.OrderEntity;
 import com.xinyi.shinnyfutures.model.engine.DataManager;
 import com.xinyi.shinnyfutures.model.listener.OrderDiffCallback;

@@ -1,4 +1,4 @@
-package com.xinyi.shinnyfutures.model.adapter;
+package com.xinyi.shinnyfutures.view.adapter;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;

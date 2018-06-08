@@ -33,8 +33,8 @@ import android.widget.TextView;
 
 import com.xinyi.shinnyfutures.R;
 import com.xinyi.shinnyfutures.databinding.ActivityMainDrawerBinding;
-import com.xinyi.shinnyfutures.model.adapter.QuoteNavAdapter;
-import com.xinyi.shinnyfutures.model.adapter.ViewPagerFragmentAdapter;
+import com.xinyi.shinnyfutures.view.adapter.QuoteNavAdapter;
+import com.xinyi.shinnyfutures.view.adapter.ViewPagerFragmentAdapter;
 import com.xinyi.shinnyfutures.model.bean.eventbusbean.PositionEvent;
 import com.xinyi.shinnyfutures.model.bean.eventbusbean.UpdateEvent;
 import com.xinyi.shinnyfutures.model.engine.DataManager;

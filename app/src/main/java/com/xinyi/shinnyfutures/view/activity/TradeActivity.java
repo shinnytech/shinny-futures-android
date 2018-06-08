@@ -17,7 +17,7 @@ import android.view.MenuItem;
 import com.xinyi.shinnyfutures.R;
 import com.xinyi.shinnyfutures.application.BaseApplicationLike;
 import com.xinyi.shinnyfutures.databinding.ActivityTradeBinding;
-import com.xinyi.shinnyfutures.model.adapter.TradeAdapter;
+import com.xinyi.shinnyfutures.view.adapter.TradeAdapter;
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.TradeEntity;
 import com.xinyi.shinnyfutures.model.engine.DataManager;
 import com.xinyi.shinnyfutures.model.listener.TradeDiffCallback;

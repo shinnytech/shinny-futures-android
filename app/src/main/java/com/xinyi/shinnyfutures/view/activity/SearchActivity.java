@@ -21,7 +21,7 @@ import android.widget.ImageView;
 import com.xinyi.shinnyfutures.R;
 import com.xinyi.shinnyfutures.application.BaseApplicationLike;
 import com.xinyi.shinnyfutures.databinding.ActivitySearchBinding;
-import com.xinyi.shinnyfutures.model.adapter.SearchAdapter;
+import com.xinyi.shinnyfutures.view.adapter.SearchAdapter;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
 import com.xinyi.shinnyfutures.utils.DividerItemDecorationUtils;
 import com.xinyi.shinnyfutures.utils.LatestFileUtils;
