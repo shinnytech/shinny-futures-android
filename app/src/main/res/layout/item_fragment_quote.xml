@@ -7,8 +7,8 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/layout_height_item_fragment_quote"
         android:background="@drawable/item_touch_bg"
-        android:focusable="true"
         android:clickable="true"
+        android:focusable="true"
         android:orientation="horizontal">
 
         <TextView

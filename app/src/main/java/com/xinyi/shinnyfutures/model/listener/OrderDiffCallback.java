@@ -42,7 +42,7 @@ public class OrderDiffCallback extends DiffUtil.Callback {
         if (oldData != null && newData != null)
             return oldData.getKey().equals(newData.getKey());
         return false;
-     }
+    }
 
     @Override
     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
@@ -66,8 +66,8 @@ public class OrderDiffCallback extends DiffUtil.Callback {
         if (!status_old.equals(status_new))
             bundle.putString("status", status_new);
 
-        String volume_trade_old =  MathUtils.subtract(volume_origin_old, volume_left_old) + "/" + volume_origin_old;
-        String volume_trade_new =  MathUtils.subtract(volume_origin_new, volume_left_new) + "/" + volume_origin_new;
+        String volume_trade_old = MathUtils.subtract(volume_origin_old, volume_left_old) + "/" + volume_origin_old;
+        String volume_trade_new = MathUtils.subtract(volume_origin_new, volume_left_new) + "/" + volume_origin_new;
         if (!volume_trade_old.equals(volume_trade_new))
             bundle.putString("volume_trade", volume_trade_new);
 

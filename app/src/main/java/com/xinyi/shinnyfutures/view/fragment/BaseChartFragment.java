@@ -26,7 +26,6 @@ import com.xinyi.shinnyfutures.model.bean.futureinfobean.QuoteEntity;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
 import com.xinyi.shinnyfutures.model.engine.DataManager;
 import com.xinyi.shinnyfutures.utils.LatestFileUtils;
-import com.xinyi.shinnyfutures.utils.LogUtils;
 import com.xinyi.shinnyfutures.utils.MathUtils;
 import com.xinyi.shinnyfutures.view.activity.FutureInfoActivity;
 import com.xinyi.shinnyfutures.view.activity.LoginActivity;
@@ -174,8 +173,8 @@ public class BaseChartFragment extends LazyLoadFragment {
                 break;
             case MESSAGE_POSITION:
                 if (LoginActivity.isIsLogin() && mIsPosition) {
-                    String key = exchange_id + "." + instrument_id ;
-                    if (!positionLimitLines.containsKey(key+"0")) {
+                    String key = exchange_id + "." + instrument_id;
+                    if (!positionLimitLines.containsKey(key + "0")) {
                         //添加多头持仓线
                         addLongPositionLimitLine();
                     } else {
@@ -183,7 +182,7 @@ public class BaseChartFragment extends LazyLoadFragment {
                         refreshLongPositionLimitLine();
                     }
 
-                    if (!positionLimitLines.containsKey(key+"1")) {
+                    if (!positionLimitLines.containsKey(key + "1")) {
                         //添加多头持仓线
                         addShortPositionLimitLine();
                     } else {
@@ -275,16 +274,16 @@ public class BaseChartFragment extends LazyLoadFragment {
      * author: chenli
      * description: 获取开仓均价
      */
-    private float getPrice(String open_cost, String open_price, String vm, int volume){
+    private float getPrice(String open_cost, String open_price, String vm, int volume) {
         try {
             float openCost = Float.parseFloat(open_cost);
             float openPrice = Float.parseFloat(open_price);
             int vmI = Integer.parseInt(vm);
-            if (openPrice != 0)return openPrice;
-            else if (openCost != 0){
+            if (openPrice != 0) return openPrice;
+            else if (openCost != 0) {
                 return openCost / (volume * vmI);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return 0.0f;
@@ -308,7 +307,7 @@ public class BaseChartFragment extends LazyLoadFragment {
      */
     private void addLongPositionLimitLine() {
         try {
-            String key = exchange_id + "." + instrument_id ;
+            String key = exchange_id + "." + instrument_id;
             SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(instrument_id);
             String vm = searchEntity != null ? searchEntity.getVm() : "1";
             PositionEntity positionEntity = dataManager.getAccountBean().getPosition().get(key);
@@ -316,10 +315,10 @@ public class BaseChartFragment extends LazyLoadFragment {
 
             String available_long = MathUtils.add(positionEntity.getVolume_long_his(), positionEntity.getVolume_long_today());
             int volume_long = Integer.parseInt(MathUtils.add(available_long, positionEntity.getVolume_long_frozen()));
-            if (volume_long != 0){
+            if (volume_long != 0) {
                 float limit_long = getPrice(positionEntity.getOpen_cost_long(), positionEntity.getOpen_price_long(), vm, volume_long);
                 String label_long = positionEntity.getInstrument_id() + " " + limit_long;
-                generateLimitLine(limit_long, label_long, mColorBuy, key+"0");
+                generateLimitLine(limit_long, label_long, mColorBuy, key + "0");
             }
         } catch (NumberFormatException ex) {
             ex.printStackTrace();
@@ -333,17 +332,17 @@ public class BaseChartFragment extends LazyLoadFragment {
      */
     private void addShortPositionLimitLine() {
         try {
-            String key = exchange_id + "." + instrument_id ;
+            String key = exchange_id + "." + instrument_id;
             SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(instrument_id);
             String vm = searchEntity != null ? searchEntity.getVm() : "1";
             PositionEntity positionEntity = dataManager.getAccountBean().getPosition().get(key);
             if (positionEntity == null) return;
             String available_short = MathUtils.add(positionEntity.getVolume_short_his(), positionEntity.getVolume_short_today());
             int volume_short = Integer.parseInt(MathUtils.add(available_short, positionEntity.getVolume_short_frozen()));
-            if (volume_short != 0){
+            if (volume_short != 0) {
                 float limit_short = getPrice(positionEntity.getOpen_cost_short(), positionEntity.getOpen_price_short(), vm, volume_short);
                 String label_short = positionEntity.getInstrument_id() + " " + limit_short;
-                generateLimitLine(limit_short, label_short, mColorSell, key+"1");
+                generateLimitLine(limit_short, label_short, mColorSell, key + "1");
             }
         } catch (NumberFormatException ex) {
             ex.printStackTrace();
@@ -355,7 +354,7 @@ public class BaseChartFragment extends LazyLoadFragment {
      * author: chenli
      * description: 添加limitLine
      */
-    private void generateLimitLine(float limit, String label, int color, String limitKey){
+    private void generateLimitLine(float limit, String label, int color, String limitKey) {
         LimitLine limitLine = new LimitLine(limit, label);
         limitLine.setLineWidth(2f);
         limitLine.enableDashedLine(10f, 10f, 0f);
@@ -374,7 +373,7 @@ public class BaseChartFragment extends LazyLoadFragment {
      */
     private void refreshLongPositionLimitLine() {
         try {
-            String key = exchange_id + "." + instrument_id ;
+            String key = exchange_id + "." + instrument_id;
             SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(instrument_id);
             String vm = searchEntity != null ? searchEntity.getVm() : "1";
             PositionEntity positionEntity = dataManager.getAccountBean().getPosition().get(key);
@@ -382,16 +381,16 @@ public class BaseChartFragment extends LazyLoadFragment {
             if (positionEntity == null) return;
             String available_long = MathUtils.add(positionEntity.getVolume_long_his(), positionEntity.getVolume_long_today());
             int volume_long = Integer.parseInt(MathUtils.add(available_long, positionEntity.getVolume_long_frozen()));
-            if (volume_long != 0){
+            if (volume_long != 0) {
                 float limit_long = getPrice(positionEntity.getOpen_cost_long(), positionEntity.getOpen_price_long(), vm, volume_long);
                 LimitLine limitLine = positionLimitLines.get(limitKey);
-                if (limitLine.getLimit() != limit_long){
+                if (limitLine.getLimit() != limit_long) {
                     String label_long = positionEntity.getInstrument_id() + " " + limit_long;
                     mChart.getAxisLeft().removeLimitLine(positionLimitLines.get(limitKey));
                     positionLimitLines.remove(limitKey);
                     generateLimitLine(limit_long, label_long, mColorBuy, limitKey);
                 }
-            }else {
+            } else {
                 mChart.getAxisLeft().removeLimitLine(positionLimitLines.get(limitKey));
                 positionLimitLines.remove(limitKey);
             }
@@ -408,7 +407,7 @@ public class BaseChartFragment extends LazyLoadFragment {
      */
     private void refreshShortPositionLimitLine() {
         try {
-            String key = exchange_id + "." + instrument_id ;
+            String key = exchange_id + "." + instrument_id;
             SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(instrument_id);
             String vm = searchEntity != null ? searchEntity.getVm() : "1";
             PositionEntity positionEntity = dataManager.getAccountBean().getPosition().get(key);
@@ -416,16 +415,16 @@ public class BaseChartFragment extends LazyLoadFragment {
             if (positionEntity == null) return;
             String available_short = MathUtils.add(positionEntity.getVolume_short_his(), positionEntity.getVolume_short_today());
             int volume_short = Integer.parseInt(MathUtils.add(available_short, positionEntity.getVolume_short_frozen()));
-            if (volume_short != 0){
+            if (volume_short != 0) {
                 float limit_short = getPrice(positionEntity.getOpen_cost_short(), positionEntity.getOpen_price_short(), vm, volume_short);
                 LimitLine limitLine = positionLimitLines.get(limitKey);
-                if (limitLine.getLimit() != limit_short){
+                if (limitLine.getLimit() != limit_short) {
                     String label_short = positionEntity.getInstrument_id() + " " + limit_short;
                     mChart.getAxisLeft().removeLimitLine(positionLimitLines.get(limitKey));
                     positionLimitLines.remove(limitKey);
                     generateLimitLine(limit_short, label_short, mColorSell, limitKey);
                 }
-            }else {
+            } else {
                 mChart.getAxisLeft().removeLimitLine(positionLimitLines.get(limitKey));
                 positionLimitLines.remove(limitKey);
             }

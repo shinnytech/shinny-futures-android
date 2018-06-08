@@ -4,9 +4,6 @@ import android.support.annotation.NonNull;
 
 import com.xinyi.shinnyfutures.utils.TimeUtils;
 
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-
 /**
  * Created on 6/16/17.
  * Created by chenli.

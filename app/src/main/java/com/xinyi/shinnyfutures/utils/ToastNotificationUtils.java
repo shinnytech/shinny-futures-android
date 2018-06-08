@@ -1,13 +1,7 @@
 package com.xinyi.shinnyfutures.utils;
 
-import android.app.NotificationManager;
 import android.content.Context;
-import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
-
-import com.xinyi.shinnyfutures.R;
-import com.xinyi.shinnyfutures.application.BaseApplicationLike;
-import com.xinyi.shinnyfutures.constants.CommonConstants;
 
 /**
  * date: 5/31/17

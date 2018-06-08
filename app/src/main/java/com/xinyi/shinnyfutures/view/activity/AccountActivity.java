@@ -15,7 +15,6 @@ import com.xinyi.shinnyfutures.application.BaseApplicationLike;
 import com.xinyi.shinnyfutures.databinding.ActivityAccountBinding;
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.AccountEntity;
 import com.xinyi.shinnyfutures.model.engine.DataManager;
-import com.xinyi.shinnyfutures.utils.LogUtils;
 
 import static com.xinyi.shinnyfutures.constants.CommonConstants.ACCOUNT;
 import static com.xinyi.shinnyfutures.constants.CommonConstants.ACTIVITY_TYPE;

@@ -17,8 +17,6 @@ import com.xinyi.shinnyfutures.model.bean.futureinfobean.FutureBean;
 import com.xinyi.shinnyfutures.model.bean.futureinfobean.KlineEntity;
 import com.xinyi.shinnyfutures.model.bean.futureinfobean.QuoteEntity;
 import com.xinyi.shinnyfutures.utils.LatestFileUtils;
-import com.xinyi.shinnyfutures.utils.LogUtils;
-import com.xinyi.shinnyfutures.utils.MathUtils;
 import com.xinyi.shinnyfutures.utils.ToastNotificationUtils;
 
 import org.json.JSONArray;
@@ -26,12 +24,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Field;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 
 import static com.xinyi.shinnyfutures.constants.CommonConstants.MESSAGE;
@@ -54,7 +48,6 @@ import static com.xinyi.shinnyfutures.utils.LatestFileUtils.getUpDownRate;
  * state: basically done
  */
 public class DataManager {
-
     /**
      * date: 7/9/17
      * description: 账户信息实例
@@ -75,7 +68,6 @@ public class DataManager {
      * description: 账户登录返回信息实例
      */
     private static final LoginInfoBean LOGIN = new LoginInfoBean();
-
     private DataManager() {
     }
 
@@ -98,13 +90,6 @@ public class DataManager {
 
     public LoginInfoBean getLogin() {
         return LOGIN;
-    }
-
-    //重新登录前清空账户信息
-    public void cleanAccountInfo() {
-        ACCOUNT.getOrder().clear();
-        ACCOUNT.getPosition().clear();
-        ACCOUNT.getTrade().clear();
     }
 
     /**

@@ -215,7 +215,7 @@ public class FutureInfoActivity extends BaseActivity {
     //交易服务器断开连接后发送一条信息，使信息页显示
     @Subscribe
     public void onEvent(String msg) {
-        if (LOG_OUT.equals(msg)){
+        if (LOG_OUT.equals(msg)) {
             mBinding.vpInfoContent.setCurrentItem(0, false);
             mBinding.rbHandicapInfo.setChecked(true);
         }

@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class AccountBean {
     private String aid;
-    private Map<String,AccountEntity> account = new HashMap<>();
+    private Map<String, AccountEntity> account = new HashMap<>();
     private Map<String, OrderEntity> order = new HashMap<>();
     private Map<String, PositionEntity> position = new HashMap<>();
     private Map<String, TradeEntity> trade = new HashMap<>();

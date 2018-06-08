@@ -117,33 +117,32 @@
 
         <TextView
             android:id="@+id/order_comma1"
-            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=", "
             android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal"
+            android:visibility="gone"/>
 
         <TextView
-            android:visibility="gone"
             android:id="@+id/order_direction1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="买开"
             android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/order_comma2"
-            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=", "
             android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal"
+            android:visibility="gone"/>
 
         <TextView
-            android:visibility="gone"
             android:id="@+id/order_volume1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -152,16 +151,17 @@
             android:maxLines="1"
             android:text="1"
             android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/order_unit"
-            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="手"
             android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal"
+            android:visibility="gone"/>
 
     </LinearLayout>
 

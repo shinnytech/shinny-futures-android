@@ -30,7 +30,6 @@ import com.xinyi.shinnyfutures.model.engine.DataManager;
 import com.xinyi.shinnyfutures.model.listener.OrderDiffCallback;
 import com.xinyi.shinnyfutures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.xinyi.shinnyfutures.utils.DividerItemDecorationUtils;
-import com.xinyi.shinnyfutures.utils.MathUtils;
 import com.xinyi.shinnyfutures.view.activity.FutureInfoActivity;
 
 import java.util.ArrayList;
@@ -133,7 +132,7 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
                 public void onItemClick(View view, int position) {
                     OrderEntity orderEntity = mAdapter.getData().get(position);
                     if (orderEntity != null) {
-                        if (("ALIVE").equals(orderEntity.getStatus()) ) {
+                        if (("ALIVE").equals(orderEntity.getStatus())) {
                             String order_id = orderEntity.getOrder_id();
                             String instrument_id = orderEntity.getInstrument_id();
                             String direction_title = ((TextView) view.findViewById(R.id.order_offset)).getText().toString();
@@ -202,7 +201,7 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
         } else {
             for (Map.Entry<String, OrderEntity> entry :
                     sDataManager.getAccountBean().getOrder().entrySet()) {
-                if (("ALIVE").equals(entry.getValue().getStatus()) ) {
+                if (("ALIVE").equals(entry.getValue().getStatus())) {
                     mNewData.add(entry.getValue());
                 }
             }

@@ -18,12 +18,10 @@ import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.google.gson.Gson;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheEntity;
 import com.lzy.okgo.cache.CacheMode;
 import com.lzy.okgo.callback.FileCallback;
-import com.lzy.okgo.callback.StringCallback;
 import com.lzy.okgo.cookie.store.SPCookieStore;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
@@ -33,8 +31,6 @@ import com.tencent.bugly.beta.Beta;
 import com.tencent.tinker.loader.app.DefaultApplicationLike;
 import com.xinyi.shinnyfutures.BuildConfig;
 import com.xinyi.shinnyfutures.constants.CommonConstants;
-import com.xinyi.shinnyfutures.model.bean.accountinfobean.LoginResponseEntity;
-import com.xinyi.shinnyfutures.model.engine.DataManager;
 import com.xinyi.shinnyfutures.model.service.WebSocketService;
 import com.xinyi.shinnyfutures.utils.LatestFileUtils;
 import com.xinyi.shinnyfutures.utils.LogUtils;
@@ -74,10 +70,10 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
 
     private static Application sContext;
     private static WebSocketService sWebSocketService;
-    private URI mUriQuote;
+    private URI mUriMarket;
     private URI mUriTransaction;
     private boolean mServiceBound = false;
-    private BroadcastReceiver mReceiverQuote;
+    private BroadcastReceiver mReceiverMarket;
     private BroadcastReceiver mReceiverTransaction;
     private BroadcastReceiver mReceiverNetwork;
     private BroadcastReceiver mReceiverScreen;
@@ -140,7 +136,7 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
         try {
             WebSocketService.LocalBinder binder = (WebSocketService.LocalBinder) service;
             sWebSocketService = binder.getService();
-            mUriQuote = new URI(CommonConstants.QUOTE_URL);
+            mUriMarket = new URI(CommonConstants.MARKET_URL);
             mUriTransaction = new URI(CommonConstants.TRANSACTION_URL);
         } catch (ClassCastException e) {
             e.printStackTrace();
@@ -178,7 +174,7 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
 
     }
 
-    private void initBugly(){
+    private void initBugly() {
         // 设置是否开启热更新能力，默认为true
         Beta.enableHotfix = true;
         // 设置是否自动下载补丁，默认为true
@@ -282,7 +278,7 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
             public void onActivityDestroyed(Activity activity) {
                 if (activity instanceof MainActivity) {
                     LogUtils.e("App彻底销毁", true);
-                    LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverQuote);
+                    LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverMarket);
                     LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverTransaction);
                     sContext.unregisterReceiver(mReceiverNetwork);
                     sContext.unregisterReceiver(mReceiverScreen);
@@ -306,7 +302,7 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
     private void notifyForeground() {
         if (sWebSocketService != null) {
             //连接行情服务器
-            sWebSocketService.connect(mUriQuote, null, 2000);
+            sWebSocketService.connect(mUriMarket, null, 2000);
             //连接交易服务器
             sWebSocketService.connectTransaction(mUriTransaction, null, 2000);
             LogUtils.e("连接打开", true);
@@ -323,7 +319,6 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
         if (sWebSocketService != null) {
             sWebSocketService.disConnect();
             sWebSocketService.disConnectTransaction();
-            DataManager.getInstance().cleanAccountInfo();
             LogUtils.e("连接断开", true);
             EventBus.getDefault().post(LOG_OUT);
         }
@@ -352,10 +347,11 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
 
     /**
      * date: 7/9/17
-     * description: 监听服务器断开事件
+     * description: 注册广播
      */
     private void registerBroaderCast() {
-        mReceiverQuote = new BroadcastReceiver() {
+        //行情服务器断线重连广播
+        mReceiverMarket = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String mDataString = intent.getStringExtra("msg");
@@ -365,7 +361,7 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
                         if (!mIsBackground) {
                             if (NetworkUtils.isNetworkConnected(sContext)) {
                                 Message message = new Message();
-                                message.obj = mUriQuote;
+                                message.obj = mUriMarket;
                                 message.what = 0;
                                 mMyHandler.sendMessageDelayed(message, 2000);
                             } else
@@ -377,8 +373,9 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
                 }
             }
         };
-        LocalBroadcastManager.getInstance(sContext).registerReceiver(mReceiverQuote, new IntentFilter(BROADCAST_ACTION));
+        LocalBroadcastManager.getInstance(sContext).registerReceiver(mReceiverMarket, new IntentFilter(BROADCAST_ACTION));
 
+        //交易服务器断线重连广播
         mReceiverTransaction = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -386,6 +383,16 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
                 switch (mDataString) {
                     case CLOSE:
                         LoginActivity.setIsLogin(false);
+                        //每隔两秒,断线重连
+                        if (!mIsBackground) {
+                            if (NetworkUtils.isNetworkConnected(sContext)) {
+                                Message message = new Message();
+                                message.obj = mUriTransaction;
+                                message.what = 1;
+                                mMyHandler.sendMessageDelayed(message, 2000);
+                            } else
+                                ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
+                        }
                         break;
                     case MESSAGE_SETTLEMENT_NOT_SURE:
                         break;
@@ -402,6 +409,7 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
         };
         LocalBroadcastManager.getInstance(sContext).registerReceiver(mReceiverTransaction, new IntentFilter(BROADCAST_ACTION_TRANSACTION));
 
+        //网络状态变化监听广播
         mReceiverNetwork = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -409,14 +417,13 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
                 switch (networkStatus) {
                     case 0:
                         if (sWebSocketService != null) {
-                            DataManager.getInstance().cleanAccountInfo();
                             LogUtils.e("连接断开", true);
                         }
                         break;
                     case 1:
                         if (sWebSocketService != null) {
                             //连接行情服务器
-                            sWebSocketService.connect(mUriQuote, null, 2000);
+                            sWebSocketService.connect(mUriMarket, null, 2000);
                             //连接交易服务器
                             sWebSocketService.connectTransaction(mUriTransaction, null, 2000);
                             LogUtils.e("连接打开", true);
@@ -429,6 +436,7 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
         };
         sContext.registerReceiver(mReceiverNetwork, new IntentFilter(NETWORK_STATE));
 
+        //屏幕亮起后重连广播
         mReceiverScreen = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {

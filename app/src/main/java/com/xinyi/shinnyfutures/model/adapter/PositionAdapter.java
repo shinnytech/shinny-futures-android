@@ -109,7 +109,7 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                         mBinding.positionAvailable.setText(available_long);
                         mBinding.positionVolume.setText(volume_long + "");
                         float open_price_long = getPrice(positionEntity.getOpen_cost_long(), positionEntity.getOpen_price_long(), vm, volume_long);
-                        mBinding.positionOpenPrice.setText(LatestFileUtils.saveScaleByPtickA(open_price_long+"", instrument_id));
+                        mBinding.positionOpenPrice.setText(LatestFileUtils.saveScaleByPtickA(open_price_long + "", instrument_id));
                         mBinding.positionProfit.setText(MathUtils.round(positionEntity.getFloat_profit_long(), 0));
                         profit = Float.valueOf(positionEntity.getFloat_profit_long());
                     } else if (volume_long == 0 && volume_short != 0) {
@@ -118,7 +118,7 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                         mBinding.positionAvailable.setText(available_short);
                         mBinding.positionVolume.setText(volume_short + "");
                         float open_price_short = getPrice(positionEntity.getOpen_cost_short(), positionEntity.getOpen_price_short(), vm, volume_short);
-                        mBinding.positionOpenPrice.setText(LatestFileUtils.saveScaleByPtickA(open_price_short+"", instrument_id));
+                        mBinding.positionOpenPrice.setText(LatestFileUtils.saveScaleByPtickA(open_price_short + "", instrument_id));
                         mBinding.positionProfit.setText(MathUtils.round(positionEntity.getFloat_profit_short(), 0));
                         profit = Float.valueOf(positionEntity.getFloat_profit_short());
                     } else if (volume_long != 0 && volume_short != 0) {
@@ -128,8 +128,8 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                         mBinding.positionVolume.setText(available_long + "/" + volume_short);
                         float open_price_long = getPrice(positionEntity.getOpen_cost_long(), positionEntity.getOpen_price_long(), vm, volume_long);
                         float open_price_short = getPrice(positionEntity.getOpen_cost_short(), positionEntity.getOpen_price_short(), vm, volume_short);
-                        String price_long = LatestFileUtils.saveScaleByPtickA(open_price_long+"", instrument_id);
-                        String price_short = LatestFileUtils.saveScaleByPtickA(open_price_short+"", instrument_id);
+                        String price_long = LatestFileUtils.saveScaleByPtickA(open_price_long + "", instrument_id);
+                        String price_short = LatestFileUtils.saveScaleByPtickA(open_price_short + "", instrument_id);
                         mBinding.positionOpenPrice.setText(price_long + "/" + price_short);
                         mBinding.positionProfit.setText(MathUtils.round(positionEntity.getFloat_profit_long(), 0)
                                 + "/" + MathUtils.round(positionEntity.getFloat_profit_short(), 0));
@@ -148,15 +148,15 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
             }
         }
 
-        private float getPrice(String open_cost, String open_price, int vm, int volume){
+        private float getPrice(String open_cost, String open_price, int vm, int volume) {
             try {
                 float openCost = Float.parseFloat(open_cost);
                 float openPrice = Float.parseFloat(open_price);
-                if (openPrice != 0)return openPrice;
-                else if (openCost != 0){
+                if (openPrice != 0) return openPrice;
+                else if (openCost != 0) {
                     return openCost / (volume * vm);
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return 0.0f;

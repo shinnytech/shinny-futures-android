@@ -9,10 +9,10 @@
         android:id="@+id/tv_Spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/padding_5dp"
-        android:textSize="@dimen/font_size_normal"
         android:gravity="center"
-        android:textColor="@color/black"/>
+        android:padding="@dimen/padding_5dp"
+        android:textColor="@color/black"
+        android:textSize="@dimen/font_size_normal"/>
 
     <View
         android:layout_width="match_parent"

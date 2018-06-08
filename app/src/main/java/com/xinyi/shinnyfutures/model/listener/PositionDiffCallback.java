@@ -6,7 +6,6 @@ import android.support.v7.util.DiffUtil;
 
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.PositionEntity;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
-import com.xinyi.shinnyfutures.model.engine.DataManager;
 import com.xinyi.shinnyfutures.utils.LatestFileUtils;
 import com.xinyi.shinnyfutures.utils.MathUtils;
 
@@ -102,10 +101,10 @@ public class PositionDiffCallback extends DiffUtil.Callback {
             String available_long_new = MathUtils.add(volume_long_his_new, volume_long_today_new);
             String available_short_old = MathUtils.add(volume_short_his_old, volume_short_today_old);
             String available_short_new = MathUtils.add(volume_short_his_new, volume_short_today_new);
-            if (!available_long_old.equals(available_long_new) || !available_short_old.equals(available_short_new)){
+            if (!available_long_old.equals(available_long_new) || !available_short_old.equals(available_short_new)) {
                 available_long = Integer.parseInt(available_long_new);
                 available_short = Integer.parseInt(available_short_new);
-            }else {
+            } else {
                 available_long = Integer.parseInt(available_long_old);
                 available_short = Integer.parseInt(available_short_old);
             }
@@ -114,48 +113,48 @@ public class PositionDiffCallback extends DiffUtil.Callback {
             String volume_long_new = MathUtils.add(available_long_new, volume_long_frozen_new);
             String volume_short_old = MathUtils.add(available_short_old, volume_short_frozen_old);
             String volume_short_new = MathUtils.add(available_short_new, volume_short_frozen_new);
-            if (!volume_long_old.equals(volume_long_new) || !volume_short_old.equals(volume_short_new)){
+            if (!volume_long_old.equals(volume_long_new) || !volume_short_old.equals(volume_short_new)) {
                 volume_long = Integer.parseInt(volume_long_new);
                 volume_short = Integer.parseInt(volume_short_new);
-            }else {
+            } else {
                 volume_long = Integer.parseInt(volume_long_old);
                 volume_short = Integer.parseInt(volume_short_old);
             }
 
             if (!open_cost_long_old.equals(open_cost_long_new) || !open_cost_short_old.equals(open_cost_short_new)
-                    || !open_price_long_old.equals(open_price_long_new) || !open_price_short_old.equals(open_price_short_new)){
+                    || !open_price_long_old.equals(open_price_long_new) || !open_price_short_old.equals(open_price_short_new)) {
                 open_price_long = LatestFileUtils.saveScaleByPtickA(getPrice(open_cost_long_new, open_price_long_new, vm, volume_long), instrument_id);
                 open_price_short = LatestFileUtils.saveScaleByPtickA(getPrice(open_cost_short_new, open_price_short_new, vm, volume_short), instrument_id);
-            }else {
+            } else {
                 open_price_long = LatestFileUtils.saveScaleByPtickA(getPrice(open_cost_long_old, open_price_long_old, vm, volume_long), instrument_id);
                 open_price_short = LatestFileUtils.saveScaleByPtickA(getPrice(open_cost_short_old, open_price_short_old, vm, volume_short), instrument_id);
             }
 
-            if (!float_profit_long_old.equals(float_profit_long_new) || !float_profit_short_old.equals(float_profit_short_new)){
+            if (!float_profit_long_old.equals(float_profit_long_new) || !float_profit_short_old.equals(float_profit_short_new)) {
                 float_profit_long = MathUtils.round(float_profit_long_new, 0);
                 float_profit_short = MathUtils.round(float_profit_short_new, 0);
-            }else {
+            } else {
                 float_profit_long = MathUtils.round(float_profit_long_old, 0);
                 float_profit_short = MathUtils.round(float_profit_short_old, 0);
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-        if (volume_long != 0 && volume_short != 0){
+        if (volume_long != 0 && volume_short != 0) {
             bundle.putString("direction", "双向");
             bundle.putString("volume", volume_long + "/" + volume_short);
             bundle.putString("available", available_long + "/" + available_short);
             bundle.putString("open_price", open_price_long + "/" + open_price_short);
             bundle.putString("float_profit", float_profit_long + "/" + float_profit_short);
-        }else if (volume_long == 0 && volume_short != 0){
+        } else if (volume_long == 0 && volume_short != 0) {
             bundle.putString("direction", "空");
             bundle.putString("volume", volume_short + "");
             bundle.putString("available", available_short + "");
             bundle.putString("open_price", open_price_short + "");
             bundle.putString("float_profit", float_profit_short + "");
-        }else if (volume_long != 0 && volume_short == 0){
+        } else if (volume_long != 0 && volume_short == 0) {
             bundle.putString("direction", "多");
             bundle.putString("volume", volume_long + "");
             bundle.putString("available", available_long + "");
@@ -169,16 +168,16 @@ public class PositionDiffCallback extends DiffUtil.Callback {
         return bundle;
     }
 
-    private String getPrice(String open_cost, String open_price, String vm, int volume){
+    private String getPrice(String open_cost, String open_price, String vm, int volume) {
         try {
             int vmI = Integer.parseInt(vm);
             float openCost = Float.parseFloat(open_cost);
             float openPrice = Float.parseFloat(open_price);
-            if (openPrice != 0)return openPrice+"";
-            else if (openCost != 0 && volume != 0){
+            if (openPrice != 0) return openPrice + "";
+            else if (openCost != 0 && volume != 0) {
                 return openCost / (volume * vmI) + "";
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return "0.0";

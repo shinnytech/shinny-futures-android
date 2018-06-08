@@ -14,8 +14,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="@dimen/padding_4dp"
             android:gravity="center"
+            android:paddingBottom="@dimen/padding_4dp"
             android:paddingTop="@dimen/padding_4dp">
 
             <TextView

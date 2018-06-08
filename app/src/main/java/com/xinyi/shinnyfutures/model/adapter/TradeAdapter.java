@@ -16,7 +16,6 @@ import com.xinyi.shinnyfutures.model.bean.accountinfobean.TradeEntity;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
 import com.xinyi.shinnyfutures.utils.LatestFileUtils;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;

@@ -32,7 +32,6 @@ import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
 import com.xinyi.shinnyfutures.model.engine.DataManager;
 import com.xinyi.shinnyfutures.utils.KeyboardUtils;
 import com.xinyi.shinnyfutures.utils.LatestFileUtils;
-import com.xinyi.shinnyfutures.utils.LogUtils;
 import com.xinyi.shinnyfutures.utils.MathUtils;
 import com.xinyi.shinnyfutures.utils.ToastNotificationUtils;
 import com.xinyi.shinnyfutures.view.activity.FutureInfoActivity;
@@ -241,14 +240,14 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             mPriceType = "最新价";
             String key = mExchangeId + "." + mInstrumentId;
             PositionEntity positionEntity = sDataManager.getAccountBean().getPosition().get(key);
-            if (positionEntity == null){
+            if (positionEntity == null) {
                 this.mDirection = "";
                 mBinding.volume.setText("1");
                 mIsClosePriceShow = false;
                 mBinding.bidPrice1Direction.setText("买多");
                 mBinding.askPrice1Direction.setText("卖空");
                 mBinding.closePrice.setText("先开先平");
-            }else {
+            } else {
                 String volume_available_long = MathUtils.add(positionEntity.getVolume_long_his(), positionEntity.getVolume_long_today());
                 int volume_long = Integer.parseInt(MathUtils.add(volume_available_long, positionEntity.getVolume_long_frozen()));
                 String volume_available_short = MathUtils.add(positionEntity.getVolume_short_his(), positionEntity.getVolume_short_today());
@@ -582,10 +581,10 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                     if (positionEntity == null) return;
                     int volume_today = 0;
                     int volume_history = 0;
-                    if ("多".equals(mDirection)){
+                    if ("多".equals(mDirection)) {
                         volume_today = Integer.parseInt(positionEntity.getVolume_long_today());
                         volume_history = Integer.parseInt(positionEntity.getVolume_long_his());
-                    }else if ("空".equals(mDirection)){
+                    } else if ("空".equals(mDirection)) {
                         volume_today = Integer.parseInt(positionEntity.getVolume_short_today());
                         volume_history = Integer.parseInt(positionEntity.getVolume_short_his());
                     }

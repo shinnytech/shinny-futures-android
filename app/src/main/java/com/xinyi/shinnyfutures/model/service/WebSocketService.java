@@ -6,7 +6,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.xinyi.shinnyfutures.constants.CommonConstants;
 import com.xinyi.shinnyfutures.model.bean.futureinfobean.ChartEntity;
@@ -18,7 +17,6 @@ import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.handshake.ServerHandshake;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,10 +33,8 @@ import static com.xinyi.shinnyfutures.constants.CommonConstants.KLINE_DAY;
 import static com.xinyi.shinnyfutures.constants.CommonConstants.KLINE_HOUR;
 import static com.xinyi.shinnyfutures.constants.CommonConstants.KLINE_MINUTE;
 import static com.xinyi.shinnyfutures.constants.CommonConstants.LOAD_QUOTE_NUM;
-import static com.xinyi.shinnyfutures.constants.CommonConstants.MESSAGE_POSITION;
 import static com.xinyi.shinnyfutures.constants.CommonConstants.OPEN;
 import static com.xinyi.shinnyfutures.constants.CommonConstants.VIEW_WIDTH;
-import static com.xinyi.shinnyfutures.model.engine.DataManager.ACCOUNT;
 
 /**
  * date: 7/9/17
