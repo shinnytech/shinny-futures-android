@@ -13,7 +13,7 @@ import com.xinyi.shinnyfutures.R;
 import com.xinyi.shinnyfutures.databinding.ItemFragmentPositionBinding;
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.PositionEntity;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 import com.xinyi.shinnyfutures.utils.MathUtils;
 
 import java.util.List;
@@ -95,7 +95,7 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                 if (positionEntity == null) return;
                 try {
                     String instrument_id = positionEntity.getInstrument_id();
-                    SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(instrument_id);
+                    SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
                     mBinding.positionName.setText(searchEntity == null ? instrument_id : searchEntity.getInstrumentName());
                     int vm = searchEntity == null ? 1 : Integer.parseInt(searchEntity.getVm());
                     String available_long = MathUtils.add(positionEntity.getVolume_long_his(), positionEntity.getVolume_long_today());
@@ -109,7 +109,7 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                         mBinding.positionAvailable.setText(available_long);
                         mBinding.positionVolume.setText(volume_long + "");
                         float open_price_long = getPrice(positionEntity.getOpen_cost_long(), positionEntity.getOpen_price_long(), vm, volume_long);
-                        mBinding.positionOpenPrice.setText(LatestFileUtils.saveScaleByPtickA(open_price_long + "", instrument_id));
+                        mBinding.positionOpenPrice.setText(LatestFileManager.saveScaleByPtickA(open_price_long + "", instrument_id));
                         mBinding.positionProfit.setText(MathUtils.round(positionEntity.getFloat_profit_long(), 0));
                         profit = Float.valueOf(positionEntity.getFloat_profit_long());
                     } else if (volume_long == 0 && volume_short != 0) {
@@ -118,7 +118,7 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                         mBinding.positionAvailable.setText(available_short);
                         mBinding.positionVolume.setText(volume_short + "");
                         float open_price_short = getPrice(positionEntity.getOpen_cost_short(), positionEntity.getOpen_price_short(), vm, volume_short);
-                        mBinding.positionOpenPrice.setText(LatestFileUtils.saveScaleByPtickA(open_price_short + "", instrument_id));
+                        mBinding.positionOpenPrice.setText(LatestFileManager.saveScaleByPtickA(open_price_short + "", instrument_id));
                         mBinding.positionProfit.setText(MathUtils.round(positionEntity.getFloat_profit_short(), 0));
                         profit = Float.valueOf(positionEntity.getFloat_profit_short());
                     } else if (volume_long != 0 && volume_short != 0) {
@@ -128,8 +128,8 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                         mBinding.positionVolume.setText(available_long + "/" + volume_short);
                         float open_price_long = getPrice(positionEntity.getOpen_cost_long(), positionEntity.getOpen_price_long(), vm, volume_long);
                         float open_price_short = getPrice(positionEntity.getOpen_cost_short(), positionEntity.getOpen_price_short(), vm, volume_short);
-                        String price_long = LatestFileUtils.saveScaleByPtickA(open_price_long + "", instrument_id);
-                        String price_short = LatestFileUtils.saveScaleByPtickA(open_price_short + "", instrument_id);
+                        String price_long = LatestFileManager.saveScaleByPtickA(open_price_long + "", instrument_id);
+                        String price_short = LatestFileManager.saveScaleByPtickA(open_price_short + "", instrument_id);
                         mBinding.positionOpenPrice.setText(price_long + "/" + price_short);
                         mBinding.positionProfit.setText(MathUtils.round(positionEntity.getFloat_profit_long(), 0)
                                 + "/" + MathUtils.round(positionEntity.getFloat_profit_short(), 0));

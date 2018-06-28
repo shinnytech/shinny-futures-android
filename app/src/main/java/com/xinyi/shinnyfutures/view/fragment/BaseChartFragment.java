@@ -25,7 +25,7 @@ import com.xinyi.shinnyfutures.model.bean.futureinfobean.KlineEntity;
 import com.xinyi.shinnyfutures.model.bean.futureinfobean.QuoteEntity;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
 import com.xinyi.shinnyfutures.model.engine.DataManager;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 import com.xinyi.shinnyfutures.utils.MathUtils;
 import com.xinyi.shinnyfutures.view.activity.FutureInfoActivity;
 import com.xinyi.shinnyfutures.view.activity.LoginActivity;
@@ -216,7 +216,7 @@ public class BaseChartFragment extends LazyLoadFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         instrument_id = ((FutureInfoActivity) getActivity()).getInstrument_id();
-        exchange_id = LatestFileUtils.getSearchEntities().get(instrument_id).getExchangeId();
+        exchange_id = LatestFileManager.getSearchEntities().get(instrument_id).getExchangeId();
         mIsAverage = ((FutureInfoActivity) getActivity()).isAverage();
         if (!mIsAverage) mChart.getLegend().setEnabled(false);
         mIsPosition = ((FutureInfoActivity) getActivity()).isPosition();
@@ -308,7 +308,7 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void addLongPositionLimitLine() {
         try {
             String key = exchange_id + "." + instrument_id;
-            SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(instrument_id);
+            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
             String vm = searchEntity != null ? searchEntity.getVm() : "1";
             PositionEntity positionEntity = dataManager.getAccountBean().getPosition().get(key);
             if (positionEntity == null) return;
@@ -333,7 +333,7 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void addShortPositionLimitLine() {
         try {
             String key = exchange_id + "." + instrument_id;
-            SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(instrument_id);
+            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
             String vm = searchEntity != null ? searchEntity.getVm() : "1";
             PositionEntity positionEntity = dataManager.getAccountBean().getPosition().get(key);
             if (positionEntity == null) return;
@@ -374,7 +374,7 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void refreshLongPositionLimitLine() {
         try {
             String key = exchange_id + "." + instrument_id;
-            SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(instrument_id);
+            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
             String vm = searchEntity != null ? searchEntity.getVm() : "1";
             PositionEntity positionEntity = dataManager.getAccountBean().getPosition().get(key);
             String limitKey = key + "0";
@@ -408,7 +408,7 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void refreshShortPositionLimitLine() {
         try {
             String key = exchange_id + "." + instrument_id;
-            SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(instrument_id);
+            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
             String vm = searchEntity != null ? searchEntity.getVm() : "1";
             PositionEntity positionEntity = dataManager.getAccountBean().getPosition().get(key);
             String limitKey = key + "1";

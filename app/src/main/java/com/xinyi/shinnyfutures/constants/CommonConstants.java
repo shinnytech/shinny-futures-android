@@ -2,7 +2,7 @@ package com.xinyi.shinnyfutures.constants;
 
 public final class CommonConstants {
     public static final String MARKET_URL = "ws://mdapi.shinnytech.com/t/md/front/mobile";
-    public static final String TRANSACTION_URL = "ws://192.168.220.224:7777";
+    public static final String TRANSACTION_URL = "ws://118.31.237.98:3918";
     public static final String JSON_FILE_URL = "http://ins.shinnytech.com/publicdata/latest.json";
     public static final String FEED_BACK_URL = "http://redmine.kuaiqi.net/src/";
     public static final String OPEN = "0";

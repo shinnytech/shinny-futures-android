@@ -14,7 +14,7 @@ import com.xinyi.shinnyfutures.databinding.ActivityFutureInfoBinding;
 import com.xinyi.shinnyfutures.model.bean.eventbusbean.IdEvent;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
 import com.xinyi.shinnyfutures.presenter.FutureInfoActivityPresenter;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 import com.xinyi.shinnyfutures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -94,7 +94,7 @@ public class FutureInfoActivity extends BaseActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.activity_futureinfo, menu);
         mMenuItem = menu.findItem(R.id.action_collect);
-        if (LatestFileUtils.getOptionalInsList().containsKey(mInstrumentId)) {
+        if (LatestFileManager.getOptionalInsList().containsKey(mInstrumentId)) {
             mMenuItem.setIcon(R.mipmap.ic_favorite_white_24dp);
         } else {
             mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
@@ -112,12 +112,12 @@ public class FutureInfoActivity extends BaseActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.action_collect:
-                if (LatestFileUtils.getOptionalInsList().containsKey(mInstrumentId)) {
+                if (LatestFileManager.getOptionalInsList().containsKey(mInstrumentId)) {
                     if (mInstrumentId != null) {
                         if (!mInstrumentId.equals("")) {
-                            Map<String, String> insList = LatestFileUtils.getOptionalInsList();
+                            Map<String, String> insList = LatestFileManager.getOptionalInsList();
                             insList.remove(mInstrumentId);
-                            LatestFileUtils.saveInsListToFile(insList);
+                            LatestFileManager.saveInsListToFile(insList);
                             ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已被移除自选列表");
                             mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
                             mFutureInfoActivityPresenter.refreshOptionalQuotesPopup(new ArrayList<>(insList.keySet()));
@@ -126,12 +126,12 @@ public class FutureInfoActivity extends BaseActivity {
                 } else {
                     if (mInstrumentId != null) {
                         if (!mInstrumentId.equals("")) {
-                            SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(mInstrumentId);
-                            Map<String, String> insList = LatestFileUtils.getOptionalInsList();
+                            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
+                            Map<String, String> insList = LatestFileManager.getOptionalInsList();
                             if (searchEntity != null)
                                 insList.put(mInstrumentId, searchEntity.getInstrumentName());
                             else insList.put(mInstrumentId, mInstrumentId);
-                            LatestFileUtils.saveInsListToFile(insList);
+                            LatestFileManager.saveInsListToFile(insList);
                             ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已添加到自选列表");
                             mMenuItem.setIcon(R.mipmap.ic_favorite_white_24dp);
                             mFutureInfoActivityPresenter.refreshOptionalQuotesPopup(new ArrayList<>(insList.keySet()));
@@ -201,10 +201,10 @@ public class FutureInfoActivity extends BaseActivity {
             mInstrumentId = instrument_id_new;
             if (BaseApplicationLike.getWebSocketService() != null)
                 BaseApplicationLike.getWebSocketService().sendSubscribeQuote(mInstrumentId);
-            SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(mInstrumentId);
+            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
             if (searchEntity != null) mToolbarTitle.setText(searchEntity.getInstrumentName());
             else mToolbarTitle.setText(mInstrumentId);
-            if (LatestFileUtils.getOptionalInsList().containsKey(mInstrumentId)) {
+            if (LatestFileManager.getOptionalInsList().containsKey(mInstrumentId)) {
                 mMenuItem.setIcon(R.mipmap.ic_favorite_white_24dp);
             } else {
                 mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);

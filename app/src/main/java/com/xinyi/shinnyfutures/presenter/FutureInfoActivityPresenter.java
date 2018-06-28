@@ -35,10 +35,10 @@ import com.xinyi.shinnyfutures.view.adapter.ViewPagerFragmentAdapter;
 import com.xinyi.shinnyfutures.model.bean.eventbusbean.IdEvent;
 import com.xinyi.shinnyfutures.model.bean.eventbusbean.SetUpEvent;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
-import com.xinyi.shinnyfutures.model.listener.SimpleRecyclerViewItemClickListener;
+import com.xinyi.shinnyfutures.view.listener.SimpleRecyclerViewItemClickListener;
 import com.xinyi.shinnyfutures.utils.DividerGridItemDecorationUtils;
 import com.xinyi.shinnyfutures.utils.KeyboardUtils;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 import com.xinyi.shinnyfutures.utils.NetworkUtils;
 import com.xinyi.shinnyfutures.utils.SPUtils;
 import com.xinyi.shinnyfutures.view.activity.FutureInfoActivity;
@@ -149,7 +149,7 @@ public class FutureInfoActivityPresenter {
         Intent intent = mFutureInfoActivity.getIntent();
         mInstrumentId = intent.getStringExtra("instrument_id");
         mNav_position = intent.getIntExtra("nav_position", 0);
-        SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(mInstrumentId);
+        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
         if (searchEntity != null) mToolbarTitle.setText(searchEntity.getInstrumentName());
         else mToolbarTitle.setText(mInstrumentId);
         mToolbar.setTitle("合约:");
@@ -220,7 +220,7 @@ public class FutureInfoActivityPresenter {
                         dialogWindow.setAttributes(lp);
                     }
                     mDialog.setContentView(viewDialog);
-                    mDialogAdapter = new DialogAdapter(mFutureInfoActivity, new ArrayList<>(LatestFileUtils.getOptionalInsList().keySet()));
+                    mDialogAdapter = new DialogAdapter(mFutureInfoActivity, new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
                     mRecyclerView = viewDialog.findViewById(R.id.dialog_rv);
                     mRecyclerView.setLayoutManager(
                             new GridLayoutManager(mFutureInfoActivity, 3));
@@ -460,7 +460,7 @@ public class FutureInfoActivityPresenter {
                     case 1:
                         mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.black_dark));
                         mToolbarTitle.setTextColor(Color.WHITE);
-                        SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(mInstrumentId);
+                        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
                         if (searchEntity != null)
                             mToolbarTitle.setText(searchEntity.getInstrumentName());
                         else mToolbarTitle.setText(mInstrumentId);
@@ -514,7 +514,7 @@ public class FutureInfoActivityPresenter {
         if (NetworkUtils.isNetworkConnected(sContext)) {
             mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.black_dark));
             mToolbarTitle.setTextColor(Color.WHITE);
-            SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(mInstrumentId);
+            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
             if (searchEntity != null) mToolbarTitle.setText(searchEntity.getInstrumentName());
             else mToolbarTitle.setText(mInstrumentId);
             mToolbarTitle.setCompoundDrawables(null, null, mRightDrawable, null);

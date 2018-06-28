@@ -31,7 +31,7 @@ import com.xinyi.shinnyfutures.model.bean.futureinfobean.QuoteEntity;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
 import com.xinyi.shinnyfutures.model.engine.DataManager;
 import com.xinyi.shinnyfutures.utils.KeyboardUtils;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 import com.xinyi.shinnyfutures.utils.MathUtils;
 import com.xinyi.shinnyfutures.utils.ToastNotificationUtils;
 import com.xinyi.shinnyfutures.view.activity.FutureInfoActivity;
@@ -87,7 +87,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mInstrumentId = ((FutureInfoActivity) getActivity()).getInstrument_id();
-        SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(mInstrumentId);
+        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
         mExchangeId = searchEntity == null ? "" : searchEntity.getExchangeId();
     }
 
@@ -252,7 +252,6 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 int volume_long = Integer.parseInt(MathUtils.add(volume_available_long, positionEntity.getVolume_long_frozen()));
                 String volume_available_short = MathUtils.add(positionEntity.getVolume_short_his(), positionEntity.getVolume_short_today());
                 int volume_short = Integer.parseInt(MathUtils.add(volume_available_short, positionEntity.getVolume_short_frozen()));
-
                 if (volume_long != 0 && volume_short == 0) {
                     this.mDirection = "多";
                     mBinding.volume.setText(volume_available_long);
@@ -574,7 +573,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 final String orderId = Calendar.getInstance().getTimeInMillis() + "";
                 final int volumeN = Integer.parseInt(volume);
                 final double priceN = Double.parseDouble(price);
-                SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(mInstrumentId);
+                SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
                 if (searchEntity != null && ("上海国际能源交易中心".equals(searchEntity.getExchangeName())
                         || "上海期货交易所".equals(searchEntity.getExchangeName()))) {
                     PositionEntity positionEntity = sDataManager.getAccountBean().getPosition().get(mExchangeId + "." + mInstrumentId);
@@ -740,13 +739,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             public void onClick(View v) {
                 if (BaseApplicationLike.getWebSocketService() != null)
                     BaseApplicationLike.getWebSocketService().sendReqInsertOrder(order_id, exchange_id, instrument_id, direction, offset, volume, price_type, price);
-                dialog.dismiss();
                 initPosition();
-//                if (instrument_id.contains("&")) {
-//                    mBinding.closeDirection.setText("平仓");
-//                    mBinding.closePrice.setText("先开先平");
-//                    mIsClosePriceShow = false;
-//                }
+                dialog.dismiss();
             }
         });
         cancel.setOnClickListener(new View.OnClickListener() {

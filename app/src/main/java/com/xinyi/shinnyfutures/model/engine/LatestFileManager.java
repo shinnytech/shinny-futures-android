@@ -1,9 +1,10 @@
-package com.xinyi.shinnyfutures.utils;
+package com.xinyi.shinnyfutures.model.engine;
 
 import android.content.Context;
 
 import com.xinyi.shinnyfutures.application.BaseApplicationLike;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
+import com.xinyi.shinnyfutures.utils.MathUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,7 +30,7 @@ import java.util.Map;
  * version:
  * state: done
  */
-public class LatestFileUtils {
+public class LatestFileManager {
     /**
      * date: 7/9/17
      * description: 自选合约列表名称
@@ -185,6 +186,7 @@ public class LatestFileUtils {
                     searchEntity.setInstrumentName(instrumentName);
                     searchEntity.setPy(py);
                     searchEntity.setVm(vm);
+                    searchEntity.setExchangeId(ei);
                     if (mainIns.contains(instrumentId)) {
                         sMainInsList.put(instrumentId, instrumentName);
                         if (aRepeat++ == 0) sMainInsListNameNav.add(sn);
@@ -194,31 +196,26 @@ public class LatestFileUtils {
                             sShangqiInsList.put(instrumentId, instrumentName);
                             if (bRepeat++ == 0) sShangqiInsListNameNav.add(sn);
                             searchEntity.setExchangeName("上海期货交易所");
-                            searchEntity.setExchangeId("SHFE");
                             break;
                         case "CZCE"://郑商所
                             sZhengzhouInsList.put(instrumentId, instrumentName);
                             if (bRepeat++ == 0) sZhengzhouInsListNameNav.add(sn);
                             searchEntity.setExchangeName("郑州商品交易所");
-                            searchEntity.setExchangeId("CZCE");
                             break;
                         case "DCE"://大商所
                             sDalianInsList.put(instrumentId, instrumentName);
                             if (bRepeat++ == 0) sDalianInsListNameNav.add(sn);
                             searchEntity.setExchangeName("大连商品交易所");
-                            searchEntity.setExchangeId("DCE");
                             break;
                         case "CFFEX"://中金所
                             sZhongjinInsList.put(instrumentId, instrumentName);
                             if (bRepeat++ == 0) sZhongjinInsListNameNav.add(sn);
                             searchEntity.setExchangeName("中国金融期货交易所");
-                            searchEntity.setExchangeId("CFFEX");
                             break;
                         case "INE"://上期能源
                             sNengyuanInsList.put(instrumentId, instrumentName);
                             if (bRepeat++ == 0) sNengyuanInsListNameNav.add(sn);
                             searchEntity.setExchangeName("上海国际能源交易中心");
-                            searchEntity.setExchangeId("INE");
                             break;
                         default:
                             break;
@@ -234,6 +231,7 @@ public class LatestFileUtils {
                 JSONObject nObject = combineObject.getJSONObject(combineId).getJSONObject("n");
                 String ei = nObject.getString("ei");
                 String pTick = nObject.getString("ptick");
+                String vm = nObject.getString("vm");
                 JSONObject insObject = combineObject.getJSONObject(combineId).getJSONObject("Ins");
                 int bRepeat = 0;
                 Iterator<String> instrumentIds = insObject.keys();
@@ -247,18 +245,18 @@ public class LatestFileUtils {
                         //组合拼音没有
                         searchEntity.setPy("");
                         searchEntity.setpTick(pTick);
+                        searchEntity.setVm(vm);
+                        searchEntity.setExchangeId(ei);
                         switch (ei) {
                             case "CZCE":
                                 sZhengzhouzuheInsList.put(instrumentId, instrumentId);
                                 if (bRepeat++ == 0) sZhengzhouzuheInsListNameNav.add(instrumentId);
                                 searchEntity.setExchangeName("郑州商品交易所");
-                                searchEntity.setExchangeId("CZCE");
                                 break;
                             case "DCE":
                                 sDalianzuheInsList.put(instrumentId, instrumentId);
                                 if (bRepeat++ == 0) sDalianzuheInsListNameNav.add(instrumentId);
                                 searchEntity.setExchangeName("大连商品交易所");
-                                searchEntity.setExchangeId("DCE");
                                 break;
                             default:
                                 break;

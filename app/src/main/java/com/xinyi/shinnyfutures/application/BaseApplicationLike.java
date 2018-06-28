@@ -32,7 +32,7 @@ import com.tencent.tinker.loader.app.DefaultApplicationLike;
 import com.xinyi.shinnyfutures.BuildConfig;
 import com.xinyi.shinnyfutures.constants.CommonConstants;
 import com.xinyi.shinnyfutures.model.service.WebSocketService;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 import com.xinyi.shinnyfutures.utils.LogUtils;
 import com.xinyi.shinnyfutures.utils.NetworkUtils;
 import com.xinyi.shinnyfutures.utils.ToastNotificationUtils;
@@ -336,7 +336,7 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
                     @Override
                     public void onSuccess(final com.lzy.okgo.model.Response<File> response) {
                         LogUtils.e("下载latest文件结束onResponse: " + response.body().getAbsolutePath(), true);
-                        LatestFileUtils.initInsList(response.body());
+                        LatestFileManager.initInsList(response.body());
                         // 通知mainActivity和quoteFragment刷新列表
                         EventBus.getDefault().post(DOMINANT);
                         Intent intent = new Intent(sContext, WebSocketService.class);

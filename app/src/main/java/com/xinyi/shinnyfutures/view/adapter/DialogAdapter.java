@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import com.xinyi.shinnyfutures.R;
 import com.xinyi.shinnyfutures.databinding.ItemDialogOptionalBinding;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +78,7 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ItemViewHo
             if (mData != null && mData.size() != 0) {
                 instrumentId = mData.get(getLayoutPosition());
                 if (!instrumentId.isEmpty()) {
-                    SearchEntity insName = LatestFileUtils.getSearchEntities().get(instrumentId);
+                    SearchEntity insName = LatestFileManager.getSearchEntities().get(instrumentId);
                     if (insName != null) mBinding.tvIdDialog.setText(insName.getInstrumentName());
                     else mBinding.tvIdDialog.setText(instrumentId);
                     itemView.setTag(instrumentId);

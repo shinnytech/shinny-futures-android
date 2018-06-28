@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import com.xinyi.shinnyfutures.R;
 import com.xinyi.shinnyfutures.databinding.ItemActivitySearchQuoteBinding;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +32,9 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ItemViewHo
 
     public SearchAdapter(Context context) {
         this.sContext = context;
-        this.mData = new ArrayList<>(LatestFileUtils.getSearchEntitiesHistory().values());
-        this.mDataCopy = new ArrayList<>(LatestFileUtils.getSearchEntitiesHistory().values());
-        this.mDataOriginal = new ArrayList<>(LatestFileUtils.getSearchEntities().values());
+        this.mData = new ArrayList<>(LatestFileManager.getSearchEntitiesHistory().values());
+        this.mDataCopy = new ArrayList<>(LatestFileManager.getSearchEntitiesHistory().values());
+        this.mDataOriginal = new ArrayList<>(LatestFileManager.getSearchEntities().values());
     }
 
     public void setOnItemClickListener(OnItemClickListener mOnItemClickListener) {
@@ -133,7 +133,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ItemViewHo
                         mBinding.tvSearchInstrumentId.setText(name);
                     }
                     mBinding.tvSearchExchangeName.setText(searchEntity.getExchangeName());
-                    if (LatestFileUtils.getOptionalInsList().containsKey(instrument_id)) {
+                    if (LatestFileManager.getOptionalInsList().containsKey(instrument_id)) {
                         mBinding.ivSearchCollect.setImageResource(R.mipmap.ic_favorite_white_24dp);
                     } else {
                         mBinding.ivSearchCollect.setImageResource(R.mipmap.ic_favorite_border_white_24dp);

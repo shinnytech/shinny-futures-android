@@ -3,7 +3,6 @@ package com.xinyi.shinnyfutures.view.adapter;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,7 +13,7 @@ import com.xinyi.shinnyfutures.R;
 import com.xinyi.shinnyfutures.databinding.ItemActivityTradeBinding;
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.TradeEntity;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -62,16 +61,6 @@ public class TradeAdapter extends RecyclerView.Adapter<TradeAdapter.ItemViewHold
     }
 
     @Override
-    public void onBindViewHolder(TradeAdapter.ItemViewHolder itemViewHolder, int position, List<Object> payloads) {
-        if (payloads.isEmpty()) {
-            onBindViewHolder(itemViewHolder, position);
-        } else {
-            Bundle bundle = (Bundle) payloads.get(0);
-            itemViewHolder.updatePart(bundle);
-        }
-    }
-
-    @Override
     public int getItemCount() {
         return mData == null ? 0 : mData.size();
     }
@@ -99,7 +88,7 @@ public class TradeAdapter extends RecyclerView.Adapter<TradeAdapter.ItemViewHold
                 tradeEntity = mData.get(getLayoutPosition());
                 if (tradeEntity != null) {
                     String instrument_id = tradeEntity.getInstrument_id();
-                    SearchEntity insName = LatestFileUtils.getSearchEntities().get(instrument_id);
+                    SearchEntity insName = LatestFileManager.getSearchEntities().get(instrument_id);
                     mBinding.tvTradeName.setText(insName == null ? instrument_id : insName.getInstrumentName());
                     switch (tradeEntity.getOffset()) {
                         case "OPEN":
@@ -136,67 +125,6 @@ public class TradeAdapter extends RecyclerView.Adapter<TradeAdapter.ItemViewHold
                     mBinding.tvTradeVolume.setText(tradeEntity.getVolume());
                     String date = simpleDateFormat.format(new Date(Long.valueOf(tradeEntity.getTrade_date_time()) / 1000000));
                     mBinding.tvTradeTime.setText(date);
-                }
-            }
-        }
-
-
-        private void updatePart(Bundle bundle) {
-            for (String key :
-                    bundle.keySet()) {
-                String value = bundle.getString(key);
-                switch (key) {
-                    case "instrument_id":
-                        SearchEntity insName = LatestFileUtils.getSearchEntities().get(value);
-                        mBinding.tvTradeName.setText(insName == null ? value : insName.getInstrumentName());
-                        break;
-                    case "offset_flag":
-                        switch (value) {
-                            case "OPEN":
-                                mBinding.tvTradeOffset.setText("开仓");
-                                break;
-                            case "CLOSETODAY":
-                                mBinding.tvTradeOffset.setText("平今");
-                                break;
-                            case "CLOSEHISTORY":
-                                mBinding.tvTradeOffset.setText("平昨");
-                                break;
-                            case "CLOSE":
-                                mBinding.tvTradeOffset.setText("平仓");
-                                break;
-                            case "FORCECLOSE":
-                                mBinding.tvTradeOffset.setText("强平");
-                                break;
-                            default:
-                                mBinding.tvTradeOffset.setText("");
-                                break;
-                        }
-                        break;
-                    case "direction":
-                        switch (value) {
-                            case "BUY":
-                                mBinding.tvTradeOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
-                                break;
-                            case "SELL":
-                                mBinding.tvTradeOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
-                                break;
-                            default:
-                                mBinding.tvTradeOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
-                                break;
-                        }
-                        break;
-                    case "price":
-                        mBinding.tvTradePrice.setText(value);
-                        break;
-                    case "volume":
-                        mBinding.tvTradeVolume.setText(value);
-                        break;
-                    case "trade_time":
-                        String date = simpleDateFormat.format(new Date(Long.valueOf(value) / 1000000));
-                        mBinding.tvTradeTime.setText(date);
-                        break;
-                    default:
-                        break;
                 }
             }
         }

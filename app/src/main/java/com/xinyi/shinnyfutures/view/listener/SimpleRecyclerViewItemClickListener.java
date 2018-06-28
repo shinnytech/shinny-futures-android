@@ -1,4 +1,4 @@
-package com.xinyi.shinnyfutures.model.listener;
+package com.xinyi.shinnyfutures.view.listener;
 
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.widget.RecyclerView;

@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import com.xinyi.shinnyfutures.R;
 import com.xinyi.shinnyfutures.databinding.ItemActivityNavQuoteBinding;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 
 import java.util.List;
 
@@ -81,7 +81,7 @@ public class QuoteNavAdapter extends RecyclerView.Adapter<QuoteNavAdapter.ItemVi
                 String instrumentId = mData.get(getLayoutPosition());
                 if (instrumentId != null && instrumentId.contains("&")) {
                     String instrument_id = instrumentId.split("&")[0].split(" ")[1];
-                    SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(instrument_id);
+                    SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
                     if (searchEntity != null)
                         mBinding.quoteNav.setText(searchEntity.getInstrumentName().replaceAll("\\d+", ""));
                     else mBinding.quoteNav.setText(instrument_id.replaceAll("\\d+", ""));

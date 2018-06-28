@@ -269,11 +269,13 @@ public class PositionEntity implements Comparable<PositionEntity> {
                     && this.volume_long_his.equals(positionEntity.volume_long_his)
                     && this.volume_long_today.equals(positionEntity.volume_long_today)
                     && this.open_price_long.equals(positionEntity.open_price_long)
+                    && this.open_cost_long.equals(positionEntity.open_cost_long)
                     && this.float_profit_long.equals(positionEntity.float_profit_long)
                     && this.volume_short_frozen.equals(positionEntity.volume_short_frozen)
                     && this.volume_short_his.equals(positionEntity.volume_short_his)
                     && this.volume_short_today.equals(positionEntity.volume_short_today)
                     && this.open_price_short.equals(positionEntity.open_price_short)
+                    && this.open_cost_short.equals(positionEntity.open_cost_short)
                     && this.float_profit_short.equals(positionEntity.float_profit_short))
                 return true;
         }

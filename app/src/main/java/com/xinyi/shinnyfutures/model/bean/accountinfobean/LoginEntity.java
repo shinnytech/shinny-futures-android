@@ -6,11 +6,11 @@ package com.xinyi.shinnyfutures.model.bean.accountinfobean;
  * Description: .
  */
 
-public class LoginInfoBean {
+public class LoginEntity {
     private String aid;
     private String req_id;
-    private String ret;
-    private String msg;
+    private String code;
+    private String content = "";
     private String msg_settlement;
     private String[] brokers;
 
@@ -30,20 +30,20 @@ public class LoginInfoBean {
         this.req_id = req_id;
     }
 
-    public String getRet() {
-        return ret;
+    public String getCode() {
+        return code;
     }
 
-    public void setRet(String ret) {
-        this.ret = ret;
+    public void setCode(String code) {
+        this.code = code;
     }
 
-    public String getMsg() {
-        return msg;
+    public String getContent() {
+        return content;
     }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public String[] getBrokers() {

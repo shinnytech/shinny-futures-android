@@ -20,7 +20,7 @@ import com.xinyi.shinnyfutures.databinding.ActivityTradeBinding;
 import com.xinyi.shinnyfutures.view.adapter.TradeAdapter;
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.TradeEntity;
 import com.xinyi.shinnyfutures.model.engine.DataManager;
-import com.xinyi.shinnyfutures.model.listener.TradeDiffCallback;
+import com.xinyi.shinnyfutures.view.listener.TradeDiffCallback;
 import com.xinyi.shinnyfutures.utils.DividerItemDecorationUtils;
 
 import java.util.ArrayList;

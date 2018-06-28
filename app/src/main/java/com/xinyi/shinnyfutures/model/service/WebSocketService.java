@@ -10,7 +10,7 @@ import android.text.TextUtils;
 import com.xinyi.shinnyfutures.constants.CommonConstants;
 import com.xinyi.shinnyfutures.model.bean.futureinfobean.ChartEntity;
 import com.xinyi.shinnyfutures.model.engine.DataManager;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 import com.xinyi.shinnyfutures.utils.LogUtils;
 
 import org.java_websocket.WebSocket;
@@ -142,7 +142,7 @@ public class WebSocketService extends Service {
                             String ins_list = sDataManager.getRtnData().getIns_list();
                             if (ins_list != null) sendSubscribeQuote(ins_list);
                             else
-                                sendSubscribeQuote(TextUtils.join(",", new ArrayList(LatestFileUtils.getMainInsList().keySet()).subList(0, LOAD_QUOTE_NUM)));
+                                sendSubscribeQuote(TextUtils.join(",", new ArrayList(LatestFileManager.getMainInsList().keySet()).subList(0, LOAD_QUOTE_NUM)));
 
                             Map<String, ChartEntity> chartEntityMap = sDataManager.getRtnData().getCharts();
                             if (chartEntityMap.size() != 0) {
@@ -303,7 +303,7 @@ public class WebSocketService extends Service {
 
             @Override
             public void onMessage(String msg) {
-                LogUtils.e(msg, false);
+                LogUtils.e(msg, true);
                 try {
                     sDataManager.refreshAccountBean(msg);
                 } catch (JSONException e) {

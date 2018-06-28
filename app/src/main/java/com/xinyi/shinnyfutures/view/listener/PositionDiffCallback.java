@@ -1,4 +1,4 @@
-package com.xinyi.shinnyfutures.model.listener;
+package com.xinyi.shinnyfutures.view.listener;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -6,7 +6,7 @@ import android.support.v7.util.DiffUtil;
 
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.PositionEntity;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 import com.xinyi.shinnyfutures.utils.MathUtils;
 
 import java.util.List;
@@ -57,7 +57,7 @@ public class PositionDiffCallback extends DiffUtil.Callback {
     public Object getChangePayload(int oldItemPosition, int newItemPosition) {
         Bundle bundle = new Bundle();
         String instrument_id = mOldData.get(oldItemPosition).getInstrument_id();
-        SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(instrument_id);
+        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
         String vm = searchEntity != null ? searchEntity.getVm() : "1";
         int available_long = 0;
         int volume_long = 0;
@@ -123,11 +123,11 @@ public class PositionDiffCallback extends DiffUtil.Callback {
 
             if (!open_cost_long_old.equals(open_cost_long_new) || !open_cost_short_old.equals(open_cost_short_new)
                     || !open_price_long_old.equals(open_price_long_new) || !open_price_short_old.equals(open_price_short_new)) {
-                open_price_long = LatestFileUtils.saveScaleByPtickA(getPrice(open_cost_long_new, open_price_long_new, vm, volume_long), instrument_id);
-                open_price_short = LatestFileUtils.saveScaleByPtickA(getPrice(open_cost_short_new, open_price_short_new, vm, volume_short), instrument_id);
+                open_price_long = LatestFileManager.saveScaleByPtickA(getPrice(open_cost_long_new, open_price_long_new, vm, volume_long), instrument_id);
+                open_price_short = LatestFileManager.saveScaleByPtickA(getPrice(open_cost_short_new, open_price_short_new, vm, volume_short), instrument_id);
             } else {
-                open_price_long = LatestFileUtils.saveScaleByPtickA(getPrice(open_cost_long_old, open_price_long_old, vm, volume_long), instrument_id);
-                open_price_short = LatestFileUtils.saveScaleByPtickA(getPrice(open_cost_short_old, open_price_short_old, vm, volume_short), instrument_id);
+                open_price_long = LatestFileManager.saveScaleByPtickA(getPrice(open_cost_long_old, open_price_long_old, vm, volume_long), instrument_id);
+                open_price_short = LatestFileManager.saveScaleByPtickA(getPrice(open_cost_short_old, open_price_short_old, vm, volume_short), instrument_id);
             }
 
             if (!float_profit_long_old.equals(float_profit_long_new) || !float_profit_short_old.equals(float_profit_short_new)) {

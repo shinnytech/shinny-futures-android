@@ -34,7 +34,7 @@ import com.xinyi.shinnyfutures.model.bean.eventbusbean.IdEvent;
 import com.xinyi.shinnyfutures.model.bean.eventbusbean.SetUpEvent;
 import com.xinyi.shinnyfutures.model.bean.futureinfobean.KlineEntity;
 import com.xinyi.shinnyfutures.model.bean.futureinfobean.QuoteEntity;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 import com.xinyi.shinnyfutures.utils.LogUtils;
 import com.xinyi.shinnyfutures.utils.MathUtils;
 import com.xinyi.shinnyfutures.view.activity.FutureInfoActivity;
@@ -518,7 +518,7 @@ public class CurrentDayFragment extends BaseChartFragment {
         @Override
         public String getFormattedValue(float value, AxisBase axis) {
             // "value" represents the position of the label on the axis (x or y)
-            return LatestFileUtils.saveScaleByPtick(value + "", instrument_id);
+            return LatestFileManager.saveScaleByPtick(value + "", instrument_id);
         }
     }
 
@@ -580,14 +580,14 @@ public class CurrentDayFragment extends BaseChartFragment {
                 calendar.setTimeInMillis(Long.valueOf(dataEntity.getDatetime()) / 1000000);
                 String time = simpleDateFormat.format(calendar.getTime());
                 String xValue = xVals.get(x);
-                String price = LatestFileUtils.saveScaleByPtick(dataEntity.getClose(), instrument_id);
+                String price = LatestFileManager.saveScaleByPtick(dataEntity.getClose(), instrument_id);
                 Entry averageEntry = mChart.getLineData().getDataSets().get(1).getEntryForXValue(e.getX(), e.getY());
                 String average;
                 if (averageEntry != null)
-                    average = LatestFileUtils.saveScaleByPtick(String.valueOf(averageEntry.getY()), instrument_id);
+                    average = LatestFileManager.saveScaleByPtick(String.valueOf(averageEntry.getY()), instrument_id);
                 else
-                    average = LatestFileUtils.saveScaleByPtick(String.valueOf(e.getY()), instrument_id);
-                String change = LatestFileUtils.saveScaleByPtick(String.valueOf(y - preSettlement), instrument_id);
+                    average = LatestFileManager.saveScaleByPtick(String.valueOf(e.getY()), instrument_id);
+                String change = LatestFileManager.saveScaleByPtick(String.valueOf(y - preSettlement), instrument_id);
                 String changePercent = mFormatPercent.format((y - preSettlement) / preSettlement * 100) + "%";
                 String volume = dataEntity.getVolume();
                 String volumeDelta = MathUtils.subtract(volume, (dataEntityPre.getVolume()));

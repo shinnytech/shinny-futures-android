@@ -1,4 +1,4 @@
-package com.xinyi.shinnyfutures.model.listener;
+package com.xinyi.shinnyfutures.view.listener;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

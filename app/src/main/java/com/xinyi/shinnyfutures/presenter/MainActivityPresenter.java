@@ -38,8 +38,8 @@ import com.xinyi.shinnyfutures.view.adapter.ViewPagerFragmentAdapter;
 import com.xinyi.shinnyfutures.model.bean.eventbusbean.PositionEvent;
 import com.xinyi.shinnyfutures.model.bean.eventbusbean.UpdateEvent;
 import com.xinyi.shinnyfutures.model.engine.DataManager;
-import com.xinyi.shinnyfutures.model.listener.SimpleRecyclerViewItemClickListener;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.view.listener.SimpleRecyclerViewItemClickListener;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 import com.xinyi.shinnyfutures.utils.NetworkUtils;
 import com.xinyi.shinnyfutures.utils.SPUtils;
 import com.xinyi.shinnyfutures.view.activity.AccountActivity;
@@ -417,7 +417,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                     mIns = DataManager.getInstance().getRtnData().getIns_list();
                     Intent intentPos = new Intent(mMainActivity, FutureInfoActivity.class);
                     intentPos.putExtra("nav_position", 1);
-                    String instrument_id = new ArrayList<>(LatestFileUtils.getMainInsList().keySet()).get(0);
+                    String instrument_id = new ArrayList<>(LatestFileManager.getMainInsList().keySet()).get(0);
                     intentPos.putExtra("instrument_id", instrument_id);
                     mMainActivity.startActivityForResult(intentPos, JUMP_TO_FUTURE_INFO_ACTIVITY);
                 } catch (Exception e) {
@@ -447,28 +447,28 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
         List<String> insListName = new ArrayList<>();
         switch (title) {
             case DOMINANT:
-                insListName = new ArrayList<>(LatestFileUtils.getMainInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getMainInsList().values());
                 break;
             case SHANGHAI:
-                insListName = new ArrayList<>(LatestFileUtils.getShangqiInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getShangqiInsList().values());
                 break;
             case NENGYUAN:
-                insListName = new ArrayList<>(LatestFileUtils.getNengyuanInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getNengyuanInsList().values());
                 break;
             case DALIAN:
-                insListName = new ArrayList<>(LatestFileUtils.getDalianInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getDalianInsList().values());
                 break;
             case ZHENGZHOU:
-                insListName = new ArrayList<>(LatestFileUtils.getZhengzhouInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getZhengzhouInsList().values());
                 break;
             case ZHONGJIN:
-                insListName = new ArrayList<>(LatestFileUtils.getZhongjinInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getZhongjinInsList().values());
                 break;
             case DALIANZUHE:
-                insListName = new ArrayList<>(LatestFileUtils.getDalianzuheInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getDalianzuheInsList().values());
                 break;
             case ZHENGZHOUZUHE:
-                insListName = new ArrayList<>(LatestFileUtils.getZhengzhouzuheInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getZhengzhouzuheInsList().values());
                 break;
             default:
                 break;
@@ -499,42 +499,42 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                 break;
             case DOMINANT:
                 setNavVisiable();
-                mInsListNameNav = LatestFileUtils.getMainInsListNameNav();
+                mInsListNameNav = LatestFileManager.getMainInsListNameNav();
                 mNavAdapter.updateList(mInsListNameNav);
                 break;
             case SHANGHAI:
                 setNavVisiable();
-                mInsListNameNav = LatestFileUtils.getShangqiInsListNameNav();
+                mInsListNameNav = LatestFileManager.getShangqiInsListNameNav();
                 mNavAdapter.updateList(mInsListNameNav);
                 break;
             case NENGYUAN:
                 setNavVisiable();
-                mInsListNameNav = LatestFileUtils.getNengyuanInsListNameNav();
+                mInsListNameNav = LatestFileManager.getNengyuanInsListNameNav();
                 mNavAdapter.updateList(mInsListNameNav);
                 break;
             case DALIAN:
                 setNavVisiable();
-                mInsListNameNav = LatestFileUtils.getDalianInsListNameNav();
+                mInsListNameNav = LatestFileManager.getDalianInsListNameNav();
                 mNavAdapter.updateList(mInsListNameNav);
                 break;
             case ZHENGZHOU:
                 setNavVisiable();
-                mInsListNameNav = LatestFileUtils.getZhengzhouInsListNameNav();
+                mInsListNameNav = LatestFileManager.getZhengzhouInsListNameNav();
                 mNavAdapter.updateList(mInsListNameNav);
                 break;
             case ZHONGJIN:
                 setNavVisiable();
-                mInsListNameNav = LatestFileUtils.getZhongjinInsListNameNav();
+                mInsListNameNav = LatestFileManager.getZhongjinInsListNameNav();
                 mNavAdapter.updateList(mInsListNameNav);
                 break;
             case DALIANZUHE:
                 setNavVisiable();
-                mInsListNameNav = LatestFileUtils.getDalianzuheInsListNameNav();
+                mInsListNameNav = LatestFileManager.getDalianzuheInsListNameNav();
                 mNavAdapter.updateList(mInsListNameNav);
                 break;
             case ZHENGZHOUZUHE:
                 setNavVisiable();
-                mInsListNameNav = LatestFileUtils.getZhengzhouzuheInsListNameNav();
+                mInsListNameNav = LatestFileManager.getZhengzhouzuheInsListNameNav();
                 mNavAdapter.updateList(mInsListNameNav);
                 break;
             default:

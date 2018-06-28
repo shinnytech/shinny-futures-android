@@ -116,11 +116,7 @@ public class TradeEntity implements Comparable<TradeEntity> {
 
         if (obj instanceof TradeEntity) {
             TradeEntity tradeEntity = (TradeEntity) obj;
-            if (this.instrument_id.equals(tradeEntity.instrument_id)
-                    && this.direction.equals(tradeEntity.direction)
-                    && this.price.equals(tradeEntity.price)
-                    && this.volume.equals(tradeEntity.volume)
-                    && this.trade_date_time.equals(tradeEntity.trade_date_time)) {
+            if (this.key.equals(tradeEntity.key)) {
                 return true;
             }
         }

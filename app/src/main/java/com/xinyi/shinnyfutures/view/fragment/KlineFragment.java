@@ -44,7 +44,7 @@ import com.xinyi.shinnyfutures.model.bean.eventbusbean.SetUpEvent;
 import com.xinyi.shinnyfutures.model.bean.futureinfobean.ChartEntity;
 import com.xinyi.shinnyfutures.model.bean.futureinfobean.KlineEntity;
 import com.xinyi.shinnyfutures.model.bean.futureinfobean.QuoteEntity;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 import com.xinyi.shinnyfutures.utils.LogUtils;
 import com.xinyi.shinnyfutures.utils.MathUtils;
 import com.xinyi.shinnyfutures.utils.SPUtils;
@@ -774,12 +774,12 @@ public class KlineFragment extends BaseChartFragment {
                     calendar.setTimeInMillis(Long.valueOf(dataEntity.getDatetime()) / 1000000);
                     String time = simpleDateFormat.format(calendar.getTime());
                     String date = simpleDateFormat1.format(calendar.getTime());
-                    String open = LatestFileUtils.saveScaleByPtick(dataEntity.getOpen(), instrument_id);
-                    String high = LatestFileUtils.saveScaleByPtick(dataEntity.getHigh(), instrument_id);
-                    String low = LatestFileUtils.saveScaleByPtick(dataEntity.getLow(), instrument_id);
-                    String close = LatestFileUtils.saveScaleByPtick(dataEntity.getClose(), instrument_id);
+                    String open = LatestFileManager.saveScaleByPtick(dataEntity.getOpen(), instrument_id);
+                    String high = LatestFileManager.saveScaleByPtick(dataEntity.getHigh(), instrument_id);
+                    String low = LatestFileManager.saveScaleByPtick(dataEntity.getLow(), instrument_id);
+                    String close = LatestFileManager.saveScaleByPtick(dataEntity.getClose(), instrument_id);
                     float closeNum = Float.valueOf(close);
-                    String change = LatestFileUtils.saveScaleByPtick(String.valueOf(closeNum - preSettlement), instrument_id);
+                    String change = LatestFileManager.saveScaleByPtick(String.valueOf(closeNum - preSettlement), instrument_id);
                     String changePercent = mFormatPercent.format((closeNum - preSettlement) / preSettlement * 100) + "%";
                     String volume = dataEntity.getVolume();
                     String closeOi = dataEntity.getClose_oi();
@@ -854,7 +854,7 @@ public class KlineFragment extends BaseChartFragment {
 
         @Override
         public String getFormattedValue(float value, AxisBase axis) {
-            return LatestFileUtils.saveScaleByPtick(String.valueOf(value), instrument_id);
+            return LatestFileManager.saveScaleByPtick(String.valueOf(value), instrument_id);
         }
     }
 
@@ -869,7 +869,7 @@ public class KlineFragment extends BaseChartFragment {
 
         @Override
         public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
-            return LatestFileUtils.saveScaleByPtick(String.valueOf(value), instrument_id);
+            return LatestFileManager.saveScaleByPtick(String.valueOf(value), instrument_id);
         }
     }
 }

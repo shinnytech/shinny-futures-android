@@ -13,7 +13,7 @@ import com.xinyi.shinnyfutures.R;
 import com.xinyi.shinnyfutures.databinding.ItemFragmentOrderBinding;
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.OrderEntity;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 import com.xinyi.shinnyfutures.utils.MathUtils;
 
 import java.text.SimpleDateFormat;
@@ -100,7 +100,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemViewHold
                 orderEntity = mOrderData.get(getLayoutPosition());
                 if (orderEntity != null) {
                     String instrument_id = orderEntity.getInstrument_id();
-                    SearchEntity insName = LatestFileUtils.getSearchEntities().get(instrument_id);
+                    SearchEntity insName = LatestFileManager.getSearchEntities().get(instrument_id);
                     mBinding.orderName.setText(insName == null ? instrument_id : insName.getInstrumentName());
                     mBinding.orderStatus.setText(orderEntity.getLast_msg());
                     switch (orderEntity.getOffset()) {
@@ -134,7 +134,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemViewHold
                             mBinding.orderOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
                             break;
                     }
-                    mBinding.orderPrice.setText(LatestFileUtils.saveScaleByPtick(orderEntity.getLimit_price(), instrument_id));
+                    mBinding.orderPrice.setText(LatestFileManager.saveScaleByPtick(orderEntity.getLimit_price(), instrument_id));
                     String volume = MathUtils.subtract(orderEntity.getVolume_orign(), orderEntity.getVolume_left()) + "/" + orderEntity.getVolume_orign();
                     mBinding.orderVolume.setText(volume);
                     String date = simpleDateFormat.format(new Date(Long.valueOf(orderEntity.getInsert_date_time()) / 1000000));

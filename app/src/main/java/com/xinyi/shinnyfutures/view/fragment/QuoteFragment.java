@@ -37,11 +37,11 @@ import com.xinyi.shinnyfutures.model.bean.eventbusbean.UpdateEvent;
 import com.xinyi.shinnyfutures.model.bean.futureinfobean.QuoteEntity;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
 import com.xinyi.shinnyfutures.model.engine.DataManager;
-import com.xinyi.shinnyfutures.model.listener.QuoteDiffCallback;
-import com.xinyi.shinnyfutures.model.listener.SimpleRecyclerViewItemClickListener;
+import com.xinyi.shinnyfutures.view.listener.QuoteDiffCallback;
+import com.xinyi.shinnyfutures.view.listener.SimpleRecyclerViewItemClickListener;
 import com.xinyi.shinnyfutures.utils.DensityUtils;
 import com.xinyi.shinnyfutures.utils.DividerItemDecorationUtils;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 import com.xinyi.shinnyfutures.utils.ToastNotificationUtils;
 import com.xinyi.shinnyfutures.view.activity.FutureInfoActivity;
 import com.xinyi.shinnyfutures.view.activity.SearchActivity;
@@ -187,31 +187,31 @@ public class QuoteFragment extends LazyLoadFragment {
     public void update() {
         switch (mTitle) {
             case OPTIONAL:
-                mInsMap = LatestFileUtils.getOptionalInsList();
+                mInsMap = LatestFileManager.getOptionalInsList();
                 break;
             case DOMINANT:
-                mInsMap = LatestFileUtils.getMainInsList();
+                mInsMap = LatestFileManager.getMainInsList();
                 break;
             case SHANGHAI:
-                mInsMap = LatestFileUtils.getShangqiInsList();
+                mInsMap = LatestFileManager.getShangqiInsList();
                 break;
             case NENGYUAN:
-                mInsMap = LatestFileUtils.getNengyuanInsList();
+                mInsMap = LatestFileManager.getNengyuanInsList();
                 break;
             case DALIAN:
-                mInsMap = LatestFileUtils.getDalianInsList();
+                mInsMap = LatestFileManager.getDalianInsList();
                 break;
             case ZHENGZHOU:
-                mInsMap = LatestFileUtils.getZhengzhouInsList();
+                mInsMap = LatestFileManager.getZhengzhouInsList();
                 break;
             case ZHONGJIN:
-                mInsMap = LatestFileUtils.getZhongjinInsList();
+                mInsMap = LatestFileManager.getZhongjinInsList();
                 break;
             case DALIANZUHE:
-                mInsMap = LatestFileUtils.getDalianzuheInsList();
+                mInsMap = LatestFileManager.getDalianzuheInsList();
                 break;
             case ZHENGZHOUZUHE:
-                mInsMap = LatestFileUtils.getZhengzhouzuheInsList();
+                mInsMap = LatestFileManager.getZhengzhouzuheInsList();
                 break;
             default:
                 break;
@@ -337,7 +337,7 @@ public class QuoteFragment extends LazyLoadFragment {
                             String instrument_id = mAdapter.getData().get(position).getInstrument_id();
                             if (instrument_id != null) {
                                 if (!instrument_id.isEmpty()) {
-                                    if (LatestFileUtils.getOptionalInsList().containsKey(instrument_id)) {
+                                    if (LatestFileManager.getOptionalInsList().containsKey(instrument_id)) {
                                         initPopUp(view, instrument_id, false);
                                     } else {
                                         initPopUp(view, instrument_id, true);
@@ -379,12 +379,12 @@ public class QuoteFragment extends LazyLoadFragment {
                             @Override
                             public boolean onTouch(View v, MotionEvent event) {
                                 if (isAdd) {
-                                    SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(instrument_id);
-                                    Map<String, String> insList = LatestFileUtils.getOptionalInsList();
+                                    SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
+                                    Map<String, String> insList = LatestFileManager.getOptionalInsList();
                                     if (searchEntity != null)
                                         insList.put(instrument_id, searchEntity.getInstrumentName());
                                     else insList.put(instrument_id, instrument_id);
-                                    LatestFileUtils.saveInsListToFile(insList);
+                                    LatestFileManager.saveInsListToFile(insList);
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -393,9 +393,9 @@ public class QuoteFragment extends LazyLoadFragment {
                                         }
                                     });
                                 } else {
-                                    Map<String, String> insList = LatestFileUtils.getOptionalInsList();
+                                    Map<String, String> insList = LatestFileManager.getOptionalInsList();
                                     insList.remove(instrument_id);
-                                    LatestFileUtils.saveInsListToFile(insList);
+                                    LatestFileManager.saveInsListToFile(insList);
                                     if (mTitle.equals(OPTIONAL)) {
                                         update();
                                     }
@@ -512,7 +512,7 @@ public class QuoteFragment extends LazyLoadFragment {
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (OPTIONAL.equals(mToolbarTitle.getText().toString()) && mInsMap.size() != LatestFileUtils.getOptionalInsList().size())
+        if (OPTIONAL.equals(mToolbarTitle.getText().toString()) && mInsMap.size() != LatestFileManager.getOptionalInsList().size())
             update();
         //三种情况:搜索页返回,合约详情页返回,搜索页点击进入合约详情页再返回
         if (BaseApplicationLike.getWebSocketService() != null)

@@ -7,7 +7,7 @@ import com.google.gson.Gson;
 import com.xinyi.shinnyfutures.application.BaseApplicationLike;
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.AccountBean;
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.AccountEntity;
-import com.xinyi.shinnyfutures.model.bean.accountinfobean.LoginInfoBean;
+import com.xinyi.shinnyfutures.model.bean.accountinfobean.LoginEntity;
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.OrderEntity;
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.PositionEntity;
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.TradeEntity;
@@ -16,8 +16,8 @@ import com.xinyi.shinnyfutures.model.bean.futureinfobean.DiffEntity;
 import com.xinyi.shinnyfutures.model.bean.futureinfobean.FutureBean;
 import com.xinyi.shinnyfutures.model.bean.futureinfobean.KlineEntity;
 import com.xinyi.shinnyfutures.model.bean.futureinfobean.QuoteEntity;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
 import com.xinyi.shinnyfutures.utils.ToastNotificationUtils;
+import com.xinyi.shinnyfutures.view.activity.LoginActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,8 +37,8 @@ import static com.xinyi.shinnyfutures.constants.CommonConstants.MESSAGE_POSITION
 import static com.xinyi.shinnyfutures.constants.CommonConstants.MESSAGE_TRADE;
 import static com.xinyi.shinnyfutures.model.service.WebSocketService.BROADCAST;
 import static com.xinyi.shinnyfutures.model.service.WebSocketService.BROADCAST_TRANSACTION;
-import static com.xinyi.shinnyfutures.utils.LatestFileUtils.getUpDown;
-import static com.xinyi.shinnyfutures.utils.LatestFileUtils.getUpDownRate;
+import static com.xinyi.shinnyfutures.model.engine.LatestFileManager.getUpDown;
+import static com.xinyi.shinnyfutures.model.engine.LatestFileManager.getUpDownRate;
 
 /**
  * date: 7/9/17
@@ -67,7 +67,7 @@ public class DataManager {
      * date: 7/9/17
      * description: 账户登录返回信息实例
      */
-    private static final LoginInfoBean LOGIN = new LoginInfoBean();
+    private static final LoginEntity LOGIN = new LoginEntity();
     private DataManager() {
     }
 
@@ -88,7 +88,7 @@ public class DataManager {
         return ACCOUNT;
     }
 
-    public LoginInfoBean getLogin() {
+    public LoginEntity getLogin() {
         return LOGIN;
     }
 
@@ -287,13 +287,13 @@ public class DataManager {
                     if (!quoteObject.isNull(key1)) {
                         Object data = quoteObject.opt(key1);
                         if (data instanceof Number) {
-                            f.set(quoteEntity, LatestFileUtils.saveScaleByPtick(data.toString(), key));
+                            f.set(quoteEntity, LatestFileManager.saveScaleByPtick(data.toString(), key));
                         } else f.set(quoteEntity, data);
                     }
                 }
                 quoteEntity.setChange_percent(getUpDownRate(quoteEntity.getLast_price(), quoteEntity.getPre_settlement()));
                 quoteEntity.setChange(getUpDown(quoteEntity.getLast_price(), quoteEntity.getPre_settlement()));
-                quoteEntity.setInstrument_name(LatestFileUtils.getSearchEntities().get(key).getInstrumentName());
+                quoteEntity.setInstrument_name(LatestFileManager.getSearchEntities().get(key).getInstrumentName());
                 quoteEntities.put(key, quoteEntity);
             }
         }
@@ -308,7 +308,7 @@ public class DataManager {
         final JSONObject accountBeanObject = new JSONObject(msg);
         switch (accountBeanObject.optString("aid")) {
             case "rtn_brokers":
-                LoginInfoBean brokerInfo = new Gson().fromJson(msg, LoginInfoBean.class);
+                LoginEntity brokerInfo = new Gson().fromJson(msg, LoginEntity.class);
                 LOGIN.setBrokers(brokerInfo.getBrokers());
                 if (BaseApplicationLike.getWebSocketService() != null)
                     BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_BROKER_INFO, BROADCAST_TRANSACTION);
@@ -336,18 +336,19 @@ public class DataManager {
                             while (notifyIterator.hasNext()) {
                                 String notifyKey = notifyIterator.next();
                                 JSONObject notify = data.getJSONObject(notifyKey);
-                                final String message = notify.optString("content");
+                                final String content = notify.optString("content");
                                 final String code = notify.optString("code");
-                                LOGIN.setMsg(message);
-                                LOGIN.setRet(code);
+                                LOGIN.setContent(content);
+                                LOGIN.setCode(code);
                                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), message);
+                                        ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), content);
                                     }
                                 });
                             }
-                            if (BaseApplicationLike.getWebSocketService() != null)
+                            if (BaseApplicationLike.getWebSocketService() != null
+                                    && !LoginActivity.isIsLogin() && LOGIN.getContent().contains("登录"))
                                 BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_LOGIN, BROADCAST_TRANSACTION);
                             break;
                         case "trade":

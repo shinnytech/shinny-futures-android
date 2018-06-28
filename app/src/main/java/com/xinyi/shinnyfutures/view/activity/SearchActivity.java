@@ -24,7 +24,7 @@ import com.xinyi.shinnyfutures.databinding.ActivitySearchBinding;
 import com.xinyi.shinnyfutures.view.adapter.SearchAdapter;
 import com.xinyi.shinnyfutures.model.bean.searchinfobean.SearchEntity;
 import com.xinyi.shinnyfutures.utils.DividerItemDecorationUtils;
-import com.xinyi.shinnyfutures.utils.LatestFileUtils;
+import com.xinyi.shinnyfutures.model.engine.LatestFileManager;
 import com.xinyi.shinnyfutures.utils.NetworkUtils;
 import com.xinyi.shinnyfutures.utils.ToastNotificationUtils;
 
@@ -79,7 +79,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
             @Override
             public void OnItemJump(SearchEntity searchEntity, String instrument_id) {
                 //如果用户点击了搜索到的合约信息，就把此条合约保存到搜索历史中
-                LatestFileUtils.getSearchEntitiesHistory().put(instrument_id, searchEntity);
+                LatestFileManager.getSearchEntitiesHistory().put(instrument_id, searchEntity);
                 Intent intent = new Intent(SearchActivity.this, FutureInfoActivity.class);
                 intent.putExtra("instrument_id", instrument_id);
                 startActivity(intent);
@@ -89,12 +89,12 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
             //收藏或移除该合约到自选合约列表
             @Override
             public void OnItemCollect(View view, String instrument_id) {
-                if (LatestFileUtils.getOptionalInsList().containsKey(instrument_id)) {
+                if (LatestFileManager.getOptionalInsList().containsKey(instrument_id)) {
                     if (instrument_id != null) {
                         if (!instrument_id.equals("")) {
-                            Map<String, String> insList = LatestFileUtils.getOptionalInsList();
+                            Map<String, String> insList = LatestFileManager.getOptionalInsList();
                             insList.remove(instrument_id);
-                            LatestFileUtils.saveInsListToFile(insList);
+                            LatestFileManager.saveInsListToFile(insList);
                             ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已被移除自选列表");
                             ((ImageView) view).setImageResource(R.mipmap.ic_favorite_border_white_24dp);
                         }
@@ -102,12 +102,12 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
                 } else {
                     if (instrument_id != null) {
                         if (!instrument_id.equals("")) {
-                            SearchEntity searchEntity = LatestFileUtils.getSearchEntities().get(instrument_id);
-                            Map<String, String> insList = LatestFileUtils.getOptionalInsList();
+                            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
+                            Map<String, String> insList = LatestFileManager.getOptionalInsList();
                             if (searchEntity != null)
                                 insList.put(instrument_id, searchEntity.getInstrumentName());
                             else insList.put(instrument_id, instrument_id);
-                            LatestFileUtils.saveInsListToFile(insList);
+                            LatestFileManager.saveInsListToFile(insList);
                             ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已添加到自选列表");
                             ((ImageView) view).setImageResource(R.mipmap.ic_favorite_white_24dp);
                         }

@@ -27,8 +27,8 @@ import com.xinyi.shinnyfutures.databinding.FragmentOrderBinding;
 import com.xinyi.shinnyfutures.view.adapter.OrderAdapter;
 import com.xinyi.shinnyfutures.model.bean.accountinfobean.OrderEntity;
 import com.xinyi.shinnyfutures.model.engine.DataManager;
-import com.xinyi.shinnyfutures.model.listener.OrderDiffCallback;
-import com.xinyi.shinnyfutures.model.listener.SimpleRecyclerViewItemClickListener;
+import com.xinyi.shinnyfutures.view.listener.OrderDiffCallback;
+import com.xinyi.shinnyfutures.view.listener.SimpleRecyclerViewItemClickListener;
 import com.xinyi.shinnyfutures.utils.DividerItemDecorationUtils;
 import com.xinyi.shinnyfutures.view.activity.FutureInfoActivity;
 

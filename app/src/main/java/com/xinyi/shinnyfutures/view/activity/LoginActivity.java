@@ -413,8 +413,8 @@ public class LoginActivity extends BaseActivity {
             if (activity != null) {
                 switch (msg.what) {
                     case 0:
-                        String ret = activity.sDataManager.getLogin().getRet();
-                        if ("0".equals(ret)) {
+                        String code = activity.sDataManager.getLogin().getCode();
+                        if ("0".equals(code)) {
                             activity.showProgress(false);
                             sIsLogin = true;
                             SPUtils.putAndApply(activity.sContext, "phone", activity.mPhoneNumber);
