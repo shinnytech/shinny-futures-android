@@ -53,6 +53,13 @@ android {
             dimension "shinny"
         }
 
+        ddqh {
+            buildConfigField "String", "BROKER_ID", "\"大地期货\""
+            resValue("string", "app_name", "大地期货")
+            applicationIdSuffix ".ddqh"
+            dimension "shinny"
+        }
+
         ces {
             buildConfigField "String", "BROKER_ID", "\"东航期货\""
             resValue("string", "app_name", "东航期货")
@@ -256,6 +263,20 @@ android {
             dimension "shinny"
         }
 
+        nhqh_sim {
+            buildConfigField "String", "BROKER_ID", "\"南华期货-仿真\""
+            resValue("string", "app_name", "南华期货-仿真")
+            applicationIdSuffix ".nhqh_sim"
+            dimension "shinny"
+        }
+
+        rdqh {
+            buildConfigField "String", "BROKER_ID", "\"瑞达期货\""
+            resValue("string", "app_name", "瑞达期货")
+            applicationIdSuffix ".rdqh"
+            dimension "shinny"
+        }
+
         sywg {
             buildConfigField "String", "BROKER_ID", "\"申万期货\""
             resValue("string", "app_name", "申万期货")
@@ -264,7 +285,7 @@ android {
         }
 
         simnow {
-            buildConfigField "String", "BROKER_ID", "\"sim\""
+            buildConfigField "String", "BROKER_ID", "\"上期技术\""
             resValue("string", "app_name", "上期技术")
             applicationIdSuffix ".simnow"
             dimension "shinny"

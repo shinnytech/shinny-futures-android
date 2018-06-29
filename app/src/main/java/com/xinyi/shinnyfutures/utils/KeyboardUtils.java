@@ -152,16 +152,28 @@ public class KeyboardUtils {
                                 }
                                 break;
                             default:
-                                String data = MathUtils.subtract(editable.toString(), "1");
-                                editable.clear();
-                                editable.insert(0, data);
+                                //添加负号功能
+                                if (mEditText.getSelectionStart() == 0){
+                                    editable.insert(0, "-");
+                                }else {
+                                    String data = MathUtils.subtract(editable.toString(), "1");
+                                    editable.clear();
+                                    editable.insert(0, data);
+                                }
                                 break;
                         }
                     } else {
                         String insertStr = Character.toString((char) primaryCode);
+                        String str = editable.toString();
                         if ("排队价".equals(text) || "对手价".equals(text) || "市价".equals(text) || "最新价".equals(text) || mIsInit) {
-                            editable.clear();
-                            editable.insert(0, insertStr);
+                            //添加负号功能
+                            if ("-".equals(str)){
+                                if ((!".".equals(insertStr)) || (".".equals(insertStr) && !text.contains(".")))
+                                    editable.insert(start, insertStr);
+                            }else {
+                                editable.clear();
+                                editable.insert(0, insertStr);
+                            }
                             mIsInit = false;
                         } else if ((!".".equals(insertStr)) || (".".equals(insertStr) && !text.contains(".")))
                             editable.insert(start, insertStr);
