@@ -3,13 +3,13 @@
 
     <data>
 
-        <import type="com.xinyi.shinnyfutures.utils.TimeUtils"></import>
+        <import type="com.shinnytech.futures.utils.TimeUtils"></import>
 
-        <import type="com.xinyi.shinnyfutures.utils.MathUtils"></import>
+        <import type="com.shinnytech.futures.utils.MathUtils"></import>
 
         <variable
             name="account"
-            type="com.xinyi.shinnyfutures.model.bean.accountinfobean.AccountEntity"></variable>
+            type="com.shinnytech.futures.model.bean.accountinfobean.AccountEntity"></variable>
     </data>
 
     <LinearLayout

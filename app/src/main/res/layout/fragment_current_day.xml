@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.xinyi.shinnyfutures.view.custommpchart.mychart.CombinedChartCurrentDay
+        <com.shinnytech.futures.view.custommpchart.mychart.CombinedChartCurrentDay
             android:id="@+id/chart"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>

@@ -3,11 +3,11 @@
 
     <data>
 
-        <import type="com.xinyi.shinnyfutures.utils.MathUtils"></import>
+        <import type="com.shinnytech.futures.utils.MathUtils"></import>
 
         <variable
             name="handicap"
-            type="com.xinyi.shinnyfutures.model.bean.futureinfobean.QuoteEntity"></variable>
+            type="com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity"></variable>
     </data>
 
     <LinearLayout
