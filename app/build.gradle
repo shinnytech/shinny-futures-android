@@ -42,6 +42,7 @@ android {
         bhfcc {
             buildConfigField "String", "BROKER_ID", "\"渤海期货\""
             resValue("string", "app_name", "渤海期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".bhfcc"
             dimension "shinny"
         }
@@ -49,13 +50,23 @@ android {
         scqh {
             buildConfigField "String", "BROKER_ID", "\"北京首创\""
             resValue("string", "app_name", "北京首创")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".scqh"
+            dimension "shinny"
+        }
+
+        bcqh {
+            buildConfigField "String", "BROKER_ID", "\"宝城期货\""
+            resValue("string", "app_name", "宝城期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+            applicationIdSuffix ".bcqh"
             dimension "shinny"
         }
 
         ddqh {
             buildConfigField "String", "BROKER_ID", "\"大地期货\""
             resValue("string", "app_name", "大地期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".ddqh"
             dimension "shinny"
         }
@@ -63,6 +74,7 @@ android {
         ces {
             buildConfigField "String", "BROKER_ID", "\"东航期货\""
             resValue("string", "app_name", "东航期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".ces"
             dimension "shinny"
         }
@@ -70,6 +82,7 @@ android {
         dsqh {
             buildConfigField "String", "BROKER_ID", "\"德盛期货\""
             resValue("string", "app_name", "德盛期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".dsqh"
             dimension "shinny"
         }
@@ -77,6 +90,7 @@ android {
         fzzq {
             buildConfigField "String", "BROKER_ID", "\"方正中期\""
             resValue("string", "app_name", "方正中期")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".fzzq"
             dimension "shinny"
         }
@@ -84,6 +98,7 @@ android {
         gfqh {
             buildConfigField "String", "BROKER_ID", "\"广发期货\""
             resValue("string", "app_name", "广发期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".gfqh"
             dimension "shinny"
         }
@@ -91,6 +106,7 @@ android {
         gzf {
             buildConfigField "String", "BROKER_ID", "\"广州期货\""
             resValue("string", "app_name", "广州期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".gzf"
             dimension "shinny"
         }
@@ -98,6 +114,7 @@ android {
         gdqh {
             buildConfigField "String", "BROKER_ID", "\"光大期货\""
             resValue("string", "app_name", "光大期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".gdqh"
             dimension "shinny"
         }
@@ -105,6 +122,7 @@ android {
         cifco {
             buildConfigField "String", "BROKER_ID", "\"国际期货\""
             resValue("string", "app_name", "国际期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".cifco"
             dimension "shinny"
         }
@@ -112,6 +130,7 @@ android {
         sdic {
             buildConfigField "String", "BROKER_ID", "\"国投安信\""
             resValue("string", "app_name", "国投安信")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".sdic"
             dimension "shinny"
         }
@@ -119,6 +138,7 @@ android {
         gffcc {
             buildConfigField "String", "BROKER_ID", "\"国富期货\""
             resValue("string", "app_name", "国富期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".gffcc"
             dimension "shinny"
         }
@@ -126,6 +146,7 @@ android {
         gjqh {
             buildConfigField "String", "BROKER_ID", "\"国金期货\""
             resValue("string", "app_name", "国金期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".gjqh"
             dimension "shinny"
         }
@@ -133,6 +154,7 @@ android {
         itf {
             buildConfigField "String", "BROKER_ID", "\"国贸期货\""
             resValue("string", "app_name", "国贸期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".itf"
             dimension "shinny"
         }
@@ -140,13 +162,31 @@ android {
         gtjaqh {
             buildConfigField "String", "BROKER_ID", "\"国泰君安\""
             resValue("string", "app_name", "国泰君安")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".gtjaqh"
+            dimension "shinny"
+        }
+
+        gtqh {
+            buildConfigField "String", "BROKER_ID", "\"冠通期货\""
+            resValue("string", "app_name", "冠通期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+            applicationIdSuffix ".gtqh"
+            dimension "shinny"
+        }
+
+        guosenqh {
+            buildConfigField "String", "BROKER_ID", "\"国信CTP\""
+            resValue("string", "app_name", "国信CTP")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+            applicationIdSuffix ".guosenqh"
             dimension "shinny"
         }
 
         htqh {
             buildConfigField "String", "BROKER_ID", "\"华泰期货\""
             resValue("string", "app_name", "华泰期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".htqh"
             dimension "shinny"
         }
@@ -154,6 +194,7 @@ android {
         htfutures {
             buildConfigField "String", "BROKER_ID", "\"海通期货\""
             resValue("string", "app_name", "海通期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".htfutures"
             dimension "shinny"
         }
@@ -161,6 +202,7 @@ android {
         htfuturessim {
             buildConfigField "String", "BROKER_ID", "\"海通股指仿真\""
             resValue("string", "app_name", "海通股指仿真")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".htfuturessim"
             dimension "shinny"
         }
@@ -168,6 +210,7 @@ android {
         hongyuanqh {
             buildConfigField "String", "BROKER_ID", "\"宏源期货\""
             resValue("string", "app_name", "宏源期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".hongyuanqh"
             dimension "shinny"
         }
@@ -175,6 +218,7 @@ android {
         huaxiqh {
             buildConfigField "String", "BROKER_ID", "\"华西期货\""
             resValue("string", "app_name", "华西期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".huaxiqh"
             dimension "shinny"
         }
@@ -182,6 +226,7 @@ android {
         chaosqh {
             buildConfigField "String", "BROKER_ID", "\"混沌天成\""
             resValue("string", "app_name", "混沌天成")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".chaosqh"
             dimension "shinny"
         }
@@ -189,6 +234,7 @@ android {
         cffc {
             buildConfigField "String", "BROKER_ID", "\"华鑫期货\""
             resValue("string", "app_name", "华鑫期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".cffc"
             dimension "shinny"
         }
@@ -196,6 +242,7 @@ android {
         cnhtqh {
             buildConfigField "String", "BROKER_ID", "\"恒泰期货\""
             resValue("string", "app_name", "恒泰期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".cnhtqh"
             dimension "shinny"
         }
@@ -203,6 +250,7 @@ android {
         hsqh {
             buildConfigField "String", "BROKER_ID", "\"徽商期货\""
             resValue("string", "app_name", "徽商期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".hsqh"
             dimension "shinny"
         }
@@ -210,6 +258,7 @@ android {
         hnjyqh {
             buildConfigField "String", "BROKER_ID", "\"金元期货\""
             resValue("string", "app_name", "金元期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".hnjyqh"
             dimension "shinny"
         }
@@ -217,6 +266,7 @@ android {
         ccbfutures {
             buildConfigField "String", "BROKER_ID", "\"建信期货\""
             resValue("string", "app_name", "建信期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".ccbfutures"
             dimension "shinny"
         }
@@ -224,6 +274,7 @@ android {
         jcqh {
             buildConfigField "String", "BROKER_ID", "\"集成期货\""
             resValue("string", "app_name", "集成期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".jcqh"
             dimension "shinny"
         }
@@ -231,13 +282,23 @@ android {
         hxqh {
             buildConfigField "String", "BROKER_ID", "\"江海汇鑫\""
             resValue("string", "app_name", "江海汇鑫")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".hxqh"
+            dimension "shinny"
+        }
+
+        ftol {
+            buildConfigField "String", "BROKER_ID", "\"江苏弘业主席\""
+            resValue("string", "app_name", "江苏弘业主席")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+            applicationIdSuffix ".ftol"
             dimension "shinny"
         }
 
         lzqh {
             buildConfigField "String", "BROKER_ID", "\"鲁证期货\""
             resValue("string", "app_name", "鲁证期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".lzqh"
             dimension "shinny"
         }
@@ -245,6 +306,7 @@ android {
         mkqh {
             buildConfigField "String", "BROKER_ID", "\"迈科期货\""
             resValue("string", "app_name", "迈科期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".mkqh"
             dimension "shinny"
         }
@@ -252,6 +314,7 @@ android {
         mfc {
             buildConfigField "String", "BROKER_ID", "\"美尔雅期货\""
             resValue("string", "app_name", "美尔雅期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".mfc"
             dimension "shinny"
         }
@@ -259,6 +322,7 @@ android {
         nhqh {
             buildConfigField "String", "BROKER_ID", "\"南华期货\""
             resValue("string", "app_name", "南华期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher_nhqh"]
             applicationIdSuffix ".nhqh"
             dimension "shinny"
         }
@@ -266,6 +330,7 @@ android {
         nhqh_sim {
             buildConfigField "String", "BROKER_ID", "\"南华期货-仿真\""
             resValue("string", "app_name", "南华期货-仿真")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".nhqh_sim"
             dimension "shinny"
         }
@@ -273,6 +338,7 @@ android {
         rdqh {
             buildConfigField "String", "BROKER_ID", "\"瑞达期货\""
             resValue("string", "app_name", "瑞达期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".rdqh"
             dimension "shinny"
         }
@@ -280,6 +346,7 @@ android {
         sywg {
             buildConfigField "String", "BROKER_ID", "\"申万期货\""
             resValue("string", "app_name", "申万期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".sywg"
             dimension "shinny"
         }
@@ -287,6 +354,7 @@ android {
         simnow {
             buildConfigField "String", "BROKER_ID", "\"上期技术\""
             resValue("string", "app_name", "上期技术")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".simnow"
             dimension "shinny"
         }
@@ -294,6 +362,7 @@ android {
         shcifco {
             buildConfigField "String", "BROKER_ID", "\"上海中期\""
             resValue("string", "app_name", "上海中期")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".shcifco"
             dimension "shinny"
         }
@@ -301,6 +370,7 @@ android {
         dzqh {
             buildConfigField "String", "BROKER_ID", "\"上海东证\""
             resValue("string", "app_name", "上海东证")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".dzqh"
             dimension "shinny"
         }
@@ -308,6 +378,7 @@ android {
         sdqh {
             buildConfigField "String", "BROKER_ID", "\"盛达期货CTP\""
             resValue("string", "app_name", "盛达期货CTP")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".sdqh"
             dimension "shinny"
         }
@@ -315,6 +386,7 @@ android {
         rlqh {
             buildConfigField "String", "BROKER_ID", "\"瑞龙期货\""
             resValue("string", "app_name", "瑞龙期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".rlqh"
             dimension "shinny"
         }
@@ -322,6 +394,7 @@ android {
         dfqh {
             buildConfigField "String", "BROKER_ID", "\"上海东方\""
             resValue("string", "app_name", "上海东方")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".dfqh"
             dimension "shinny"
         }
@@ -329,6 +402,7 @@ android {
         jyqh {
             buildConfigField "String", "BROKER_ID", "\"铜冠金源\""
             resValue("string", "app_name", "铜冠金源")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".jyqh"
             dimension "shinny"
         }
@@ -336,6 +410,7 @@ android {
         txjhqh {
             buildConfigField "String", "BROKER_ID", "\"同信久恒\""
             resValue("string", "app_name", "同信久恒")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".txjhqh"
             dimension "shinny"
         }
@@ -343,6 +418,7 @@ android {
         thqh {
             buildConfigField "String", "BROKER_ID", "\"天鸿期货\""
             resValue("string", "app_name", "天鸿期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".thqh"
             dimension "shinny"
         }
@@ -350,6 +426,7 @@ android {
         tianfu {
             buildConfigField "String", "BROKER_ID", "\"天富期货\""
             resValue("string", "app_name", "天富期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".tianfu"
             dimension "shinny"
         }
@@ -357,6 +434,7 @@ android {
         wkjy {
             buildConfigField "String", "BROKER_ID", "\"五矿经易\""
             resValue("string", "app_name", "五矿经易")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".wkjy"
             dimension "shinny"
         }
@@ -364,6 +442,7 @@ android {
         xzfutures {
             buildConfigField "String", "BROKER_ID", "\"兴证期货\""
             resValue("string", "app_name", "兴证期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".xzfutures"
             dimension "shinny"
         }
@@ -371,6 +450,7 @@ android {
         xyqh {
             buildConfigField "String", "BROKER_ID", "\"兴业期货\""
             resValue("string", "app_name", "兴业期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".xyqh"
             dimension "shinny"
         }
@@ -378,13 +458,23 @@ android {
         xinhu {
             buildConfigField "String", "BROKER_ID", "\"新湖期货\""
             resValue("string", "app_name", "新湖期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".xinhu"
+            dimension "shinny"
+        }
+
+        zjncf {
+            buildConfigField "String", "BROKER_ID", "\"新世纪期货\""
+            resValue("string", "app_name", "新世纪期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+            applicationIdSuffix ".zjncf"
             dimension "shinny"
         }
 
         xbqh {
             buildConfigField "String", "BROKER_ID", "\"西部期货\""
             resValue("string", "app_name", "西部期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".xbqh"
             dimension "shinny"
         }
@@ -392,6 +482,7 @@ android {
         yhqhkh {
             buildConfigField "String", "BROKER_ID", "\"银河期货\""
             resValue("string", "app_name", "银河期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".yhqhkh"
             dimension "shinny"
         }
@@ -399,6 +490,7 @@ android {
         citicsf {
             buildConfigField "String", "BROKER_ID", "\"中信期货\""
             resValue("string", "app_name", "中信期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".citicsf"
             dimension "shinny"
         }
@@ -406,6 +498,7 @@ android {
         zxjtqh {
             buildConfigField "String", "BROKER_ID", "\"中信建投\""
             resValue("string", "app_name", "中信建投")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".zxjtqh"
             dimension "shinny"
         }
@@ -413,6 +506,7 @@ android {
         zrhxqh {
             buildConfigField "String", "BROKER_ID", "\"中融汇信\""
             resValue("string", "app_name", "中融汇信")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".zrhxqh"
             dimension "shinny"
         }
@@ -420,6 +514,7 @@ android {
         zhqh {
             buildConfigField "String", "BROKER_ID", "\"中辉期货\""
             resValue("string", "app_name", "中辉期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".zhqh"
             dimension "shinny"
         }
@@ -427,6 +522,7 @@ android {
         zjfco {
             buildConfigField "String", "BROKER_ID", "\"招金期货\""
             resValue("string", "app_name", "招金期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".zjfco"
             dimension "shinny"
         }
@@ -434,6 +530,7 @@ android {
         zcqh {
             buildConfigField "String", "BROKER_ID", "\"中财期货\""
             resValue("string", "app_name", "中财期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".zcqh"
             dimension "shinny"
         }
@@ -441,6 +538,7 @@ android {
         xrqh {
             buildConfigField "String", "BROKER_ID", "\"先融期货\""
             resValue("string", "app_name", "先融期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".xrqh"
             dimension "shinny"
         }
@@ -448,6 +546,7 @@ android {
         zygj {
             buildConfigField "String", "BROKER_ID", "\"中银国际\""
             resValue("string", "app_name", "中银国际")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".zygj"
             dimension "shinny"
         }
@@ -455,6 +554,7 @@ android {
         kuaiqixiaoq {
             buildConfigField "String", "BROKER_ID", "\"快期小Q\""
             resValue("string", "app_name", "快期小Q")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".kuaiqixiaoq"
             dimension "shinny"
         }

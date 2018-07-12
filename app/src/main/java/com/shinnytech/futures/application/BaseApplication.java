@@ -13,7 +13,7 @@ import com.tencent.tinker.loader.shareutil.ShareConstants;
 public class BaseApplication extends TinkerApplication {
 
     public BaseApplication() {
-        super(ShareConstants.TINKER_ENABLE_ALL, "com.xinyi.shinnyfutures.application.BaseApplicationLike",
+        super(ShareConstants.TINKER_ENABLE_ALL, "com.shinnytech.futures.application.BaseApplicationLike",
                 "com.tencent.tinker.loader.TinkerLoader", false);
     }
 }
