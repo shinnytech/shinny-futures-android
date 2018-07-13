@@ -6,7 +6,7 @@ apply from: 'tinker-support.gradle'
 android {
     compileSdkVersion 26
     defaultConfig {
-        applicationId "com.xinyi.shinnyfutures"
+        applicationId "com.shinnytech.futures"
         minSdkVersion 19
         targetSdkVersion 23
         versionCode APP_CODE as Integer
