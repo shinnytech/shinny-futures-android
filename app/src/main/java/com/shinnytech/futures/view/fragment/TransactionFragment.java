@@ -87,8 +87,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mInstrumentId = ((FutureInfoActivity) getActivity()).getInstrument_id();
-        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
-        mExchangeId = searchEntity == null ? "" : searchEntity.getExchangeId();
+        mExchangeId = mInstrumentId.split("\\.")[0];
     }
 
     @Nullable
@@ -106,30 +105,28 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         mBinding.closePosition.setOnClickListener(this);
 
         //弹出价格键盘
-        mBinding.price.setOnTouchListener(new View.OnTouchListener() {
+        mBinding.price.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
+            public void onClick(View v) {
                 mKeyboardUtilsPrice = new KeyboardUtils(getActivity(),
                         R.xml.future_price, mInstrumentId);
                 mKeyboardUtilsPrice.attachTo(mBinding.price);
                 if (!mKeyboardUtilsPrice.isVisible()) {
                     mKeyboardUtilsPrice.showKeyboard();
                 }
-                return false;
             }
         });
 
         //弹出手数键盘
-        mBinding.volume.setOnTouchListener(new View.OnTouchListener() {
+        mBinding.volume.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
+            public void onClick(View v) {
                 mKeyboardUtilsVolume = new KeyboardUtils(getActivity(),
                         R.xml.future_volume, mInstrumentId);
                 mKeyboardUtilsVolume.attachTo(mBinding.volume);
                 if (!mKeyboardUtilsVolume.isVisible()) {
                     mKeyboardUtilsVolume.showKeyboard();
                 }
-                return false;
             }
         });
 
@@ -238,7 +235,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         try {
             mBinding.price.setText("最新价");
             mPriceType = "最新价";
-            String key = mExchangeId + "." + mInstrumentId;
+            String key = mInstrumentId;
             PositionEntity positionEntity = sDataManager.getAccountBean().getPosition().get(key);
             if (positionEntity == null) {
                 this.mDirection = "";
@@ -418,7 +415,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         try {
                             int volumeN = Integer.parseInt(volume);
                             double priceN = Double.parseDouble(price);
-                            initDialog(orderId, mExchangeId, mInstrumentId, "买开", "BUY", "OPEN", volumeN, "LIMIT", priceN);
+                            initDialog(orderId, mExchangeId, mInstrumentId.split("\\.")[1], "买开", "BUY", "OPEN", volumeN, "LIMIT", priceN);
                         } catch (NumberFormatException ex) {
                             ex.printStackTrace();
                         }
@@ -444,7 +441,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         try {
                             int volumeN = Integer.parseInt(volume);
                             double priceN = Double.parseDouble(price);
-                            initDialog(orderId, mExchangeId, mInstrumentId, "卖开", "SELL", "OPEN", volumeN, "LIMIT", priceN);
+                            initDialog(orderId, mExchangeId, mInstrumentId.split("\\.")[1], "卖开", "SELL", "OPEN", volumeN, "LIMIT", priceN);
                         } catch (NumberFormatException ex) {
                             ex.printStackTrace();
                         }
@@ -573,10 +570,11 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 final String orderId = Calendar.getInstance().getTimeInMillis() + "";
                 final int volumeN = Integer.parseInt(volume);
                 final double priceN = Double.parseDouble(price);
+                final String instrumentId = mInstrumentId.split("\\.")[1];
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
                 if (searchEntity != null && ("上海国际能源交易中心".equals(searchEntity.getExchangeName())
                         || "上海期货交易所".equals(searchEntity.getExchangeName()))) {
-                    PositionEntity positionEntity = sDataManager.getAccountBean().getPosition().get(mExchangeId + "." + mInstrumentId);
+                    PositionEntity positionEntity = sDataManager.getAccountBean().getPosition().get(mInstrumentId);
                     if (positionEntity == null) return;
                     int volume_today = 0;
                     int volume_history = 0;
@@ -596,10 +594,10 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                                 public boolean onMenuItemClick(MenuItem item) {
                                     switch (item.getItemId()) {
                                         case R.id.close_today:
-                                            initDialog(orderId, mExchangeId, mInstrumentId, "平今", direction, "CLOSETODAY", volumeN, "LIMIT", priceN);
+                                            initDialog(orderId, mExchangeId, instrumentId, "平今", direction, "CLOSETODAY", volumeN, "LIMIT", priceN);
                                             break;
                                         case R.id.close_history:
-                                            initDialog(orderId, mExchangeId, mInstrumentId, "平昨", direction, "CLOSE", volumeN, "LIMIT", priceN);
+                                            initDialog(orderId, mExchangeId, instrumentId, "平昨", direction, "CLOSE", volumeN, "LIMIT", priceN);
                                             break;
                                         default:
                                             break;
@@ -610,16 +608,16 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                             popup.show();
                         } else if (volumeN > volume_today || volumeN > volume_history) {
                             int volume_sub = volumeN - volume_today;
-                            initDialog(orderId, mExchangeId, mInstrumentId, "平今", "平昨", direction, "CLOSETODAY", "CLOSE", volume_today, volume_sub, "LIMIT", priceN);
+                            initDialog(orderId, mExchangeId, instrumentId, "平今", "平昨", direction, "CLOSETODAY", "CLOSE", volume_today, volume_sub, "LIMIT", priceN);
                         }
                     } else if (volume_today == 0 && volume_history > 0) {
-                        initDialog(orderId, mExchangeId, mInstrumentId, "平昨", direction, "CLOSE", volumeN, "LIMIT", priceN);
+                        initDialog(orderId, mExchangeId, instrumentId, "平昨", direction, "CLOSE", volumeN, "LIMIT", priceN);
                     } else if (volume_today > 0 && volume_history == 0) {
-                        initDialog(orderId, mExchangeId, mInstrumentId, "平今", direction, "CLOSETODAY", volumeN, "LIMIT", priceN);
+                        initDialog(orderId, mExchangeId, instrumentId, "平今", direction, "CLOSETODAY", volumeN, "LIMIT", priceN);
                     }
 
                 } else
-                    initDialog(orderId, mExchangeId, mInstrumentId, "平仓", direction, "CLOSE", volumeN, "LIMIT", priceN);
+                    initDialog(orderId, mExchangeId, instrumentId, "平仓", direction, "CLOSE", volumeN, "LIMIT", priceN);
             } catch (NumberFormatException ex) {
                 ex.printStackTrace();
             }
@@ -634,7 +632,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     @Subscribe
     public void onEvent(IdEvent data) {
         mInstrumentId = data.getInstrument_id();
-        mExchangeId = data.getPosition_id();
+        mExchangeId = mInstrumentId.split("\\.")[0];
         initPosition();
         refreshPrice();
     }

@@ -17,12 +17,13 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
@@ -31,6 +32,8 @@ import android.widget.TextView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplicationLike;
 import com.shinnytech.futures.databinding.FragmentQuoteBinding;
+import com.shinnytech.futures.utils.CloneUtils;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.view.adapter.QuoteAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
@@ -53,6 +56,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
@@ -98,10 +102,9 @@ public class QuoteFragment extends LazyLoadFragment {
     private String mTitle = DOMINANT;
     private TextView mToolbarTitle;
     private String mIns = "";
-    private Map<String, String> mInsMap = new LinkedHashMap<>();
     private List<String> mInsList = new ArrayList<>();
-    private Map<String, QuoteEntity> mOldData = new LinkedHashMap<>();
-    private Map<String, QuoteEntity> mNewData = new LinkedHashMap<>();
+    private List<QuoteEntity> mOldData = new ArrayList<>();
+    private Map<String, QuoteEntity> mNewData = new TreeMap<>();
     private FragmentQuoteBinding mBinding;
 
     /**
@@ -170,11 +173,22 @@ public class QuoteFragment extends LazyLoadFragment {
 
     private void initData() {
         mToolbarTitle = getActivity().findViewById(R.id.title_toolbar);
+
+        if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
+            mBinding.tvLast.setGravity(Gravity.CENTER);
+            mBinding.tvLast.setText(R.string.quote_fragment_upper_limit);
+            Drawable mRightDrawable = ContextCompat.getDrawable(getActivity(), R.mipmap.ic_signal_cellular_4_bar_white_18dp);
+            if (mRightDrawable != null)
+                mRightDrawable.setBounds(0, 0, mRightDrawable.getMinimumWidth(), mRightDrawable.getMinimumHeight());
+            mBinding.tvLast.setCompoundDrawables(null, null, mRightDrawable, null);
+            mBinding.tvChangePercent.setText(R.string.quote_fragment_bid_price1);
+            mBinding.tvOpenInterest.setText(R.string.quote_fragment_bid_volume1);
+        }
         mBinding.rvQuote.setLayoutManager(new LinearLayoutManager(getActivity()));
         mBinding.rvQuote.addItemDecoration(
                 new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
         mBinding.rvQuote.setItemAnimator(new DefaultItemAnimator());
-        mAdapter = new QuoteAdapter(getActivity(), new ArrayList<>(mOldData.values()));
+        mAdapter = new QuoteAdapter(getActivity(), mOldData, mTitle);
         mBinding.rvQuote.setAdapter(mAdapter);
     }
 
@@ -187,37 +201,38 @@ public class QuoteFragment extends LazyLoadFragment {
     public void update() {
         switch (mTitle) {
             case OPTIONAL:
-                mInsMap = LatestFileManager.getOptionalInsList();
+                mNewData = LatestFileManager.getOptionalInsList();
                 break;
             case DOMINANT:
-                mInsMap = LatestFileManager.getMainInsList();
+                mNewData = LatestFileManager.getMainInsList();
                 break;
             case SHANGHAI:
-                mInsMap = LatestFileManager.getShangqiInsList();
+                mNewData = LatestFileManager.getShangqiInsList();
                 break;
             case NENGYUAN:
-                mInsMap = LatestFileManager.getNengyuanInsList();
+                mNewData = LatestFileManager.getNengyuanInsList();
                 break;
             case DALIAN:
-                mInsMap = LatestFileManager.getDalianInsList();
+                mNewData = LatestFileManager.getDalianInsList();
                 break;
             case ZHENGZHOU:
-                mInsMap = LatestFileManager.getZhengzhouInsList();
+                mNewData = LatestFileManager.getZhengzhouInsList();
                 break;
             case ZHONGJIN:
-                mInsMap = LatestFileManager.getZhongjinInsList();
+                mNewData = LatestFileManager.getZhongjinInsList();
                 break;
             case DALIANZUHE:
-                mInsMap = LatestFileManager.getDalianzuheInsList();
+                mNewData = LatestFileManager.getDalianzuheInsList();
                 break;
             case ZHENGZHOUZUHE:
-                mInsMap = LatestFileManager.getZhengzhouzuheInsList();
+                mNewData = LatestFileManager.getZhengzhouzuheInsList();
                 break;
             default:
                 break;
         }
-        //获取服务器数据
-        mInsList = new ArrayList<>(mInsMap.keySet());
+
+        mInsList = new ArrayList<>(mNewData.keySet());
+
         if (BaseApplicationLike.getWebSocketService() != null) {
             try {
                 if (mInsList.size() <= LOAD_QUOTE_NUM)
@@ -230,55 +245,84 @@ public class QuoteFragment extends LazyLoadFragment {
                 e.printStackTrace();
             }
         }
-
-        mNewData.clear();
-        for (Map.Entry<String, String> entry :
-                mInsMap.entrySet()) {
-            String ins = entry.getKey();
-            String insName = entry.getValue();
-            QuoteEntity quoteEntity = mDataManager.getRtnData().getQuotes().get(ins);
-            if (quoteEntity == null) {
-                QuoteEntity quoteEntity1 = new QuoteEntity();
-                quoteEntity1.setInstrument_id(ins);
-                quoteEntity1.setInstrument_name(insName);
-                mNewData.put(ins, quoteEntity1);
-            } else mNewData.put(ins, quoteEntity);
-        }
     }
 
     protected void initEvent() {
-
-        mBinding.tvChangePercent.setOnTouchListener(new View.OnTouchListener() {
+        mBinding.tvLast.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (mBinding.tvChangePercent.getText().toString()) {
-                    case "涨跌幅%":
-                        mBinding.tvChangePercent.setText("涨跌");
-                        mAdapter.switchChangeView();
-                        break;
-                    case "涨跌":
-                        mBinding.tvChangePercent.setText("涨跌幅%");
-                        mAdapter.switchChangeView();
-                        break;
+            public void onClick(View view) {
+                if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
+                    switch (mBinding.tvLast.getText().toString()) {
+                        case "涨停价":
+                            mBinding.tvLast.setText("跌停价");
+                            mAdapter.switchLastView();
+                            break;
+                        case "跌停价":
+                            mBinding.tvLast.setText("涨停价");
+                            mAdapter.switchLastView();
+                            break;
+                    }
                 }
-                return false;
             }
         });
 
-        mBinding.tvOpenInterest.setOnTouchListener(new View.OnTouchListener() {
+        mBinding.tvChangePercent.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (mBinding.tvOpenInterest.getText().toString()) {
-                    case "持仓量":
-                        mBinding.tvOpenInterest.setText("成交量");
-                        mAdapter.switchVolView();
-                        break;
-                    case "成交量":
-                        mBinding.tvOpenInterest.setText("持仓量");
-                        mAdapter.switchVolView();
-                        break;
+            public void onClick(View view) {
+                if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
+                    switch (mBinding.tvChangePercent.getText().toString()) {
+                        case "买价":
+                            mBinding.tvChangePercent.setText("卖价");
+                            mAdapter.switchChangeView();
+                            break;
+                        case "卖价":
+                            mBinding.tvChangePercent.setText("买价");
+                            mAdapter.switchChangeView();
+                            break;
+                    }
+                } else {
+                    switch (mBinding.tvChangePercent.getText().toString()) {
+                        case "涨跌幅%":
+                            mBinding.tvChangePercent.setText("涨跌");
+                            mAdapter.switchChangeView();
+                            break;
+                        case "涨跌":
+                            mBinding.tvChangePercent.setText("涨跌幅%");
+                            mAdapter.switchChangeView();
+                            break;
+                    }
                 }
-                return false;
+
+            }
+        });
+
+        mBinding.tvOpenInterest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
+                    switch (mBinding.tvOpenInterest.getText().toString()) {
+                        case "买量":
+                            mBinding.tvOpenInterest.setText("卖量");
+                            mAdapter.switchVolView();
+                            break;
+                        case "卖量":
+                            mBinding.tvOpenInterest.setText("买量");
+                            mAdapter.switchVolView();
+                            break;
+                    }
+                } else {
+                    switch (mBinding.tvOpenInterest.getText().toString()) {
+                        case "持仓量":
+                            mBinding.tvOpenInterest.setText("成交量");
+                            mAdapter.switchVolView();
+                            break;
+                        case "成交量":
+                            mBinding.tvOpenInterest.setText("持仓量");
+                            mAdapter.switchVolView();
+                            break;
+                    }
+                }
+
             }
         });
 
@@ -293,7 +337,7 @@ public class QuoteFragment extends LazyLoadFragment {
                         int firstVisibleItemPosition = lm.findFirstVisibleItemPosition();
                         int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
                         try {
-                            if (mInsMap.size() > LOAD_QUOTE_NUM && BaseApplicationLike.getWebSocketService() != null)
+                            if (mInsList.size() > LOAD_QUOTE_NUM && BaseApplicationLike.getWebSocketService() != null)
                                 BaseApplicationLike.getWebSocketService().sendSubscribeQuote(TextUtils.join(",",
                                         mInsList.subList(firstVisibleItemPosition, lastVisibleItemPosition + 1)));
                         } catch (IndexOutOfBoundsException e) {
@@ -335,19 +379,19 @@ public class QuoteFragment extends LazyLoadFragment {
                         vibrator.vibrate(70);
                         if (mAdapter.getData().get(position) != null) {
                             String instrument_id = mAdapter.getData().get(position).getInstrument_id();
-                            if (instrument_id != null) {
-                                if (!instrument_id.isEmpty()) {
-                                    if (LatestFileManager.getOptionalInsList().containsKey(instrument_id)) {
-                                        initPopUp(view, instrument_id, false);
-                                    } else {
-                                        initPopUp(view, instrument_id, true);
-                                    }
-                                }
+                            if (instrument_id == null || instrument_id.isEmpty()) return;
+                            Map<String, QuoteEntity> insList = LatestFileManager.getOptionalInsList();
+                            LogUtils.e(insList.toString(), true);
+                            if ( insList.containsKey(instrument_id)) {
+                                initPopUp(view, instrument_id, insList, false);
+                            } else {
+                                initPopUp(view, instrument_id, insList, true);
                             }
+
                         }
                     }
 
-                    private void initPopUp(View view, final String instrument_id, final boolean isAdd) {
+                    private void initPopUp(View view, final String instrument_id, final Map<String, QuoteEntity>insList, final boolean isAdd) {
                         //构造一个添加自选合约合约的PopupWindow
                         final View popUpView = View.inflate(getActivity(), R.layout.popup_fragment_quote, null);
                         final PopupWindow popWindow = new PopupWindow(popUpView,
@@ -375,16 +419,14 @@ public class QuoteFragment extends LazyLoadFragment {
                         getActivity().getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
                         popWindow.showAsDropDown(view, outMetrics.widthPixels / 4 * 3, 0);
 
-                        add.setOnTouchListener(new View.OnTouchListener() {
+                        add.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public boolean onTouch(View v, MotionEvent event) {
+                            public void onClick(View v) {
                                 if (isAdd) {
-                                    SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
-                                    Map<String, String> insList = LatestFileManager.getOptionalInsList();
-                                    if (searchEntity != null)
-                                        insList.put(instrument_id, searchEntity.getInstrumentName());
-                                    else insList.put(instrument_id, instrument_id);
-                                    LatestFileManager.saveInsListToFile(insList);
+                                    QuoteEntity quoteEntity = new QuoteEntity();
+                                    quoteEntity.setInstrument_id(instrument_id);
+                                    insList.put(instrument_id, quoteEntity);
+                                    LatestFileManager.saveInsListToFile(insList.keySet());
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -393,9 +435,8 @@ public class QuoteFragment extends LazyLoadFragment {
                                         }
                                     });
                                 } else {
-                                    Map<String, String> insList = LatestFileManager.getOptionalInsList();
                                     insList.remove(instrument_id);
-                                    LatestFileManager.saveInsListToFile(insList);
+                                    LatestFileManager.saveInsListToFile(insList.keySet());
                                     if (mTitle.equals(OPTIONAL)) {
                                         update();
                                     }
@@ -407,7 +448,6 @@ public class QuoteFragment extends LazyLoadFragment {
                                         }
                                     });
                                 }
-                                return true;
                             }
                         });
                     }
@@ -441,7 +481,7 @@ public class QuoteFragment extends LazyLoadFragment {
     /**
      * date: 7/9/17
      * author: chenli
-     * description: 根据主页标题和mtitle判断刷新不同行情页, 不显示的页面不刷
+     * description: 根据主页标题和mTitle判断刷新不同行情页, 不显示的页面不刷
      */
     public void refreshUI(String toolbarTitle) {
         //防止相邻合约列表页面刷新
@@ -450,15 +490,16 @@ public class QuoteFragment extends LazyLoadFragment {
                 for (String ins : mDataManager.getRtnData().getIns_list().split(",")) {
                     //防止合约页切换时,前一页的数据加载
                     if (mNewData.containsKey(ins)) {
-                        QuoteEntity quoteEntity = mDataManager.getRtnData().getQuotes().get(ins);
-                        if (quoteEntity != null) mNewData.put(ins, quoteEntity);
+                        QuoteEntity quoteEntity = CloneUtils.clone(mDataManager.getRtnData().getQuotes().get(ins));
+                        mNewData.put(ins, quoteEntity);
                     }
                 }
-                DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new QuoteDiffCallback(new ArrayList<>(mOldData.values()), new ArrayList<>(mNewData.values())), false);
-                mAdapter.setData(new ArrayList<>(mNewData.values()));
+                List<QuoteEntity> newData = new ArrayList<>(mNewData.values());
+                DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new QuoteDiffCallback(mOldData, newData), false);
+                mAdapter.setData(newData);
                 diffResult.dispatchUpdatesTo(mAdapter);
                 mOldData.clear();
-                mOldData.putAll(mNewData);
+                mOldData.addAll(newData);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -512,7 +553,7 @@ public class QuoteFragment extends LazyLoadFragment {
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (OPTIONAL.equals(mToolbarTitle.getText().toString()) && mInsMap.size() != LatestFileManager.getOptionalInsList().size())
+        if (OPTIONAL.equals(mToolbarTitle.getText().toString()) && mInsList.size() != LatestFileManager.getOptionalInsList().size())
             update();
         //三种情况:搜索页返回,合约详情页返回,搜索页点击进入合约详情页再返回
         if (BaseApplicationLike.getWebSocketService() != null)

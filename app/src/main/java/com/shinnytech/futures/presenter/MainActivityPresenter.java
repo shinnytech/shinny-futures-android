@@ -33,6 +33,7 @@ import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.view.adapter.QuoteNavAdapter;
 import com.shinnytech.futures.view.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
@@ -52,7 +53,10 @@ import com.shinnytech.futures.view.fragment.QuoteFragment;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
@@ -82,7 +86,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
     private TextView mToolbarTitle;
     private QuoteNavAdapter mNavAdapter;
     private String[] mMenuTitle = new String[]{"自选", "主力", "上海", "上期能源", "大连", "郑州", "中金", "大连组合", "郑州组合", "账户", "持仓", "成交", "反馈"};
-    private List<String> mInsListNameNav = new ArrayList<>();
+    private Map<String, String> mInsListNameNav = new TreeMap<>();
     private String mIns;
     private BroadcastReceiver mReceiver;
     private int mCurItemId;
@@ -211,8 +215,8 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
         mBinding.rvQuoteNavigation.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rvQuoteNavigation, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                String insName = (String) view.getTag();
-                scrollQuotes(mToolbarTitle.getText().toString(), position, insName);
+                String instrumentId = (String) view.getTag();
+                scrollQuotes(mToolbarTitle.getText().toString(), position, instrumentId);
             }
 
             @Override
@@ -443,39 +447,39 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
      * author: chenli
      * description: 点击合约导航滑动行情列表
      */
-    private void scrollQuotes(String title, int position, String insName) {
+    private void scrollQuotes(String title, int position, String instrumentId) {
         List<String> insListName = new ArrayList<>();
         switch (title) {
             case DOMINANT:
-                insListName = new ArrayList<>(LatestFileManager.getMainInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getMainInsList().keySet());
                 break;
             case SHANGHAI:
-                insListName = new ArrayList<>(LatestFileManager.getShangqiInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getShangqiInsList().keySet());
                 break;
             case NENGYUAN:
-                insListName = new ArrayList<>(LatestFileManager.getNengyuanInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getNengyuanInsList().keySet());
                 break;
             case DALIAN:
-                insListName = new ArrayList<>(LatestFileManager.getDalianInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getDalianInsList().keySet());
                 break;
             case ZHENGZHOU:
-                insListName = new ArrayList<>(LatestFileManager.getZhengzhouInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getZhengzhouInsList().keySet());
                 break;
             case ZHONGJIN:
-                insListName = new ArrayList<>(LatestFileManager.getZhongjinInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getZhongjinInsList().keySet());
                 break;
             case DALIANZUHE:
-                insListName = new ArrayList<>(LatestFileManager.getDalianzuheInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getDalianzuheInsList().keySet());
                 break;
             case ZHENGZHOUZUHE:
-                insListName = new ArrayList<>(LatestFileManager.getZhengzhouzuheInsList().values());
+                insListName = new ArrayList<>(LatestFileManager.getZhengzhouzuheInsList().keySet());
                 break;
             default:
                 break;
         }
 
         for (int i = 0; i < insListName.size(); i++) {
-            if (insListName.get(i).contains(insName)) {
+            if (insListName.get(i).equals(instrumentId)) {
                 //出现重复的合约中文名，则导航到第一个出现的位置
                 position = i;
                 break;

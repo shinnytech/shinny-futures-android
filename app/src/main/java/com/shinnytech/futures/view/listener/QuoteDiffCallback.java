@@ -5,8 +5,12 @@ import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
+import com.shinnytech.futures.utils.LogUtils;
 
 import java.util.List;
+
+import static com.shinnytech.futures.model.engine.LatestFileManager.getUpDown;
+import static com.shinnytech.futures.model.engine.LatestFileManager.getUpDownRate;
 
 /**
  * Created on 7/27/17.
@@ -37,7 +41,8 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
     @Override
     public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
         //newData里的值不会为空
-        return mOldData.get(oldItemPosition) != null && mOldData.get(oldItemPosition).getInstrument_id().equals(mNewData.get(newItemPosition).getInstrument_id());
+        return mOldData.get(oldItemPosition) != null && mOldData.get(oldItemPosition).getInstrument_id()
+                .equals(mNewData.get(newItemPosition).getInstrument_id());
     }
 
     @Override
@@ -49,18 +54,31 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
     @Override
     public Object getChangePayload(int oldItemPosition, int newItemPosition) {
         Bundle bundle = new Bundle();
-
         String latest_old = mOldData.get(oldItemPosition).getLast_price();
-        String change_old = mOldData.get(oldItemPosition).getChange();
-        String change_percent_old = mOldData.get(oldItemPosition).getChange_percent();
+        String change_old = getUpDown(latest_old, mOldData.get(oldItemPosition).getPre_settlement());
+        String change_percent_old = getUpDownRate(latest_old, mOldData.get(oldItemPosition).getPre_settlement());
         String volume_old = mOldData.get(oldItemPosition).getVolume();
         String open_interest_old = mOldData.get(oldItemPosition).getOpen_interest();
 
+        String upper_limit_old = mOldData.get(oldItemPosition).getUpper_limit();
+        String lower_limit_old = mOldData.get(oldItemPosition).getLower_limit();
+        String ask_price1_old = mOldData.get(oldItemPosition).getAsk_price1();
+        String ask_volume1_old = mOldData.get(oldItemPosition).getAsk_volume1();
+        String bid_price1_old = mOldData.get(oldItemPosition).getBid_price1();
+        String bid_volume1_old = mOldData.get(oldItemPosition).getBid_volume1();
+
         String latest_new = mNewData.get(newItemPosition).getLast_price();
-        String change_new = mNewData.get(newItemPosition).getChange();
-        String change_percent_new = mNewData.get(newItemPosition).getChange_percent();
+        String change_new = getUpDown(latest_new, mNewData.get(newItemPosition).getPre_settlement());
+        String change_percent_new = getUpDownRate(latest_new, mNewData.get(newItemPosition).getPre_settlement());
         String volume_new = mNewData.get(newItemPosition).getVolume();
         String open_interest_new = mNewData.get(newItemPosition).getOpen_interest();
+
+        String upper_limit_new = mNewData.get(newItemPosition).getUpper_limit();
+        String lower_limit_new = mNewData.get(newItemPosition).getLower_limit();
+        String ask_price1_new = mNewData.get(newItemPosition).getAsk_price1();
+        String ask_volume1_new = mNewData.get(newItemPosition).getAsk_volume1();
+        String bid_price1_new = mNewData.get(newItemPosition).getBid_price1();
+        String bid_volume1_new = mNewData.get(newItemPosition).getBid_volume1();
 
         if (latest_old != null && latest_new != null) {
             if (!latest_old.equals(latest_new)) bundle.putString("latest", latest_new);
@@ -92,6 +110,42 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
                 bundle.putString("open_interest", open_interest_new);
         } else if (open_interest_old == null && open_interest_new != null) {
             bundle.putString("open_interest", open_interest_new);
+        }
+
+        if (upper_limit_old != null && upper_limit_new != null) {
+            if (!upper_limit_old.equals(upper_limit_new)) bundle.putString("upper_limit", upper_limit_new);
+        } else if (upper_limit_old == null && upper_limit_new != null) {
+            bundle.putString("upper_limit", upper_limit_new);
+        }
+
+        if (lower_limit_old != null && lower_limit_new != null) {
+            if (!lower_limit_old.equals(lower_limit_new)) bundle.putString("lower_limit", lower_limit_new);
+        } else if (lower_limit_old == null && lower_limit_new != null) {
+            bundle.putString("lower_limit", lower_limit_new);
+        }
+
+        if (ask_price1_old != null && ask_price1_new != null) {
+            if (!ask_price1_old.equals(ask_price1_new)) bundle.putString("ask_price1", ask_price1_new);
+        } else if (ask_price1_old == null && ask_price1_new != null) {
+            bundle.putString("ask_price1", ask_price1_new);
+        }
+
+        if (ask_volume1_old != null && ask_volume1_new != null) {
+            if (!ask_volume1_old.equals(ask_volume1_new)) bundle.putString("ask_volume1", ask_volume1_new);
+        } else if (ask_volume1_old == null && ask_volume1_new != null) {
+            bundle.putString("ask_volume1", ask_volume1_new);
+        }
+
+        if (bid_price1_old != null && bid_price1_new != null) {
+            if (!bid_price1_old.equals(bid_price1_new)) bundle.putString("bid_price1", bid_price1_new);
+        } else if (bid_price1_old == null && bid_price1_new != null) {
+            bundle.putString("bid_price1", bid_price1_new);
+        }
+
+        if (bid_volume1_old != null && bid_volume1_new != null) {
+            if (!bid_volume1_old.equals(bid_volume1_new)) bundle.putString("bid_volume1", bid_volume1_new);
+        } else if (bid_volume1_old == null && bid_volume1_new != null) {
+            bundle.putString("bid_volume1", bid_volume1_new);
         }
 
 

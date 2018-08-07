@@ -7,14 +7,22 @@ package com.shinnytech.futures.model.bean.searchinfobean;
  */
 
 public class SearchEntity {
-    private String instrumentName;
-    private String instrumentId;
-    private String exchangeName;
-    private String exchangeId;
-    private String py;
-    private String pTick;
-    private String vm;
+    private String instrumentName = "";
+    private String instrumentId = "";
+    private String exchangeName = "";
+    private String exchangeId = "";
+    private String py = "";
+    private String pTick = "";
+    private String vm = "";
+    private String sort_key = "";
 
+    public String getSort_key() {
+        return sort_key;
+    }
+
+    public void setSort_key(String sort_key) {
+        this.sort_key = sort_key;
+    }
 
     public String getVm() {
         return vm;

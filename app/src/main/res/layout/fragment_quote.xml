@@ -27,6 +27,7 @@
                 android:textStyle="bold"/>
 
             <TextView
+                android:id="@+id/tv_last"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -48,7 +49,7 @@
                 android:drawableEnd="@mipmap/ic_signal_cellular_4_bar_white_18dp"
                 android:gravity="center"
                 android:padding="@dimen/padding_5dp"
-                android:text="@string/quote_fragment_up_down"
+                android:text="@string/quote_fragment_up_down_rate"
                 android:textColor="@color/white"
                 android:textSize="@dimen/font_size_normal"
                 android:textStyle="bold"/>

@@ -16,6 +16,7 @@ import com.shinnytech.futures.model.bean.futureinfobean.DiffEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.FutureBean;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.shinnytech.futures.view.activity.LoginActivity;
 
@@ -134,14 +135,10 @@ public class DataManager {
                 BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE, BROADCAST);
         } catch (JSONException e) {
             e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
         }
     }
 
-    private void parseCharts(JSONObject dataObject, DiffEntity diffEntity) throws JSONException, NoSuchFieldException, IllegalAccessException {
+    private void parseCharts(JSONObject dataObject, DiffEntity diffEntity) throws JSONException {
         JSONObject chartsObject = dataObject.getJSONObject("charts");
         Map<String, ChartEntity> chartsEntities = diffEntity.getCharts();
         Iterator<String> iterator = chartsObject.keys();
@@ -165,10 +162,16 @@ public class DataManager {
                         stateEntity.put(key511, stateObject.optString(key511));
                     }
                 } else {
-                    Field f = clChart.getDeclaredField(key1);
-                    f.setAccessible(true);
-                    if (!chartObject.isNull(key1)) {
-                        f.set(chartEntity, chartObject.optString(key1));
+                    try {
+                        Field f = clChart.getDeclaredField(key1);
+                        f.setAccessible(true);
+                        if (!chartObject.isNull(key1)) {
+                            f.set(chartEntity, chartObject.optString(key1));
+                        }
+                    } catch (NoSuchFieldException e) {
+                        continue;
+                    } catch (IllegalAccessException e) {
+                        continue;
                     }
                 }
             }
@@ -184,7 +187,7 @@ public class DataManager {
 //        }
     }
 
-    private void parseKlines(JSONObject dataObject, DiffEntity diffEntity) throws JSONException, NoSuchFieldException, IllegalAccessException {
+    private void parseKlines(JSONObject dataObject, DiffEntity diffEntity) throws JSONException{
         JSONObject futureKlineObjects = dataObject.getJSONObject("klines");
         Map<String, Map<String, KlineEntity>> futureKlineEntities = diffEntity.getKlines();
         Iterator<String> iterator = futureKlineObjects.keys();
@@ -223,10 +226,17 @@ public class DataManager {
                                 Class clData = dataEntity.getClass();
                                 while (iterator4.hasNext()) {
                                     String key4 = iterator4.next();
-                                    Field f = clData.getDeclaredField(key4);
-                                    f.setAccessible(true);
-                                    if (!dataObjectInner.isNull(key4))
-                                        f.set(dataEntity, dataObjectInner.optString(key4));
+                                    try {
+                                        Field f = clData.getDeclaredField(key4);
+                                        f.setAccessible(true);
+                                        if (!dataObjectInner.isNull(key4))
+                                            f.set(dataEntity, dataObjectInner.optString(key4));
+                                    } catch (NoSuchFieldException e) {
+                                        continue;
+                                    } catch (IllegalAccessException e) {
+                                        continue;
+                                    }
+
                                 }
                                 dataEntities.put(key3, dataEntity);
                             }
@@ -246,20 +256,33 @@ public class DataManager {
                                 Class clBinding = bindingEntity.getClass();
                                 while (iterator6.hasNext()) {
                                     String key6 = iterator6.next();
-                                    Field f = clBinding.getDeclaredField(key6);
-                                    f.setAccessible(true);
-                                    if (!bindingObject.isNull(key6)) {
-                                        f.set(bindingEntity, bindingObject.optString(key6));
+                                    try {
+                                        Field f = clBinding.getDeclaredField(key6);
+                                        f.setAccessible(true);
+                                        if (!bindingObject.isNull(key6)) {
+                                            f.set(bindingEntity, bindingObject.optString(key6));
+                                        }
+                                    } catch (NoSuchFieldException e) {
+                                        continue;
+                                    } catch (IllegalAccessException e) {
+                                        continue;
                                     }
+
                                 }
                                 bindingEntities.put(key5, bindingEntity);
                             }
                             break;
                         default:
-                            Field field = clKline.getDeclaredField(key2);
-                            field.setAccessible(true);
-                            if (!klineObject.isNull(key2))
-                                field.set(klineEntity, klineObject.optString(key2));
+                            try {
+                                Field field = clKline.getDeclaredField(key2);
+                                field.setAccessible(true);
+                                if (!klineObject.isNull(key2))
+                                    field.set(klineEntity, klineObject.optString(key2));
+                            } catch (NoSuchFieldException e) {
+                                continue;
+                            } catch (IllegalAccessException e) {
+                                continue;
+                            }
                             break;
                     }
                 }
@@ -269,7 +292,7 @@ public class DataManager {
         }
     }
 
-    private void parseQuotes(JSONObject dataObject, DiffEntity diffEntity) throws JSONException, NoSuchFieldException, IllegalAccessException {
+    private void parseQuotes(JSONObject dataObject, DiffEntity diffEntity) throws JSONException {
         JSONObject quoteObjects = dataObject.getJSONObject("quotes");
         Map<String, QuoteEntity> quoteEntities = diffEntity.getQuotes();
         Iterator<String> iterator = quoteObjects.keys();
@@ -278,25 +301,27 @@ public class DataManager {
             if (!quoteObjects.isNull(key)) {
                 JSONObject quoteObject = quoteObjects.getJSONObject(key);
                 Iterator<String> iterator1 = quoteObject.keys();
-                QuoteEntity quoteEntity = new QuoteEntity();
+                QuoteEntity quoteEntity = quoteEntities.get(key);
+                if (quoteEntity == null) quoteEntity = new QuoteEntity();
                 Class clQuote = quoteEntity.getClass();
                 while (iterator1.hasNext()) {
                     String key1 = iterator1.next();
-                    Field f = clQuote.getDeclaredField(key1);
-                    f.setAccessible(true);
-                    if (!quoteObject.isNull(key1)) {
-                        Object data = quoteObject.opt(key1);
-                        if (data instanceof Number) {
-                            f.set(quoteEntity, LatestFileManager.saveScaleByPtick(data.toString(), key));
-                        } else f.set(quoteEntity, data);
+                    try {
+                        Field f = clQuote.getDeclaredField(key1);
+                        f.setAccessible(true);
+                        if (!quoteObject.isNull(key1))
+                            f.set(quoteEntity, quoteObject.optString(key1));
+                    } catch (NoSuchFieldException e) {
+                        continue;
+                    } catch (IllegalAccessException e) {
+                        continue;
                     }
+
                 }
-                quoteEntity.setChange_percent(getUpDownRate(quoteEntity.getLast_price(), quoteEntity.getPre_settlement()));
-                quoteEntity.setChange(getUpDown(quoteEntity.getLast_price(), quoteEntity.getPre_settlement()));
-                quoteEntity.setInstrument_name(LatestFileManager.getSearchEntities().get(key).getInstrumentName());
                 quoteEntities.put(key, quoteEntity);
             }
         }
+
     }
 
     /**
@@ -401,12 +426,19 @@ public class DataManager {
                 Class clTrade = tradeEntity.getClass();
                 while (iterator1.hasNext()) {
                     String key1 = iterator1.next();
-                    Field f = clTrade.getDeclaredField(key1);
-                    f.setAccessible(true);
-                    if (!tradeObject.isNull(key1)) {
-                        String data = tradeObject.optString(key1);
-                        f.set(tradeEntity, data);
+                    try {
+                        Field f = clTrade.getDeclaredField(key1);
+                        f.setAccessible(true);
+                        if (!tradeObject.isNull(key1)) {
+                            String data = tradeObject.optString(key1);
+                            f.set(tradeEntity, data);
+                        }
+                    } catch (NoSuchFieldException e) {
+                        continue;
+                    } catch (IllegalAccessException e) {
+                        continue;
                     }
+
                 }
                 tradeEntity.setKey(key);
                 tradeEntities.put(key, tradeEntity);
@@ -414,10 +446,6 @@ public class DataManager {
             if (BaseApplicationLike.getWebSocketService() != null)
                 BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_TRADE, BROADCAST_TRANSACTION);
         } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
     }
@@ -435,12 +463,19 @@ public class DataManager {
                 Class clPosition = positionEntity.getClass();
                 while (iterator1.hasNext()) {
                     String key1 = iterator1.next();
-                    Field f = clPosition.getDeclaredField(key1);
-                    f.setAccessible(true);
-                    if (!positionObject.isNull(key1)) {
-                        String data = positionObject.optString(key1);
-                        f.set(positionEntity, data);
+                    try {
+                        Field f = clPosition.getDeclaredField(key1);
+                        f.setAccessible(true);
+                        if (!positionObject.isNull(key1)) {
+                            String data = positionObject.optString(key1);
+                            f.set(positionEntity, data);
+                        }
+                    } catch (NoSuchFieldException e) {
+                        continue;
+                    } catch (IllegalAccessException e) {
+                        continue;
                     }
+
 
                 }
                 positionEntity.setKey(key);
@@ -449,10 +484,6 @@ public class DataManager {
             if (BaseApplicationLike.getWebSocketService() != null)
                 BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_POSITION, BROADCAST_TRANSACTION);
         } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
     }
@@ -470,12 +501,19 @@ public class DataManager {
                 Class clOrder = orderEntity.getClass();
                 while (iterator1.hasNext()) {
                     String key1 = iterator1.next();
-                    Field f = clOrder.getDeclaredField(key1);
-                    f.setAccessible(true);
-                    if (!orderObject.isNull(key1)) {
-                        String data = orderObject.optString(key1);
-                        f.set(orderEntity, data);
+                    try {
+                        Field f = clOrder.getDeclaredField(key1);
+                        f.setAccessible(true);
+                        if (!orderObject.isNull(key1)) {
+                            String data = orderObject.optString(key1);
+                            f.set(orderEntity, data);
+                        }
+                    } catch (NoSuchFieldException e) {
+                        continue;
+                    } catch (IllegalAccessException e) {
+                        continue;
                     }
+
                 }
                 orderEntity.setKey(key);
                 orderEntities.put(key, orderEntity);
@@ -483,10 +521,6 @@ public class DataManager {
             if (BaseApplicationLike.getWebSocketService() != null)
                 BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_ORDER, BROADCAST_TRANSACTION);
         } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
     }
@@ -504,10 +538,17 @@ public class DataManager {
                 Iterator<String> iterator1 = accountObject.keys();
                 while (iterator1.hasNext()) {
                     String key1 = iterator1.next();
-                    Field f = clAccount.getDeclaredField(key1);
-                    f.setAccessible(true);
-                    if (!accountObject.isNull(key1))
-                        f.set(accountEntity, accountObject.optString(key1));
+                    try {
+                        Field f = clAccount.getDeclaredField(key1);
+                        f.setAccessible(true);
+                        if (!accountObject.isNull(key1))
+                            f.set(accountEntity, accountObject.optString(key1));
+                    } catch (NoSuchFieldException e) {
+                        continue;
+                    } catch (IllegalAccessException e) {
+                        continue;
+                    }
+
                 }
                 accountEntity.setKey(key);
                 accountEntities.put(key, accountEntity);
@@ -515,10 +556,6 @@ public class DataManager {
             if (BaseApplicationLike.getWebSocketService() != null)
                 BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_ACCOUNT, BROADCAST_TRANSACTION);
         } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
     }

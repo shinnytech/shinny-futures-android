@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplicationLike;
 import com.shinnytech.futures.databinding.ActivitySearchBinding;
+import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.view.adapter.SearchAdapter;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
@@ -89,29 +90,21 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
             //收藏或移除该合约到自选合约列表
             @Override
             public void OnItemCollect(View view, String instrument_id) {
-                if (LatestFileManager.getOptionalInsList().containsKey(instrument_id)) {
-                    if (instrument_id != null) {
-                        if (!instrument_id.equals("")) {
-                            Map<String, String> insList = LatestFileManager.getOptionalInsList();
-                            insList.remove(instrument_id);
-                            LatestFileManager.saveInsListToFile(insList);
-                            ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已被移除自选列表");
-                            ((ImageView) view).setImageResource(R.mipmap.ic_favorite_border_white_24dp);
-                        }
-                    }
+                if (instrument_id == null || "".equals(instrument_id)) return;
+                Map<String, QuoteEntity> insList = LatestFileManager.getOptionalInsList();
+
+                if (insList.containsKey(instrument_id)) {
+                    insList.remove(instrument_id);
+                    LatestFileManager.saveInsListToFile(insList.keySet());
+                    ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已被移除自选列表");
+                    ((ImageView) view).setImageResource(R.mipmap.ic_favorite_border_white_24dp);
                 } else {
-                    if (instrument_id != null) {
-                        if (!instrument_id.equals("")) {
-                            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
-                            Map<String, String> insList = LatestFileManager.getOptionalInsList();
-                            if (searchEntity != null)
-                                insList.put(instrument_id, searchEntity.getInstrumentName());
-                            else insList.put(instrument_id, instrument_id);
-                            LatestFileManager.saveInsListToFile(insList);
-                            ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已添加到自选列表");
-                            ((ImageView) view).setImageResource(R.mipmap.ic_favorite_white_24dp);
-                        }
-                    }
+                    QuoteEntity quoteEntity = new QuoteEntity();
+                    quoteEntity.setInstrument_id(instrument_id);
+                    insList.put(instrument_id, quoteEntity);
+                    LatestFileManager.saveInsListToFile(insList.keySet());
+                    ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已添加到自选列表");
+                    ((ImageView) view).setImageResource(R.mipmap.ic_favorite_white_24dp);
                 }
             }
         });

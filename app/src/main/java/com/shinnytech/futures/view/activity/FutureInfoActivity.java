@@ -12,6 +12,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplicationLike;
 import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
+import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.presenter.FutureInfoActivityPresenter;
 import com.shinnytech.futures.model.engine.LatestFileManager;
@@ -112,31 +113,23 @@ public class FutureInfoActivity extends BaseActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.action_collect:
-                if (LatestFileManager.getOptionalInsList().containsKey(mInstrumentId)) {
-                    if (mInstrumentId != null) {
-                        if (!mInstrumentId.equals("")) {
-                            Map<String, String> insList = LatestFileManager.getOptionalInsList();
-                            insList.remove(mInstrumentId);
-                            LatestFileManager.saveInsListToFile(insList);
-                            ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已被移除自选列表");
-                            mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
-                            mFutureInfoActivityPresenter.refreshOptionalQuotesPopup(new ArrayList<>(insList.keySet()));
-                        }
-                    }
+                if (mInstrumentId == null || mInstrumentId.equals(""))
+                    return super.onOptionsItemSelected(item);
+                Map<String, QuoteEntity> insList = LatestFileManager.getOptionalInsList();
+                if (insList.containsKey(mInstrumentId)) {
+                    insList.remove(mInstrumentId);
+                    LatestFileManager.saveInsListToFile(insList.keySet());
+                    ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已被移除自选列表");
+                    mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
+                    mFutureInfoActivityPresenter.refreshOptionalQuotesPopup(new ArrayList<>(insList.keySet()));
                 } else {
-                    if (mInstrumentId != null) {
-                        if (!mInstrumentId.equals("")) {
-                            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
-                            Map<String, String> insList = LatestFileManager.getOptionalInsList();
-                            if (searchEntity != null)
-                                insList.put(mInstrumentId, searchEntity.getInstrumentName());
-                            else insList.put(mInstrumentId, mInstrumentId);
-                            LatestFileManager.saveInsListToFile(insList);
-                            ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已添加到自选列表");
-                            mMenuItem.setIcon(R.mipmap.ic_favorite_white_24dp);
-                            mFutureInfoActivityPresenter.refreshOptionalQuotesPopup(new ArrayList<>(insList.keySet()));
-                        }
-                    }
+                    QuoteEntity quoteEntity = new QuoteEntity();
+                    quoteEntity.setInstrument_id(mInstrumentId);
+                    insList.put(mInstrumentId, quoteEntity);
+                    LatestFileManager.saveInsListToFile(insList.keySet());
+                    ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已添加到自选列表");
+                    mMenuItem.setIcon(R.mipmap.ic_favorite_white_24dp);
+                    mFutureInfoActivityPresenter.refreshOptionalQuotesPopup(new ArrayList<>(insList.keySet()));
                 }
                 break;
             case android.R.id.home:

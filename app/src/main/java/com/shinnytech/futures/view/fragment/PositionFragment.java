@@ -80,12 +80,11 @@ public class PositionFragment extends LazyLoadFragment {
                 @Override
                 public void onItemClick(View view, int position) {
                     if (mAdapter.getData().get(position) != null) {
-                        String instrument_id = mAdapter.getData().get(position).getInstrument_id();
-                        String exchange_id = mAdapter.getData().get(position).getExchange_id();
+                        String instrument_id = mAdapter.getData().get(position).getExchange_id() + "." +
+                                mAdapter.getData().get(position).getInstrument_id();
                         //添加判断，防止自选合约列表为空时产生无效的点击事件
                         if (instrument_id != null) {
                             IdEvent idEvent = new IdEvent();
-                            idEvent.setPosition_id(exchange_id);
                             idEvent.setInstrument_id(instrument_id);
                             EventBus.getDefault().post(idEvent);
                             ((FutureInfoActivity) getActivity()).getViewPager().setCurrentItem(3, false);

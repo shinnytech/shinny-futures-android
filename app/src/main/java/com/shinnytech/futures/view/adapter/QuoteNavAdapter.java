@@ -11,8 +11,12 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ItemActivityNavQuoteBinding;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.LogUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * date: 7/9/17
@@ -24,9 +28,9 @@ import java.util.List;
 public class QuoteNavAdapter extends RecyclerView.Adapter<QuoteNavAdapter.ItemViewHolder> {
 
     private Context sContext;
-    private List<String> mData;
+    private Map<String, String> mData;
 
-    public QuoteNavAdapter(Context context, List<String> data) {
+    public QuoteNavAdapter(Context context, Map<String, String> data) {
         this.sContext = context;
         this.mData = data;
     }
@@ -36,7 +40,7 @@ public class QuoteNavAdapter extends RecyclerView.Adapter<QuoteNavAdapter.ItemVi
      *
      * @param data 更新的数据
      */
-    public void updateList(List<String> data) {
+    public void updateList(Map<String, String> data) {
         this.mData = data;
         notifyDataSetChanged();
     }
@@ -78,16 +82,11 @@ public class QuoteNavAdapter extends RecyclerView.Adapter<QuoteNavAdapter.ItemVi
 
         public void update() {
             if (mData != null && mData.size() != 0) {
-                String instrumentId = mData.get(getLayoutPosition());
-                if (instrumentId != null && instrumentId.contains("&")) {
-                    String instrument_id = instrumentId.split("&")[0].split(" ")[1];
-                    SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
-                    if (searchEntity != null)
-                        mBinding.quoteNav.setText(searchEntity.getInstrumentName().replaceAll("\\d+", ""));
-                    else mBinding.quoteNav.setText(instrument_id.replaceAll("\\d+", ""));
-                } else {
-                    mBinding.quoteNav.setText(instrumentId);
-                }
+                List<String> keys = new ArrayList<>(mData.keySet());
+                List<String> values = new ArrayList<>(mData.values());
+                String instrumentName = values.get(getLayoutPosition());
+                String instrumentId = keys.get(getLayoutPosition());
+                mBinding.quoteNav.setText(instrumentName);
                 itemView.setTag(instrumentId);
             }
         }

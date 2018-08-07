@@ -186,7 +186,7 @@
                 android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:text="@{handicap.change}"
+                android:text="@{MathUtils.subtract(handicap.last_price, handicap.pre_settlement)}"
                 android:textColor="@color/white"/>
 
         </LinearLayout>

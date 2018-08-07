@@ -418,7 +418,7 @@ public class LoginActivity extends BaseActivity {
                             activity.showProgress(false);
                             sIsLogin = true;
                             SPUtils.putAndApply(activity.sContext, "phone", activity.mPhoneNumber);
-                            SPUtils.putAndApply(activity.sContext, "brokerId", activity.mBrokerId);
+                            SPUtils.putAndApply(activity.sContext, "brokerId", activity.mBinding.spinner.getSelectedItemPosition());
                             //关闭键盘
                             View view = activity.getWindow().getCurrentFocus();
                             if (view != null) {

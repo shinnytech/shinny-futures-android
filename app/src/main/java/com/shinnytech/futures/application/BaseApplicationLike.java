@@ -25,7 +25,6 @@ import com.lzy.okgo.callback.FileCallback;
 import com.lzy.okgo.cookie.store.SPCookieStore;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
-import com.lzy.okgo.model.HttpParams;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.tencent.tinker.loader.app.DefaultApplicationLike;
@@ -43,8 +42,9 @@ import com.shinnytech.futures.view.activity.MainActivity;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -53,9 +53,21 @@ import okhttp3.OkHttpClient;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
 import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
+import static com.shinnytech.futures.constants.CommonConstants.ERROR;
 import static com.shinnytech.futures.constants.CommonConstants.LOG_OUT;
+import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_1;
+import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_2;
+import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_3;
+import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_4;
+import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_5;
+import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_6;
+import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_7;
+import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_8;
+import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_9;
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_SETTLEMENT;
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_SETTLEMENT_NOT_SURE;
+import static com.shinnytech.futures.constants.CommonConstants.OPEN;
+import static com.shinnytech.futures.constants.CommonConstants.SWITCH;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION;
 import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION_TRANSACTION;
@@ -70,8 +82,6 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
 
     private static Application sContext;
     private static WebSocketService sWebSocketService;
-    private URI mUriMarket;
-    private URI mUriTransaction;
     private boolean mServiceBound = false;
     private BroadcastReceiver mReceiverMarket;
     private BroadcastReceiver mReceiverTransaction;
@@ -79,9 +89,19 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
     private BroadcastReceiver mReceiverScreen;
     private boolean mIsBackground = false;
     private MyHandler mMyHandler = new MyHandler();
+    private static List<String> sMDURLs = new ArrayList<>();
+    private static int index = 0;
 
     public BaseApplicationLike(Application application, int tinkerFlags, boolean tinkerLoadVerifyFlag, long applicationStartElapsedTime, long applicationStartMillisTime, Intent tinkerResultIntent) {
         super(application, tinkerFlags, tinkerLoadVerifyFlag, applicationStartElapsedTime, applicationStartMillisTime, tinkerResultIntent);
+    }
+
+    public static void setIndex(int index) {
+        BaseApplicationLike.index = index;
+    }
+
+    public static int getIndex() {
+        return index;
     }
 
     public static Context getContext() {
@@ -104,14 +124,19 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
         //OkHttp网络框架初始化
         initOkGo();
 
-        //广播注册
-        registerBroaderCast();
+        //初始化行情服务器地址
+        initMDUrl();
 
         //下载合约列表文件
         downloadLatestJsonFile();
 
         //注册活动生命周期回调
         registerActivityLifecycleCallback();
+
+        //广播注册
+        registerBroaderCast();
+
+
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -136,11 +161,7 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
         try {
             WebSocketService.LocalBinder binder = (WebSocketService.LocalBinder) service;
             sWebSocketService = binder.getService();
-            mUriMarket = new URI(CommonConstants.MARKET_URL);
-            mUriTransaction = new URI(CommonConstants.TRANSACTION_URL);
         } catch (ClassCastException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
             e.printStackTrace();
         }
         notifyForeground();
@@ -218,20 +239,39 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
         //配置OkGo
         //---------这里给出的是示例代码,告诉你可以这么传,实际使用的时候,根据需要传,不需要就不传-------------//
         HttpHeaders headers = new HttpHeaders();
-        headers.put("commonHeaderKey1", "commonHeaderValue1");    //header不支持中文，不允许有特殊字符
-        headers.put("commonHeaderKey2", "commonHeaderValue2");
-        HttpParams params = new HttpParams();
-        params.put("commonParamsKey1", "commonParamsValue1");     //param支持中文,直接传,不要自己编码
-        params.put("commonParamsKey2", "这里支持中文参数");
+        headers.put("Accept", "application/json");    //header不支持中文，不允许有特殊字符
         //-------------------------------------------------------------------------------------//
         OkGo.getInstance().init(sContext)                           //必须调用初始化
                 .setOkHttpClient(builder.build())               //建议设置OkHttpClient，不设置将使用默认的
                 .setCacheMode(CacheMode.NO_CACHE)               //全局统一缓存模式，默认不使用缓存，可以不传
                 .setCacheTime(CacheEntity.CACHE_NEVER_EXPIRE)   //全局统一缓存时间，默认永不过期，可以不传
                 .setRetryCount(3)                               //全局统一超时重连次数，默认为三次，那么最差的情况会请求4次(一次原始请求，三次重连请求)，不需要可以设置为0
-                .addCommonHeaders(headers)                      //全局公共头
-                .addCommonParams(params);
+                .addCommonHeaders(headers);                      //全局公共头
     }
+
+    /**
+     * date: 8/6/18
+     * author: chenli
+     * description: 初始化行情服务器地址
+     */
+    private void initMDUrl() {
+        List<String> MDUrlGroup1 = new ArrayList<>();
+        MDUrlGroup1.add(MARKET_URL_2);
+        MDUrlGroup1.add(MARKET_URL_3);
+        List<String> MDUrlGroup2 = new ArrayList<>();
+        MDUrlGroup2.add(MARKET_URL_4);
+        MDUrlGroup2.add(MARKET_URL_5);
+        MDUrlGroup2.add(MARKET_URL_6);
+        MDUrlGroup2.add(MARKET_URL_7);
+        MDUrlGroup2.add(MARKET_URL_8);
+        MDUrlGroup2.add(MARKET_URL_9);
+        Collections.shuffle(MDUrlGroup1);
+        Collections.shuffle(MDUrlGroup2);
+        sMDURLs.add(MARKET_URL_1);
+        sMDURLs.addAll(MDUrlGroup1);
+        sMDURLs.addAll(MDUrlGroup2);
+    }
+
 
     /**
      * date: 7/21/17
@@ -302,9 +342,9 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
     private void notifyForeground() {
         if (sWebSocketService != null) {
             //连接行情服务器
-            sWebSocketService.connect(mUriMarket, null, 2000);
+            sWebSocketService.connect(sMDURLs.get(index));
             //连接交易服务器
-            sWebSocketService.connectTransaction(mUriTransaction, null, 2000);
+            sWebSocketService.connectTransaction();
             LogUtils.e("连接打开", true);
         }
     }
@@ -356,15 +396,26 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
             public void onReceive(Context context, Intent intent) {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
+                    case OPEN:
+                        ToastNotificationUtils.showToast(sContext, "行情服务器连接成功");
+                        break;
                     case CLOSE:
+                        ToastNotificationUtils.showToast(sContext, "行情服务器连接断开，正在重连...");
                         //每隔两秒,断线重连
                         if (!mIsBackground) {
-                            if (NetworkUtils.isNetworkConnected(sContext)) {
-                                Message message = new Message();
-                                message.obj = mUriMarket;
-                                message.what = 0;
-                                mMyHandler.sendMessageDelayed(message, 2000);
-                            } else
+                            if (NetworkUtils.isNetworkConnected(sContext))
+                                mMyHandler.sendEmptyMessageDelayed(0, 2000);
+                            else
+                                ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
+                        }
+                        break;
+                    case ERROR:
+                    case SWITCH:
+                        //每隔两秒,断线重连
+                        if (!mIsBackground) {
+                            if (NetworkUtils.isNetworkConnected(sContext))
+                                mMyHandler.sendEmptyMessageDelayed(2, 2000);
+                            else
                                 ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
                         }
                         break;
@@ -381,16 +432,17 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
             public void onReceive(Context context, Intent intent) {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
+                    case OPEN:
+                        ToastNotificationUtils.showToast(sContext, "交易服务器连接成功");
+                        break;
                     case CLOSE:
+                        ToastNotificationUtils.showToast(sContext, "交易服务器连接断开，正在重连...");
                         LoginActivity.setIsLogin(false);
                         //每隔两秒,断线重连
                         if (!mIsBackground) {
-                            if (NetworkUtils.isNetworkConnected(sContext)) {
-                                Message message = new Message();
-                                message.obj = mUriTransaction;
-                                message.what = 1;
-                                mMyHandler.sendMessageDelayed(message, 2000);
-                            } else
+                            if (NetworkUtils.isNetworkConnected(sContext))
+                                mMyHandler.sendEmptyMessageDelayed(1, 2000);
+                            else
                                 ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
                         }
                         break;
@@ -423,9 +475,9 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
                     case 1:
                         if (sWebSocketService != null) {
                             //连接行情服务器
-                            sWebSocketService.connect(mUriMarket, null, 2000);
+                            sWebSocketService.connect(sMDURLs.get(index));
                             //连接交易服务器
-                            sWebSocketService.connectTransaction(mUriTransaction, null, 2000);
+                            sWebSocketService.connectTransaction();
                             LogUtils.e("连接打开", true);
                         }
                         break;
@@ -459,11 +511,17 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
             switch (msg.what) {
                 case 0:
                     if (sWebSocketService != null)
-                        sWebSocketService.connect((URI) msg.obj, null, 2000);
+                        sWebSocketService.connect(sMDURLs.get(index));
                     break;
                 case 1:
                     if (sWebSocketService != null)
-                        sWebSocketService.connectTransaction(URI.create((String) msg.obj), null, 2000);
+                        sWebSocketService.connectTransaction();
+                    break;
+                case 2:
+                    if (sWebSocketService != null){
+                        sWebSocketService.disConnect();
+                        sWebSocketService.connect(sMDURLs.get(index));
+                    }
                     break;
                 default:
                     break;

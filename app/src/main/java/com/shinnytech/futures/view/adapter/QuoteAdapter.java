@@ -13,8 +13,16 @@ import android.widget.TextView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ItemFragmentQuoteBinding;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
+import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
+import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.LogUtils;
 
 import java.util.List;
+
+import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
+import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
+import static com.shinnytech.futures.model.engine.LatestFileManager.getUpDown;
+import static com.shinnytech.futures.model.engine.LatestFileManager.getUpDownRate;
 
 
 /**
@@ -28,12 +36,15 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
 
     private Context sContext;
     private List<QuoteEntity> mData;
+    private String mTitle;
     private boolean mSwitchChange = false;
     private boolean mSwitchVolume = false;
+    private boolean mSwitchLowerLimit = false;
 
-    public QuoteAdapter(Context context, List<QuoteEntity> data) {
+    public QuoteAdapter(Context context, List<QuoteEntity> data, String title) {
         this.sContext = context;
         this.mData = data;
+        this.mTitle = title;
     }
 
     public List<QuoteEntity> getData() {
@@ -61,6 +72,16 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
      */
     public void switchVolView() {
         mSwitchVolume = !mSwitchVolume;
+        notifyDataSetChanged();
+    }
+
+    /**
+     * date: 7/9/17
+     * author: chenli
+     * description: 涨停价/跌停价切换
+     */
+    public void switchLastView() {
+        mSwitchLowerLimit = !mSwitchLowerLimit;
         notifyDataSetChanged();
     }
 
@@ -112,16 +133,43 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
         public void update() {
             if (mData != null && mData.size() != 0) {
                 QuoteEntity quoteEntity = mData.get(getLayoutPosition());
-                if (quoteEntity != null) {
-                    String name = quoteEntity.getInstrument_name();
-                    if (name != null && name.contains("&")) mBinding.quoteName.setTextSize(13);
-                    else mBinding.quoteName.setTextSize(15);
-                    mBinding.quoteName.setText(name);
+                if (quoteEntity == null) {
+                    return;
+                }
+
+                String changePercent = getUpDownRate(quoteEntity.getLast_price(), quoteEntity.getPre_settlement());
+                String change = getUpDown(quoteEntity.getLast_price(), quoteEntity.getPre_settlement());
+                String instrumentId = quoteEntity.getInstrument_id();
+                SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrumentId);
+                String instrumentName = instrumentId;
+
+                if (searchEntity != null) instrumentName = searchEntity.getInstrumentName();
+                if (instrumentName.contains("&")) mBinding.quoteName.setTextSize(10);
+                else mBinding.quoteName.setTextSize(15);
+                mBinding.quoteName.setText(instrumentName);
+
+                if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)){
+                    if (mSwitchLowerLimit){
+                        setTextColor(mBinding.quoteLatest, quoteEntity.getLower_limit());
+                    }else {
+                        setTextColor(mBinding.quoteLatest, quoteEntity.getUpper_limit());
+                    }
+                    if (mSwitchChange) {
+                        setTextColor(mBinding.quoteChangePercent, quoteEntity.getBid_price1());
+                    } else {
+                        setTextColor(mBinding.quoteChangePercent, quoteEntity.getAsk_price1());
+                    }
+                    if (mSwitchVolume) {
+                        mBinding.quoteOpenInterest.setText(quoteEntity.getBid_volume1());
+                    } else {
+                        mBinding.quoteOpenInterest.setText(quoteEntity.getAsk_volume1());
+                    }
+                }else {
                     setTextColor(mBinding.quoteLatest, quoteEntity.getLast_price());
                     if (mSwitchChange) {
-                        setTextColor(mBinding.quoteChangePercent, quoteEntity.getChange());
+                        setTextColor(mBinding.quoteChangePercent,change);
                     } else {
-                        setTextColor(mBinding.quoteChangePercent, quoteEntity.getChange_percent());
+                        setTextColor(mBinding.quoteChangePercent, changePercent);
                     }
                     if (mSwitchVolume) {
                         mBinding.quoteOpenInterest.setText(quoteEntity.getVolume());
@@ -129,6 +177,8 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                         mBinding.quoteOpenInterest.setText(quoteEntity.getOpen_interest());
                     }
                 }
+
+
             }
         }
 
@@ -138,28 +188,59 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                 String value = bundle.getString(key);
                 switch (key) {
                     case "latest":
+                        if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)))
                         setTextColor(mBinding.quoteLatest, value);
                         break;
                     case "change":
-                        if (mSwitchChange) {
+                        if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchChange) {
                             setTextColor(mBinding.quoteChangePercent, value);
                         }
                         break;
                     case "change_percent":
-                        if (!mSwitchChange) {
+                        if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && !mSwitchChange) {
                             setTextColor(mBinding.quoteChangePercent, value);
                         }
                         break;
                     case "volume":
-                        if (mSwitchVolume) {
+                        if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchVolume) {
                             mBinding.quoteOpenInterest.setText(value);
                         }
                         break;
                     case "open_interest":
-                        if (!mSwitchVolume) {
+                        if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && !mSwitchVolume) {
                             mBinding.quoteOpenInterest.setText(value);
                         }
                         break;
+                    case "upper_limit":
+                        if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle) && !mSwitchLowerLimit)
+                        setTextColor(mBinding.quoteLatest, value);
+                        break;
+                    case "lower_limit":
+                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchLowerLimit) {
+                            setTextColor(mBinding.quoteLatest, value);
+                        }
+                        break;
+                    case "ask_price1":
+                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchChange) {
+                            setTextColor(mBinding.quoteChangePercent, value);
+                        }
+                        break;
+                    case "ask_volume1":
+                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchVolume) {
+                            mBinding.quoteOpenInterest.setText(value);
+                        }
+                        break;
+                    case "bid_price1":
+                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && !mSwitchChange) {
+                            setTextColor(mBinding.quoteChangePercent, value);
+                        }
+                        break;
+                    case "bid_volume1":
+                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && !mSwitchVolume) {
+                            mBinding.quoteOpenInterest.setText(value);
+                        }
+                        break;
+
                 }
             }
         }

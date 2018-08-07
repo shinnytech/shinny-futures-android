@@ -179,8 +179,8 @@
 -keep public class java.nio.** { *; }
 
 # Java-WebSocket
--dontwarn org.java_websocket.**
--keep class org.java_websocket.** { *; }
+-dontwarn com.neovisionaries.**
+-keep class com.neovisionaries.** { *; }
 
 # MPAndroidChart
 -dontwarn com.github.mikephil.charting.**

@@ -11,6 +11,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ItemActivitySearchQuoteBinding;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.LogUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +69,10 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ItemViewHo
         } else {
             text = text.toLowerCase();
             for (SearchEntity searchEntity : mDataOriginal) {
-                if (searchEntity.getPy().toLowerCase().contains(text) || searchEntity.getInstrumentName().toLowerCase().contains(text) || searchEntity.getInstrumentId().toLowerCase().contains(text) || searchEntity.getExchangeName().toLowerCase().contains(text)) {
+                if (searchEntity.getPy().toLowerCase().contains(text)
+                        || searchEntity.getInstrumentName().toLowerCase().contains(text)
+                        || searchEntity.getInstrumentId().toLowerCase().contains(text)
+                        || searchEntity.getExchangeName().toLowerCase().contains(text)) {
                     mData.add(searchEntity);
                 }
             }

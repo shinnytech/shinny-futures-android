@@ -1,9 +1,13 @@
 package com.shinnytech.futures.model.engine;
 
 import android.content.Context;
+import android.util.ArrayMap;
+import android.util.Log;
 
 import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 
 import org.json.JSONException;
@@ -18,10 +22,15 @@ import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * date: 3/30/17
@@ -31,6 +40,32 @@ import java.util.Map;
  * state: done
  */
 public class LatestFileManager {
+
+    /**
+     * date: 7/9/17
+     * description: 合约列表json字符串
+     */
+    private static JSONObject sLatestObject;
+
+    private static Comparator<String> comparator = new Comparator<String>() {
+        @Override
+        public int compare(String instrumentId1, String instrumentId2) {
+            try {
+                int sort_key1 = sLatestObject.getJSONObject(instrumentId1).optInt("sort_key");
+                int sort_key2 = sLatestObject.getJSONObject(instrumentId2).optInt("sort_key");
+                if (sort_key1 == sort_key2){
+                    return instrumentId1.compareTo(instrumentId2);
+                }else {
+                    return sort_key1 - sort_key2;
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return instrumentId1.compareTo(instrumentId2);
+        }
+    };
+
     /**
      * date: 7/9/17
      * description: 自选合约列表名称
@@ -40,117 +75,117 @@ public class LatestFileManager {
      * date: 7/9/17
      * description: 搜索列表实例
      */
-    private static final Map<String, SearchEntity> SEARCH_ENTITIES = new LinkedHashMap<>(1568);
+    private static final Map<String, SearchEntity> SEARCH_ENTITIES = new TreeMap<>(comparator);
 
+    /**
+     * date: 7/9/17
+     * description: 自选合约列表
+     */
+    private static Map<String, QuoteEntity> sOptionalInsList = new TreeMap<>(comparator);
 
     /**
      * date: 7/9/17
      * description: 主力合约列表
      */
-    private static Map<String, String> sMainInsList = new LinkedHashMap<>(64);
+    private static Map<String, QuoteEntity> sMainInsList = new TreeMap<>(comparator);
 
     /**
      * date: 7/9/17
      * description: 主力合约导航
      */
-    private static List<String> sMainInsListNameNav = new ArrayList(60);
+    private static Map<String, String> sMainInsListNameNav = new TreeMap<>(comparator);
 
     /**
      * date: 7/9/17
      * description: 上期合约列表
      */
-    private static Map<String, String> sShangqiInsList = new LinkedHashMap<>(220);
+    private static Map<String, QuoteEntity> sShangqiInsList = new TreeMap<>(comparator);
 
     /**
      * date: 7/9/17
      * description: 上期导航
      */
-    private static List<String> sShangqiInsListNameNav = new ArrayList<>(24);
+    private static Map<String, String> sShangqiInsListNameNav = new TreeMap<>(comparator);
 
     /**
      * date: 7/9/17
      * description: 大连合约列表
      */
-    private static Map<String, String> sDalianInsList = new LinkedHashMap<>(224);
+    private static Map<String, QuoteEntity> sDalianInsList = new TreeMap<>(comparator);
 
     /**
      * date: 7/9/17
      * description: 大连合约导航
      */
-    private static List<String> sDalianInsListNameNav = new ArrayList<>(24);
+    private static Map<String, String> sDalianInsListNameNav = new TreeMap<>(comparator);
 
     /**
      * date: 7/9/17
      * description: 郑州合约列表
      */
-    private static Map<String, String> sZhengzhouInsList = new LinkedHashMap<>(200);
+    private static Map<String, QuoteEntity> sZhengzhouInsList = new TreeMap<>(comparator);
 
     /**
      * date: 7/9/17
      * description: 郑州合约列表导航
      */
-    private static List<String> sZhengzhouInsListNameNav = new ArrayList<>(24);
+    private static Map<String, String> sZhengzhouInsListNameNav = new TreeMap<>(comparator);
 
     /**
      * date: 7/9/17
      * description: 中金合约列表
      */
-    private static Map<String, String> sZhongjinInsList = new LinkedHashMap<>(28);
+    private static Map<String, QuoteEntity> sZhongjinInsList = new TreeMap<>(comparator);
 
     /**
      * date: 7/9/17
      * description: 中金合约列表导航
      */
-    private static List<String> sZhongjinInsListNameNav = new ArrayList<>();
+    private static Map<String, String> sZhongjinInsListNameNav = new TreeMap<>(comparator);
 
     /**
      * date: 3/27/18
      * description: 能源合约列表
      */
-    private static Map<String, String> sNengyuanInsList = new LinkedHashMap<>(28);
+    private static Map<String, QuoteEntity> sNengyuanInsList = new TreeMap<>(comparator);
 
     /**
      * date: 3/27/18
      * description: 能源合约列表导航
      */
-    private static List<String> sNengyuanInsListNameNav = new ArrayList<>();
+    private static Map<String, String> sNengyuanInsListNameNav = new TreeMap<>(comparator);
 
 
     /**
      * date: 7/9/17
      * description: 大连组合列表
      */
-    private static Map<String, String> sDalianzuheInsList = new LinkedHashMap<>(108);
+    private static Map<String, QuoteEntity> sDalianzuheInsList = new TreeMap<>(comparator);
 
     /**
      * date: 7/9/17
      * description: 大连组合列表导航
      */
-    private static List<String> sDalianzuheInsListNameNav = new ArrayList<>(40);
+    private static Map<String, String> sDalianzuheInsListNameNav = new TreeMap<>(comparator);
 
     /**
      * date: 7/9/17
      * description: 郑州组合列表
      */
-    private static Map<String, String> sZhengzhouzuheInsList = new LinkedHashMap<>(816);
+    private static Map<String, QuoteEntity> sZhengzhouzuheInsList = new TreeMap<>(comparator);
 
     /**
      * date: 7/9/17
      * description: 郑州组合中文名列表
      */
-    private static List<String> sZhengzhouzuheInsListNameNav = new ArrayList<>(28);
+    private static Map<String, String> sZhengzhouzuheInsListNameNav = new TreeMap<>(comparator);
 
     /**
      * date: 7/9/17
      * description: 搜索列表实例历史
      */
-    private static Map<String, SearchEntity> SEARCH_ENTITIES_HISTORY = new LinkedHashMap<>();
+    private static Map<String, SearchEntity> SEARCH_ENTITIES_HISTORY =  new TreeMap<>(comparator);
 
-    /**
-     * date: 7/9/17
-     * description: 合约列表json字符串
-     */
-    private static String sLatest;
 
     /**
      * date: 7/9/17
@@ -158,113 +193,104 @@ public class LatestFileManager {
      * description: 开机初始化合约列表
      */
     public static void initInsList(File latestFile) {
-        if (latestFile != null) sLatest = readLatestFile(latestFile.getName());
+        LogUtils.e("合约列表解析开始", true);
+        String latest = readLatestFile(latestFile.getName());
+        if (latest == null)return;
         try {
-            JSONObject latestObject = new JSONObject(sLatest);
-            String mainIns = latestObject.getString("active");
-            JSONObject dataObject = latestObject.getJSONObject("data");
-            JSONObject futureObject = dataObject.getJSONObject("future");
-            Iterator<String> futureIds = futureObject.keys();
-            while (futureIds.hasNext()) {
-                String futureId = futureIds.next();
-                JSONObject nObject = futureObject.getJSONObject(futureId).getJSONObject("n");
-                String sn = nObject.getString("sn");
-                String vm = nObject.getString("vm");
-                String py = nObject.getString("py");
-                String ei = nObject.getString("ei");
-                String pTick = nObject.getString("ptick");
-                JSONObject insObject = futureObject.getJSONObject(futureId).getJSONObject("Ins");
-                int bRepeat = 0;
-                int aRepeat = 0;
-                Iterator<String> instrumentIds = insObject.keys();
-                while (instrumentIds.hasNext()) {
-                    String instrumentId = instrumentIds.next();
-                    String instrumentName = sn + instrumentId.substring(futureId.length(), instrumentId.length());
-                    SearchEntity searchEntity = new SearchEntity();
-                    searchEntity.setpTick(pTick);
-                    searchEntity.setInstrumentId(instrumentId);
-                    searchEntity.setInstrumentName(instrumentName);
-                    searchEntity.setPy(py);
-                    searchEntity.setVm(vm);
-                    searchEntity.setExchangeId(ei);
-                    if (mainIns.contains(instrumentId)) {
-                        sMainInsList.put(instrumentId, instrumentName);
-                        if (aRepeat++ == 0) sMainInsListNameNav.add(sn);
-                    }
-                    switch (ei) {
+            sLatestObject = new JSONObject(latest);
+            Iterator<String> instrumentIds = sLatestObject.keys();
+            while (instrumentIds.hasNext()) {
+                String instrument_id = instrumentIds.next();
+                JSONObject subObject = sLatestObject.getJSONObject(instrument_id);
+                String classN = subObject.optString("class");
+                if (!"FUTURE_CONT".equals(classN) && !"FUTURE".equals(classN) && !"FUTURE_COMBINE".equals(classN)){continue;}
+                String ins_name = subObject.optString("ins_name");
+                String exchange_id = subObject.optString("exchange_id");
+                String price_tick = subObject.optString("price_tick");
+                String volume_multiple = subObject.optString("volume_multiple");
+                String sort_key = subObject.optString("sort_key");
+                String product_short_name = subObject.optString("product_short_name");
+                String py = subObject.optString("py");
+                SearchEntity searchEntity = new SearchEntity();
+                searchEntity.setpTick(price_tick);
+                searchEntity.setInstrumentId(instrument_id);
+                searchEntity.setInstrumentName(ins_name);
+                searchEntity.setVm(volume_multiple);
+                searchEntity.setExchangeId(exchange_id);
+                searchEntity.setSort_key(sort_key);
+                searchEntity.setPy(py);
+                QuoteEntity quoteEntity = new QuoteEntity();
+                quoteEntity.setInstrument_id(instrument_id);
+
+                if ("FUTURE_CONT".equals(classN)) {
+                    sMainInsList.put(instrument_id, quoteEntity);
+                    sMainInsListNameNav.put(instrument_id, ins_name.replace("主连", ""));
+                }
+
+                if ("FUTURE".equals(classN)) {
+                    switch (exchange_id) {
                         case "SHFE"://上期所
-                            sShangqiInsList.put(instrumentId, instrumentName);
-                            if (bRepeat++ == 0) sShangqiInsListNameNav.add(sn);
+                            sShangqiInsList.put(instrument_id, quoteEntity);
+                            if (!sShangqiInsListNameNav.containsValue(product_short_name))
+                                sShangqiInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("上海期货交易所");
                             break;
                         case "CZCE"://郑商所
-                            sZhengzhouInsList.put(instrumentId, instrumentName);
-                            if (bRepeat++ == 0) sZhengzhouInsListNameNav.add(sn);
+                            sZhengzhouInsList.put(instrument_id, quoteEntity);
+                            if (!sZhengzhouInsListNameNav.containsValue(product_short_name))
+                                sZhengzhouInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("郑州商品交易所");
                             break;
                         case "DCE"://大商所
-                            sDalianInsList.put(instrumentId, instrumentName);
-                            if (bRepeat++ == 0) sDalianInsListNameNav.add(sn);
+                            sDalianInsList.put(instrument_id, quoteEntity);
+                            if (!sDalianInsListNameNav.containsValue(product_short_name))
+                                sDalianInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("大连商品交易所");
                             break;
                         case "CFFEX"://中金所
-                            sZhongjinInsList.put(instrumentId, instrumentName);
-                            if (bRepeat++ == 0) sZhongjinInsListNameNav.add(sn);
+                            sZhongjinInsList.put(instrument_id, quoteEntity);
+                            if (!sZhongjinInsListNameNav.containsValue(product_short_name))
+                                sZhongjinInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("中国金融期货交易所");
                             break;
                         case "INE"://上期能源
-                            sNengyuanInsList.put(instrumentId, instrumentName);
-                            if (bRepeat++ == 0) sNengyuanInsListNameNav.add(sn);
+                            sNengyuanInsList.put(instrument_id, quoteEntity);
+                            if (!sNengyuanInsListNameNav.containsValue(product_short_name))
+                                sNengyuanInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("上海国际能源交易中心");
                             break;
                         default:
                             break;
                     }
-                    SEARCH_ENTITIES.put(instrumentId, searchEntity);
                 }
-            }
 
-            JSONObject combineObject = dataObject.getJSONObject("combine");
-            Iterator<String> combineIds = combineObject.keys();
-            while (combineIds.hasNext()) {
-                String combineId = combineIds.next();
-                JSONObject nObject = combineObject.getJSONObject(combineId).getJSONObject("n");
-                String ei = nObject.getString("ei");
-                String pTick = nObject.getString("ptick");
-                String vm = nObject.getString("vm");
-                JSONObject insObject = combineObject.getJSONObject(combineId).getJSONObject("Ins");
-                int bRepeat = 0;
-                Iterator<String> instrumentIds = insObject.keys();
-                while (instrumentIds.hasNext()) {
-                    String instrumentId = instrumentIds.next();
-                    JSONObject oneCombineObject = insObject.getJSONObject(instrumentId);
-                    if (oneCombineObject.length() == 0) {
-                        SearchEntity searchEntity = new SearchEntity();
-                        searchEntity.setInstrumentId(instrumentId);
-                        searchEntity.setInstrumentName(instrumentId);
-                        //组合拼音没有
-                        searchEntity.setPy("");
-                        searchEntity.setpTick(pTick);
-                        searchEntity.setVm(vm);
-                        searchEntity.setExchangeId(ei);
-                        switch (ei) {
-                            case "CZCE":
-                                sZhengzhouzuheInsList.put(instrumentId, instrumentId);
-                                if (bRepeat++ == 0) sZhengzhouzuheInsListNameNav.add(instrumentId);
-                                searchEntity.setExchangeName("郑州商品交易所");
-                                break;
-                            case "DCE":
-                                sDalianzuheInsList.put(instrumentId, instrumentId);
-                                if (bRepeat++ == 0) sDalianzuheInsListNameNav.add(instrumentId);
-                                searchEntity.setExchangeName("大连商品交易所");
-                                break;
-                            default:
-                                break;
-                        }
-                        SEARCH_ENTITIES.put(instrumentId, searchEntity);
+                if ("FUTURE_COMBINE".equals(classN)) {
+                    String leg1_symbol = subObject.optString("leg1_symbol");
+                    JSONObject subObjectFuture = sLatestObject.optJSONObject(leg1_symbol);
+                    String product_short_name_leg = subObjectFuture.optString("product_short_name");
+                    String py_leg = subObjectFuture.optString("py");
+                    switch (exchange_id) {
+                        case "CZCE":
+                            sZhengzhouzuheInsList.put(instrument_id, quoteEntity);
+                            if (!sZhengzhouzuheInsListNameNav.containsValue(product_short_name_leg))
+                                sZhengzhouzuheInsListNameNav.put(instrument_id, product_short_name_leg);
+                            searchEntity.setExchangeName("郑州商品交易所");
+                            break;
+                        case "DCE":
+                            sDalianzuheInsList.put(instrument_id, quoteEntity);
+                            if (!sDalianzuheInsListNameNav.containsValue(product_short_name_leg))
+                                sDalianzuheInsListNameNav.put(instrument_id, product_short_name_leg);
+                            searchEntity.setExchangeName("大连商品交易所");
+                            break;
+                        default:
+                            break;
                     }
+                    searchEntity.setPy(py_leg);
                 }
+
+                SEARCH_ENTITIES.put(instrument_id, searchEntity);
             }
+            LogUtils.e("合约列表解析结束", true);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -275,71 +301,81 @@ public class LatestFileManager {
      * author: chenli
      * description: 获取合约列表
      */
-    public static Map<String, String> getOptionalInsList() {
-        return readInsListFromFile();
+    public static Map<String, QuoteEntity> getOptionalInsList() {
+        Set<String> insList = readInsListFromFile();
+        for (String ins :
+                insList) {
+            QuoteEntity quoteEntity = DataManager.getInstance().getRtnData().getQuotes().get(ins);
+            if (quoteEntity == null) {
+                quoteEntity = new QuoteEntity();
+                quoteEntity.setInstrument_id(ins);
+            }
+            sOptionalInsList.put(ins, quoteEntity);
+        }
+        return sOptionalInsList;
     }
 
-    public static Map<String, String> getMainInsList() {
+    public static Map<String, QuoteEntity> getMainInsList() {
         return sMainInsList;
     }
 
-    public static Map<String, String> getShangqiInsList() {
+    public static Map<String, QuoteEntity> getShangqiInsList() {
         return sShangqiInsList;
     }
 
-    public static Map<String, String> getDalianInsList() {
+    public static Map<String, QuoteEntity> getDalianInsList() {
         return sDalianInsList;
     }
 
-    public static Map<String, String> getZhengzhouInsList() {
+    public static Map<String, QuoteEntity> getZhengzhouInsList() {
         return sZhengzhouInsList;
     }
 
-    public static Map<String, String> getZhongjinInsList() {
+    public static Map<String, QuoteEntity> getZhongjinInsList() {
         return sZhongjinInsList;
     }
 
-    public static Map<String, String> getNengyuanInsList() {
+    public static Map<String, QuoteEntity> getNengyuanInsList() {
         return sNengyuanInsList;
     }
 
-    public static Map<String, String> getDalianzuheInsList() {
+    public static Map<String, QuoteEntity> getDalianzuheInsList() {
         return sDalianzuheInsList;
     }
 
-    public static Map<String, String> getZhengzhouzuheInsList() {
+    public static Map<String, QuoteEntity> getZhengzhouzuheInsList() {
         return sZhengzhouzuheInsList;
     }
 
-    public static List<String> getMainInsListNameNav() {
+    public static Map<String, String> getMainInsListNameNav() {
         return sMainInsListNameNav;
     }
 
-    public static List<String> getShangqiInsListNameNav() {
+    public static Map<String, String> getShangqiInsListNameNav() {
         return sShangqiInsListNameNav;
     }
 
-    public static List<String> getDalianInsListNameNav() {
+    public static Map<String, String> getDalianInsListNameNav() {
         return sDalianInsListNameNav;
     }
 
-    public static List<String> getZhengzhouInsListNameNav() {
+    public static Map<String, String> getZhengzhouInsListNameNav() {
         return sZhengzhouInsListNameNav;
     }
 
-    public static List<String> getZhongjinInsListNameNav() {
+    public static Map<String, String> getZhongjinInsListNameNav() {
         return sZhongjinInsListNameNav;
     }
 
-    public static List<String> getNengyuanInsListNameNav() {
+    public static Map<String, String> getNengyuanInsListNameNav() {
         return sNengyuanInsListNameNav;
     }
 
-    public static List<String> getDalianzuheInsListNameNav() {
+    public static Map<String, String> getDalianzuheInsListNameNav() {
         return sDalianzuheInsListNameNav;
     }
 
-    public static List<String> getZhengzhouzuheInsListNameNav() {
+    public static Map<String, String> getZhengzhouzuheInsListNameNav() {
         return sZhengzhouzuheInsListNameNav;
     }
 
@@ -357,7 +393,7 @@ public class LatestFileManager {
      * description: 根据最新价与昨收获取合约涨跌幅
      */
     public static String getUpDownRate(String latest, String preClose) {
-        return MathUtils.round(MathUtils.multiply("100", MathUtils.divide(MathUtils.subtract(latest, preClose), preClose)), 2, BigDecimal.ROUND_HALF_EVEN);
+        return MathUtils.round(MathUtils.multiply( MathUtils.divide(MathUtils.subtract(latest, preClose), preClose), "100"), 2, BigDecimal.ROUND_HALF_EVEN);
     }
 
     /**
@@ -416,7 +452,7 @@ public class LatestFileManager {
     /**
      * 保存合约列表字符串到本地文件
      */
-    public static void saveInsListToFile(Map<String, String> insList) {
+    public static void saveInsListToFile(Set<String> insList) {
         try {
             ObjectOutputStream out = new ObjectOutputStream(BaseApplicationLike.getContext().openFileOutput(OPTIONAL_INS_LIST, Context.MODE_PRIVATE));
             out.writeObject(insList);
@@ -429,13 +465,13 @@ public class LatestFileManager {
     /**
      * 读取本地文件合约列表
      */
-    private static Map<String, String> readInsListFromFile() {
-        Map<String, String> insList = new LinkedHashMap<>();
+    private static Set<String> readInsListFromFile() {
+        Set<String> insList = new TreeSet<>(comparator);
         //打开文件输入流
         //读取文件内容
         try {
             ObjectInputStream in = new ObjectInputStream(BaseApplicationLike.getContext().openFileInput(OPTIONAL_INS_LIST));
-            insList = (LinkedHashMap<String, String>) in.readObject();
+            insList = (TreeSet<String>) in.readObject();
             in.close();
         } catch (IOException e) {
             e.printStackTrace();
