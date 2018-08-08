@@ -41,7 +41,8 @@
 
                 <android.support.v7.widget.AppCompatSpinner
                     android:id="@+id/spinner"
-                    android:layout_width="wrap_content"
+                    android:layout_marginEnd="@dimen/margin_10dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@id/broker"
                     android:layout_toRightOf="@id/broker"></android.support.v7.widget.AppCompatSpinner>
@@ -69,6 +70,7 @@
                     android:textSize="@dimen/font_size_normal"/>
 
                 <AutoCompleteTextView
+                    android:layout_marginEnd="@dimen/margin_10dp"
                     android:id="@+id/tv_id_phone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -106,6 +108,7 @@
                     android:textSize="@dimen/font_size_normal"/>
 
                 <EditText
+                    android:layout_marginEnd="@dimen/margin_10dp"
                     android:id="@+id/et_id_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

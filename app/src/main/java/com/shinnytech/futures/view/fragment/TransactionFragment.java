@@ -104,30 +104,34 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         mBinding.askOpenPosition.setOnClickListener(this);
         mBinding.closePosition.setOnClickListener(this);
 
-        //弹出价格键盘
-        mBinding.price.setOnClickListener(new View.OnClickListener() {
+        //弹出价格键盘，不可以用单击监控器，会弹出系统自带键盘
+        mBinding.price.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
+            public boolean onTouch(View view, MotionEvent motionEvent) {
                 mKeyboardUtilsPrice = new KeyboardUtils(getActivity(),
                         R.xml.future_price, mInstrumentId);
                 mKeyboardUtilsPrice.attachTo(mBinding.price);
                 if (!mKeyboardUtilsPrice.isVisible()) {
                     mKeyboardUtilsPrice.showKeyboard();
                 }
+                return true;
             }
+
         });
 
         //弹出手数键盘
-        mBinding.volume.setOnClickListener(new View.OnClickListener() {
+        mBinding.volume.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
+            public boolean onTouch(View view, MotionEvent motionEvent) {
                 mKeyboardUtilsVolume = new KeyboardUtils(getActivity(),
                         R.xml.future_volume, mInstrumentId);
                 mKeyboardUtilsVolume.attachTo(mBinding.volume);
                 if (!mKeyboardUtilsVolume.isVisible()) {
                     mKeyboardUtilsVolume.showKeyboard();
                 }
+                return true;
             }
+
         });
 
         //价格输入框监听器，实现下单板上价格联动

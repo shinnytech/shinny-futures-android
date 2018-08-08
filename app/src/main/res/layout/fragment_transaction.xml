@@ -452,7 +452,7 @@
             android:layout_alignParentBottom="true"
             android:layout_below="@id/transaction"
             android:background="@color/black_light_more"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <android.inputmethodservice.KeyboardView
                 android:id="@+id/keyboard"
@@ -466,7 +466,9 @@
                 android:focusableInTouchMode="true"
                 android:keyPreviewLayout="@layout/keyboard_layout_preview"/>
 
+
             <LinearLayout
+                android:id="@+id/upper_lower_limit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_above="@id/keyboard"
@@ -480,7 +482,6 @@
                     android:textColor="@color/white"/>
 
                 <TextView
-                    android:id="@+id/upper_limit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@{quote.upper_limit}"
@@ -494,12 +495,55 @@
                     android:textColor="@color/white"/>
 
                 <TextView
-                    android:id="@+id/lower_limit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@{quote.lower_limit}"
                     android:textColor="@color/white"/>
             </LinearLayout>
+
+            <!--<LinearLayout-->
+                <!--android:id="@+id/max_open_volume"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_above="@id/upper_lower_limit"-->
+                <!--android:layout_alignStart="@id/upper_lower_limit"-->
+                <!--android:orientation="horizontal">-->
+
+                <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="最大开仓手数："-->
+                    <!--android:textColor="@color/white"/>-->
+
+                <!--<TextView-->
+                    <!--android:id="@+id/max_volume"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="@{quote.lower_limit}"-->
+                    <!--android:textColor="@color/white"/>-->
+            <!--</LinearLayout>-->
+
+            <!--<LinearLayout-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_above="@id/max_open_volume"-->
+                <!--android:layout_alignStart="@id/max_open_volume"-->
+                <!--android:orientation="horizontal">-->
+
+                <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="最小变动价位："-->
+                    <!--android:textColor="@color/white"/>-->
+
+                <!--<TextView-->
+                    <!--android:id="@+id/min_price"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="@{quote.upper_limit}"-->
+                    <!--android:textColor="@color/white"/>-->
+
+            <!--</LinearLayout>-->
 
             <TextView
                 android:id="@+id/hide"

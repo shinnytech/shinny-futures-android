@@ -82,6 +82,7 @@ public class LoginActivity extends BaseActivity {
     private ArrayAdapter<String> mSpinnerAdapter;
     private Handler handler = new MyHandler(this);
     private ActivityLoginBinding mBinding;
+    private String mPassword;
 
     public static boolean isIsLogin() {
         return sIsLogin;
@@ -147,6 +148,10 @@ public class LoginActivity extends BaseActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, mData);
         mBinding.tvIdPhone.setAdapter(adapter);
 
+        if (SPUtils.contains(sContext, "password")) {
+            String password = (String) SPUtils.get(sContext, "password", "");
+            mBinding.etIdPassword.setText(password);
+        }
     }
 
     @Override
@@ -286,13 +291,13 @@ public class LoginActivity extends BaseActivity {
         // Store values at the time of the fragment_home attempt.
         mBrokerId = (String) mBinding.spinner.getSelectedItem();
         mPhoneNumber = mBinding.tvIdPhone.getText().toString();
-        String password = mBinding.etIdPassword.getText().toString();
+        mPassword = mBinding.etIdPassword.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (TextUtils.isEmpty(password)) {
+        if (TextUtils.isEmpty(mPassword)) {
             mBinding.etIdPassword.setError(getString(R.string.login_activity_error_invalid_password));
             focusView = mBinding.etIdPassword;
             cancel = true;
@@ -314,7 +319,7 @@ public class LoginActivity extends BaseActivity {
             // perform the user fragment_home attempt.
             showProgress(true);
             if (BaseApplicationLike.getWebSocketService() != null)
-                BaseApplicationLike.getWebSocketService().sendReqLogin(mBrokerId, mPhoneNumber, password);
+                BaseApplicationLike.getWebSocketService().sendReqLogin(mBrokerId, mPhoneNumber, mPassword);
 
             handler.sendEmptyMessageDelayed(1, 5000);
 
@@ -418,6 +423,7 @@ public class LoginActivity extends BaseActivity {
                             activity.showProgress(false);
                             sIsLogin = true;
                             SPUtils.putAndApply(activity.sContext, "phone", activity.mPhoneNumber);
+                            SPUtils.putAndApply(activity.sContext, "password", activity.mPassword);
                             SPUtils.putAndApply(activity.sContext, "brokerId", activity.mBinding.spinner.getSelectedItemPosition());
                             //关闭键盘
                             View view = activity.getWindow().getCurrentFocus();
