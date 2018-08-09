@@ -237,6 +237,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      */
     private void initPosition() {
         try {
+            mBinding.minPrice.setText(LatestFileManager.getSearchEntities().get(mInstrumentId).getpTick());
             mBinding.price.setText("最新价");
             mPriceType = "最新价";
             String key = mInstrumentId;
