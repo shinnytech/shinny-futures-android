@@ -41,30 +41,7 @@ import java.util.TreeSet;
  */
 public class LatestFileManager {
 
-    /**
-     * date: 7/9/17
-     * description: 合约列表json字符串
-     */
-    private static JSONObject sLatestObject;
-
-    private static Comparator<String> comparator = new Comparator<String>() {
-        @Override
-        public int compare(String instrumentId1, String instrumentId2) {
-            try {
-                int sort_key1 = sLatestObject.getJSONObject(instrumentId1).optInt("sort_key");
-                int sort_key2 = sLatestObject.getJSONObject(instrumentId2).optInt("sort_key");
-                if (sort_key1 == sort_key2){
-                    return instrumentId1.compareTo(instrumentId2);
-                }else {
-                    return sort_key1 - sort_key2;
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return instrumentId1.compareTo(instrumentId2);
-        }
-    };
+    private static Comparator<String> comparator;
 
     /**
      * date: 7/9/17
@@ -197,11 +174,29 @@ public class LatestFileManager {
         String latest = readLatestFile(latestFile.getName());
         if (latest == null)return;
         try {
-            sLatestObject = new JSONObject(latest);
-            Iterator<String> instrumentIds = sLatestObject.keys();
+            final JSONObject jsonObject = new JSONObject(latest);
+            comparator = new Comparator<String>() {
+                @Override
+                public int compare(String instrumentId1, String instrumentId2) {
+                    try {
+                        int sort_key1 = jsonObject.getJSONObject(instrumentId1).optInt("sort_key");
+                        int sort_key2 = jsonObject.getJSONObject(instrumentId2).optInt("sort_key");
+                        if (sort_key1 == sort_key2){
+                            return instrumentId1.compareTo(instrumentId2);
+                        }else {
+                            return sort_key1 - sort_key2;
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    return instrumentId1.compareTo(instrumentId2);
+                }
+            };
+            Iterator<String> instrumentIds = jsonObject.keys();
             while (instrumentIds.hasNext()) {
                 String instrument_id = instrumentIds.next();
-                JSONObject subObject = sLatestObject.getJSONObject(instrument_id);
+                JSONObject subObject = jsonObject.getJSONObject(instrument_id);
                 String classN = subObject.optString("class");
                 if (!"FUTURE_CONT".equals(classN) && !"FUTURE".equals(classN) && !"FUTURE_COMBINE".equals(classN)){continue;}
                 String ins_name = subObject.optString("ins_name");
@@ -211,6 +206,7 @@ public class LatestFileManager {
                 String sort_key = subObject.optString("sort_key");
                 String product_short_name = subObject.optString("product_short_name");
                 String py = subObject.optString("py");
+                String margin = subObject.optString("margin");
                 SearchEntity searchEntity = new SearchEntity();
                 searchEntity.setpTick(price_tick);
                 searchEntity.setInstrumentId(instrument_id);
@@ -219,12 +215,15 @@ public class LatestFileManager {
                 searchEntity.setExchangeId(exchange_id);
                 searchEntity.setSort_key(sort_key);
                 searchEntity.setPy(py);
+                searchEntity.setMargin(margin);
+                LogUtils.e(margin, true);
                 QuoteEntity quoteEntity = new QuoteEntity();
                 quoteEntity.setInstrument_id(instrument_id);
 
                 if ("FUTURE_CONT".equals(classN)) {
-                    sMainInsList.put(instrument_id, quoteEntity);
-                    sMainInsListNameNav.put(instrument_id, ins_name.replace("主连", ""));
+                    String underlying_symbol = subObject.optString("underlying_symbol");
+                    sMainInsList.put(underlying_symbol, quoteEntity);
+                    sMainInsListNameNav.put(underlying_symbol, ins_name.replace("主连", ""));
                 }
 
                 if ("FUTURE".equals(classN)) {
@@ -266,7 +265,7 @@ public class LatestFileManager {
 
                 if ("FUTURE_COMBINE".equals(classN)) {
                     String leg1_symbol = subObject.optString("leg1_symbol");
-                    JSONObject subObjectFuture = sLatestObject.optJSONObject(leg1_symbol);
+                    JSONObject subObjectFuture = jsonObject.optJSONObject(leg1_symbol);
                     String product_short_name_leg = subObjectFuture.optString("product_short_name");
                     String py_leg = subObjectFuture.optString("py");
                     switch (exchange_id) {

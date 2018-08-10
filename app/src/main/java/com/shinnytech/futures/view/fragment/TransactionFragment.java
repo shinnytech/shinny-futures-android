@@ -25,6 +25,7 @@ import android.widget.TextView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplicationLike;
 import com.shinnytech.futures.databinding.FragmentTransactionBinding;
+import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
@@ -345,7 +346,13 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      * description: 刷新账户信息
      */
     private void refreshAccount() {
-        mBinding.setAccount(sDataManager.getAccountBean().getAccount().get("CNY"));
+        AccountEntity accountEntity = sDataManager.getAccountBean().getAccount().get("CNY");
+        mBinding.setAccount(accountEntity);
+        if (accountEntity == null) return;
+        String margin = LatestFileManager.getSearchEntities().get(mInstrumentId).getMargin();
+        if (margin.isEmpty()) mBinding.maxVolume.setText("0");
+        else mBinding.maxVolume.setText(MathUtils.round(MathUtils.divide(accountEntity.getAvailable(), margin), 0));
+
     }
 
     private void registerBroaderCast() {
@@ -640,6 +647,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         mExchangeId = mInstrumentId.split("\\.")[0];
         initPosition();
         refreshPrice();
+        refreshAccount();
     }
 
     /**

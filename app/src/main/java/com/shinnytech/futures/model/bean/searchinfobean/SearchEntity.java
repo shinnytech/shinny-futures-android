@@ -15,6 +15,15 @@ public class SearchEntity {
     private String pTick = "";
     private String vm = "";
     private String sort_key = "";
+    private String margin = "";
+
+    public String getMargin() {
+        return margin;
+    }
+
+    public void setMargin(String margin) {
+        this.margin = margin;
+    }
 
     public String getSort_key() {
         return sort_key;
