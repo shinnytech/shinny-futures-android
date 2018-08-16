@@ -448,6 +448,10 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
      * description: 点击合约导航滑动行情列表
      */
     private void scrollQuotes(String title, int position, String instrumentId) {
+        if (instrumentId.contains("&")){
+            instrumentId = instrumentId.split("&")[0];
+        }
+        instrumentId = instrumentId.replaceAll("\\d", "");
         List<String> insListName = new ArrayList<>();
         switch (title) {
             case DOMINANT:
@@ -479,7 +483,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
         }
 
         for (int i = 0; i < insListName.size(); i++) {
-            if (insListName.get(i).equals(instrumentId)) {
+            if (insListName.get(i).contains(instrumentId)) {
                 //出现重复的合约中文名，则导航到第一个出现的位置
                 position = i;
                 break;

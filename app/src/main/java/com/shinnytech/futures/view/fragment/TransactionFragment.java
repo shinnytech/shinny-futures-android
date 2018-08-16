@@ -1,5 +1,6 @@
 package com.shinnytech.futures.view.fragment;
 
+import android.animation.LayoutTransition;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -59,6 +60,7 @@ import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_AC
  */
 public class TransactionFragment extends LazyLoadFragment implements View.OnClickListener {
 
+    private String mInstrumentIdTransaction;
     private String mInstrumentId;
     private String mExchangeId;
     private String mDirection;
@@ -88,7 +90,9 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mInstrumentId = ((FutureInfoActivity) getActivity()).getInstrument_id();
-        mExchangeId = mInstrumentId.split("\\.")[0];
+        if (mInstrumentId.contains("KQ")) mInstrumentIdTransaction = LatestFileManager.getSearchEntities().get(mInstrumentId).getUnderlying_symbol();
+        else mInstrumentIdTransaction = mInstrumentId;
+        mExchangeId = mInstrumentIdTransaction.split("\\.")[0];
     }
 
     @Nullable
@@ -110,7 +114,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 mKeyboardUtilsPrice = new KeyboardUtils(getActivity(),
-                        R.xml.future_price, mInstrumentId);
+                        R.xml.future_price, mInstrumentIdTransaction);
                 mKeyboardUtilsPrice.attachTo(mBinding.price);
                 if (!mKeyboardUtilsPrice.isVisible()) {
                     mKeyboardUtilsPrice.showKeyboard();
@@ -125,7 +129,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 mKeyboardUtilsVolume = new KeyboardUtils(getActivity(),
-                        R.xml.future_volume, mInstrumentId);
+                        R.xml.future_volume, mInstrumentIdTransaction);
                 mKeyboardUtilsVolume.attachTo(mBinding.volume);
                 if (!mKeyboardUtilsVolume.isVisible()) {
                     mKeyboardUtilsVolume.showKeyboard();
@@ -149,7 +153,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
 
             @Override
             public void afterTextChanged(Editable s) {
-                QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
+                QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentIdTransaction);
                 if (quoteEntity != null) {
                     switch (mBinding.price.getText().toString()) {
                         case "排队价":
@@ -238,10 +242,10 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      */
     private void initPosition() {
         try {
-            mBinding.minPrice.setText(LatestFileManager.getSearchEntities().get(mInstrumentId).getpTick());
+            mBinding.minPrice.setText(LatestFileManager.getSearchEntities().get(mInstrumentIdTransaction).getpTick());
             mBinding.price.setText("最新价");
             mPriceType = "最新价";
-            String key = mInstrumentId;
+            String key = mInstrumentIdTransaction;
             PositionEntity positionEntity = sDataManager.getAccountBean().getPosition().get(key);
             if (positionEntity == null) {
                 this.mDirection = "";
@@ -349,7 +353,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         AccountEntity accountEntity = sDataManager.getAccountBean().getAccount().get("CNY");
         mBinding.setAccount(accountEntity);
         if (accountEntity == null) return;
-        String margin = LatestFileManager.getSearchEntities().get(mInstrumentId).getMargin();
+        String margin = LatestFileManager.getSearchEntities().get(mInstrumentIdTransaction).getMargin();
         if (margin.isEmpty()) mBinding.maxVolume.setText("0");
         else mBinding.maxVolume.setText(MathUtils.round(MathUtils.divide(accountEntity.getAvailable(), margin), 0));
 
@@ -427,7 +431,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         try {
                             int volumeN = Integer.parseInt(volume);
                             double priceN = Double.parseDouble(price);
-                            initDialog(orderId, mExchangeId, mInstrumentId.split("\\.")[1], "买开", "BUY", "OPEN", volumeN, "LIMIT", priceN);
+                            initDialog(orderId, mExchangeId, mInstrumentIdTransaction.split("\\.")[1], "买开", "BUY", "OPEN", volumeN, "LIMIT", priceN);
                         } catch (NumberFormatException ex) {
                             ex.printStackTrace();
                         }
@@ -453,7 +457,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         try {
                             int volumeN = Integer.parseInt(volume);
                             double priceN = Double.parseDouble(price);
-                            initDialog(orderId, mExchangeId, mInstrumentId.split("\\.")[1], "卖开", "SELL", "OPEN", volumeN, "LIMIT", priceN);
+                            initDialog(orderId, mExchangeId, mInstrumentIdTransaction.split("\\.")[1], "卖开", "SELL", "OPEN", volumeN, "LIMIT", priceN);
                         } catch (NumberFormatException ex) {
                             ex.printStackTrace();
                         }
@@ -502,7 +506,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         popup.show();
                         break;
                     case "先开先平":
-                        if (mInstrumentId != null && mInstrumentId.contains("&")) {
+                        if (mInstrumentIdTransaction != null && mInstrumentIdTransaction.contains("&")) {
                             PopupMenu popupCombine = new PopupMenu(getActivity(), v);
                             popupCombine.getMenuInflater().inflate(R.menu.fragment_transaction, popupCombine.getMenu());
                             popupCombine.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -582,11 +586,11 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 final String orderId = Calendar.getInstance().getTimeInMillis() + "";
                 final int volumeN = Integer.parseInt(volume);
                 final double priceN = Double.parseDouble(price);
-                final String instrumentId = mInstrumentId.split("\\.")[1];
-                SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
+                final String instrumentId = mInstrumentIdTransaction.split("\\.")[1];
+                SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentIdTransaction);
                 if (searchEntity != null && ("上海国际能源交易中心".equals(searchEntity.getExchangeName())
                         || "上海期货交易所".equals(searchEntity.getExchangeName()))) {
-                    PositionEntity positionEntity = sDataManager.getAccountBean().getPosition().get(mInstrumentId);
+                    PositionEntity positionEntity = sDataManager.getAccountBean().getPosition().get(mInstrumentIdTransaction);
                     if (positionEntity == null) return;
                     int volume_today = 0;
                     int volume_history = 0;
@@ -644,7 +648,9 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     @Subscribe
     public void onEvent(IdEvent data) {
         mInstrumentId = data.getInstrument_id();
-        mExchangeId = mInstrumentId.split("\\.")[0];
+        if (mInstrumentId.contains("KQ"))mInstrumentIdTransaction = LatestFileManager.getSearchEntities().get(mInstrumentId).getUnderlying_symbol();
+        else mInstrumentIdTransaction = mInstrumentId;
+        mExchangeId = mInstrumentIdTransaction.split("\\.")[0];
         initPosition();
         refreshPrice();
         refreshAccount();

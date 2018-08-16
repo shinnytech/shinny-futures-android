@@ -254,7 +254,7 @@ public class WebSocketService extends Service {
         if (webSocketClient != null && webSocketClient.getState() == WebSocketState.OPEN) {
             String peekMessage = "{\"aid\":\"peek_message\"}";
             webSocketClient.sendText(peekMessage);
-            LogUtils.e("PeekMessage", false);
+            LogUtils.e(peekMessage, false);
         }
     }
 
@@ -329,12 +329,13 @@ public class WebSocketService extends Service {
 
                         // A text message arrived from the server.
                         public void onTextMessage(WebSocket websocket, String message) {
-                            LogUtils.e(message, true);
+                            LogUtils.e(message, false);
                             try {
                                 sDataManager.refreshAccountBean(message);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
+                            sendPeekMessageTransaction();
                         }
 
                         @Override
@@ -359,9 +360,22 @@ public class WebSocketService extends Service {
     }
 
     public void disConnectTransaction() {
-        if (webSocketClientTransaction != null && webSocketClient.getState() == WebSocketState.OPEN) {
+        if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
             webSocketClientTransaction.disconnect();
             webSocketClientTransaction = null;
+        }
+    }
+
+    /**
+     * date: 7/9/17
+     * author: chenli
+     * description: 获取合约信息
+     */
+    public void sendPeekMessageTransaction() {
+        if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
+            String peekMessage = "{\"aid\":\"peek_message\"}";
+            webSocketClientTransaction.sendText(peekMessage);
+            LogUtils.e(peekMessage, false);
         }
     }
 
@@ -371,7 +385,7 @@ public class WebSocketService extends Service {
      * description: 用户登录
      */
     public void sendReqLogin(String bid, String user_name, String password) {
-        if (webSocketClientTransaction != null && webSocketClient.getState() == WebSocketState.OPEN) {
+        if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
             String reqLogin = "{\"aid\":\"req_login\",\"bid\":\"" + bid + "\",\"user_name\":\"" + user_name + "\",\"password\":\"" + password + "\"}";
             LogUtils.e(reqLogin, true);
             webSocketClientTransaction.sendText(reqLogin);
@@ -384,7 +398,7 @@ public class WebSocketService extends Service {
      * description: 确认结算单
      */
     public void sendReqConfirmSettlement(String req_id, String msg) {
-        if (webSocketClientTransaction != null && webSocketClient.getState() == WebSocketState.OPEN) {
+        if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
             String confirmSettlement = "{\"aid\":\"MobileConfirmSettlement\",\"req_id\":\"" + req_id + "\",\"msg\":\"" + msg + "\"}";
             LogUtils.e(confirmSettlement, true);
             webSocketClientTransaction.sendText(confirmSettlement);
@@ -398,8 +412,8 @@ public class WebSocketService extends Service {
      * description: 下单
      */
     public void sendReqInsertOrder(String order_id, String exchange_id, String instrument_id, String direction, String offset, int volume, String price_type, double price) {
-        if (webSocketClientTransaction != null && webSocketClient.getState() == WebSocketState.OPEN) {
-            String reqInsertOrder = "{\"aid\":\"insert_order\",\"order_id\":\"" + order_id + "\",\"exchange_id\":\"" + exchange_id + "\",\"instrument_id\":\"" + instrument_id + "\",\"direction\":\"" + direction + "\",\"offset\":\"" + offset + "\",\"volume\":" + volume + ",\"price_type\":\"" + price_type + "\",\"limit_price\":" + price + "}";
+        if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
+            String reqInsertOrder = "{\"aid\":\"insert_order\",\"order_id\":\"" + order_id + "\",\"exchange_id\":\"" + exchange_id + "\",\"instrument_id\":\"" + instrument_id + "\",\"direction\":\"" + direction + "\",\"offset\":\"" + offset + "\",\"volume\":" + volume + ",\"price_type\":\"" + price_type + "\",\"limit_price\":" + price + ", \"volume_condition\":\"ANY\", \"time_condition\":\"GFD\"}";
             LogUtils.e(reqInsertOrder, true);
             webSocketClientTransaction.sendText(reqInsertOrder);
         }
@@ -411,7 +425,7 @@ public class WebSocketService extends Service {
      * description: 撤单
      */
     public void sendReqCancelOrder(String order_id) {
-        if (webSocketClientTransaction != null && webSocketClient.getState() == WebSocketState.OPEN) {
+        if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
             String reqInsertOrder = "{\"aid\":\"cancel_order\",\"order_id\":\"" + order_id + "\"}";
             LogUtils.e(reqInsertOrder, true);
             webSocketClientTransaction.sendText(reqInsertOrder);

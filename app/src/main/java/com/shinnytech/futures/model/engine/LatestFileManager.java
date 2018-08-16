@@ -41,7 +41,25 @@ import java.util.TreeSet;
  */
 public class LatestFileManager {
 
-    private static Comparator<String> comparator;
+    private static JSONObject jsonObject ;
+
+    private static Comparator<String> comparator = new Comparator<String>() {
+        @Override
+        public int compare(String instrumentId1, String instrumentId2) {
+            JSONObject jsonObject1 = jsonObject.optJSONObject(instrumentId1);
+            JSONObject jsonObject2 = jsonObject.optJSONObject(instrumentId2);
+            if (jsonObject1 == null || jsonObject2 == null){
+                return instrumentId1.compareTo(instrumentId2);
+            }
+            int sort_key1 = jsonObject1.optInt("sort_key");
+            int sort_key2 = jsonObject2.optInt("sort_key");
+            if (sort_key1 == sort_key2) {
+                return instrumentId1.compareTo(instrumentId2);
+            } else {
+                return sort_key1 - sort_key2;
+            }
+        }
+    };
 
     /**
      * date: 7/9/17
@@ -161,7 +179,7 @@ public class LatestFileManager {
      * date: 7/9/17
      * description: 搜索列表实例历史
      */
-    private static Map<String, SearchEntity> SEARCH_ENTITIES_HISTORY =  new TreeMap<>(comparator);
+    private static Map<String, SearchEntity> SEARCH_ENTITIES_HISTORY = new TreeMap<>(comparator);
 
 
     /**
@@ -172,33 +190,17 @@ public class LatestFileManager {
     public static void initInsList(File latestFile) {
         LogUtils.e("合约列表解析开始", true);
         String latest = readLatestFile(latestFile.getName());
-        if (latest == null)return;
+        if (latest == null) return;
         try {
-            final JSONObject jsonObject = new JSONObject(latest);
-            comparator = new Comparator<String>() {
-                @Override
-                public int compare(String instrumentId1, String instrumentId2) {
-                    try {
-                        int sort_key1 = jsonObject.getJSONObject(instrumentId1).optInt("sort_key");
-                        int sort_key2 = jsonObject.getJSONObject(instrumentId2).optInt("sort_key");
-                        if (sort_key1 == sort_key2){
-                            return instrumentId1.compareTo(instrumentId2);
-                        }else {
-                            return sort_key1 - sort_key2;
-                        }
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    return instrumentId1.compareTo(instrumentId2);
-                }
-            };
+            jsonObject = new JSONObject(latest);
             Iterator<String> instrumentIds = jsonObject.keys();
             while (instrumentIds.hasNext()) {
                 String instrument_id = instrumentIds.next();
                 JSONObject subObject = jsonObject.getJSONObject(instrument_id);
                 String classN = subObject.optString("class");
-                if (!"FUTURE_CONT".equals(classN) && !"FUTURE".equals(classN) && !"FUTURE_COMBINE".equals(classN)){continue;}
+                if (!"FUTURE_CONT".equals(classN) && !"FUTURE".equals(classN) && !"FUTURE_COMBINE".equals(classN)) {
+                    continue;
+                }
                 String ins_name = subObject.optString("ins_name");
                 String exchange_id = subObject.optString("exchange_id");
                 String price_tick = subObject.optString("price_tick");
@@ -216,14 +218,15 @@ public class LatestFileManager {
                 searchEntity.setSort_key(sort_key);
                 searchEntity.setPy(py);
                 searchEntity.setMargin(margin);
-                LogUtils.e(margin, true);
                 QuoteEntity quoteEntity = new QuoteEntity();
                 quoteEntity.setInstrument_id(instrument_id);
 
                 if ("FUTURE_CONT".equals(classN)) {
                     String underlying_symbol = subObject.optString("underlying_symbol");
-                    sMainInsList.put(underlying_symbol, quoteEntity);
-                    sMainInsListNameNav.put(underlying_symbol, ins_name.replace("主连", ""));
+                    if ("".equals(underlying_symbol)) continue;
+                    searchEntity.setUnderlying_symbol(underlying_symbol);
+                    sMainInsList.put(instrument_id, quoteEntity);
+                    sMainInsListNameNav.put(instrument_id, ins_name.replace("主连", ""));
                 }
 
                 if ("FUTURE".equals(classN)) {
@@ -268,6 +271,7 @@ public class LatestFileManager {
                     JSONObject subObjectFuture = jsonObject.optJSONObject(leg1_symbol);
                     String product_short_name_leg = subObjectFuture.optString("product_short_name");
                     String py_leg = subObjectFuture.optString("py");
+                    searchEntity.setPy(py_leg);
                     switch (exchange_id) {
                         case "CZCE":
                             sZhengzhouzuheInsList.put(instrument_id, quoteEntity);
@@ -284,7 +288,6 @@ public class LatestFileManager {
                         default:
                             break;
                     }
-                    searchEntity.setPy(py_leg);
                 }
 
                 SEARCH_ENTITIES.put(instrument_id, searchEntity);
@@ -392,7 +395,7 @@ public class LatestFileManager {
      * description: 根据最新价与昨收获取合约涨跌幅
      */
     public static String getUpDownRate(String latest, String preClose) {
-        return MathUtils.round(MathUtils.multiply( MathUtils.divide(MathUtils.subtract(latest, preClose), preClose), "100"), 2, BigDecimal.ROUND_HALF_EVEN);
+        return MathUtils.round(MathUtils.multiply(MathUtils.divide(MathUtils.subtract(latest, preClose), preClose), "100"), 2, BigDecimal.ROUND_HALF_EVEN);
     }
 
     /**

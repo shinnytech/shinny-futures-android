@@ -400,9 +400,10 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
                         ToastNotificationUtils.showToast(sContext, "行情服务器连接成功");
                         break;
                     case CLOSE:
-                        ToastNotificationUtils.showToast(sContext, "行情服务器连接断开，正在重连...");
                         //每隔两秒,断线重连
                         if (!mIsBackground) {
+                            ToastNotificationUtils.showToast(sContext, "行情服务器连接断开，正在重连...");
+
                             if (NetworkUtils.isNetworkConnected(sContext))
                                 mMyHandler.sendEmptyMessageDelayed(0, 2000);
                             else
@@ -436,10 +437,11 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
                         ToastNotificationUtils.showToast(sContext, "交易服务器连接成功");
                         break;
                     case CLOSE:
-                        ToastNotificationUtils.showToast(sContext, "交易服务器连接断开，正在重连...");
                         LoginActivity.setIsLogin(false);
                         //每隔两秒,断线重连
                         if (!mIsBackground) {
+                            ToastNotificationUtils.showToast(sContext, "交易服务器连接断开，正在重连...");
+
                             if (NetworkUtils.isNetworkConnected(sContext))
                                 mMyHandler.sendEmptyMessageDelayed(1, 2000);
                             else

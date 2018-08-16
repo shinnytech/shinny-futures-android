@@ -16,6 +16,15 @@ public class SearchEntity {
     private String vm = "";
     private String sort_key = "";
     private String margin = "";
+    private String underlying_symbol = "";
+
+    public String getUnderlying_symbol() {
+        return underlying_symbol;
+    }
+
+    public void setUnderlying_symbol(String underlying_symbol) {
+        this.underlying_symbol = underlying_symbol;
+    }
 
     public String getMargin() {
         return margin;
