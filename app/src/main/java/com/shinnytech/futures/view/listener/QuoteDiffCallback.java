@@ -5,7 +5,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
+import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.LogUtils;
+import com.shinnytech.futures.utils.MathUtils;
 
 import java.util.List;
 
@@ -41,7 +43,9 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
     @Override
     public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
         //newData里的值不会为空
-        return mOldData.get(oldItemPosition) != null && mOldData.get(oldItemPosition).getInstrument_id()
+        return mOldData.get(oldItemPosition) != null
+                && mNewData.get(newItemPosition) != null
+                && mOldData.get(oldItemPosition).getInstrument_id()
                 .equals(mNewData.get(newItemPosition).getInstrument_id());
     }
 
@@ -54,30 +58,45 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
     @Override
     public Object getChangePayload(int oldItemPosition, int newItemPosition) {
         Bundle bundle = new Bundle();
-        String latest_old = mOldData.get(oldItemPosition).getLast_price();
-        String change_old = getUpDown(latest_old, mOldData.get(oldItemPosition).getPre_settlement());
-        String change_percent_old = getUpDownRate(latest_old, mOldData.get(oldItemPosition).getPre_settlement());
+        String instrumentId = mOldData.get(oldItemPosition).getInstrument_id();
+        String latest_old = LatestFileManager.saveScaleByPtick(
+                mOldData.get(oldItemPosition).getLast_price(), instrumentId);
+        String change_old = LatestFileManager.saveScaleByPtick(
+                getUpDown(latest_old, mOldData.get(oldItemPosition).getPre_settlement()), instrumentId);
+        String change_percent_old = MathUtils.round(
+                        getUpDownRate(latest_old, mOldData.get(oldItemPosition).getPre_settlement()), 2);
         String volume_old = mOldData.get(oldItemPosition).getVolume();
         String open_interest_old = mOldData.get(oldItemPosition).getOpen_interest();
 
-        String upper_limit_old = mOldData.get(oldItemPosition).getUpper_limit();
-        String lower_limit_old = mOldData.get(oldItemPosition).getLower_limit();
-        String ask_price1_old = mOldData.get(oldItemPosition).getAsk_price1();
+        String upper_limit_old = LatestFileManager.saveScaleByPtick(
+                mOldData.get(oldItemPosition).getUpper_limit(), instrumentId);
+        String lower_limit_old = LatestFileManager.saveScaleByPtick(
+                mOldData.get(oldItemPosition).getLower_limit(), instrumentId);
+        String ask_price1_old = LatestFileManager.saveScaleByPtick(
+                mOldData.get(oldItemPosition).getAsk_price1(), instrumentId);
         String ask_volume1_old = mOldData.get(oldItemPosition).getAsk_volume1();
-        String bid_price1_old = mOldData.get(oldItemPosition).getBid_price1();
+        String bid_price1_old = LatestFileManager.saveScaleByPtick(
+                mOldData.get(oldItemPosition).getBid_price1(), instrumentId);
         String bid_volume1_old = mOldData.get(oldItemPosition).getBid_volume1();
 
-        String latest_new = mNewData.get(newItemPosition).getLast_price();
-        String change_new = getUpDown(latest_new, mNewData.get(newItemPosition).getPre_settlement());
-        String change_percent_new = getUpDownRate(latest_new, mNewData.get(newItemPosition).getPre_settlement());
+        String latest_new = LatestFileManager.saveScaleByPtick(
+                mNewData.get(newItemPosition).getLast_price(), instrumentId);
+        String change_new = LatestFileManager.saveScaleByPtick(
+                getUpDown(latest_new, mNewData.get(newItemPosition).getPre_settlement()), instrumentId);
+        String change_percent_new = MathUtils.round(
+                getUpDownRate(latest_new, mNewData.get(newItemPosition).getPre_settlement()), 2);
         String volume_new = mNewData.get(newItemPosition).getVolume();
         String open_interest_new = mNewData.get(newItemPosition).getOpen_interest();
 
-        String upper_limit_new = mNewData.get(newItemPosition).getUpper_limit();
-        String lower_limit_new = mNewData.get(newItemPosition).getLower_limit();
-        String ask_price1_new = mNewData.get(newItemPosition).getAsk_price1();
+        String upper_limit_new = LatestFileManager.saveScaleByPtick(
+                mNewData.get(newItemPosition).getUpper_limit(), instrumentId);
+        String lower_limit_new = LatestFileManager.saveScaleByPtick(
+                mNewData.get(newItemPosition).getLower_limit(), instrumentId);
+        String ask_price1_new = LatestFileManager.saveScaleByPtick(
+                mNewData.get(newItemPosition).getAsk_price1(), instrumentId);
         String ask_volume1_new = mNewData.get(newItemPosition).getAsk_volume1();
-        String bid_price1_new = mNewData.get(newItemPosition).getBid_price1();
+        String bid_price1_new = LatestFileManager.saveScaleByPtick(
+                mNewData.get(newItemPosition).getBid_price1(), instrumentId);
         String bid_volume1_new = mNewData.get(newItemPosition).getBid_volume1();
 
         if (latest_old != null && latest_new != null) {

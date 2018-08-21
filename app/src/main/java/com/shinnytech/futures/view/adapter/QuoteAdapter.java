@@ -16,6 +16,7 @@ import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.LogUtils;
+import com.shinnytech.futures.utils.MathUtils;
 
 import java.util.List;
 
@@ -137,27 +138,34 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                     return;
                 }
 
-                String changePercent = getUpDownRate(quoteEntity.getLast_price(), quoteEntity.getPre_settlement());
-                String change = getUpDown(quoteEntity.getLast_price(), quoteEntity.getPre_settlement());
                 String instrumentId = quoteEntity.getInstrument_id();
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrumentId);
                 String instrumentName = instrumentId;
-
                 if (searchEntity != null) instrumentName = searchEntity.getInstrumentName();
                 if (instrumentName.contains("&")) mBinding.quoteName.setTextSize(10);
                 else mBinding.quoteName.setTextSize(15);
                 mBinding.quoteName.setText(instrumentName);
 
+                String latest = LatestFileManager.saveScaleByPtick(quoteEntity.getLast_price(), instrumentId);
+                String changePercent = MathUtils.round(
+                        getUpDownRate(quoteEntity.getLast_price(), quoteEntity.getPre_settlement()), 2);
+                String change = LatestFileManager.saveScaleByPtick(
+                        getUpDown(quoteEntity.getLast_price(), quoteEntity.getPre_settlement()), instrumentId);
+                String lowerLimit = LatestFileManager.saveScaleByPtick(quoteEntity.getLower_limit(), instrumentId);
+                String upperLimit = LatestFileManager.saveScaleByPtick(quoteEntity.getUpper_limit(), instrumentId);
+                String askPrice1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(), instrumentId);
+                String bidPrice1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(), instrumentId);
+
                 if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)){
                     if (mSwitchLowerLimit){
-                        setTextColor(mBinding.quoteLatest, quoteEntity.getLower_limit());
+                        setTextColor(mBinding.quoteLatest,lowerLimit);
                     }else {
-                        setTextColor(mBinding.quoteLatest, quoteEntity.getUpper_limit());
+                        setTextColor(mBinding.quoteLatest, upperLimit);
                     }
                     if (mSwitchChange) {
-                        setTextColor(mBinding.quoteChangePercent, quoteEntity.getBid_price1());
+                        setTextColor(mBinding.quoteChangePercent, bidPrice1);
                     } else {
-                        setTextColor(mBinding.quoteChangePercent, quoteEntity.getAsk_price1());
+                        setTextColor(mBinding.quoteChangePercent, askPrice1);
                     }
                     if (mSwitchVolume) {
                         mBinding.quoteOpenInterest.setText(quoteEntity.getBid_volume1());
@@ -165,7 +173,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                         mBinding.quoteOpenInterest.setText(quoteEntity.getAsk_volume1());
                     }
                 }else {
-                    setTextColor(mBinding.quoteLatest, quoteEntity.getLast_price());
+                    setTextColor(mBinding.quoteLatest, latest);
                     if (mSwitchChange) {
                         setTextColor(mBinding.quoteChangePercent,change);
                     } else {

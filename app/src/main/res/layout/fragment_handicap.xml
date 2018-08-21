@@ -5,6 +5,8 @@
 
         <import type="com.shinnytech.futures.utils.MathUtils"></import>
 
+        <import type="com.shinnytech.futures.model.engine.LatestFileManager"></import>
+
         <variable
             name="handicap"
             type="com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity"></variable>
@@ -44,7 +46,7 @@
                 android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:text="@{handicap.ask_price1}"
+                android:text="@{LatestFileManager.saveScaleByPtick(handicap.ask_price1, handicap.instrument_id)}"
                 android:textColor="@color/white"/>
 
 
@@ -100,7 +102,7 @@
                 android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:text="@{handicap.bid_price1}"
+                android:text="@{LatestFileManager.saveScaleByPtick(handicap.bid_price1, handicap.instrument_id)}"
                 android:textColor="@color/white"/>
 
             <View
@@ -160,7 +162,7 @@
                 android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:text="@{handicap.last_price}"
+                android:text="@{LatestFileManager.saveScaleByPtick(handicap.last_price, handicap.instrument_id)}"
                 android:textColor="@color/white"/>
 
             <View
@@ -186,7 +188,7 @@
                 android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:text="@{MathUtils.subtract(handicap.last_price, handicap.pre_settlement)}"
+                android:text="@{LatestFileManager.saveScaleByPtick(MathUtils.subtract(handicap.last_price, handicap.pre_settlement), handicap.instrument_id)}"
                 android:textColor="@color/white"/>
 
         </LinearLayout>
@@ -215,7 +217,7 @@
                 android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:text="@{handicap.open}"
+                android:text="@{LatestFileManager.saveScaleByPtick(handicap.open, handicap.instrument_id)}"
                 android:textColor="@color/white"/>
 
             <View
@@ -270,7 +272,7 @@
                 android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:text="@{handicap.highest}"
+                android:text="@{LatestFileManager.saveScaleByPtick(handicap.highest, handicap.instrument_id)}"
                 android:textColor="@color/white"/>
 
             <View
@@ -325,7 +327,7 @@
                 android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:text="@{handicap.lowest}"
+                android:text="@{LatestFileManager.saveScaleByPtick(handicap.lowest, handicap.instrument_id)}"
                 android:textColor="@color/white"/>
 
             <View
@@ -381,7 +383,7 @@
                 android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:text="@{handicap.average}"
+                android:text="@{LatestFileManager.saveScaleByPtick(handicap.average, handicap.instrument_id)}"
                 android:textColor="@color/white"/>
 
 
@@ -408,7 +410,7 @@
                 android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:text="@{handicap.settlement}"
+                android:text="@{LatestFileManager.saveScaleByPtick(handicap.settlement, handicap.instrument_id)}"
                 android:textColor="@color/white"/>
 
         </LinearLayout>
@@ -437,7 +439,7 @@
                 android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:text="@{handicap.pre_close}"
+                android:text="@{LatestFileManager.saveScaleByPtick(handicap.pre_close, handicap.instrument_id)}"
                 android:textColor="@color/white"/>
 
 
@@ -465,7 +467,7 @@
                 android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:text="@{handicap.upper_limit}"
+                android:text="@{LatestFileManager.saveScaleByPtick(handicap.upper_limit, handicap.instrument_id)}"
                 android:textColor="@color/white"/>
 
         </LinearLayout>
@@ -494,7 +496,7 @@
                 android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:text="@{handicap.pre_settlement}"
+                android:text="@{LatestFileManager.saveScaleByPtick(handicap.pre_settlement, handicap.instrument_id)}"
                 android:textColor="@color/white"/>
 
 
@@ -522,7 +524,7 @@
                 android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:text="@{handicap.lower_limit}"
+                android:text="@{LatestFileManager.saveScaleByPtick(handicap.lower_limit, handicap.instrument_id)}"
                 android:textColor="@color/white"/>
 
         </LinearLayout>

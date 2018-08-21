@@ -41,14 +41,14 @@ import java.util.TreeSet;
  */
 public class LatestFileManager {
 
-    private static JSONObject jsonObject ;
+    private static JSONObject jsonObject;
 
     private static Comparator<String> comparator = new Comparator<String>() {
         @Override
         public int compare(String instrumentId1, String instrumentId2) {
             JSONObject jsonObject1 = jsonObject.optJSONObject(instrumentId1);
             JSONObject jsonObject2 = jsonObject.optJSONObject(instrumentId2);
-            if (jsonObject1 == null || jsonObject2 == null){
+            if (jsonObject1 == null || jsonObject2 == null) {
                 return instrumentId1.compareTo(instrumentId2);
             }
             int sort_key1 = jsonObject1.optInt("sort_key");
@@ -415,16 +415,15 @@ public class LatestFileManager {
      */
     public static String saveScaleByPtick(String data, String instrumentId) {
         SearchEntity searchEntity = SEARCH_ENTITIES.get(instrumentId);
-        if (searchEntity != null && data.contains(".")) {
-            try {
-                String pTick = searchEntity.getpTick();
-                DecimalFormat decimalFormat = new DecimalFormat(pTick);
-                return decimalFormat.format(Float.valueOf(data));
-            } catch (Exception e) {
-                e.printStackTrace();
-                return data;
-            }
-        } else return data;
+        if (searchEntity == null || data == null || !data.matches("-?\\d+(\\.\\d+)?")) return data;
+        try {
+            String pTick = searchEntity.getpTick();
+            DecimalFormat decimalFormat = new DecimalFormat(pTick);
+            return decimalFormat.format(Float.valueOf(data));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return data;
+        }
     }
 
     /**
