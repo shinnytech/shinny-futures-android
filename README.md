@@ -9,7 +9,8 @@
 - Gradle版本：4.4
 - JDK：使用AS内置jre
 - bugly：项目中嵌入了bugly平台的升级和热更新模块，具体使用见[bugly文档中心](https://bugly.qq.com/docs/)
-- 期货公司版本：在模块的build.gradle文件中包含多个期货公司版本，您可以在AS的`Build Variant`中选择simnow版本进行测试([simnow账号注册](http://www.simnow.com.cn/))
+- 期货公司版本：在模块的build.gradle文件中包含多个期货公司版本，您可以在AS的`Build Variant`中选择`kuaiqixiaoq`全期货公司版本进行模拟测试
+- 模拟账号：可以到simnow官网注册([simnow账号注册](http://www.simnow.com.cn/))，然后在登陆页期货公司选择`S上期技术`
 ### Function
 软件的主要功能：查看行情以及进行交易<br>
 - 首页
