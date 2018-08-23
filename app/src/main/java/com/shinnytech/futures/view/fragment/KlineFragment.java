@@ -733,7 +733,6 @@ public class KlineFragment extends BaseChartFragment {
         private TextView volume;
         private TextView closeOi;
         private TextView closeOiDelta;
-        private DecimalFormat mFormatPercent;
         private String markViewState;
         private SimpleDateFormat simpleDateFormat;
         private SimpleDateFormat simpleDateFormat1;
@@ -755,7 +754,6 @@ public class KlineFragment extends BaseChartFragment {
             volume = findViewById(R.id.volume);
             closeOi = findViewById(R.id.close_oi);
             closeOiDelta = findViewById(R.id.close_oi_delta);
-            mFormatPercent = new DecimalFormat("#0.00");
             markViewState = "right";
             simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
             simpleDateFormat1 = new SimpleDateFormat("HH:mm", Locale.CHINA);
@@ -778,9 +776,8 @@ public class KlineFragment extends BaseChartFragment {
                     String high = LatestFileManager.saveScaleByPtick(dataEntity.getHigh(), instrument_id);
                     String low = LatestFileManager.saveScaleByPtick(dataEntity.getLow(), instrument_id);
                     String close = LatestFileManager.saveScaleByPtick(dataEntity.getClose(), instrument_id);
-                    float closeNum = Float.valueOf(close);
-                    String change = LatestFileManager.saveScaleByPtick(String.valueOf(closeNum - preSettlement), instrument_id);
-                    String changePercent = mFormatPercent.format((closeNum - preSettlement) / preSettlement * 100) + "%";
+                    String change = LatestFileManager.saveScaleByPtick(MathUtils.subtract(dataEntity.getClose(), dataEntityPre.getClose()), instrument_id);
+                    String changePercent =MathUtils.round( MathUtils.multiply(MathUtils.divide(change, dataEntityPre.getClose()), "100"), 2) + "%";
                     String volume = dataEntity.getVolume();
                     String closeOi = dataEntity.getClose_oi();
                     String closeOiDelta = MathUtils.subtract(closeOi, dataEntityPre.getClose_oi());

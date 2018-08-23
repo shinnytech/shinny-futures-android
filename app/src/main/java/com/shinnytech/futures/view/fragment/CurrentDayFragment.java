@@ -541,7 +541,6 @@ public class CurrentDayFragment extends BaseChartFragment {
         private TextView volumeDelta;
         private TextView closeOi;
         private TextView deltaOi;
-        private DecimalFormat mFormatPercent;
         private String markViewState;
         private SimpleDateFormat simpleDateFormat;
         private Calendar calendar;
@@ -563,7 +562,6 @@ public class CurrentDayFragment extends BaseChartFragment {
             volumeDelta = findViewById(R.id.volume_delta);
             closeOi = findViewById(R.id.close_oi);
             deltaOi = findViewById(R.id.delta_oi);
-            mFormatPercent = new DecimalFormat("#0.00");
             markViewState = "right";
             simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
             calendar = Calendar.getInstance();
@@ -576,7 +574,6 @@ public class CurrentDayFragment extends BaseChartFragment {
             KlineEntity.DataEntity dataEntity = dataEntities.get(String.valueOf(x));
             KlineEntity.DataEntity dataEntityPre = dataEntities.get(String.valueOf(index >= mStartIndex ? index : mStartIndex));
             if (dataEntity != null && dataEntityPre != null) {
-                float y = Float.valueOf(dataEntity.getClose());
                 calendar.setTimeInMillis(Long.valueOf(dataEntity.getDatetime()) / 1000000);
                 String time = simpleDateFormat.format(calendar.getTime());
                 String xValue = xVals.get(x);
@@ -587,8 +584,8 @@ public class CurrentDayFragment extends BaseChartFragment {
                     average = LatestFileManager.saveScaleByPtick(String.valueOf(averageEntry.getY()), instrument_id);
                 else
                     average = LatestFileManager.saveScaleByPtick(String.valueOf(e.getY()), instrument_id);
-                String change = LatestFileManager.saveScaleByPtick(String.valueOf(y - preSettlement), instrument_id);
-                String changePercent = mFormatPercent.format((y - preSettlement) / preSettlement * 100) + "%";
+                String change = LatestFileManager.saveScaleByPtick(MathUtils.subtract(dataEntity.getClose(), dataEntityPre.getClose()), instrument_id);
+                String changePercent =MathUtils.round( MathUtils.multiply(MathUtils.divide(change, dataEntityPre.getClose()), "100"), 2) + "%";
                 String volume = dataEntity.getVolume();
                 String volumeDelta = MathUtils.subtract(volume, (dataEntityPre.getVolume()));
                 String closeOi = dataEntity.getClose_oi();
