@@ -10,7 +10,7 @@ public final class CommonConstants {
     public static final String MARKET_URL_7 = "ws://106.15.82.247/t/md/front/mobile";
     public static final String MARKET_URL_8 = "ws://106.15.82.189/t/md/front/mobile";
     public static final String MARKET_URL_9 = "ws://106.15.219.160/t/md/front/mobile";
-    public static final String TRANSACTION_URL = "ws://118.31.237.98:3918";
+    public static final String TRANSACTION_URL = "ws://opentd.shinnytech.com";
     public static final String JSON_FILE_URL = "http://openmd.shinnytech.com/t/md/symbols/latest.json";
     public static final String FEED_BACK_URL = "http://redmine.kuaiqi.net/src/";
     public static final String SWITCH = "-1";
