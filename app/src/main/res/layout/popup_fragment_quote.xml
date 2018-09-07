@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="@dimen/layout_height_popup_fragment_quote"
-              android:background="@color/black_light"
-              android:orientation="horizontal">
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/layout_height_popup_fragment_quote"
+    android:background="@color/black_light"
+    android:orientation="horizontal">
 
     <TextView
         android:id="@+id/quote_name"
@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
-        android:padding="@dimen/padding_5dp"/>
+        android:padding="@dimen/padding_5dp" />
 
     <TextView
         android:id="@+id/quote_latest"
@@ -19,7 +19,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
-        android:padding="@dimen/padding_5dp"/>
+        android:padding="@dimen/padding_5dp" />
 
     <TextView
         android:id="@+id/quote_change_percent"
@@ -27,7 +27,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
-        android:padding="@dimen/padding_5dp"/>
+        android:padding="@dimen/padding_5dp" />
 
     <TextView
         android:id="@+id/add_remove_quote"
@@ -39,7 +39,7 @@
         android:padding="@dimen/padding_5dp"
         android:text="加入自选"
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_normal"/>
+        android:textSize="@dimen/font_size_normal" />
 
 
 </LinearLayout>

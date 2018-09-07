@@ -2,9 +2,9 @@
     <translate
         android:duration="400"
         android:fromYDelta="50%p"
-        android:toYDelta="0"/>
+        android:toYDelta="0" />
     <alpha
         android:duration="1000"
         android:fromAlpha="0.0"
-        android:toAlpha="1.0"/>
+        android:toAlpha="1.0" />
 </set>

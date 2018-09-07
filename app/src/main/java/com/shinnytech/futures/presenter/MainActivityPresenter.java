@@ -18,6 +18,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSmoothScroller;
@@ -33,27 +34,26 @@ import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
-import com.shinnytech.futures.utils.LogUtils;
-import com.shinnytech.futures.view.adapter.QuoteNavAdapter;
-import com.shinnytech.futures.view.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.view.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.view.activity.AccountActivity;
+import com.shinnytech.futures.view.activity.BankTransferActivity;
 import com.shinnytech.futures.view.activity.FeedBackActivity;
 import com.shinnytech.futures.view.activity.FutureInfoActivity;
 import com.shinnytech.futures.view.activity.MainActivity;
 import com.shinnytech.futures.view.activity.TradeActivity;
+import com.shinnytech.futures.view.adapter.QuoteNavAdapter;
+import com.shinnytech.futures.view.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.view.fragment.QuoteFragment;
+import com.shinnytech.futures.view.listener.SimpleRecyclerViewItemClickListener;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -85,7 +85,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
     private Toolbar mToolbar;
     private TextView mToolbarTitle;
     private QuoteNavAdapter mNavAdapter;
-    private String[] mMenuTitle = new String[]{"自选", "主力", "上海", "上期能源", "大连", "郑州", "中金", "大连组合", "郑州组合", "账户", "持仓", "成交", "反馈"};
+    private String[] mMenuTitle = new String[]{"自选", "主力", "上海", "上期能源", "大连", "郑州", "中金", "大连组合", "郑州组合", "账户", "持仓", "成交", "转账", "反馈"};
     private Map<String, String> mInsListNameNav = new TreeMap<>();
     private String mIns;
     private BroadcastReceiver mReceiver;
@@ -137,7 +137,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
 
         // 设置导航菜单宽度
         ViewGroup.LayoutParams params = mBinding.nvMenu.getLayoutParams();
-        params.width = mMainActivity.getResources().getDisplayMetrics().widthPixels * 2 / 3;
+        params.width = mMainActivity.getResources().getDisplayMetrics().widthPixels * 1 / 2;
         mBinding.nvMenu.setLayoutParams(params);
     }
 
@@ -432,6 +432,10 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                 Intent intentDeal = new Intent(mMainActivity, TradeActivity.class);
                 mMainActivity.startActivity(intentDeal);
                 break;
+            case R.id.nav_bank:
+                Intent intentBank = new Intent(mMainActivity, BankTransferActivity.class);
+                mMainActivity.startActivity(intentBank);
+                break;
             case R.id.nav_feedback:
                 Intent intentFeed = new Intent(mMainActivity, FeedBackActivity.class);
                 mMainActivity.startActivity(intentFeed);
@@ -448,7 +452,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
      * description: 点击合约导航滑动行情列表
      */
     private void scrollQuotes(String title, int position, String instrumentId) {
-        if (instrumentId.contains("&")){
+        if (instrumentId.contains("&")) {
             instrumentId = instrumentId.split("&")[0];
         }
         instrumentId = instrumentId.replaceAll("\\d", "");
@@ -631,9 +635,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
 
     @Override
     public void onDrawerOpened(View drawerView) {
-        UpdateEvent updateEvent = new UpdateEvent();
-        updateEvent.setUpdate(false);
-        EventBus.getDefault().post(updateEvent);
+
     }
 
     @Override
@@ -645,7 +647,13 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
 
     @Override
     public void onDrawerStateChanged(int newState) {
+        if (newState == ViewDragHelper.STATE_SETTLING) {
+            UpdateEvent updateEvent = new UpdateEvent();
+            updateEvent.setUpdate(false);
+            EventBus.getDefault().post(updateEvent);
+        }
     }
+
 
     /**
      * date: 7/11/17

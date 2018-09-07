@@ -37,7 +37,7 @@ import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_AC
 public class HandicapFragment extends LazyLoadFragment {
     private DataManager sDataManager = DataManager.getInstance();
     private BroadcastReceiver mReceiver;
-    private String mInstrumenId;
+    private String mInstrumentId;
     private FragmentHandicapBinding mBinding;
 
     /**
@@ -46,7 +46,7 @@ public class HandicapFragment extends LazyLoadFragment {
      * description: 实时刷新盘口信息
      */
     private void refreshUI() {
-        mBinding.setHandicap(sDataManager.getRtnData().getQuotes().get(mInstrumenId));
+        mBinding.setHandicap(sDataManager.getRtnData().getQuotes().get(mInstrumentId));
     }
 
     @Override
@@ -94,7 +94,7 @@ public class HandicapFragment extends LazyLoadFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mInstrumenId = ((FutureInfoActivity) getActivity()).getInstrument_id();
+        mInstrumentId = ((FutureInfoActivity) getActivity()).getInstrument_id();
     }
 
     @Override
@@ -109,7 +109,7 @@ public class HandicapFragment extends LazyLoadFragment {
      */
     @Subscribe
     public void onEvent(IdEvent data) {
-        mInstrumenId = data.getInstrument_id();
+        mInstrumentId = data.getInstrument_id();
         //此处由上层活动页向服务器请求数据
     }
 
@@ -118,7 +118,7 @@ public class HandicapFragment extends LazyLoadFragment {
         super.onResume();
         registerBroaderCast();
         //防止重复发相同的合约代码,服务器什么都不回
-        refreshUI();
+        update();
     }
 
     @Override

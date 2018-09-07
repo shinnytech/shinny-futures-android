@@ -319,7 +319,7 @@ public class WebSocketService extends Service {
         try {
             webSocketClientTransaction = new WebSocketFactory()
                     .setConnectionTimeout(TIMEOUT)
-                    .createSocket(TRANSACTION_URL)
+                    .createSocket(DataManager.getInstance().TRANSACTION_URL_FULL)
                     .addListener(new WebSocketAdapter() {
                         @Override
                         public void onConnected(WebSocket websocket, Map<String, List<String>> headers) {
@@ -331,7 +331,7 @@ public class WebSocketService extends Service {
                         public void onTextMessage(WebSocket websocket, String message) {
                             LogUtils.e(message, false);
                             try {
-                                sDataManager.refreshAccountBean(message);
+                                sDataManager.refreshTradeBean(message);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -413,7 +413,8 @@ public class WebSocketService extends Service {
      */
     public void sendReqInsertOrder(String order_id, String exchange_id, String instrument_id, String direction, String offset, int volume, String price_type, double price) {
         if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
-            String reqInsertOrder = "{\"aid\":\"insert_order\",\"order_id\":\"" + order_id + "\",\"exchange_id\":\"" + exchange_id + "\",\"instrument_id\":\"" + instrument_id + "\",\"direction\":\"" + direction + "\",\"offset\":\"" + offset + "\",\"volume\":" + volume + ",\"price_type\":\"" + price_type + "\",\"limit_price\":" + price + ", \"volume_condition\":\"ANY\", \"time_condition\":\"GFD\"}";
+            String user_id = DataManager.getInstance().USER_ID;
+            String reqInsertOrder = "{\"aid\":\"insert_order\", \"user_id\":\"" + user_id + "\", \"order_id\":\"" + order_id + "\",\"exchange_id\":\"" + exchange_id + "\",\"instrument_id\":\"" + instrument_id + "\",\"direction\":\"" + direction + "\",\"offset\":\"" + offset + "\",\"volume\":" + volume + ",\"price_type\":\"" + price_type + "\",\"limit_price\":" + price + ", \"volume_condition\":\"ANY\", \"time_condition\":\"GFD\"}";
             LogUtils.e(reqInsertOrder, true);
             webSocketClientTransaction.sendText(reqInsertOrder);
         }
@@ -426,9 +427,23 @@ public class WebSocketService extends Service {
      */
     public void sendReqCancelOrder(String order_id) {
         if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
-            String reqInsertOrder = "{\"aid\":\"cancel_order\",\"order_id\":\"" + order_id + "\"}";
+            String user_id = DataManager.getInstance().USER_ID;
+            String reqInsertOrder = "{\"aid\":\"cancel_order\", \"user_id\":\"" + user_id + "\",\"order_id\":\"" + order_id + "\"}";
             LogUtils.e(reqInsertOrder, true);
             webSocketClientTransaction.sendText(reqInsertOrder);
+        }
+    }
+
+    /**
+     * date: 7/9/17
+     * author: chenli
+     * description: 银期转帐
+     */
+    public void sendReqTransfer(String future_account, String future_password, String bank_id, String bank_password, String currency, float amount) {
+        if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
+            String reqTransfer = "{\"aid\":\"req_transfer\",\"future_account\":\"" + future_account + "\",\"future_password\":\"" + future_password + "\",\"bank_id\":\"" + bank_id + "\",\"bank_password\":\"" + bank_password + "\",\"currency\":\"" + currency + "\",\"amount\": " + amount + "}";
+            LogUtils.e(reqTransfer, true);
+            webSocketClientTransaction.sendText(reqTransfer);
         }
     }
 

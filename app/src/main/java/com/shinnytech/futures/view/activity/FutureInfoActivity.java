@@ -14,8 +14,8 @@ import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
-import com.shinnytech.futures.presenter.FutureInfoActivityPresenter;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.presenter.FutureInfoActivityPresenter;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;

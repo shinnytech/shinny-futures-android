@@ -30,13 +30,13 @@
         <item name="android:windowBackground">@color/black_light_more</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <!-- 侧滑栏主题 -->
     <style name="NavigationTheme" parent="AppTheme">
-        <item name="android:listPreferredItemHeightSmall">40dp</item>
+        <item name="android:listPreferredItemHeightSmall">30dp</item>
     </style>
 
     <!--下单/撤单/自选合约弹出框,固定大小-->

@@ -40,7 +40,7 @@
                     android:gravity="end|center"
                     android:text="@string/transaction_fragment_balance"
                     android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_small_high"/>
+                    android:textSize="@dimen/font_size_small_high" />
 
                 <TextView
                     android:id="@+id/tv_id_transaction_balance"
@@ -52,7 +52,7 @@
                     android:maxLines="1"
                     android:text="@{MathUtils.round(account.balance, 0)}"
                     android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_small_high"/>
+                    android:textSize="@dimen/font_size_small_high" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -61,7 +61,7 @@
                     android:gravity="end|center"
                     android:text="@string/transaction_fragment_available"
                     android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_small_high"/>
+                    android:textSize="@dimen/font_size_small_high" />
 
                 <TextView
                     android:id="@+id/tv_id_transaction_available"
@@ -73,7 +73,7 @@
                     android:maxLines="1"
                     android:text="@{MathUtils.round(account.available, 0)}"
                     android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_small_high"/>
+                    android:textSize="@dimen/font_size_small_high" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -82,7 +82,7 @@
                     android:gravity="end|center"
                     android:text="@string/transaction_fragment_using_ratio"
                     android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_small_high"/>
+                    android:textSize="@dimen/font_size_small_high" />
 
                 <TextView
                     android:id="@+id/tv_id_transaction_using_ratio"
@@ -94,7 +94,7 @@
                     android:maxLines="1"
                     android:text='@{MathUtils.subZeroAndDot(MathUtils.round(MathUtils.multiply("100", MathUtils.divide(account.margin, account.balance)), 2)) + "%"}'
                     android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_small_high"/>
+                    android:textSize="@dimen/font_size_small_high" />
 
             </LinearLayout>
 
@@ -130,7 +130,7 @@
                             android:labelFor="@+id/price"
                             android:text="@string/transaction_fragment_price"
                             android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"/>
+                            android:textSize="@dimen/font_size_normal" />
 
                         <EditText
                             android:id="@+id/price"
@@ -146,7 +146,7 @@
                             android:maxLines="1"
                             android:text="-"
                             android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"/>
+                            android:textSize="@dimen/font_size_normal" />
 
                     </LinearLayout>
 
@@ -168,7 +168,7 @@
                             android:labelFor="@+id/volume"
                             android:text="@string/transaction_fragment_volume"
                             android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"/>
+                            android:textSize="@dimen/font_size_normal" />
 
                         <EditText
                             android:id="@+id/volume"
@@ -184,7 +184,7 @@
                             android:maxLines="1"
                             android:text="1"
                             android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"/>
+                            android:textSize="@dimen/font_size_normal" />
                     </LinearLayout>
 
                 </LinearLayout>
@@ -215,7 +215,7 @@
                             android:gravity="start"
                             android:text="@string/transaction_fragment_last_price"
                             android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"/>
+                            android:textSize="@dimen/font_size_normal" />
 
                         <TextView
                             android:id="@+id/tv_id_transaction_last_price"
@@ -223,11 +223,11 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
                             android:ellipsize="end"
-                            android:gravity="center"
+                            android:gravity="left"
                             android:maxLines="1"
                             android:text="@{quote.last_price}"
                             android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"/>
+                            android:textSize="@dimen/font_size_normal" />
 
                         <TextView
                             android:id="@+id/tv_id_transaction_last_volume"
@@ -235,11 +235,11 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
                             android:ellipsize="end"
-                            android:gravity="center"
+                            android:gravity="right"
                             android:maxLines="1"
                             android:text="@{quote.volume}"
                             android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"/>
+                            android:textSize="@dimen/font_size_normal" />
 
                     </LinearLayout>
 
@@ -260,7 +260,7 @@
                             android:gravity="start"
                             android:text="@string/transaction_fragment_ask_price1"
                             android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"/>
+                            android:textSize="@dimen/font_size_normal" />
 
                         <TextView
                             android:id="@+id/tv_id_transaction_ask_price1"
@@ -268,11 +268,11 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
                             android:ellipsize="end"
-                            android:gravity="center"
+                            android:gravity="left"
                             android:maxLines="1"
                             android:text="@{quote.ask_price1}"
                             android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"/>
+                            android:textSize="@dimen/font_size_normal" />
 
                         <TextView
                             android:id="@+id/tv_id_transaction_ask_volume1"
@@ -280,11 +280,11 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
                             android:ellipsize="end"
-                            android:gravity="center"
+                            android:gravity="right"
                             android:maxLines="1"
                             android:text="@{quote.ask_volume1}"
                             android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"/>
+                            android:textSize="@dimen/font_size_normal" />
 
                     </LinearLayout>
 
@@ -303,7 +303,7 @@
                             android:gravity="start"
                             android:text="@string/transaction_fragment_bid_price1"
                             android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"/>
+                            android:textSize="@dimen/font_size_normal" />
 
                         <TextView
                             android:id="@+id/tv_id_transaction_bid_price1"
@@ -311,11 +311,11 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
                             android:ellipsize="end"
-                            android:gravity="center"
+                            android:gravity="left"
                             android:maxLines="1"
                             android:text="@{quote.bid_price1}"
                             android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"/>
+                            android:textSize="@dimen/font_size_normal" />
 
                         <TextView
                             android:id="@+id/tv_id_transaction_bid_volume1"
@@ -323,11 +323,11 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
                             android:ellipsize="end"
-                            android:gravity="center"
+                            android:gravity="right"
                             android:maxLines="1"
                             android:text="@{quote.bid_volume1}"
                             android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"/>
+                            android:textSize="@dimen/font_size_normal" />
 
                     </LinearLayout>
 
@@ -365,7 +365,7 @@
                         android:maxLines="1"
                         android:text="-"
                         android:textColor="@color/white"
-                        android:textSize="@dimen/font_size_normal"/>
+                        android:textSize="@dimen/font_size_normal" />
 
                     <TextView
                         android:id="@+id/bid_price1_direction"
@@ -374,7 +374,7 @@
                         android:gravity="center"
                         android:text="@string/transaction_fragment_bid_direction"
                         android:textColor="@color/white"
-                        android:textSize="@dimen/font_size_normal"/>
+                        android:textSize="@dimen/font_size_normal" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -397,7 +397,7 @@
                         android:maxLines="1"
                         android:text="-"
                         android:textColor="@color/white"
-                        android:textSize="@dimen/font_size_normal"/>
+                        android:textSize="@dimen/font_size_normal" />
 
                     <TextView
                         android:id="@+id/ask_price1_direction"
@@ -406,7 +406,7 @@
                         android:gravity="center"
                         android:text="@string/transaction_fragment_ask_direction"
                         android:textColor="@color/white"
-                        android:textSize="@dimen/font_size_normal"/>
+                        android:textSize="@dimen/font_size_normal" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -429,7 +429,7 @@
                         android:gravity="center"
                         android:text="@string/transaction_fragment_close_status"
                         android:textColor="@color/black"
-                        android:textSize="@dimen/font_size_normal"/>
+                        android:textSize="@dimen/font_size_normal" />
 
                     <TextView
                         android:id="@+id/close_direction"
@@ -438,7 +438,7 @@
                         android:gravity="center"
                         android:text="@string/transaction_fragment_close_direction"
                         android:textColor="@color/black"
-                        android:textSize="@dimen/font_size_normal"/>
+                        android:textSize="@dimen/font_size_normal" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -464,7 +464,7 @@
                 android:background="@color/transaction_dark"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:keyPreviewLayout="@layout/keyboard_layout_preview"/>
+                android:keyPreviewLayout="@layout/keyboard_layout_preview" />
 
 
             <LinearLayout
@@ -479,26 +479,26 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="涨停："
-                    android:textColor="@color/white"/>
+                    android:textColor="@color/white" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@{quote.upper_limit}"
-                    android:textColor="@color/white"/>
+                    android:textColor="@color/white" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/margin_30dp"
                     android:text="跌停："
-                    android:textColor="@color/white"/>
+                    android:textColor="@color/white" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@{quote.lower_limit}"
-                    android:textColor="@color/white"/>
+                    android:textColor="@color/white" />
             </LinearLayout>
 
             <LinearLayout
@@ -513,13 +513,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="最大开仓手数："
-                    android:textColor="@color/white"/>
+                    android:textColor="@color/white" />
 
                 <TextView
                     android:id="@+id/max_volume"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/white"/>
+                    android:textColor="@color/white" />
             </LinearLayout>
 
             <LinearLayout
@@ -533,13 +533,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="最小变动价位："
-                    android:textColor="@color/white"/>
+                    android:textColor="@color/white" />
 
                 <TextView
                     android:id="@+id/min_price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/white"/>
+                    android:textColor="@color/white" />
 
             </LinearLayout>
 
@@ -551,7 +551,7 @@
                 android:layout_alignEnd="@id/keyboard"
                 android:layout_marginEnd="@dimen/margin_10dp"
                 android:background="@mipmap/ic_expand_more_white_24dp"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
         </RelativeLayout>
 

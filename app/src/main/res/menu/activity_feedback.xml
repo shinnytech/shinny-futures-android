@@ -1,13 +1,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto"
-      xmlns:tools="http://schemas.android.com/tools"
-      tools:context=".view.activity.FeedBackActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".view.activity.FeedBackActivity">
 
     <item
         android:id="@+id/action_refresh"
         android:icon="@mipmap/ic_refresh_white_24dp"
         android:orderInCategory="100"
         android:title="刷新"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
 
 </menu>

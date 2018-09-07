@@ -27,7 +27,7 @@
                 android:gravity="center"
                 android:text="@string/trade_activity_instrument_id"
                 android:textColor="@android:color/white"
-                android:textSize="@dimen/font_size_small"/>
+                android:textSize="@dimen/font_size_small" />
 
 
             <TextView
@@ -37,16 +37,16 @@
                 android:gravity="center"
                 android:text="@string/trade_activity_direction"
                 android:textColor="@android:color/white"
-                android:textSize="@dimen/font_size_small"/>
+                android:textSize="@dimen/font_size_small" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
+                android:gravity="end"
                 android:text="@string/trade_activity_amount"
                 android:textColor="@android:color/white"
-                android:textSize="@dimen/font_size_small"/>
+                android:textSize="@dimen/font_size_small" />
 
             <TextView
                 android:layout_width="0dp"
@@ -55,7 +55,7 @@
                 android:gravity="center"
                 android:text="@string/trade_activity_volume"
                 android:textColor="@android:color/white"
-                android:textSize="@dimen/font_size_small"/>
+                android:textSize="@dimen/font_size_small" />
 
             <TextView
                 android:layout_width="0dp"
@@ -64,7 +64,7 @@
                 android:gravity="center"
                 android:text="@string/trade_activity_time"
                 android:textColor="@android:color/white"
-                android:textSize="@dimen/font_size_small"/>
+                android:textSize="@dimen/font_size_small" />
 
         </LinearLayout>
 
@@ -77,7 +77,7 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent" />
 
     </LinearLayout>
 </layout>

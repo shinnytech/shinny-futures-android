@@ -2,15 +2,13 @@ package com.shinnytech.futures.constants;
 
 public final class CommonConstants {
     public static final String MARKET_URL_1 = "ws://u.shinnytech.com/t/md/front/mobile";
-    public static final String MARKET_URL_2 = "ws://sh.u.shinnytech.com/t/md/front/mobile";
-    public static final String MARKET_URL_3 = "ws://gz.u.shinnytech.com/t/md/front/mobile";
-    public static final String MARKET_URL_4 = "ws://139.198.126.116/t/md/front/mobile";
-    public static final String MARKET_URL_5 = "ws://139.198.122.80/t/md/front/mobile";
-    public static final String MARKET_URL_6 = "ws://139.198.123.206/t/md/front/mobile";
-    public static final String MARKET_URL_7 = "ws://106.15.82.247/t/md/front/mobile";
-    public static final String MARKET_URL_8 = "ws://106.15.82.189/t/md/front/mobile";
-    public static final String MARKET_URL_9 = "ws://106.15.219.160/t/md/front/mobile";
-    public static final String TRANSACTION_URL = "ws://opentd.shinnytech.com";
+    public static final String MARKET_URL_2 = "ws://139.198.126.116/t/md/front/mobile";
+    public static final String MARKET_URL_3 = "ws://139.198.122.80/t/md/front/mobile";
+    public static final String MARKET_URL_4 = "ws://139.198.123.206/t/md/front/mobile";
+    public static final String MARKET_URL_5 = "ws://106.15.82.247/t/md/front/mobile";
+    public static final String MARKET_URL_6 = "ws://106.15.82.189/t/md/front/mobile";
+    public static final String MARKET_URL_7 = "ws://106.15.219.160/t/md/front/mobile";
+    public static final String TRANSACTION_URL = "ws://opentd.shinnytech.com/trade/user";
     public static final String JSON_FILE_URL = "http://openmd.shinnytech.com/t/md/symbols/latest.json";
     public static final String FEED_BACK_URL = "http://redmine.kuaiqi.net/src/";
     public static final String SWITCH = "-1";
@@ -19,13 +17,10 @@ public final class CommonConstants {
     public static final String ERROR = "2";
     public static final String MESSAGE = "3";
     public static final String MESSAGE_TRADE = "4";
-    public static final String MESSAGE_POSITION = "5";
-    public static final String MESSAGE_ORDER = "6";
-    public static final String MESSAGE_ACCOUNT = "7";
-    public static final String MESSAGE_LOGIN = "8";
-    public static final String MESSAGE_SETTLEMENT_NOT_SURE = "9";
-    public static final String MESSAGE_SETTLEMENT = "10";
-    public static final String MESSAGE_BROKER_INFO = "11";
+    public static final String MESSAGE_LOGIN = "5";
+    public static final String MESSAGE_SETTLEMENT_NOT_SURE = "6";
+    public static final String MESSAGE_SETTLEMENT = "7";
+    public static final String MESSAGE_BROKER_INFO = "8";
     public static final String OPTIONAL = "自选合约";
     public static final String DOMINANT = "主力合约";
     public static final String SHANGHAI = "上海期货交易所";
@@ -37,6 +32,7 @@ public final class CommonConstants {
     public static final String ZHENGZHOUZUHE = "郑州组合";
     public static final String ACCOUNT = "资金账户";
     public static final String DEAL = "成交记录";
+    public static final String BANK = "银期转帐";
     public static final String FEEDBACK = "反馈";
     public static final String CURRENT_DAY_FRAGMENT = "当日";
     public static final String DAY_FRAGMENT = "日线";

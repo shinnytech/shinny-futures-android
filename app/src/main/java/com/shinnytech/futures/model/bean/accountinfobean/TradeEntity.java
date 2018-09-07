@@ -4,23 +4,30 @@ import android.support.annotation.NonNull;
 
 import com.shinnytech.futures.utils.TimeUtils;
 
+import java.io.Serializable;
+
 /**
  * Created on 6/16/17.
  * Created by chenli.
  * Description: .
  */
 
-public class TradeEntity implements Comparable<TradeEntity> {
+public class TradeEntity implements Comparable<TradeEntity>, Serializable {
+    private static final long serialVersionUID = 2631590509760908284L;
     private String key = "";
-    private String order_id = "";
+    private String user_id = "";
+    private String trade_id = "";
     private String exchange_id = "";
     private String instrument_id = "";
+    private String order_id = "";
     private String exchange_trade_id = "";
+
     private String direction = "";
     private String offset = "";
     private String volume = "";
     private String price = "";
     private String trade_date_time = "";
+    private String commission = "";
 
     public String getKey() {
         return key;
@@ -30,12 +37,12 @@ public class TradeEntity implements Comparable<TradeEntity> {
         this.key = key;
     }
 
-    public String getOrder_id() {
-        return order_id;
+    public String getTrade_id() {
+        return trade_id;
     }
 
-    public void setOrder_id(String order_id) {
-        this.order_id = order_id;
+    public void setTrade_id(String trade_id) {
+        this.trade_id = trade_id;
     }
 
     public String getExchange_id() {
@@ -102,12 +109,36 @@ public class TradeEntity implements Comparable<TradeEntity> {
         this.trade_date_time = trade_date_time;
     }
 
+    public String getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
+    }
+
+    public String getOrder_id() {
+        return order_id;
+    }
+
+    public void setOrder_id(String order_id) {
+        this.order_id = order_id;
+    }
+
+    public String getCommission() {
+        return commission;
+    }
+
+    public void setCommission(String commission) {
+        this.commission = commission;
+    }
+
     @Override
     public int compareTo(@NonNull TradeEntity o) {
-        long date1 = Long.parseLong(this.getTrade_date_time()) / 1000000;
-        long date2 = Long.parseLong(o.getTrade_date_time()) / 1000000;
-        if (!TimeUtils.isBetw2124(this.getTrade_date_time())) date1 += 24 * 3600 * 1000;
-        if (!TimeUtils.isBetw2124(o.getTrade_date_time())) date2 += 24 * 3600 * 1000;
+        long date1 = Long.parseLong(this.trade_date_time) / 1000000;
+        long date2 = Long.parseLong(o.trade_date_time) / 1000000;
+        if (!TimeUtils.isBetw2124(this.trade_date_time)) date1 += 24 * 3600 * 1000;
+        if (!TimeUtils.isBetw2124(o.trade_date_time)) date2 += 24 * 3600 * 1000;
         return (int) -(date1 - date2);
     }
 

@@ -1,6 +1,5 @@
 package com.shinnytech.futures.view.fragment;
 
-import android.animation.LayoutTransition;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,12 +27,13 @@ import com.shinnytech.futures.application.BaseApplicationLike;
 import com.shinnytech.futures.databinding.FragmentTransactionBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.utils.KeyboardUtils;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.KeyboardUtils;
 import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.shinnytech.futures.view.activity.FutureInfoActivity;
@@ -46,7 +46,7 @@ import java.util.Calendar;
 import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
 import static com.shinnytech.futures.constants.CommonConstants.ERROR;
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_ACCOUNT;
+import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_TRADE;
 import static com.shinnytech.futures.constants.CommonConstants.OPEN;
 import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION;
 import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION_TRANSACTION;
@@ -90,7 +90,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mInstrumentId = ((FutureInfoActivity) getActivity()).getInstrument_id();
-        if (mInstrumentId.contains("KQ")) mInstrumentIdTransaction = LatestFileManager.getSearchEntities().get(mInstrumentId).getUnderlying_symbol();
+        if (mInstrumentId.contains("KQ"))
+            mInstrumentIdTransaction = LatestFileManager.getSearchEntities().get(mInstrumentId).getUnderlying_symbol();
         else mInstrumentIdTransaction = mInstrumentId;
         mExchangeId = mInstrumentIdTransaction.split("\\.")[0];
     }
@@ -210,9 +211,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     public void onResume() {
         super.onResume();
         registerBroaderCast();
-        refreshPrice();
-        refreshAccount();
-        initPosition();
+        update();
     }
 
     @Override
@@ -246,7 +245,9 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             mBinding.price.setText("最新价");
             mPriceType = "最新价";
             String key = mInstrumentIdTransaction;
-            PositionEntity positionEntity = sDataManager.getAccountBean().getPosition().get(key);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            if (userEntity == null) return;
+            PositionEntity positionEntity = userEntity.getPositions().get(key);
             if (positionEntity == null) {
                 this.mDirection = "";
                 mBinding.volume.setText("1");
@@ -256,9 +257,9 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 mBinding.closePrice.setText("先开先平");
             } else {
                 String volume_available_long = MathUtils.add(positionEntity.getVolume_long_his(), positionEntity.getVolume_long_today());
-                int volume_long = Integer.parseInt(MathUtils.add(volume_available_long, positionEntity.getVolume_long_frozen()));
+                int volume_long = Integer.parseInt(MathUtils.add(volume_available_long, positionEntity.getVolume_long_frozen_his()));
                 String volume_available_short = MathUtils.add(positionEntity.getVolume_short_his(), positionEntity.getVolume_short_today());
-                int volume_short = Integer.parseInt(MathUtils.add(volume_available_short, positionEntity.getVolume_short_frozen()));
+                int volume_short = Integer.parseInt(MathUtils.add(volume_available_short, positionEntity.getVolume_short_frozen_his()));
                 if (volume_long != 0 && volume_short == 0) {
                     this.mDirection = "多";
                     mBinding.volume.setText(volume_available_long);
@@ -350,12 +351,15 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      * description: 刷新账户信息
      */
     private void refreshAccount() {
-        AccountEntity accountEntity = sDataManager.getAccountBean().getAccount().get("CNY");
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        if (userEntity == null) return;
+        AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
         mBinding.setAccount(accountEntity);
         if (accountEntity == null) return;
         String margin = LatestFileManager.getSearchEntities().get(mInstrumentIdTransaction).getMargin();
         if (margin.isEmpty()) mBinding.maxVolume.setText("0");
-        else mBinding.maxVolume.setText(MathUtils.round(MathUtils.divide(accountEntity.getAvailable(), margin), 0));
+        else
+            mBinding.maxVolume.setText(MathUtils.round(MathUtils.divide(accountEntity.getAvailable(), margin), 0));
 
     }
 
@@ -371,7 +375,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         break;
                     case ERROR:
                         break;
-                    case MESSAGE_ACCOUNT:
+                    case MESSAGE_TRADE:
                         if (((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId() == R.id.rb_transaction_info)
                             refreshAccount();
                         break;
@@ -590,7 +594,9 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentIdTransaction);
                 if (searchEntity != null && ("上海国际能源交易中心".equals(searchEntity.getExchangeName())
                         || "上海期货交易所".equals(searchEntity.getExchangeName()))) {
-                    PositionEntity positionEntity = sDataManager.getAccountBean().getPosition().get(mInstrumentIdTransaction);
+                    UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+                    if (userEntity == null) return;
+                    PositionEntity positionEntity = userEntity.getPositions().get(mInstrumentIdTransaction);
                     if (positionEntity == null) return;
                     int volume_today = 0;
                     int volume_history = 0;
@@ -648,7 +654,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     @Subscribe
     public void onEvent(IdEvent data) {
         mInstrumentId = data.getInstrument_id();
-        if (mInstrumentId.contains("KQ"))mInstrumentIdTransaction = LatestFileManager.getSearchEntities().get(mInstrumentId).getUnderlying_symbol();
+        if (mInstrumentId.contains("KQ"))
+            mInstrumentIdTransaction = LatestFileManager.getSearchEntities().get(mInstrumentId).getUnderlying_symbol();
         else mInstrumentIdTransaction = mInstrumentId;
         mExchangeId = mInstrumentIdTransaction.split("\\.")[0];
         initPosition();

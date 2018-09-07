@@ -31,14 +31,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="-"
-                    android:textColor="@color/white"/>
+                    android:textColor="@color/white" />
 
                 <TextView
                     android:id="@+id/tv_search_instrument_id"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="-"
-                    android:textColor="@color/instrument_id"/>
+                    android:textColor="@color/instrument_id" />
             </LinearLayout>
 
             <TextView
@@ -47,7 +47,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:text="-"
-                android:textColor="@color/text_gray_light"/>
+                android:textColor="@color/text_gray_light" />
 
         </RelativeLayout>
 
@@ -63,7 +63,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:contentDescription="collect"
-            android:src="@mipmap/ic_favorite_border_white_24dp"/>
+            android:src="@mipmap/ic_favorite_border_white_24dp" />
 
     </LinearLayout>
 </layout>

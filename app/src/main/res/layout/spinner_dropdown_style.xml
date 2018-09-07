@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:background="@color/bg_gray_light"
-              android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/bg_gray_light"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/tv_Spinner"
@@ -12,7 +12,7 @@
         android:gravity="center"
         android:padding="@dimen/padding_5dp"
         android:textColor="@color/black"
-        android:textSize="@dimen/font_size_normal"/>
+        android:textSize="@dimen/font_size_normal" />
 
     <View
         android:layout_width="match_parent"

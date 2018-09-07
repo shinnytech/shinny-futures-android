@@ -22,12 +22,12 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplicationLike;
 import com.shinnytech.futures.databinding.ActivitySearchBinding;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
-import com.shinnytech.futures.view.adapter.SearchAdapter;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
-import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
+import com.shinnytech.futures.view.adapter.SearchAdapter;
 
 import java.util.Map;
 

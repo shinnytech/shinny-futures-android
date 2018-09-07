@@ -5,12 +5,15 @@ import android.os.Looper;
 
 import com.google.gson.Gson;
 import com.shinnytech.futures.application.BaseApplicationLike;
-import com.shinnytech.futures.model.bean.accountinfobean.AccountBean;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
-import com.shinnytech.futures.model.bean.accountinfobean.LoginEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.BankEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.BrokerEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.TradeBean;
 import com.shinnytech.futures.model.bean.accountinfobean.TradeEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.TransferEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.ChartEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.DiffEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.FutureBean;
@@ -18,28 +21,26 @@ import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
-import com.shinnytech.futures.view.activity.LoginActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_BROKER_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_LOGIN;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_ORDER;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_POSITION;
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_TRADE;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_URL;
 import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST;
 import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_TRANSACTION;
-import static com.shinnytech.futures.model.engine.LatestFileManager.getUpDown;
-import static com.shinnytech.futures.model.engine.LatestFileManager.getUpDownRate;
 
 /**
  * date: 7/9/17
@@ -53,12 +54,7 @@ public class DataManager {
      * date: 7/9/17
      * description: 账户信息实例
      */
-    public static final AccountBean ACCOUNT = new AccountBean();
-    /**
-     * date: 7/9/17
-     * description: 单例模式，本解析类实例
-     */
-    private static final DataManager INSTANCE = new DataManager();
+    public static final TradeBean TRADE = new TradeBean();
     /**
      * date: 7/9/17
      * description: 单例模式，行情数据类实例
@@ -68,8 +64,33 @@ public class DataManager {
      * date: 7/9/17
      * description: 账户登录返回信息实例
      */
-    private static final LoginEntity LOGIN = new LoginEntity();
+    private static final BrokerEntity BROKER = new BrokerEntity();
+    /**
+     * date: 7/9/17
+     * description: 单例模式，本解析类实例
+     */
+    private static final DataManager INSTANCE = new DataManager();
+    /**
+     * date: 7/7/17
+     * description: 用于判断是否登录成功的全局标志
+     */
+    public boolean IS_LOGIN = false;
+    /**
+     * date: 9/1/18
+     * description: 账户id
+     */
+    public String USER_ID = "";
+
+    /**
+     * date: 9/7/18
+     * description: 交易服务器路径
+     */
+    public String TRANSACTION_URL_FULL = TRANSACTION_URL + "0";
+
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+
     private DataManager() {
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 
     public static DataManager getInstance() {
@@ -85,12 +106,16 @@ public class DataManager {
         return RTN_DATA.getData();
     }
 
-    public AccountBean getAccountBean() {
-        return ACCOUNT;
+    public TradeBean getTradeBean() {
+        return TRADE;
     }
 
-    public LoginEntity getLogin() {
-        return LOGIN;
+    public BrokerEntity getLogin() {
+        return BROKER;
+    }
+
+    public SimpleDateFormat getSimpleDateFormat(){
+        return simpleDateFormat;
     }
 
     /**
@@ -146,9 +171,7 @@ public class DataManager {
             String key = iterator.next();
             JSONObject chartObject = chartsObject.getJSONObject(key);
             ChartEntity chartEntity = chartsEntities.get(key);
-            if (chartEntity == null) {
-                chartEntity = new ChartEntity();
-            }
+            if (chartEntity == null) chartEntity = new ChartEntity();
             Class clChart = chartEntity.getClass();
             Iterator<String> iterator1 = chartObject.keys();
             Map<String, String> stateEntity = chartEntity.getState();
@@ -187,7 +210,7 @@ public class DataManager {
 //        }
     }
 
-    private void parseKlines(JSONObject dataObject, DiffEntity diffEntity) throws JSONException{
+    private void parseKlines(JSONObject dataObject, DiffEntity diffEntity) throws JSONException {
         JSONObject futureKlineObjects = dataObject.getJSONObject("klines");
         Map<String, Map<String, KlineEntity>> futureKlineEntities = diffEntity.getKlines();
         Iterator<String> iterator = futureKlineObjects.keys();
@@ -196,16 +219,14 @@ public class DataManager {
             JSONObject futureKlineObject = futureKlineObjects.getJSONObject(key);
             Iterator<String> iterator1 = futureKlineObject.keys();
             Map<String, KlineEntity> futureKlineEntity = futureKlineEntities.get(key);
-            if (futureKlineEntity == null) {
-                futureKlineEntity = new HashMap<>();
-            }
+            if (futureKlineEntity == null) futureKlineEntity = new HashMap<>();
+
             while (iterator1.hasNext()) {
                 String key1 = iterator1.next(); //kline"M3"
                 JSONObject klineObject = futureKlineObject.getJSONObject(key1);
                 KlineEntity klineEntity = futureKlineEntity.get(key1);
-                if (klineEntity == null) {
-                    klineEntity = new KlineEntity();
-                }
+                if (klineEntity == null) klineEntity = new KlineEntity();
+
                 Class clKline = klineEntity.getClass();
                 Iterator<String> iterator2 = klineObject.keys();
                 while (iterator2.hasNext()) {
@@ -220,9 +241,8 @@ public class DataManager {
                                 JSONObject dataObjectInner = dataObjects.getJSONObject(key3);
                                 KlineEntity.DataEntity dataEntity = dataEntities.get(key3);
                                 Iterator<String> iterator4 = dataObjectInner.keys();
-                                if (dataEntity == null) {
-                                    dataEntity = new KlineEntity.DataEntity();
-                                }
+                                if (dataEntity == null) dataEntity = new KlineEntity.DataEntity();
+
                                 Class clData = dataEntity.getClass();
                                 while (iterator4.hasNext()) {
                                     String key4 = iterator4.next();
@@ -329,24 +349,24 @@ public class DataManager {
      * author: chenli
      * description: 刷新登录信息
      */
-    public void refreshAccountBean(String msg) throws JSONException {
-        final JSONObject accountBeanObject = new JSONObject(msg);
-        switch (accountBeanObject.optString("aid")) {
+    public void refreshTradeBean(String msg) throws JSONException {
+        final JSONObject tradeBeanObject = new JSONObject(msg);
+        switch (tradeBeanObject.optString("aid")) {
             case "rtn_brokers":
-                LoginEntity brokerInfo = new Gson().fromJson(msg, LoginEntity.class);
-                LOGIN.setBrokers(brokerInfo.getBrokers());
+                BrokerEntity brokerInfo = new Gson().fromJson(msg, BrokerEntity.class);
+                BROKER.setBrokers(brokerInfo.getBrokers());
                 if (BaseApplicationLike.getWebSocketService() != null)
                     BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_BROKER_INFO, BROADCAST_TRANSACTION);
                 break;
             case "rtn_data":
-                parseRtnData(accountBeanObject);
+                parseTradeData(tradeBeanObject);
                 break;
             default:
                 break;
         }
     }
 
-    private void parseRtnData(JSONObject accountBeanObject) {
+    private void parseTradeData(JSONObject accountBeanObject) {
         try {
             JSONArray dataArray = accountBeanObject.getJSONArray("data");
             for (int i = 0; i < dataArray.length(); i++) {
@@ -362,9 +382,6 @@ public class DataManager {
                                 String notifyKey = notifyIterator.next();
                                 JSONObject notify = data.getJSONObject(notifyKey);
                                 final String content = notify.optString("content");
-                                final String code = notify.optString("code");
-                                LOGIN.setContent(content);
-                                LOGIN.setCode(code);
                                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                                     @Override
                                     public void run() {
@@ -372,35 +389,51 @@ public class DataManager {
                                     }
                                 });
                             }
-                            if (BaseApplicationLike.getWebSocketService() != null
-                                    && !LoginActivity.isIsLogin() && LOGIN.getContent().contains("登录"))
-                                BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_LOGIN, BROADCAST_TRANSACTION);
                             break;
                         case "trade":
+                            Map<String, UserEntity> userEntities = TRADE.getUsers();
                             Iterator<String> tradeIterator = data.keys();
                             while (tradeIterator.hasNext()) {
-                                String tradeKey = tradeIterator.next();
-                                JSONObject trade = data.getJSONObject(tradeKey);
-                                Iterator<String> tradeDataIterator = trade.keys();
+                                String userKey = tradeIterator.next();
+                                JSONObject user = data.getJSONObject(userKey);
+                                UserEntity userEntity = userEntities.get(userKey);
+                                if (userEntity == null) userEntity = new UserEntity();
+                                Iterator<String> tradeDataIterator = user.keys();
                                 while (tradeDataIterator.hasNext()) {
                                     String tradeDataKey = tradeDataIterator.next();
                                     switch (tradeDataKey) {
                                         case "accounts":
-                                            parseAccount(trade);
+                                            parseAccounts(user, userEntity);
                                             break;
                                         case "orders":
-                                            parseOrder(trade);
+                                            parseOrders(user, userEntity);
                                             break;
                                         case "positions":
-                                            parsePosition(trade);
+                                            parsePositions(user, userEntity);
                                             break;
                                         case "trades":
-                                            parseTrade(trade);
+                                            parseTrades(user, userEntity);
+                                            break;
+                                        case "banks":
+                                            parseBanks(user, userEntity);
+                                            break;
+                                        case "transfers":
+                                            parseTransfers(user, userEntity);
+                                            break;
+                                        case "session":
+                                            String userId = user.getJSONObject("session").optString("user_id");
+                                            USER_ID = userId;
+                                            userEntity.setUser_id(userId);
+                                            if (BaseApplicationLike.getWebSocketService() != null && !IS_LOGIN )
+                                                BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_LOGIN, BROADCAST_TRANSACTION);
                                             break;
                                         default:
                                             break;
                                     }
                                 }
+                                userEntities.put(userKey, userEntity);
+                                if (BaseApplicationLike.getWebSocketService() != null)
+                                    BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_TRADE, BROADCAST_TRANSACTION);
                             }
                             break;
                         default:
@@ -413,16 +446,88 @@ public class DataManager {
         }
     }
 
-    private void parseTrade(JSONObject trade) {
+    private void parseTransfers(JSONObject user, UserEntity userEntity) {
         try {
-            JSONObject tradeData = trade.getJSONObject("trades");
-            Map<String, TradeEntity> tradeEntities = ACCOUNT.getTrade();
+            JSONObject transferData = user.getJSONObject("transfers");
+            Map<String, TransferEntity> transferEntities = userEntity.getTransfers();
+            Iterator<String> transferIterator = transferData.keys();
+            while (transferIterator.hasNext()) {
+                String key = transferIterator.next();
+                JSONObject transferObject = transferData.getJSONObject(key);
+                Iterator<String> iterator1 = transferObject.keys();
+                TransferEntity transferEntity = transferEntities.get(key);
+                if (transferEntity == null) transferEntity = new TransferEntity();
+                Class clTransfer = transferEntity.getClass();
+                while (iterator1.hasNext()) {
+                    String key1 = iterator1.next();
+                    try {
+                        Field f = clTransfer.getDeclaredField(key1);
+                        f.setAccessible(true);
+                        if (!transferObject.isNull(key1)) {
+                            String data = transferObject.optString(key1);
+                            f.set(transferEntity, data);
+                        }
+                    } catch (NoSuchFieldException e) {
+                        continue;
+                    } catch (IllegalAccessException e) {
+                        continue;
+                    }
+                }
+                transferEntity.setKey(key);
+                transferEntities.put(key, transferEntity);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void parseBanks(JSONObject user, UserEntity userEntity) {
+        try {
+            JSONObject bankData = user.getJSONObject("banks");
+            Map<String, BankEntity> bankEntities = userEntity.getBanks();
+            Iterator<String> bankIterator = bankData.keys();
+            while (bankIterator.hasNext()) {
+                String key = bankIterator.next();
+                JSONObject bankObject = bankData.getJSONObject(key);
+                Iterator<String> iterator1 = bankObject.keys();
+                BankEntity bankEntity = bankEntities.get(key);
+                if (bankEntity == null) bankEntity = new BankEntity();
+                Class clBank = bankEntity.getClass();
+                while (iterator1.hasNext()) {
+                    String key1 = iterator1.next();
+                    try {
+                        Field f = clBank.getDeclaredField(key1);
+                        f.setAccessible(true);
+                        if (!bankObject.isNull(key1)) {
+                            String data = bankObject.optString(key1);
+                            f.set(bankEntity, data);
+                        }
+                    } catch (NoSuchFieldException e) {
+                        continue;
+                    } catch (IllegalAccessException e) {
+                        continue;
+                    }
+
+                }
+                bankEntity.setKey(key);
+                bankEntities.put(key, bankEntity);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void parseTrades(JSONObject user, UserEntity userEntity) {
+        try {
+            JSONObject tradeData = user.getJSONObject("trades");
+            Map<String, TradeEntity> tradeEntities = userEntity.getTrades();
             Iterator<String> tradeIterator = tradeData.keys();
             while (tradeIterator.hasNext()) {
                 String key = tradeIterator.next();
                 JSONObject tradeObject = tradeData.getJSONObject(key);
                 Iterator<String> iterator1 = tradeObject.keys();
-                TradeEntity tradeEntity = new TradeEntity();
+                TradeEntity tradeEntity = tradeEntities.get(key);
+                if (tradeEntity == null) tradeEntity = new TradeEntity();
                 Class clTrade = tradeEntity.getClass();
                 while (iterator1.hasNext()) {
                     String key1 = iterator1.next();
@@ -443,23 +548,22 @@ public class DataManager {
                 tradeEntity.setKey(key);
                 tradeEntities.put(key, tradeEntity);
             }
-            if (BaseApplicationLike.getWebSocketService() != null)
-                BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_TRADE, BROADCAST_TRANSACTION);
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private void parsePosition(JSONObject trade) {
+    private void parsePositions(JSONObject user, UserEntity userEntity) {
         try {
-            JSONObject positionData = trade.getJSONObject("positions");
-            Map<String, PositionEntity> positionEntities = ACCOUNT.getPosition();
+            JSONObject positionData = user.getJSONObject("positions");
+            Map<String, PositionEntity> positionEntities = userEntity.getPositions();
             Iterator<String> positionIterator = positionData.keys();
             while (positionIterator.hasNext()) {
                 String key = positionIterator.next();
                 JSONObject positionObject = positionData.getJSONObject(key);
                 Iterator<String> iterator1 = positionObject.keys();
-                PositionEntity positionEntity = new PositionEntity();
+                PositionEntity positionEntity = positionEntities.get(key);
+                if (positionEntity == null) positionEntity = new PositionEntity();
                 Class clPosition = positionEntity.getClass();
                 while (iterator1.hasNext()) {
                     String key1 = iterator1.next();
@@ -481,23 +585,22 @@ public class DataManager {
                 positionEntity.setKey(key);
                 positionEntities.put(key, positionEntity);
             }
-            if (BaseApplicationLike.getWebSocketService() != null)
-                BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_POSITION, BROADCAST_TRANSACTION);
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private void parseOrder(JSONObject trade) {
+    private void parseOrders(JSONObject user, UserEntity userEntity) {
         try {
-            JSONObject orderData = trade.getJSONObject("orders");
-            final Map<String, OrderEntity> orderEntities = ACCOUNT.getOrder();
+            JSONObject orderData = user.getJSONObject("orders");
+            final Map<String, OrderEntity> orderEntities = userEntity.getOrders();
             Iterator<String> orderIterator = orderData.keys();
             while (orderIterator.hasNext()) {
                 String key = orderIterator.next();
-                final JSONObject orderObject = orderData.getJSONObject(key);
+                JSONObject orderObject = orderData.getJSONObject(key);
                 Iterator<String> iterator1 = orderObject.keys();
-                final OrderEntity orderEntity = new OrderEntity();
+                OrderEntity orderEntity = orderEntities.get(key);
+                if (orderEntity == null) orderEntity = new OrderEntity();
                 Class clOrder = orderEntity.getClass();
                 while (iterator1.hasNext()) {
                     String key1 = iterator1.next();
@@ -518,22 +621,21 @@ public class DataManager {
                 orderEntity.setKey(key);
                 orderEntities.put(key, orderEntity);
             }
-            if (BaseApplicationLike.getWebSocketService() != null)
-                BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_ORDER, BROADCAST_TRANSACTION);
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private void parseAccount(JSONObject trade) {
+    private void parseAccounts(JSONObject user, UserEntity userEntity) {
         try {
-            JSONObject accountData = trade.getJSONObject("accounts");
-            Map<String, AccountEntity> accountEntities = ACCOUNT.getAccount();
+            JSONObject accountData = user.getJSONObject("accounts");
+            Map<String, AccountEntity> accountEntities = userEntity.getAccounts();
             Iterator<String> accountIterator = accountData.keys();
             while (accountIterator.hasNext()) {
                 String key = accountIterator.next();
                 JSONObject accountObject = accountData.getJSONObject(key);
-                AccountEntity accountEntity = new AccountEntity();
+                AccountEntity accountEntity = accountEntities.get(key);
+                if (accountEntity == null) accountEntity = new AccountEntity();
                 Class clAccount = accountEntity.getClass();
                 Iterator<String> iterator1 = accountObject.keys();
                 while (iterator1.hasNext()) {
@@ -553,8 +655,6 @@ public class DataManager {
                 accountEntity.setKey(key);
                 accountEntities.put(key, accountEntity);
             }
-            if (BaseApplicationLike.getWebSocketService() != null)
-                BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_ACCOUNT, BROADCAST_TRANSACTION);
         } catch (JSONException e) {
             e.printStackTrace();
         }

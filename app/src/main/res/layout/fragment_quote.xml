@@ -24,7 +24,7 @@
                 android:text="@string/quote_fragment_name"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/font_size_normal"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_last"
@@ -38,7 +38,7 @@
                 android:text="@string/quote_fragment_latest"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/font_size_normal"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_change_percent"
@@ -52,7 +52,7 @@
                 android:text="@string/quote_fragment_up_down_rate"
                 android:textColor="@color/white"
                 android:textSize="@dimen/font_size_normal"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
 
             <View
@@ -72,7 +72,7 @@
                 android:text="@string/quote_fragment_open_interest"
                 android:textColor="@color/white"
                 android:textSize="@dimen/font_size_normal"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -85,7 +85,7 @@
             android:fadeScrollbars="false"
             android:scrollbarSize="@dimen/scroll_bar_size_small"
             android:scrollbarThumbVertical="@color/text_gray_light"
-            android:scrollbars="vertical"/>
+            android:scrollbars="vertical" />
 
     </LinearLayout>
 

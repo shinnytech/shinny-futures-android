@@ -153,9 +153,9 @@ public class KeyboardUtils {
                                 break;
                             default:
                                 //添加负号功能
-                                if (mEditText.getSelectionStart() == 0){
+                                if (mEditText.getSelectionStart() == 0) {
                                     editable.insert(0, "-");
-                                }else {
+                                } else {
                                     String data = MathUtils.subtract(editable.toString(), "1");
                                     editable.clear();
                                     editable.insert(0, data);
@@ -167,10 +167,10 @@ public class KeyboardUtils {
                         String str = editable.toString();
                         if ("排队价".equals(text) || "对手价".equals(text) || "市价".equals(text) || "最新价".equals(text) || mIsInit) {
                             //添加负号功能
-                            if ("-".equals(str)){
+                            if ("-".equals(str)) {
                                 if ((!".".equals(insertStr)) || (".".equals(insertStr) && !text.contains(".")))
                                     editable.insert(start, insertStr);
-                            }else {
+                            } else {
                                 editable.clear();
                                 editable.insert(0, insertStr);
                             }

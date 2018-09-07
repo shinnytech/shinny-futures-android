@@ -1,8 +1,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:background="@color/dialog_optional_out"
-              android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dialog_optional_out"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/dialog_hint"
@@ -11,7 +11,7 @@
         android:layout_margin="@dimen/margin_10dp"
         android:text="@string/select_from_optional"
         android:textColor="@color/dialog_optional_out_text"
-        android:textSize="@dimen/font_size_normal_high"/>
+        android:textSize="@dimen/font_size_normal_high" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/dialog_rv"

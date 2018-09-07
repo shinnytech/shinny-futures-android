@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,13 +25,15 @@ import android.widget.TextView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplicationLike;
 import com.shinnytech.futures.databinding.FragmentOrderBinding;
-import com.shinnytech.futures.view.adapter.OrderAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.view.listener.OrderDiffCallback;
-import com.shinnytech.futures.view.listener.SimpleRecyclerViewItemClickListener;
+import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.view.activity.FutureInfoActivity;
+import com.shinnytech.futures.view.adapter.OrderAdapter;
+import com.shinnytech.futures.view.listener.OrderDiffCallback;
+import com.shinnytech.futures.view.listener.SimpleRecyclerViewItemClickListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +42,7 @@ import java.util.Map;
 
 import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
 import static com.shinnytech.futures.constants.CommonConstants.ERROR;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_ORDER;
+import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_TRADE;
 import static com.shinnytech.futures.constants.CommonConstants.OPEN;
 import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION_TRANSACTION;
 
@@ -59,6 +62,7 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
     private List<OrderEntity> mOldData = new ArrayList<>();
     private List<OrderEntity> mNewData = new ArrayList<>();
     private FragmentOrderBinding mBinding;
+    private boolean mIsUpdate;
 
     /**
      * date: 7/14/17
@@ -116,6 +120,7 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
     }
 
     protected void initData() {
+        mIsUpdate = true;
         mBinding.rv.setLayoutManager(
                 new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         mBinding.rv.addItemDecoration(
@@ -125,37 +130,54 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
     }
 
     protected void initEvent() {
-        if (mBinding.rv != null) {
-            //recyclerView点击事件监听器，对于未成交单进行撤单
-            SimpleRecyclerViewItemClickListener mTouchListener = new SimpleRecyclerViewItemClickListener(mBinding.rv, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
-                @Override
-                public void onItemClick(View view, int position) {
-                    OrderEntity orderEntity = mAdapter.getData().get(position);
-                    if (orderEntity != null) {
-                        if (("ALIVE").equals(orderEntity.getStatus())) {
-                            String order_id = orderEntity.getOrder_id();
-                            String instrument_id = orderEntity.getInstrument_id();
-                            String direction_title = ((TextView) view.findViewById(R.id.order_offset)).getText().toString();
-                            String volume = orderEntity.getVolume_left();
-                            String price = ((TextView) view.findViewById(R.id.order_price)).getText().toString();
-                            initDialog(order_id, instrument_id, direction_title, volume, price);
-                        }
+
+        mBinding.rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                switch (newState) {
+                    case RecyclerView.SCROLL_STATE_IDLE:
+                        mIsUpdate = true;
+                        break;
+                    case RecyclerView.SCROLL_STATE_DRAGGING:
+                        mIsUpdate = false;
+                        break;
+                    case RecyclerView.SCROLL_STATE_SETTLING:
+                        mIsUpdate = false;
+                        break;
+                }
+            }
+        });
+
+
+        mBinding.rv.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rv, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                OrderEntity orderEntity = mAdapter.getData().get(position);
+                if (orderEntity != null) {
+                    if (("ALIVE").equals(orderEntity.getStatus())) {
+                        String order_id = orderEntity.getOrder_id();
+                        String instrument_id = orderEntity.getInstrument_id();
+                        String direction_title = ((TextView) view.findViewById(R.id.order_offset)).getText().toString();
+                        String volume = orderEntity.getVolume_left();
+                        String price = ((TextView) view.findViewById(R.id.order_price)).getText().toString();
+                        initDialog(order_id, instrument_id, direction_title, volume, price);
                     }
                 }
+            }
 
-                @Override
-                public void onItemLongClick(View view, int position) {
-                }
-            });
-            mBinding.rv.addOnItemTouchListener(mTouchListener);
-        }
+            @Override
+            public void onItemLongClick(View view, int position) {
+            }
+        }));
+
         mBinding.rgOrder.setOnCheckedChangeListener(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        refreshOrder();
+        update();
         registerBroaderCast();
     }
 
@@ -177,8 +199,9 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
                         break;
                     case ERROR:
                         break;
-                    case MESSAGE_ORDER:
-                        if ((R.id.rb_order_info == ((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId()))
+                    case MESSAGE_TRADE:
+                        if ((R.id.rb_order_info == ((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId())
+                                && mIsUpdate)
                             refreshOrder();
                         break;
                     default:
@@ -195,22 +218,22 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
      * description: 根据用户选择显示全部挂单或未成交单
      */
     protected void refreshOrder() {
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        if (userEntity == null) return;
         mNewData.clear();
-        if (mBinding.rbAllOrder.isChecked()) {
-            mNewData.addAll(sDataManager.getAccountBean().getOrder().values());
-        } else {
-            for (Map.Entry<String, OrderEntity> entry :
-                    sDataManager.getAccountBean().getOrder().entrySet()) {
-                if (("ALIVE").equals(entry.getValue().getStatus())) {
-                    mNewData.add(entry.getValue());
-                }
+        for (OrderEntity orderEntity :
+                userEntity.getOrders().values()) {
+            OrderEntity o = CloneUtils.clone(orderEntity);
+            if (mBinding.rbAllOrder.isChecked()) {
+                mNewData.add(o);
+            } else if (("ALIVE").equals(orderEntity.getStatus())) {
+                mNewData.add(o);
             }
         }
         Collections.sort(mNewData);
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new OrderDiffCallback(mOldData, mNewData), false);
         mAdapter.setData(mNewData);
         diffResult.dispatchUpdatesTo(mAdapter);
-        mBinding.rv.scrollToPosition(0);
         mOldData.clear();
         mOldData.addAll(mNewData);
     }
@@ -235,6 +258,7 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
     @Override
     public void update() {
         refreshOrder();
+        mBinding.rv.scrollToPosition(0);
     }
 
 }

@@ -20,7 +20,7 @@
             android:paddingBottom="@dimen/padding_4dp"
             android:paddingTop="@dimen/padding_4dp"
             android:textColor="@color/white"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/position_direction"
@@ -31,7 +31,7 @@
             android:paddingBottom="@dimen/padding_4dp"
             android:paddingTop="@dimen/padding_4dp"
             android:textColor="@color/text_red"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/position_volume"
@@ -42,7 +42,7 @@
             android:paddingBottom="@dimen/padding_4dp"
             android:paddingTop="@dimen/padding_4dp"
             android:textColor="@color/white"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/position_available"
@@ -53,29 +53,29 @@
             android:paddingBottom="@dimen/padding_4dp"
             android:paddingTop="@dimen/padding_4dp"
             android:textColor="@color/white"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/position_open_price"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:gravity="center"
+            android:gravity="right"
             android:paddingBottom="@dimen/padding_4dp"
             android:paddingTop="@dimen/padding_4dp"
             android:textColor="@color/white"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/position_profit"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:gravity="center"
+            android:gravity="right"
             android:paddingBottom="@dimen/padding_4dp"
             android:paddingTop="@dimen/padding_4dp"
             android:textColor="@color/text_red"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal" />
 
     </LinearLayout>
 </layout>

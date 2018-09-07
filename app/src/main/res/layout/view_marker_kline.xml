@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:background="@drawable/rectangle_border_current_day"
-              android:orientation="vertical">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rectangle_border_current_day"
+    android:orientation="vertical">
 
 
     <TextView
@@ -15,7 +15,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text=""
         android:textColor="@color/minute_yellow"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
     <TextView
         android:id="@+id/x_value"
@@ -26,7 +26,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text=""
         android:textColor="@color/minute_yellow"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
 
     <TextView
@@ -37,7 +37,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text="开盘"
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
     <TextView
         android:id="@+id/open"
@@ -48,7 +48,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text=""
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
 
     <TextView
@@ -59,7 +59,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text="最高"
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
     <TextView
         android:id="@+id/high"
@@ -70,7 +70,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text=""
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -80,7 +80,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text="最低"
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
     <TextView
         android:id="@+id/low"
@@ -91,7 +91,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text=""
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -101,7 +101,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text="收盘"
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
     <TextView
         android:id="@+id/close"
@@ -112,7 +112,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text=""
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
     <TextView
         android:id="@+id/close_change"
@@ -123,7 +123,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text=""
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
     <TextView
         android:id="@+id/close_change_percent"
@@ -134,7 +134,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text=""
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -144,7 +144,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text="成交量"
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
     <TextView
         android:id="@+id/volume"
@@ -155,7 +155,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text=""
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -165,7 +165,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text="持仓量"
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
     <TextView
         android:id="@+id/close_oi"
@@ -176,7 +176,7 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text=""
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
     <TextView
         android:id="@+id/close_oi_delta"
@@ -187,6 +187,6 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text=""
         android:textColor="@color/white"
-        android:textSize="@dimen/font_size_tiny_high"/>
+        android:textSize="@dimen/font_size_tiny_high" />
 
 </LinearLayout>

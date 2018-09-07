@@ -6,26 +6,31 @@ package com.shinnytech.futures.model.bean.accountinfobean;
  * Description: .
  */
 
-public class AccountEntity {
+public class AccountEntity{
     private String key = "";
-    private String account_id = "";
+    private String user_id = "";
     private String currency = "";
-    private String balance = "";
-    private String available = "";
+
     private String pre_balance = "";
+
     private String deposit = "";
     private String withdraw = "";
+    private String close_profit = "";
     private String commission = "";
     private String premium = "";
     private String static_balance = "";
+
     private String position_profit = "";
     private String float_profit = "";
-    private String risk_ratio = "";
+
+    private String balance = "";
+
     private String margin = "";
     private String frozen_margin = "";
     private String frozen_commission = "";
     private String frozen_premium = "";
-    private String close_profit = "";
+    private String available = "";
+    private String risk_ratio = "";
 
     public String getKey() {
         return key;
@@ -35,12 +40,12 @@ public class AccountEntity {
         this.key = key;
     }
 
-    public String getAccount_id() {
-        return account_id;
+    public String getUser_id() {
+        return user_id;
     }
 
-    public void setAccount_id(String account_id) {
-        this.account_id = account_id;
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
     }
 
     public String getCurrency() {

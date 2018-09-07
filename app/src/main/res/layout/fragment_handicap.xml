@@ -12,8 +12,7 @@
             type="com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity"></variable>
     </data>
 
-    <LinearLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/content_future_info"
         android:layout_width="match_parent"
@@ -36,7 +35,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_ask_price1"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_ask_price1"
@@ -47,7 +46,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.ask_price1, handicap.instrument_id)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
 
             <View
@@ -64,7 +63,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_ask_volume1"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_ask_volume1"
@@ -75,7 +74,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{handicap.ask_volume1}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
         </LinearLayout>
 
@@ -92,7 +91,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_bid_price1"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_bid_price1"
@@ -103,7 +102,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.bid_price1, handicap.instrument_id)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <View
                 android:layout_width="1dp"
@@ -119,7 +118,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_bid_volume1"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_bid_volume1"
@@ -130,7 +129,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{handicap.bid_volume1}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
         </LinearLayout>
 
@@ -152,7 +151,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_last_price"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_last_price"
@@ -163,7 +162,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.last_price, handicap.instrument_id)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <View
                 android:layout_width="1dp"
@@ -178,7 +177,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_change"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_change"
@@ -189,7 +188,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(MathUtils.subtract(handicap.last_price, handicap.pre_settlement), handicap.instrument_id)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
         </LinearLayout>
 
@@ -207,7 +206,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_open"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_open"
@@ -218,7 +217,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.open, handicap.instrument_id)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <View
                 android:layout_width="1dp"
@@ -234,7 +233,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_volume"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_volume"
@@ -245,7 +244,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{handicap.volume}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
         </LinearLayout>
 
@@ -262,7 +261,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_highest"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_highest"
@@ -273,7 +272,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.highest, handicap.instrument_id)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <View
                 android:layout_width="1dp"
@@ -289,7 +288,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_open_interest"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_open_interest"
@@ -300,7 +299,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{handicap.open_interest}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
         </LinearLayout>
 
@@ -317,7 +316,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_lowest"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_lowest"
@@ -328,7 +327,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.lowest, handicap.instrument_id)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <View
                 android:layout_width="1dp"
@@ -344,7 +343,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_pre_open_interest"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_pre_open_interest"
@@ -355,7 +354,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{MathUtils.subtract(handicap.open_interest, handicap.pre_open_interest)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
         </LinearLayout>
 
@@ -373,7 +372,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_average"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_average"
@@ -384,7 +383,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.average, handicap.instrument_id)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
 
             <View
@@ -400,7 +399,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_settlement"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_settlement"
@@ -411,7 +410,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.settlement, handicap.instrument_id)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
         </LinearLayout>
 
@@ -429,7 +428,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_pre_close"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_pre_close"
@@ -440,7 +439,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.pre_close, handicap.instrument_id)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
 
             <View
@@ -457,7 +456,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_upper_limit"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_upper_limit"
@@ -468,7 +467,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.upper_limit, handicap.instrument_id)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
         </LinearLayout>
 
@@ -486,7 +485,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_pre_settlement"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_pre_settlement"
@@ -497,7 +496,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.pre_settlement, handicap.instrument_id)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
 
             <View
@@ -514,7 +513,7 @@
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_lower_limit"
-                android:textColor="@color/handicap_text"/>
+                android:textColor="@color/handicap_text" />
 
             <TextView
                 android:id="@+id/tv_id_handicap_lower_limit"
@@ -525,7 +524,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.lower_limit, handicap.instrument_id)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
         </LinearLayout>
 

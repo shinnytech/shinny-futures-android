@@ -13,12 +13,14 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ItemActivityTradeBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.TradeEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
+import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * date: 7/9/17
@@ -31,7 +33,6 @@ public class TradeAdapter extends RecyclerView.Adapter<TradeAdapter.ItemViewHold
 
     private Context sContext;
     private List<TradeEntity> mData;
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
 
     public TradeAdapter(Context context, List<TradeEntity> data) {
         this.sContext = context;
@@ -87,7 +88,7 @@ public class TradeAdapter extends RecyclerView.Adapter<TradeAdapter.ItemViewHold
             if (mData != null && mData.size() != 0) {
                 tradeEntity = mData.get(getLayoutPosition());
                 if (tradeEntity != null) {
-                    String instrument_id = tradeEntity.getInstrument_id();
+                    String instrument_id = tradeEntity.getExchange_id() + "." + tradeEntity.getInstrument_id();
                     SearchEntity insName = LatestFileManager.getSearchEntities().get(instrument_id);
                     mBinding.tvTradeName.setText(insName == null ? instrument_id : insName.getInstrumentName());
                     switch (tradeEntity.getOffset()) {
@@ -121,9 +122,9 @@ public class TradeAdapter extends RecyclerView.Adapter<TradeAdapter.ItemViewHold
                             mBinding.tvTradeOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
                             break;
                     }
-                    mBinding.tvTradePrice.setText(tradeEntity.getPrice());
+                    mBinding.tvTradePrice.setText(LatestFileManager.saveScaleByPtick(tradeEntity.getPrice(), instrument_id));
                     mBinding.tvTradeVolume.setText(tradeEntity.getVolume());
-                    String date = simpleDateFormat.format(new Date(Long.valueOf(tradeEntity.getTrade_date_time()) / 1000000));
+                    String date = DataManager.getInstance().getSimpleDateFormat().format(new Date(Long.valueOf(tradeEntity.getTrade_date_time()) / 1000000));
                     mBinding.tvTradeTime.setText(date);
                 }
             }

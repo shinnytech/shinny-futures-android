@@ -1,8 +1,6 @@
 package com.shinnytech.futures.model.engine;
 
 import android.content.Context;
-import android.util.ArrayMap;
-import android.util.Log;
 
 import com.shinnytech.futures.application.BaseApplicationLike;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
@@ -21,12 +19,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -41,8 +35,12 @@ import java.util.TreeSet;
  */
 public class LatestFileManager {
 
+    /**
+     * date: 7/9/17
+     * description: 自选合约列表名称
+     */
+    private static final String OPTIONAL_INS_LIST = "optionalInsList";
     private static JSONObject jsonObject;
-
     private static Comparator<String> comparator = new Comparator<String>() {
         @Override
         public int compare(String instrumentId1, String instrumentId2) {
@@ -60,12 +58,6 @@ public class LatestFileManager {
             }
         }
     };
-
-    /**
-     * date: 7/9/17
-     * description: 自选合约列表名称
-     */
-    private static final String OPTIONAL_INS_LIST = "optionalInsList";
     /**
      * date: 7/9/17
      * description: 搜索列表实例
@@ -209,6 +201,7 @@ public class LatestFileManager {
                 String product_short_name = subObject.optString("product_short_name");
                 String py = subObject.optString("py");
                 String margin = subObject.optString("margin");
+                Boolean expired = subObject.optBoolean("expired");
                 SearchEntity searchEntity = new SearchEntity();
                 searchEntity.setpTick(price_tick);
                 searchEntity.setInstrumentId(instrument_id);
@@ -232,31 +225,31 @@ public class LatestFileManager {
                 if ("FUTURE".equals(classN)) {
                     switch (exchange_id) {
                         case "SHFE"://上期所
-                            sShangqiInsList.put(instrument_id, quoteEntity);
+                            if (!expired)sShangqiInsList.put(instrument_id, quoteEntity);
                             if (!sShangqiInsListNameNav.containsValue(product_short_name))
                                 sShangqiInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("上海期货交易所");
                             break;
                         case "CZCE"://郑商所
-                            sZhengzhouInsList.put(instrument_id, quoteEntity);
+                            if (!expired)sZhengzhouInsList.put(instrument_id, quoteEntity);
                             if (!sZhengzhouInsListNameNav.containsValue(product_short_name))
                                 sZhengzhouInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("郑州商品交易所");
                             break;
                         case "DCE"://大商所
-                            sDalianInsList.put(instrument_id, quoteEntity);
+                            if (!expired)sDalianInsList.put(instrument_id, quoteEntity);
                             if (!sDalianInsListNameNav.containsValue(product_short_name))
                                 sDalianInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("大连商品交易所");
                             break;
                         case "CFFEX"://中金所
-                            sZhongjinInsList.put(instrument_id, quoteEntity);
+                            if (!expired)sZhongjinInsList.put(instrument_id, quoteEntity);
                             if (!sZhongjinInsListNameNav.containsValue(product_short_name))
                                 sZhongjinInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("中国金融期货交易所");
                             break;
                         case "INE"://上期能源
-                            sNengyuanInsList.put(instrument_id, quoteEntity);
+                            if (!expired)sNengyuanInsList.put(instrument_id, quoteEntity);
                             if (!sNengyuanInsListNameNav.containsValue(product_short_name))
                                 sNengyuanInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("上海国际能源交易中心");
@@ -274,13 +267,13 @@ public class LatestFileManager {
                     searchEntity.setPy(py_leg);
                     switch (exchange_id) {
                         case "CZCE":
-                            sZhengzhouzuheInsList.put(instrument_id, quoteEntity);
+                            if (!expired)sZhengzhouzuheInsList.put(instrument_id, quoteEntity);
                             if (!sZhengzhouzuheInsListNameNav.containsValue(product_short_name_leg))
                                 sZhengzhouzuheInsListNameNav.put(instrument_id, product_short_name_leg);
                             searchEntity.setExchangeName("郑州商品交易所");
                             break;
                         case "DCE":
-                            sDalianzuheInsList.put(instrument_id, quoteEntity);
+                            if (!expired)sDalianzuheInsList.put(instrument_id, quoteEntity);
                             if (!sDalianzuheInsListNameNav.containsValue(product_short_name_leg))
                                 sDalianzuheInsListNameNav.put(instrument_id, product_short_name_leg);
                             searchEntity.setExchangeName("大连商品交易所");
@@ -415,14 +408,15 @@ public class LatestFileManager {
      */
     public static String saveScaleByPtick(String data, String instrumentId) {
         SearchEntity searchEntity = SEARCH_ENTITIES.get(instrumentId);
-        if (searchEntity == null || data == null || !data.matches("-?\\d+(\\.\\d+)?")) return data;
+        if (searchEntity == null || data == null || !data.matches("-?\\d+(\\.\\d+)?"))
+            return MathUtils.round(data, 1);
         try {
             String pTick = searchEntity.getpTick();
             DecimalFormat decimalFormat = new DecimalFormat(pTick);
             return decimalFormat.format(Float.valueOf(data));
         } catch (Exception e) {
             e.printStackTrace();
-            return data;
+            return MathUtils.round(data, 1);
         }
     }
 
@@ -433,21 +427,19 @@ public class LatestFileManager {
      */
     public static String saveScaleByPtickA(String data, String instrumentId) {
         SearchEntity searchEntity = SEARCH_ENTITIES.get(instrumentId);
-        if (searchEntity != null) {
-            try {
-                String pTick = searchEntity.getpTick();
-                int scale = 0;
-                if (pTick != null) {
-                    if (pTick.contains(".")) scale = pTick.length() - pTick.indexOf(".");
-                    else scale = 1;
-                }
-                return MathUtils.round(data, scale);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return MathUtils.round(data, 2);
+        if (searchEntity == null) return MathUtils.round(data, 2);
+        try {
+            String pTick = searchEntity.getpTick();
+            int scale = 0;
+            if (pTick != null) {
+                if (pTick.contains(".")) scale = pTick.length() - pTick.indexOf(".");
+                else scale = 1;
             }
-        } else return MathUtils.round(data, 2);
-        // 组合目前找不到ptick,默认保留两位
+            return MathUtils.round(data, scale);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return MathUtils.round(data, 2);
+        }
     }
 
     /**

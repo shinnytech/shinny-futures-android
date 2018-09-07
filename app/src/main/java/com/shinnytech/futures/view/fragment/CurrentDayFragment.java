@@ -38,7 +38,6 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.view.activity.FutureInfoActivity;
-import com.shinnytech.futures.view.activity.LoginActivity;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyXAxis;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyYAxis;
 
@@ -105,9 +104,9 @@ public class CurrentDayFragment extends BaseChartFragment {
         super.initData();
         mColorOneMinuteChart = ContextCompat.getColor(getActivity(), R.color.kline_one_minute);
         mColorAverageChart = ContextCompat.getColor(getActivity(), R.color.kline_average);
-        simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
+        mSimpleDateFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
         mKlineType = CURRENT_DAY;
-        buttonId = R.id.rb_current_day_up;
+        mButtonId = R.id.rb_current_day_up;
     }
 
     @Override
@@ -206,18 +205,18 @@ public class CurrentDayFragment extends BaseChartFragment {
      * description: 载入数据
      */
     @Override
-    protected void loadChartData() {
-        if (((FutureInfoActivity) getActivity()).getTabsUp().getCheckedRadioButtonId() == buttonId) {
+    protected void refreshMarketing() {
+        if (((FutureInfoActivity) getActivity()).getTabsUp().getCheckedRadioButtonId() == mButtonId) {
             try {
-                Map<String, KlineEntity> klineEntities = dataManager.getRtnData().getKlines().get(instrument_id);
-                QuoteEntity quoteEntity = dataManager.getRtnData().getQuotes().get(instrument_id);
+                Map<String, KlineEntity> klineEntities = sDataManager.getRtnData().getKlines().get(instrument_id);
+                QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(instrument_id);
                 if (klineEntities == null || quoteEntity == null) return;
                 KlineEntity klineEntity = klineEntities.get(mKlineType);
                 if (klineEntity == null) return;
                 String last_id = klineEntity.getLast_id();
-                dataEntities = klineEntity.getData();
+                mDataEntities = klineEntity.getData();
                 preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
-                if (last_id == null || "-1".equals(last_id) || dataEntities.isEmpty() || preSettlement == 1)
+                if (last_id == null || "-1".equals(last_id) || mDataEntities.isEmpty() || preSettlement == 1)
                     return;
                 int last_index = Integer.parseInt(last_id);
                 //开始加载数据
@@ -225,13 +224,13 @@ public class CurrentDayFragment extends BaseChartFragment {
                     LineData lineData = mChart.getLineData();
                     CombinedData combinedData = mChart.getCombinedData();
                     List<ILineDataSet> dataSets = lineData.getDataSets();
-                    int itemCount = dataEntities.size();
+                    int itemCount = mDataEntities.size();
                     int entryCount = dataSets.get(0).getEntryCount();
                     if (last_index > mEndIndex) last_index = mEndIndex;
 
                     if (entryCount == itemCount) {
                         LogUtils.e("分时图刷新", false);
-                        KlineEntity.DataEntity dataEntity = dataEntities.get(last_id);
+                        KlineEntity.DataEntity dataEntity = mDataEntities.get(last_id);
                         if (dataEntity == null) return;
                         lineData.removeEntry(last_index, 0);
                         lineData.removeEntry(last_index, 1);
@@ -243,7 +242,7 @@ public class CurrentDayFragment extends BaseChartFragment {
                         int increase = itemCount - entryCount;
                         int last_index_begin = last_index - increase + 1;
                         for (int i = last_index_begin; i <= last_index; i++) {
-                            KlineEntity.DataEntity dataEntity = dataEntities.get(i + "");
+                            KlineEntity.DataEntity dataEntity = mDataEntities.get(i + "");
                             if (dataEntity == null) continue;
                             generateXAxisLabel(i, dataEntity);
                             generateLineDataEntry(last_index, lineData, dataEntity);
@@ -268,7 +267,7 @@ public class CurrentDayFragment extends BaseChartFragment {
                     List<Entry> averageChart = new ArrayList<>();
                     CombinedData combinedData = new CombinedData();
                     for (int index = mStartIndex; index <= last_index; index++) {
-                        KlineEntity.DataEntity dataEntity = dataEntities.get(String.valueOf(index));
+                        KlineEntity.DataEntity dataEntity = mDataEntities.get(String.valueOf(index));
                         if (dataEntity == null) continue;
                         generateXAxisLabel(index, dataEntity);
                         generateLineDataEntry(oneMinuteChart, averageChart, index, dataEntity);
@@ -299,19 +298,19 @@ public class CurrentDayFragment extends BaseChartFragment {
      */
     private void generateXAxisLabel(int index, KlineEntity.DataEntity dataEntity) throws ParseException {
         long dateTime = Long.valueOf(dataEntity.getDatetime()) / 1000000;
-        calendar.setTimeInMillis(dateTime);
-        String time = simpleDateFormat.format(calendar.getTime());
+        mCalendar.setTimeInMillis(dateTime);
+        String time = mSimpleDateFormat.format(mCalendar.getTime());
         xVals.put(index, time);
         if (index == mStartIndex) {
             mStringSparseArray.put(index, time);
         } else if (index == mEndIndex) {
-            calendar.setTimeInMillis(dateTime + 60000L);
-            String timeLast = simpleDateFormat.format(calendar.getTime());
+            mCalendar.setTimeInMillis(dateTime + 60000L);
+            String timeLast = mSimpleDateFormat.format(mCalendar.getTime());
             mStringSparseArray.put(index, timeLast);
         } else {
             String timePreS = xVals.get(index - 1);
-            long timeCur = simpleDateFormat.parse(time).getTime();
-            long timePre = simpleDateFormat.parse(timePreS).getTime();
+            long timeCur = mSimpleDateFormat.parse(time).getTime();
+            long timePre = mSimpleDateFormat.parse(timePreS).getTime();
             if ((timeCur - timePre) != 60000L) mStringSparseArray.put(index, time);
         }
     }
@@ -435,7 +434,10 @@ public class CurrentDayFragment extends BaseChartFragment {
             if (BaseApplicationLike.getWebSocketService() != null)
                 BaseApplicationLike.getWebSocketService().sendSetChart(instrument_id);
 
-            if (LoginActivity.isIsLogin()) {
+            if (instrument_id.contains("KQ"))
+                instrument_id_transaction = LatestFileManager.getSearchEntities().get(instrument_id).getUnderlying_symbol();
+            else instrument_id_transaction = instrument_id;
+            if (sDataManager.IS_LOGIN) {
                 if (mIsPosition) addPositionLimitLines();
                 if (mIsPending) addOrderLimitLines();
             }
@@ -451,7 +453,7 @@ public class CurrentDayFragment extends BaseChartFragment {
     public void onEventMainThread(SetUpEvent data) {
         if (mIsPending != data.isPending()) {
             mIsPending = data.isPending();
-            if (LoginActivity.isIsLogin()) {
+            if (sDataManager.IS_LOGIN) {
                 if (mIsPending) addOrderLimitLines();
                 else removeOrderLimitLines();
             }
@@ -459,7 +461,7 @@ public class CurrentDayFragment extends BaseChartFragment {
 
         if (mIsPosition != data.isPosition()) {
             mIsPosition = data.isPosition();
-            if (LoginActivity.isIsLogin()) {
+            if (sDataManager.IS_LOGIN) {
                 if (mIsPosition) addPositionLimitLines();
                 else removePositionLimitLines();
             }
@@ -571,8 +573,8 @@ public class CurrentDayFragment extends BaseChartFragment {
         public void refreshContent(Entry e, Highlight highlight) {
             int x = (int) e.getX();
             int index = x - 1;
-            KlineEntity.DataEntity dataEntity = dataEntities.get(String.valueOf(x));
-            KlineEntity.DataEntity dataEntityPre = dataEntities.get(String.valueOf(index >= mStartIndex ? index : mStartIndex));
+            KlineEntity.DataEntity dataEntity = mDataEntities.get(String.valueOf(x));
+            KlineEntity.DataEntity dataEntityPre = mDataEntities.get(String.valueOf(index >= mStartIndex ? index : mStartIndex));
             if (dataEntity != null && dataEntityPre != null) {
                 calendar.setTimeInMillis(Long.valueOf(dataEntity.getDatetime()) / 1000000);
                 String time = simpleDateFormat.format(calendar.getTime());
@@ -585,7 +587,7 @@ public class CurrentDayFragment extends BaseChartFragment {
                 else
                     average = LatestFileManager.saveScaleByPtick(String.valueOf(e.getY()), instrument_id);
                 String change = LatestFileManager.saveScaleByPtick(MathUtils.subtract(dataEntity.getClose(), dataEntityPre.getClose()), instrument_id);
-                String changePercent =MathUtils.round( MathUtils.multiply(MathUtils.divide(change, dataEntityPre.getClose()), "100"), 2) + "%";
+                String changePercent = MathUtils.round(MathUtils.multiply(MathUtils.divide(change, dataEntityPre.getClose()), "100"), 2) + "%";
                 String volume = dataEntity.getVolume();
                 String volumeDelta = MathUtils.subtract(volume, (dataEntityPre.getVolume()));
                 String closeOi = dataEntity.getClose_oi();

@@ -13,7 +13,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
@@ -55,12 +54,6 @@ public class LoginActivity extends BaseActivity {
 
     /**
      * date: 7/7/17
-     * description: 用于判断是否登录成功的全局标志
-     */
-    private static boolean sIsLogin = false;
-
-    /**
-     * date: 7/7/17
      * description: 用户名输入框的下拉列表
      */
     private String[] mData = new String[]{""};
@@ -75,22 +68,14 @@ public class LoginActivity extends BaseActivity {
      */
     private BroadcastReceiver mReceiverLogin;
     private String mActivityType;
-    private DataManager sDataManager = DataManager.getInstance();
+    private DataManager sDataManager;
     private Context sContext;
     private String mBrokerId;
     private String mPhoneNumber;
     private ArrayAdapter<String> mSpinnerAdapter;
-    private Handler handler = new MyHandler(this);
+    private Handler mHandler;
     private ActivityLoginBinding mBinding;
     private String mPassword;
-
-    public static boolean isIsLogin() {
-        return sIsLogin;
-    }
-
-    public static void setIsLogin(boolean isLogin) {
-        LoginActivity.sIsLogin = isLogin;
-    }
 
     /**
      * date: 6/1/18
@@ -123,6 +108,9 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     protected void initData() {
+        sContext = BaseApplicationLike.getContext();
+        sDataManager = DataManager.getInstance();
+        mHandler = new MyHandler(this);
         mBinding = (ActivityLoginBinding) mViewDataBinding;
         mActivityType = getIntent().getStringExtra(ACTIVITY_TYPE);
         List<String> brokerList = getBrokerIdFromBuildConfig(sDataManager.getLogin().getBrokers());
@@ -130,11 +118,10 @@ public class LoginActivity extends BaseActivity {
         mSpinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown_style);
         mBinding.spinner.setAdapter(mSpinnerAdapter);
 
-        sContext = BaseApplicationLike.getContext();
         //获取用户登录成功后保存在sharedPreference里的期货公司
         if (SPUtils.contains(sContext, "brokerId") && brokerList.size() > 1) {
             int brokerId = (int) SPUtils.get(sContext, "brokerId", 0);
-            mBinding.spinner.setSelection(brokerId, true);
+            if (brokerId < brokerList.size()) mBinding.spinner.setSelection(brokerId, true);
         }
 
         //获取用户登录成功后保存在sharedPreference里的用户名
@@ -156,34 +143,6 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     protected void initEvent() {
-        //聚焦密码框时，弹出键盘，布局上移
-        mBinding.etIdPassword.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mBinding.svIdLogin.scrollTo(0, mBinding.svIdLogin.getHeight());
-                    }
-                }, 100);
-                return false;
-            }
-        });
-
-
-        //聚焦用户名输入框时，加盘弹出，布局上移
-        mBinding.tvIdPhone.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mBinding.svIdLogin.scrollTo(0, mBinding.svIdLogin.getHeight());
-                    }
-                }, 100);
-                return false;
-            }
-        });
 
         //点击登录
         mBinding.buttonIdLogin.setOnClickListener(new View.OnClickListener() {
@@ -317,11 +276,8 @@ public class LoginActivity extends BaseActivity {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user fragment_home attempt.
-            showProgress(true);
             if (BaseApplicationLike.getWebSocketService() != null)
                 BaseApplicationLike.getWebSocketService().sendReqLogin(mBrokerId, mPhoneNumber, mPassword);
-
-            handler.sendEmptyMessageDelayed(1, 5000);
 
             //关闭键盘
             View view = getWindow().getCurrentFocus();
@@ -332,13 +288,6 @@ public class LoginActivity extends BaseActivity {
             }
         }
 
-    }
-
-    /**
-     * Shows the progress UI and hides the fragment_home form.
-     */
-    private void showProgress(final boolean show) {
-        mBinding.pbIdLogin.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     /**
@@ -382,12 +331,11 @@ public class LoginActivity extends BaseActivity {
                     case ERROR:
                         break;
                     case MESSAGE_LOGIN:
-                        //延迟一秒有一个转圈等待效果
-                        handler.sendEmptyMessageDelayed(0, 1000);
+                        mHandler.sendEmptyMessageDelayed(0, 2000);
                         break;
                     case MESSAGE_BROKER_INFO:
                         //如果客户端打开后期货公司列表信息还没有解析完毕，服务器发送brokerId后更新期货公司列表
-                        handler.sendEmptyMessage(2);
+                        mHandler.sendEmptyMessage(1);
                         break;
                     default:
                         break;
@@ -418,53 +366,34 @@ public class LoginActivity extends BaseActivity {
             if (activity != null) {
                 switch (msg.what) {
                     case 0:
-                        String code = activity.sDataManager.getLogin().getCode();
-                        if ("0".equals(code)) {
-                            activity.showProgress(false);
-                            sIsLogin = true;
-                            SPUtils.putAndApply(activity.sContext, "phone", activity.mPhoneNumber);
-                            SPUtils.putAndApply(activity.sContext, "password", activity.mPassword);
-                            SPUtils.putAndApply(activity.sContext, "brokerId", activity.mBinding.spinner.getSelectedItemPosition());
-                            //关闭键盘
-                            View view = activity.getWindow().getCurrentFocus();
-                            if (view != null) {
-                                InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-                                if (inputMethodManager != null)
-                                    inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOT_ALWAYS);
-                            }
-
-                            //返回登录信息给合约详情页，使相应页面显示
-                            if (activity.mActivityType.equals("FutureInfoActivity")) {
-                                Intent intent = new Intent();
-                                activity.setResult(RESULT_OK, intent);
-                            }
-                            activity.finish();
-
-                        } else {
-                            activity.showProgress(false);
-                            activity.mBinding.etIdPassword.setError(activity.getString(R.string.login_activity_error_incorrect_password));
-                            activity.mBinding.etIdPassword.requestFocus();
+                        activity.sDataManager.IS_LOGIN = true;
+                        SPUtils.putAndApply(activity.sContext, "phone", activity.mPhoneNumber);
+                        SPUtils.putAndApply(activity.sContext, "password", activity.mPassword);
+                        SPUtils.putAndApply(activity.sContext, "brokerId", activity.mBinding.spinner.getSelectedItemPosition());
+                        //关闭键盘
+                        View view = activity.getWindow().getCurrentFocus();
+                        if (view != null) {
+                            InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                            if (inputMethodManager != null)
+                                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOT_ALWAYS);
                         }
+
+                        //返回登录信息给合约详情页，使相应页面显示
+                        if (activity.mActivityType.equals("FutureInfoActivity")) {
+                            Intent intent = new Intent();
+                            activity.setResult(RESULT_OK, intent);
+                        }
+                        activity.finish();
                         break;
                     case 1:
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (activity.mBinding.pbIdLogin != null && activity.mBinding.pbIdLogin.getVisibility() == View.VISIBLE) {
-                                    ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "连接超时,目前可能无法登录交易服务器...");
-                                    activity.showProgress(false);
-                                }
-                            }
-                        });
-                        break;
-                    case 2:
                         activity.mSpinnerAdapter.clear();
                         List<String> brokerList = activity.getBrokerIdFromBuildConfig(activity.sDataManager.getLogin().getBrokers());
                         activity.mSpinnerAdapter.addAll(brokerList);
                         //获取用户登录成功后保存在sharedPreference里的期货公司
                         if (SPUtils.contains(activity.sContext, "brokerId") && brokerList.size() > 1) {
                             int brokerId = (int) SPUtils.get(activity.sContext, "brokerId", 0);
-                            activity.mBinding.spinner.setSelection(brokerId, true);
+                            if (brokerId < brokerList.size())
+                                activity.mBinding.spinner.setSelection(brokerId, true);
                         }
                         break;
                     default:

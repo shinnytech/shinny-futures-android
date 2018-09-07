@@ -14,6 +14,7 @@ import com.shinnytech.futures.databinding.ItemFragmentPositionBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 
 import java.util.List;
@@ -94,45 +95,44 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                 PositionEntity positionEntity = mPositionData.get(getLayoutPosition());
                 if (positionEntity == null) return;
                 try {
-                    String instrument_id = positionEntity.getInstrument_id();
+                    String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
+                    LogUtils.e(instrument_id, true);
                     SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
                     mBinding.positionName.setText(searchEntity == null ? instrument_id : searchEntity.getInstrumentName());
-                    int vm = searchEntity == null ? 1 : Integer.parseInt(searchEntity.getVm());
-                    String available_long = MathUtils.add(positionEntity.getVolume_long_his(), positionEntity.getVolume_long_today());
-                    int volume_long = Integer.parseInt(MathUtils.add(available_long, positionEntity.getVolume_long_frozen()));
-                    String available_short = MathUtils.add(positionEntity.getVolume_short_his(), positionEntity.getVolume_short_today());
-                    int volume_short = Integer.parseInt(MathUtils.add(available_short, positionEntity.getVolume_short_frozen()));
+
+                    String available_long = MathUtils.subtract(positionEntity.getVolume_long(),
+                            MathUtils.add(positionEntity.getVolume_long_frozen_his(), positionEntity.getVolume_long_frozen_today()));
+                    int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+                    String available_short = MathUtils.subtract(positionEntity.getVolume_short(),
+                            MathUtils.add(positionEntity.getVolume_short_frozen_his(), positionEntity.getVolume_short_frozen_today()));
+                    int volume_short = Integer.parseInt(positionEntity.getVolume_short());
                     float profit = 0;
                     if (volume_long != 0 && volume_short == 0) {
                         mBinding.positionDirection.setText("多");
                         mBinding.positionDirection.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
                         mBinding.positionAvailable.setText(available_long);
                         mBinding.positionVolume.setText(volume_long + "");
-                        float open_price_long = getPrice(positionEntity.getOpen_cost_long(), positionEntity.getOpen_price_long(), vm, volume_long);
-                        mBinding.positionOpenPrice.setText(LatestFileManager.saveScaleByPtickA(open_price_long + "", instrument_id));
-                        mBinding.positionProfit.setText(MathUtils.round(positionEntity.getFloat_profit_long(), 0));
+                        mBinding.positionOpenPrice.setText(LatestFileManager.saveScaleByPtickA(positionEntity.getOpen_price_long(), instrument_id));
+                        mBinding.positionProfit.setText(MathUtils.round(positionEntity.getFloat_profit_long(), 2));
                         profit = Float.valueOf(positionEntity.getFloat_profit_long());
                     } else if (volume_long == 0 && volume_short != 0) {
                         mBinding.positionDirection.setText("空");
                         mBinding.positionDirection.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
                         mBinding.positionAvailable.setText(available_short);
                         mBinding.positionVolume.setText(volume_short + "");
-                        float open_price_short = getPrice(positionEntity.getOpen_cost_short(), positionEntity.getOpen_price_short(), vm, volume_short);
-                        mBinding.positionOpenPrice.setText(LatestFileManager.saveScaleByPtickA(open_price_short + "", instrument_id));
-                        mBinding.positionProfit.setText(MathUtils.round(positionEntity.getFloat_profit_short(), 0));
+                        mBinding.positionOpenPrice.setText(LatestFileManager.saveScaleByPtickA(positionEntity.getOpen_price_short(), instrument_id));
+                        mBinding.positionProfit.setText(MathUtils.round(positionEntity.getFloat_profit_short(), 2));
                         profit = Float.valueOf(positionEntity.getFloat_profit_short());
                     } else if (volume_long != 0 && volume_short != 0) {
                         mBinding.positionDirection.setText("双向");
                         mBinding.positionDirection.setTextColor(ContextCompat.getColor(sContext, R.color.white));
                         mBinding.positionAvailable.setText(available_long + "/" + available_short);
                         mBinding.positionVolume.setText(available_long + "/" + volume_short);
-                        float open_price_long = getPrice(positionEntity.getOpen_cost_long(), positionEntity.getOpen_price_long(), vm, volume_long);
-                        float open_price_short = getPrice(positionEntity.getOpen_cost_short(), positionEntity.getOpen_price_short(), vm, volume_short);
-                        String price_long = LatestFileManager.saveScaleByPtickA(open_price_long + "", instrument_id);
-                        String price_short = LatestFileManager.saveScaleByPtickA(open_price_short + "", instrument_id);
+                        String price_long = LatestFileManager.saveScaleByPtickA(positionEntity.getOpen_price_long(), instrument_id);
+                        String price_short = LatestFileManager.saveScaleByPtickA(positionEntity.getOpen_price_short(), instrument_id);
                         mBinding.positionOpenPrice.setText(price_long + "/" + price_short);
-                        mBinding.positionProfit.setText(MathUtils.round(positionEntity.getFloat_profit_long(), 0)
-                                + "/" + MathUtils.round(positionEntity.getFloat_profit_short(), 0));
+                        mBinding.positionProfit.setText(MathUtils.round(positionEntity.getFloat_profit_long(), 2)
+                                + "/" + MathUtils.round(positionEntity.getFloat_profit_short(), 2));
                         profit = Float.valueOf(positionEntity.getFloat_profit_long());
                     }
                     if (profit < 0)
@@ -146,20 +146,6 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                     e.printStackTrace();
                 }
             }
-        }
-
-        private float getPrice(String open_cost, String open_price, int vm, int volume) {
-            try {
-                float openCost = Float.parseFloat(open_cost);
-                float openPrice = Float.parseFloat(open_price);
-                if (openPrice != 0) return openPrice;
-                else if (openCost != 0) {
-                    return openCost / (volume * vm);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return 0.0f;
         }
 
         private void updatePart(Bundle bundle) {

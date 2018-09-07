@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data></data>
 
@@ -38,7 +38,7 @@
                     android:background="@color/black_light"
                     android:contentDescription="left"
                     android:gravity="center"
-                    android:src="@mipmap/ic_chevron_left_white_24dp"/>
+                    android:src="@mipmap/ic_chevron_left_white_24dp" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/rv_quote_navigation"
@@ -48,7 +48,7 @@
                     android:layout_marginEnd="@dimen/margin_45dp"
                     android:layout_marginStart="@dimen/margin_45dp"
                     android:background="@color/black_light"
-                    android:gravity="center"/>
+                    android:gravity="center" />
 
                 <ImageView
                     android:id="@+id/quote_nav_right"
@@ -58,7 +58,7 @@
                     android:background="@color/black_light"
                     android:contentDescription="right"
                     android:gravity="center"
-                    android:src="@mipmap/ic_chevron_right_white_24dp"/>
+                    android:src="@mipmap/ic_chevron_right_white_24dp" />
 
             </android.support.design.widget.CoordinatorLayout>
 

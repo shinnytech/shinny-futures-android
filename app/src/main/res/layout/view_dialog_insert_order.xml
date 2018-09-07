@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/root"
-              android:layout_width="@dimen/layout_width_view_dialog_cancel_order"
-              android:layout_height="@dimen/layout_height_view_dialog_cancel_order"
-              android:background="@drawable/dialog_shape"
-              android:orientation="vertical">
+    android:id="@+id/root"
+    android:layout_width="@dimen/layout_width_view_dialog_cancel_order"
+    android:layout_height="@dimen/layout_height_view_dialog_cancel_order"
+    android:background="@drawable/dialog_shape"
+    android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/title_layout"
@@ -20,7 +20,7 @@
             android:text="确认"
             android:textColor="@color/black"
             android:textSize="@dimen/font_size_normal_high"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -28,7 +28,7 @@
             android:text="下"
             android:textColor="@color/dialog_order_xia_text"
             android:textSize="@dimen/font_size_normal_high"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -36,7 +36,7 @@
             android:text="单吗?"
             android:textColor="@color/black"
             android:textSize="@dimen/font_size_normal_high"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
     </LinearLayout>
 
@@ -55,14 +55,14 @@
             android:layout_height="wrap_content"
             android:text="m1709"
             android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=", "
             android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/order_price"
@@ -73,14 +73,14 @@
             android:maxLines="1"
             android:text="1111"
             android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=", "
             android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/order_direction"
@@ -88,14 +88,14 @@
             android:layout_height="wrap_content"
             android:text="买开"
             android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=", "
             android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/order_volume"
@@ -106,14 +106,14 @@
             android:maxLines="1"
             android:text="1"
             android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="手"
             android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal"/>
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/order_comma1"
@@ -122,7 +122,7 @@
             android:text=", "
             android:textColor="@color/black"
             android:textSize="@dimen/font_size_normal"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/order_direction1"
@@ -131,7 +131,7 @@
             android:text="买开"
             android:textColor="@color/black"
             android:textSize="@dimen/font_size_normal"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/order_comma2"
@@ -140,7 +140,7 @@
             android:text=", "
             android:textColor="@color/black"
             android:textSize="@dimen/font_size_normal"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/order_volume1"
@@ -152,7 +152,7 @@
             android:text="1"
             android:textColor="@color/black"
             android:textSize="@dimen/font_size_normal"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/order_unit"
@@ -161,7 +161,7 @@
             android:text="手"
             android:textColor="@color/black"
             android:textSize="@dimen/font_size_normal"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
     </LinearLayout>
 
@@ -185,7 +185,7 @@
             android:gravity="center"
             android:text="取消"
             android:textColor="@color/dialog_order_button_text"
-            android:textSize="@dimen/font_size_normal_high"/>
+            android:textSize="@dimen/font_size_normal_high" />
 
         <View
             android:layout_width="@dimen/line_width"
@@ -201,7 +201,7 @@
             android:gravity="center"
             android:text="确定"
             android:textColor="@color/dialog_order_button_text"
-            android:textSize="@dimen/font_size_normal_high"/>
+            android:textSize="@dimen/font_size_normal_high" />
 
     </LinearLayout>
 

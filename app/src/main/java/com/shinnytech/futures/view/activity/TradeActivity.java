@@ -17,11 +17,13 @@ import android.view.MenuItem;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplicationLike;
 import com.shinnytech.futures.databinding.ActivityTradeBinding;
-import com.shinnytech.futures.view.adapter.TradeAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.TradeEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.view.listener.TradeDiffCallback;
+import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
+import com.shinnytech.futures.view.adapter.TradeAdapter;
+import com.shinnytech.futures.view.listener.TradeDiffCallback;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -102,13 +104,18 @@ public class TradeActivity extends BaseActivity {
     }
 
     public void refreshUI() {
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        if (userEntity == null) return;
         mNewData.clear();
-        mNewData.addAll(sDataManager.getAccountBean().getTrade().values());
+        for (TradeEntity tradeEntity :
+                userEntity.getTrades().values()) {
+            TradeEntity t = CloneUtils.clone(tradeEntity);
+            mNewData.add(t);
+        }
         Collections.sort(mNewData);
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new TradeDiffCallback(mOldData, mNewData), false);
         mAdapter.setData(mNewData);
         diffResult.dispatchUpdatesTo(mAdapter);
-        mBinding.rv.scrollToPosition(0);
         mOldData.clear();
         mOldData.addAll(mNewData);
     }
@@ -159,7 +166,7 @@ public class TradeActivity extends BaseActivity {
         super.onResume();
         updateToolbarFromNetwork(sContext, "成交记录");
         refreshUI();
-        if (!LoginActivity.isIsLogin()) {
+        if (!sDataManager.IS_LOGIN) {
             Intent intent = new Intent(this, LoginActivity.class);
             //判断从哪个页面跳到登录页，登录页的销毁方式不一样
             intent.putExtra(ACTIVITY_TYPE, "MainActivity");

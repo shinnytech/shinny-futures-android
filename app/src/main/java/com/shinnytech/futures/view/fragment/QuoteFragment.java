@@ -17,7 +17,6 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -32,28 +31,26 @@ import android.widget.TextView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplicationLike;
 import com.shinnytech.futures.databinding.FragmentQuoteBinding;
-import com.shinnytech.futures.utils.CloneUtils;
-import com.shinnytech.futures.utils.LogUtils;
-import com.shinnytech.futures.view.adapter.QuoteAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
-import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.view.listener.QuoteDiffCallback;
-import com.shinnytech.futures.view.listener.SimpleRecyclerViewItemClickListener;
+import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
-import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.shinnytech.futures.view.activity.FutureInfoActivity;
 import com.shinnytech.futures.view.activity.SearchActivity;
+import com.shinnytech.futures.view.adapter.QuoteAdapter;
+import com.shinnytech.futures.view.listener.QuoteDiffCallback;
+import com.shinnytech.futures.view.listener.SimpleRecyclerViewItemClickListener;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -382,7 +379,7 @@ public class QuoteFragment extends LazyLoadFragment {
                             if (instrument_id == null || instrument_id.isEmpty()) return;
                             Map<String, QuoteEntity> insList = LatestFileManager.getOptionalInsList();
                             LogUtils.e(insList.toString(), true);
-                            if ( insList.containsKey(instrument_id)) {
+                            if (insList.containsKey(instrument_id)) {
                                 initPopUp(view, instrument_id, insList, false);
                             } else {
                                 initPopUp(view, instrument_id, insList, true);
@@ -391,7 +388,7 @@ public class QuoteFragment extends LazyLoadFragment {
                         }
                     }
 
-                    private void initPopUp(View view, final String instrument_id, final Map<String, QuoteEntity>insList, final boolean isAdd) {
+                    private void initPopUp(View view, final String instrument_id, final Map<String, QuoteEntity> insList, final boolean isAdd) {
                         //构造一个添加自选合约合约的PopupWindow
                         final View popUpView = View.inflate(getActivity(), R.layout.popup_fragment_quote, null);
                         final PopupWindow popWindow = new PopupWindow(popUpView,

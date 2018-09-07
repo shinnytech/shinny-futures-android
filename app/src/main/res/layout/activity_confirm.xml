@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <data>
-    </data>
+    <data></data>
 
-    <LinearLayout
-        xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -27,7 +25,7 @@
                 android:gravity="center"
                 android:text="@string/confirm_activity_not_now"
                 android:textColor="@color/white"
-                android:textSize="@dimen/font_size_normal"/>
+                android:textSize="@dimen/font_size_normal" />
 
             <TextView
                 android:layout_width="0dp"
@@ -36,7 +34,7 @@
                 android:gravity="center"
                 android:text="@string/confirm_activity_title"
                 android:textColor="@color/white"
-                android:textSize="@dimen/font_size_large"/>
+                android:textSize="@dimen/font_size_large" />
 
             <Button
                 android:id="@+id/confirm"
@@ -47,7 +45,7 @@
                 android:gravity="center"
                 android:text="@string/confirm_activity_settlement"
                 android:textColor="@color/white"
-                android:textSize="@dimen/font_size_normal"/>
+                android:textSize="@dimen/font_size_normal" />
         </LinearLayout>
 
         <ScrollView
@@ -65,7 +63,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:scrollbars="horizontal|vertical"
-                    android:textColor="@color/white"/>
+                    android:textColor="@color/white" />
 
             </HorizontalScrollView>
 

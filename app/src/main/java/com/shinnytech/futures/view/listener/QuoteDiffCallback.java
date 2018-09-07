@@ -6,7 +6,6 @@ import android.support.v7.util.DiffUtil;
 
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 
 import java.util.List;
@@ -64,7 +63,7 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
         String change_old = LatestFileManager.saveScaleByPtick(
                 getUpDown(latest_old, mOldData.get(oldItemPosition).getPre_settlement()), instrumentId);
         String change_percent_old = MathUtils.round(
-                        getUpDownRate(latest_old, mOldData.get(oldItemPosition).getPre_settlement()), 2);
+                getUpDownRate(latest_old, mOldData.get(oldItemPosition).getPre_settlement()), 2);
         String volume_old = mOldData.get(oldItemPosition).getVolume();
         String open_interest_old = mOldData.get(oldItemPosition).getOpen_interest();
 
@@ -132,37 +131,43 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
         }
 
         if (upper_limit_old != null && upper_limit_new != null) {
-            if (!upper_limit_old.equals(upper_limit_new)) bundle.putString("upper_limit", upper_limit_new);
+            if (!upper_limit_old.equals(upper_limit_new))
+                bundle.putString("upper_limit", upper_limit_new);
         } else if (upper_limit_old == null && upper_limit_new != null) {
             bundle.putString("upper_limit", upper_limit_new);
         }
 
         if (lower_limit_old != null && lower_limit_new != null) {
-            if (!lower_limit_old.equals(lower_limit_new)) bundle.putString("lower_limit", lower_limit_new);
+            if (!lower_limit_old.equals(lower_limit_new))
+                bundle.putString("lower_limit", lower_limit_new);
         } else if (lower_limit_old == null && lower_limit_new != null) {
             bundle.putString("lower_limit", lower_limit_new);
         }
 
         if (ask_price1_old != null && ask_price1_new != null) {
-            if (!ask_price1_old.equals(ask_price1_new)) bundle.putString("ask_price1", ask_price1_new);
+            if (!ask_price1_old.equals(ask_price1_new))
+                bundle.putString("ask_price1", ask_price1_new);
         } else if (ask_price1_old == null && ask_price1_new != null) {
             bundle.putString("ask_price1", ask_price1_new);
         }
 
         if (ask_volume1_old != null && ask_volume1_new != null) {
-            if (!ask_volume1_old.equals(ask_volume1_new)) bundle.putString("ask_volume1", ask_volume1_new);
+            if (!ask_volume1_old.equals(ask_volume1_new))
+                bundle.putString("ask_volume1", ask_volume1_new);
         } else if (ask_volume1_old == null && ask_volume1_new != null) {
             bundle.putString("ask_volume1", ask_volume1_new);
         }
 
         if (bid_price1_old != null && bid_price1_new != null) {
-            if (!bid_price1_old.equals(bid_price1_new)) bundle.putString("bid_price1", bid_price1_new);
+            if (!bid_price1_old.equals(bid_price1_new))
+                bundle.putString("bid_price1", bid_price1_new);
         } else if (bid_price1_old == null && bid_price1_new != null) {
             bundle.putString("bid_price1", bid_price1_new);
         }
 
         if (bid_volume1_old != null && bid_volume1_new != null) {
-            if (!bid_volume1_old.equals(bid_volume1_new)) bundle.putString("bid_volume1", bid_volume1_new);
+            if (!bid_volume1_old.equals(bid_volume1_new))
+                bundle.putString("bid_volume1", bid_volume1_new);
         } else if (bid_volume1_old == null && bid_volume1_new != null) {
             bundle.putString("bid_volume1", bid_volume1_new);
         }

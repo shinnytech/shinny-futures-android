@@ -9,12 +9,8 @@ import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ItemActivityNavQuoteBinding;
-import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
-import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.utils.LogUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.SparseArray;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -49,7 +50,6 @@ import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.view.activity.FutureInfoActivity;
-import com.shinnytech.futures.view.activity.LoginActivity;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyXAxis;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyYAxis;
 
@@ -57,7 +57,6 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -138,19 +137,19 @@ public class KlineFragment extends BaseChartFragment {
         mKlineType = getArguments().getString(FRAGMENT_KLINE_TYPE);
         switch (mKlineType) {
             case KLINE_DAY:
-                buttonId = R.id.rb_day_up;
+                mButtonId = R.id.rb_day_up;
                 break;
             case KLINE_HOUR:
-                buttonId = R.id.rb_hour_up;
+                mButtonId = R.id.rb_hour_up;
                 break;
             case KLINE_MINUTE:
-                buttonId = R.id.rb_minute_up;
+                mButtonId = R.id.rb_minute_up;
                 break;
             default:
                 break;
         }
         if (mXValsFormat != null)
-            simpleDateFormat = new SimpleDateFormat(mXValsFormat, Locale.CHINA);
+            mSimpleDateFormat = new SimpleDateFormat(mXValsFormat, Locale.CHINA);
     }
 
     @Override
@@ -283,12 +282,12 @@ public class KlineFragment extends BaseChartFragment {
 
             @Override
             public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
-
+                mIsUpdate = false;
             }
 
             @Override
             public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
-
+                mIsUpdate = true;
             }
 
             @Override
@@ -368,32 +367,32 @@ public class KlineFragment extends BaseChartFragment {
      * description: 载入K线数据
      */
     @Override
-    protected void loadChartData() {
-        if (((FutureInfoActivity) getActivity()).getTabsUp().getCheckedRadioButtonId() == buttonId) {
+    protected void refreshMarketing() {
+        if (((FutureInfoActivity) getActivity()).getTabsUp().getCheckedRadioButtonId() == mButtonId) {
             try {
-                Map<String, KlineEntity> klineEntities = dataManager.getRtnData().getKlines().get(instrument_id);
-                ChartEntity chartEntity = dataManager.getRtnData().getCharts().get(mKlineType);
-                QuoteEntity quoteEntity = dataManager.getRtnData().getQuotes().get(instrument_id);
+                Map<String, KlineEntity> klineEntities = sDataManager.getRtnData().getKlines().get(instrument_id);
+                ChartEntity chartEntity = sDataManager.getRtnData().getCharts().get(mKlineType);
+                QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(instrument_id);
                 if (klineEntities == null || chartEntity == null) return;
                 KlineEntity klineEntity = klineEntities.get(mKlineType);
                 String ins_list = chartEntity.getState().get("ins_list");
                 if (klineEntity == null || ins_list == null || quoteEntity == null) return;
                 preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
                 String last_id = klineEntity.getLast_id();
-                dataEntities = klineEntity.getData();
+                mDataEntities = klineEntity.getData();
                 if (last_id == null || "-1".equals(last_id) ||
-                        dataEntities.isEmpty() || !instrument_id.equals(ins_list) || preSettlement == 1)
+                        mDataEntities.isEmpty() || !instrument_id.equals(ins_list) || preSettlement == 1)
                     return;
                 mLastIndex = Integer.parseInt(last_id);
                 //开始加载数据
                 if (mChart.getData() != null && mChart.getData().getDataSetCount() > 0) {
                     CandleData candleData = mChart.getCandleData();
                     CombinedData combinedData = mChart.getCombinedData();
-                    int itemCount = dataEntities.size();
+                    int itemCount = mDataEntities.size();
                     int entryCount = candleData.getDataSetByIndex(0).getEntryCount();
 
                     if (entryCount == itemCount) {
-                        KlineEntity.DataEntity dataEntity = dataEntities.get(last_id);
+                        KlineEntity.DataEntity dataEntity = mDataEntities.get(last_id);
                         if (dataEntity == null) return;
                         LogUtils.e("单个柱子刷新", false);
                         candleData.removeEntry(mLastIndex, 0);
@@ -498,10 +497,10 @@ public class KlineFragment extends BaseChartFragment {
      * description: K线图刷新时生成单个数据
      */
     private void generateCandleAndLineDataEntry(CandleData candleData, int left_index, int index) {
-        KlineEntity.DataEntity dataEntity = dataEntities.get(String.valueOf(index));
+        KlineEntity.DataEntity dataEntity = mDataEntities.get(String.valueOf(index));
         if (dataEntity == null) return;
-        calendar.setTimeInMillis(Long.valueOf(dataEntity.getDatetime()) / 1000000);
-        xVals.put(index, simpleDateFormat.format(calendar.getTime()));
+        mCalendar.setTimeInMillis(Long.valueOf(dataEntity.getDatetime()) / 1000000);
+        xVals.put(index, mSimpleDateFormat.format(mCalendar.getTime()));
 
         CandleEntry candleEntry = new CandleEntry(index, Float.valueOf(dataEntity.getHigh()),
                 Float.valueOf(dataEntity.getLow()), Float.valueOf(dataEntity.getOpen()),
@@ -525,10 +524,10 @@ public class KlineFragment extends BaseChartFragment {
      * description: K线图初始化时生成单个数据
      */
     private void generateCandleAndLineDataEntry(List<Entry> ma5Entries, List<Entry> ma10Entries, List<Entry> ma20Entries, List<CandleEntry> candleEntries, int i) {
-        KlineEntity.DataEntity dataEntity = dataEntities.get(String.valueOf(i));
+        KlineEntity.DataEntity dataEntity = mDataEntities.get(String.valueOf(i));
         if (dataEntity == null) return;
-        calendar.setTimeInMillis(Long.valueOf(dataEntity.getDatetime()) / 1000000);
-        xVals.put(i, simpleDateFormat.format(calendar.getTime()));
+        mCalendar.setTimeInMillis(Long.valueOf(dataEntity.getDatetime()) / 1000000);
+        xVals.put(i, mSimpleDateFormat.format(mCalendar.getTime()));
         CandleEntry candleEntry = new CandleEntry(i,
                 Float.valueOf(dataEntity.getHigh()),
                 Float.valueOf(dataEntity.getLow()),
@@ -554,7 +553,7 @@ public class KlineFragment extends BaseChartFragment {
     private float getSum(int a, int b) {
         float sum = 0f;
         for (int i = a; i <= b; i++) {
-            KlineEntity.DataEntity dataEntity = dataEntities.get(String.valueOf(i));
+            KlineEntity.DataEntity dataEntity = mDataEntities.get(String.valueOf(i));
             if (dataEntity != null) {
                 try {
                     sum += Float.parseFloat(dataEntity.getClose());
@@ -651,7 +650,10 @@ public class KlineFragment extends BaseChartFragment {
             mChart.clear();
             mChart.fitScreen();
 
-            if (LoginActivity.isIsLogin()) {
+            if (instrument_id.contains("KQ"))
+                instrument_id_transaction = LatestFileManager.getSearchEntities().get(instrument_id).getUnderlying_symbol();
+            else instrument_id_transaction = instrument_id;
+            if (sDataManager.IS_LOGIN) {
                 if (mIsPosition) addPositionLimitLines();
                 if (mIsPending) addOrderLimitLines();
             }
@@ -667,7 +669,7 @@ public class KlineFragment extends BaseChartFragment {
     public void onEventMainThread(SetUpEvent data) {
         if (mIsPending != data.isPending()) {
             mIsPending = data.isPending();
-            if (LoginActivity.isIsLogin()) {
+            if (sDataManager.IS_LOGIN) {
                 if (mIsPending) addOrderLimitLines();
                 else removeOrderLimitLines();
             }
@@ -675,7 +677,7 @@ public class KlineFragment extends BaseChartFragment {
 
         if (mIsPosition != data.isPosition()) {
             mIsPosition = data.isPosition();
-            if (LoginActivity.isIsLogin()) {
+            if (sDataManager.IS_LOGIN) {
                 if (mIsPosition) addPositionLimitLines();
                 else removePositionLimitLines();
             }
@@ -765,9 +767,9 @@ public class KlineFragment extends BaseChartFragment {
             if (e instanceof CandleEntry) {
                 CandleEntry candleEntry = (CandleEntry) e;
                 String xValue = MathUtils.round(String.valueOf(candleEntry.getX()), 0);
-                KlineEntity.DataEntity dataEntity = dataEntities.get(xValue);
+                KlineEntity.DataEntity dataEntity = mDataEntities.get(xValue);
                 String xValuePre = MathUtils.subtract(xValue, "1");
-                KlineEntity.DataEntity dataEntityPre = dataEntities.get(xValuePre);
+                KlineEntity.DataEntity dataEntityPre = mDataEntities.get(xValuePre);
                 if (dataEntity != null && dataEntityPre != null) {
                     calendar.setTimeInMillis(Long.valueOf(dataEntity.getDatetime()) / 1000000);
                     String time = simpleDateFormat.format(calendar.getTime());
@@ -777,7 +779,7 @@ public class KlineFragment extends BaseChartFragment {
                     String low = LatestFileManager.saveScaleByPtick(dataEntity.getLow(), instrument_id);
                     String close = LatestFileManager.saveScaleByPtick(dataEntity.getClose(), instrument_id);
                     String change = LatestFileManager.saveScaleByPtick(MathUtils.subtract(dataEntity.getClose(), dataEntityPre.getClose()), instrument_id);
-                    String changePercent =MathUtils.round( MathUtils.multiply(MathUtils.divide(change, dataEntityPre.getClose()), "100"), 2) + "%";
+                    String changePercent = MathUtils.round(MathUtils.multiply(MathUtils.divide(change, dataEntityPre.getClose()), "100"), 2) + "%";
                     String volume = dataEntity.getVolume();
                     String closeOi = dataEntity.getClose_oi();
                     String closeOiDelta = MathUtils.subtract(closeOi, dataEntityPre.getClose_oi());

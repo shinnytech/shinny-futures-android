@@ -11,6 +11,6 @@
     <integer name="keycode_market_price">-10202</integer>
     <integer name="keycode_last_price">-10203</integer>
 
-    <item name="keyboard_view_move_height" type="id"/>
-    <item name="edit_text_bind_keyboard" type="id"/>
+    <item name="keyboard_view_move_height" type="id" />
+    <item name="edit_text_bind_keyboard" type="id" />
 </resources>

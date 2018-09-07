@@ -5,8 +5,7 @@
 
     </data>
 
-    <android.support.design.widget.CoordinatorLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <android.support.design.widget.CoordinatorLayout xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -41,25 +40,25 @@
                     style="@style/RadioButtonTabUp"
                     android:checked="true"
                     android:text="@string/future_info_activity_current_day"
-                    android:textSize="@dimen/font_size_normal"/>
+                    android:textSize="@dimen/font_size_normal" />
 
                 <RadioButton
                     android:id="@+id/rb_day_up"
                     style="@style/RadioButtonTabUp"
                     android:text="@string/future_info_activity_day"
-                    android:textSize="@dimen/font_size_normal"/>
+                    android:textSize="@dimen/font_size_normal" />
 
                 <RadioButton
                     android:id="@+id/rb_hour_up"
                     style="@style/RadioButtonTabUp"
                     android:text="@string/future_info_activity_hour"
-                    android:textSize="@dimen/font_size_normal"/>
+                    android:textSize="@dimen/font_size_normal" />
 
                 <RadioButton
                     android:id="@+id/rb_minute_up"
                     style="@style/RadioButtonTabUp"
                     android:text="@string/future_info_activity_five_minute"
-                    android:textSize="@dimen/font_size_normal"/>
+                    android:textSize="@dimen/font_size_normal" />
 
                 <Button
                     android:id="@+id/rb_set_up"
@@ -70,7 +69,7 @@
                     android:paddingStart="@dimen/padding_0dp"
                     android:text="@string/future_info_activity_set"
                     android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_normal"/>
+                    android:textSize="@dimen/font_size_normal" />
             </RadioGroup>
 
             <FrameLayout
@@ -93,26 +92,26 @@
                     style="@style/RadioButtonTabDown"
                     android:checked="true"
                     android:text="@string/future_info_activity_handicap"
-                    android:textSize="@dimen/font_size_normal"/>
+                    android:textSize="@dimen/font_size_normal" />
 
 
                 <RadioButton
                     android:id="@+id/rb_position_info"
                     style="@style/RadioButtonTabDown"
                     android:text="@string/future_info_activity_position"
-                    android:textSize="@dimen/font_size_normal"/>
+                    android:textSize="@dimen/font_size_normal" />
 
                 <RadioButton
                     android:id="@+id/rb_order_info"
                     style="@style/RadioButtonTabDown"
                     android:text="@string/future_info_activity_order"
-                    android:textSize="@dimen/font_size_normal"/>
+                    android:textSize="@dimen/font_size_normal" />
 
                 <RadioButton
                     android:id="@+id/rb_transaction_info"
                     style="@style/RadioButtonTabDownTransaction"
                     android:text="@string/future_info_activity_transaction"
-                    android:textSize="@dimen/font_size_normal"/>
+                    android:textSize="@dimen/font_size_normal" />
             </RadioGroup>
 
             <android.support.v4.view.ViewPager

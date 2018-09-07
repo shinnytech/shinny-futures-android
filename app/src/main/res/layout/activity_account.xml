@@ -31,7 +31,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/account_date"
                 android:text="@string/account_activity_date"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/account_date"
@@ -39,7 +39,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:text="@{TimeUtils.nowTime}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -53,15 +53,15 @@
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/account_static_balance"
                 android:text="@string/account_activity_static_balance"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/account_static_balance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:text="@{MathUtils.round(account.pre_balance, 2)}"
-                android:textColor="@color/white"/>
+                android:text="@{MathUtils.round(account.static_balance, 2)}"
+                android:textColor="@color/white" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -75,7 +75,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/account_close_profit"
                 android:text="@string/account_activity_close_profit"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/account_close_profit"
@@ -83,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:text="@{MathUtils.round(account.close_profit, 2)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -97,7 +97,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/account_position_profit"
                 android:text="@string/account_activity_position_profit"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/account_position_profit"
@@ -105,7 +105,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:text="@{MathUtils.round(account.position_profit, 2)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -119,7 +119,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/account_commission"
                 android:text="@string/account_activity_commission"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/account_commission"
@@ -127,7 +127,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:text="@{MathUtils.round(account.commission, 2)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
         </RelativeLayout>
 
         <View
@@ -148,7 +148,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/account_balance"
                 android:text="@string/account_activity_balance"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/account_balance"
@@ -156,7 +156,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:text="@{MathUtils.round(account.balance, 2)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -170,7 +170,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/account_margin_using"
                 android:text="@string/account_activity_margin_using"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/account_margin_using"
@@ -178,7 +178,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:text="@{MathUtils.round(account.margin, 2)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -192,7 +192,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/account_margin_frozen"
                 android:text="@string/account_activity_margin_frozen"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/account_margin_frozen"
@@ -200,7 +200,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:text="@{MathUtils.round(account.frozen_margin, 2)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -214,7 +214,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/account_commission_frozen"
                 android:text="@string/account_activity_commission_frozen"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/account_commission_frozen"
@@ -222,7 +222,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:text="@{MathUtils.round(account.frozen_commission, 2)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -236,7 +236,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/account_premium_frozen"
                 android:text="@string/account_activity_premium_frozen"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/account_premium_frozen"
@@ -244,7 +244,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:text="@{MathUtils.round(account.frozen_premium, 2)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
         </RelativeLayout>
 
         <View
@@ -265,7 +265,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/account_available"
                 android:text="@string/account_activity_available"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/account_available"
@@ -273,7 +273,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:text="@{MathUtils.round(account.available, 2)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
         </RelativeLayout>
 
         <View
@@ -294,7 +294,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/account_deposit"
                 android:text="@string/account_activity_deposit"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/account_deposit"
@@ -302,7 +302,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:text="@{MathUtils.round(account.deposit, 2)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -316,7 +316,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/account_reachable"
                 android:text="@string/account_activity_withdraw"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/account_reachable"
@@ -324,7 +324,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:text="@{MathUtils.round(account.withdraw, 2)}"
-                android:textColor="@color/white"/>
+                android:textColor="@color/white" />
         </RelativeLayout>
 
     </LinearLayout>

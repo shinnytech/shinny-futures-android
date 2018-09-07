@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data></data>
+
+    <LinearLayout xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".view.activity.BankTransferActivity">
+
+        <include layout="@layout/view_toolbar"></include>
+
+        <!-- Login progress -->
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/bank"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="@dimen/margin_10dp"
+                android:layout_marginRight="@dimen/margin_45dp"
+                android:gravity="center_vertical"
+                android:padding="@dimen/padding_5dp"
+                android:text="选择银行"
+                android:textColor="@color/gray"
+                android:textSize="@dimen/font_size_normal" />
+
+            <android.support.v7.widget.AppCompatSpinner
+                android:id="@+id/spinner_bank"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/bank"
+                android:layout_marginEnd="@dimen/margin_10dp"
+                android:layout_toRightOf="@id/bank" />
+
+            <View
+                android:id="@+id/line_bank"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/line_width"
+                android:layout_below="@id/bank"
+                android:background="@color/gray" />
+
+
+            <TextView
+                android:id="@+id/account_password"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@id/line_bank"
+                android:layout_marginLeft="@dimen/margin_10dp"
+                android:layout_marginRight="@dimen/margin_45dp"
+                android:gravity="center_vertical"
+                android:padding="@dimen/padding_5dp"
+                android:text="资金账户密码"
+                android:textColor="@color/gray"
+                android:textSize="@dimen/font_size_normal" />
+
+            <EditText
+                android:id="@+id/et_account_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/account_password"
+                android:layout_alignLeft="@id/spinner_bank"
+                android:layout_marginEnd="@dimen/margin_10dp"
+                android:background="@null"
+                android:gravity="center_vertical"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:hint="请输入资金账户密码"
+                android:padding="@dimen/padding_5dp"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal" />
+
+            <View
+                android:id="@+id/line_account_password"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/line_width"
+                android:layout_below="@id/account_password"
+                android:background="@color/gray" />
+
+
+            <TextView
+                android:id="@+id/bank_password"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@id/line_account_password"
+                android:layout_marginLeft="@dimen/margin_10dp"
+                android:layout_marginRight="@dimen/margin_45dp"
+                android:gravity="center_vertical"
+                android:padding="@dimen/padding_5dp"
+                android:text="银行账户密码"
+                android:textColor="@color/gray"
+                android:textSize="@dimen/font_size_normal" />
+
+            <EditText
+                android:id="@+id/et_bank_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/bank_password"
+                android:layout_alignLeft="@id/spinner_bank"
+                android:layout_marginEnd="@dimen/margin_10dp"
+                android:background="@null"
+                android:gravity="center_vertical"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:hint="请输入银行账户密码"
+                android:padding="@dimen/padding_5dp"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal" />
+
+            <View
+                android:id="@+id/line_bank_password"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/line_width"
+                android:layout_below="@id/bank_password"
+                android:background="@color/gray" />
+
+            <TextView
+                android:id="@+id/transfer_money"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@id/line_bank_password"
+                android:layout_marginLeft="@dimen/margin_10dp"
+                android:layout_marginRight="@dimen/margin_45dp"
+                android:gravity="center_vertical"
+                android:padding="@dimen/padding_5dp"
+                android:text="转账金额"
+                android:textColor="@color/gray"
+                android:textSize="@dimen/font_size_normal" />
+
+            <EditText
+                android:id="@+id/et_transfer_money"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/transfer_money"
+                android:layout_alignLeft="@id/spinner_bank"
+                android:layout_marginEnd="@dimen/margin_10dp"
+                android:background="@null"
+                android:gravity="center_vertical"
+                android:inputType="number"
+                android:maxLines="1"
+                android:hint="请输入转账金额"
+                android:padding="@dimen/padding_5dp"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal" />
+
+            <View
+                android:id="@+id/line_transfer_money"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/line_width"
+                android:layout_below="@id/transfer_money"
+                android:background="@color/gray" />
+
+            <TextView
+                android:id="@+id/currency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@id/line_transfer_money"
+                android:layout_marginLeft="@dimen/margin_10dp"
+                android:layout_marginRight="@dimen/margin_45dp"
+                android:gravity="center_vertical"
+                android:padding="@dimen/padding_5dp"
+                android:text="币种选择"
+                android:textColor="@color/gray"
+                android:textSize="@dimen/font_size_normal" />
+
+            <android.support.v7.widget.AppCompatSpinner
+                android:id="@+id/spinner_currency"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/currency"
+                android:layout_marginEnd="@dimen/margin_10dp"
+                android:layout_toRightOf="@id/bank" />
+
+            <View
+                android:id="@+id/line_currency"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/line_width"
+                android:layout_below="@id/currency"
+                android:background="@color/gray" />
+
+
+            <ProgressBar
+                android:id="@+id/pb"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="gone" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:paddingBottom="@dimen/padding_4dp"
+            android:paddingTop="@dimen/padding_4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/black_dark"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="转账时间"
+                android:textColor="@color/bg_gray_light"
+                android:textSize="@dimen/font_size_normal" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:text="转账金额"
+                android:textColor="@color/bg_gray_light"
+                android:textSize="@dimen/font_size_normal" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:gravity="center"
+                android:text="币种"
+                android:textColor="@color/bg_gray_light"
+                android:textSize="@dimen/font_size_normal" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="转账结果"
+                android:textColor="@color/bg_gray_light"
+                android:textSize="@dimen/font_size_normal" />
+
+        </LinearLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/future_bank"
+                style="?android:textAppearanceSmall"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/login_selector"
+                android:gravity="center"
+                android:text="期货->银行"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal" />
+
+            <Button
+                android:id="@+id/bank_future"
+                style="?android:textAppearanceSmall"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/login_selector"
+                android:gravity="center"
+                android:text="银行->期货"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</layout>

@@ -10,21 +10,23 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.FragmentPositionBinding;
-import com.shinnytech.futures.view.adapter.PositionAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.engine.DataManager;
+import com.shinnytech.futures.utils.CloneUtils;
+import com.shinnytech.futures.utils.DividerItemDecorationUtils;
+import com.shinnytech.futures.view.activity.FutureInfoActivity;
+import com.shinnytech.futures.view.adapter.PositionAdapter;
 import com.shinnytech.futures.view.listener.PositionDiffCallback;
 import com.shinnytech.futures.view.listener.SimpleRecyclerViewItemClickListener;
-import com.shinnytech.futures.utils.DividerItemDecorationUtils;
-import com.shinnytech.futures.utils.MathUtils;
-import com.shinnytech.futures.view.activity.FutureInfoActivity;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -35,7 +37,7 @@ import java.util.Map;
 
 import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
 import static com.shinnytech.futures.constants.CommonConstants.ERROR;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_POSITION;
+import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_TRADE;
 import static com.shinnytech.futures.constants.CommonConstants.OPEN;
 import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION_TRANSACTION;
 
@@ -53,6 +55,7 @@ public class PositionFragment extends LazyLoadFragment {
     private List<PositionEntity> mOldData = new ArrayList<>();
     private List<PositionEntity> mNewData = new ArrayList<>();
     private FragmentPositionBinding mBinding;
+    private boolean mIsUpdate;
 
     @Nullable
     @Override
@@ -65,6 +68,7 @@ public class PositionFragment extends LazyLoadFragment {
     }
 
     protected void initData() {
+        mIsUpdate = true;
         mBinding.rv.setLayoutManager(
                 new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         mBinding.rv.addItemDecoration(
@@ -74,43 +78,60 @@ public class PositionFragment extends LazyLoadFragment {
     }
 
     protected void initEvent() {
-        if (mBinding.rv != null) {
-            //recyclerView点击事件监听器，点击改变合约代码，并跳转到交易页
-            SimpleRecyclerViewItemClickListener mTouchListener = new SimpleRecyclerViewItemClickListener(mBinding.rv, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
-                @Override
-                public void onItemClick(View view, int position) {
-                    if (mAdapter.getData().get(position) != null) {
-                        String instrument_id = mAdapter.getData().get(position).getExchange_id() + "." +
-                                mAdapter.getData().get(position).getInstrument_id();
-                        //添加判断，防止自选合约列表为空时产生无效的点击事件
-                        if (instrument_id != null) {
-                            IdEvent idEvent = new IdEvent();
-                            idEvent.setInstrument_id(instrument_id);
-                            EventBus.getDefault().post(idEvent);
-                            ((FutureInfoActivity) getActivity()).getViewPager().setCurrentItem(3, false);
-                        }
+        //recyclerView点击事件监听器，点击改变合约代码，并跳转到交易页
+        mBinding.rv.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rv, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                if (mAdapter.getData().get(position) != null) {
+                    String instrument_id = mAdapter.getData().get(position).getExchange_id() + "." +
+                            mAdapter.getData().get(position).getInstrument_id();
+                    //添加判断，防止自选合约列表为空时产生无效的点击事件
+                    if (instrument_id != null) {
+                        IdEvent idEvent = new IdEvent();
+                        idEvent.setInstrument_id(instrument_id);
+                        EventBus.getDefault().post(idEvent);
+                        ((FutureInfoActivity) getActivity()).getViewPager().setCurrentItem(3, false);
                     }
                 }
+            }
 
-                @Override
-                public void onItemLongClick(View view, int position) {
+            @Override
+            public void onItemLongClick(View view, int position) {
+            }
+        }));
+
+
+        mBinding.rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                switch (newState) {
+                    case RecyclerView.SCROLL_STATE_IDLE:
+                        mIsUpdate = true;
+                        break;
+                    case RecyclerView.SCROLL_STATE_DRAGGING:
+                        mIsUpdate = false;
+                        break;
+                    case RecyclerView.SCROLL_STATE_SETTLING:
+                        mIsUpdate = false;
+                        break;
                 }
-            });
-            mBinding.rv.addOnItemTouchListener(mTouchListener);
-        }
+            }
+        });
     }
 
     protected void refreshPosition() {
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        if (userEntity == null) return;
         mNewData.clear();
-        for (Map.Entry<String, PositionEntity> entry :
-                sDataManager.getAccountBean().getPosition().entrySet()) {
-            PositionEntity positionEntity = entry.getValue();
-            String available_long = MathUtils.add(positionEntity.getVolume_long_his(), positionEntity.getVolume_long_today());
-            int volume_long = Integer.parseInt(MathUtils.add(available_long, positionEntity.getVolume_long_frozen()));
-            String available_short = MathUtils.add(positionEntity.getVolume_short_his(), positionEntity.getVolume_short_today());
-            int volume_short = Integer.parseInt(MathUtils.add(available_short, positionEntity.getVolume_short_frozen()));
+
+        for (PositionEntity positionEntity :
+                userEntity.getPositions().values()) {
+            int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+            int volume_short = Integer.parseInt(positionEntity.getVolume_short());
             if (volume_long != 0 || volume_short != 0) {
-                mNewData.add(entry.getValue());
+                PositionEntity p = CloneUtils.clone(positionEntity);
+                mNewData.add(p);
             }
         }
         Collections.sort(mNewData);
@@ -133,8 +154,9 @@ public class PositionFragment extends LazyLoadFragment {
                         break;
                     case ERROR:
                         break;
-                    case MESSAGE_POSITION:
-                        if ((R.id.rb_position_info == ((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId()))
+                    case MESSAGE_TRADE:
+                        if ((R.id.rb_position_info == ((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId())
+                                && mIsUpdate)
                             refreshPosition();
                         break;
                     default:
@@ -149,7 +171,7 @@ public class PositionFragment extends LazyLoadFragment {
     @Override
     public void onResume() {
         super.onResume();
-        refreshPosition();
+        update();
         registerBroaderCast();
     }
 
@@ -163,5 +185,7 @@ public class PositionFragment extends LazyLoadFragment {
     @Override
     public void update() {
         refreshPosition();
+        mBinding.rv.scrollToPosition(0);
+
     }
 }

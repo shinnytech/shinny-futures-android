@@ -13,6 +13,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ItemFragmentOrderBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
+import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.MathUtils;
 
@@ -32,7 +33,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemViewHold
 
     private Context sContext;
     private List<OrderEntity> mOrderData;
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
 
     public OrderAdapter(Context context, List<OrderEntity> orderData) {
         this.sContext = context;
@@ -99,7 +99,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemViewHold
             if (mOrderData != null && mOrderData.size() != 0) {
                 orderEntity = mOrderData.get(getLayoutPosition());
                 if (orderEntity != null) {
-                    String instrument_id = orderEntity.getInstrument_id();
+                    String instrument_id = orderEntity.getExchange_id() + "." + orderEntity.getInstrument_id();
                     SearchEntity insName = LatestFileManager.getSearchEntities().get(instrument_id);
                     mBinding.orderName.setText(insName == null ? instrument_id : insName.getInstrumentName());
                     mBinding.orderStatus.setText(orderEntity.getLast_msg());
@@ -137,7 +137,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemViewHold
                     mBinding.orderPrice.setText(LatestFileManager.saveScaleByPtick(orderEntity.getLimit_price(), instrument_id));
                     String volume = MathUtils.subtract(orderEntity.getVolume_orign(), orderEntity.getVolume_left()) + "/" + orderEntity.getVolume_orign();
                     mBinding.orderVolume.setText(volume);
-                    String date = simpleDateFormat.format(new Date(Long.valueOf(orderEntity.getInsert_date_time()) / 1000000));
+                    String date = DataManager.getInstance().getSimpleDateFormat().format(new Date(Long.valueOf(orderEntity.getInsert_date_time()) / 1000000));
                     mBinding.orderTime.setText(date);
                 }
             }

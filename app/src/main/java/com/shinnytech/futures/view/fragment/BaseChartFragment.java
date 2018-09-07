@@ -21,14 +21,12 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplicationLike;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
-import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.view.activity.FutureInfoActivity;
-import com.shinnytech.futures.view.activity.LoginActivity;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -44,8 +42,7 @@ import static com.shinnytech.futures.constants.CommonConstants.KLINE_DAY;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_HOUR;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_MINUTE;
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_ORDER;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_POSITION;
+import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_TRADE;
 import static com.shinnytech.futures.constants.CommonConstants.OPEN;
 import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
 import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION;
@@ -114,28 +111,29 @@ public class BaseChartFragment extends LazyLoadFragment {
      * date: 7/9/17
      * description: 持仓线数据
      */
-    protected Map<String, LimitLine> positionLimitLines = new HashMap<>();
+    protected Map<String, LimitLine> mPositionLimitLines;
     /**
      * date: 7/9/17
      * description: 挂单线
      */
-    protected Map<String, LimitLine> orderLimitLines = new HashMap<>();
+    protected Map<String, LimitLine> mOrderLimitLines;
 
-    protected DataManager dataManager = DataManager.getInstance();
+    protected DataManager sDataManager;
     protected BroadcastReceiver mReceiver;
     protected BroadcastReceiver mReceiver1;
     protected String instrument_id;
     protected String instrument_id_transaction;
     protected String exchange_id;
     protected float preSettlement;
-    protected Calendar calendar = Calendar.getInstance();
-    protected SimpleDateFormat simpleDateFormat;
-    protected SparseArray<String> xVals = new SparseArray<>();
-    protected Map<String, KlineEntity.DataEntity> dataEntities;
+    protected Calendar mCalendar;
+    protected SimpleDateFormat mSimpleDateFormat;
+    protected SparseArray<String> xVals;
+    protected Map<String, KlineEntity.DataEntity> mDataEntities;
     protected int mLayoutId;
     protected String mKlineType;
-    protected int buttonId;
+    protected int mButtonId;
     private ViewDataBinding mViewDataBinding;
+    protected boolean mIsUpdate;
 
     /**
      * date: 7/9/17
@@ -143,58 +141,27 @@ public class BaseChartFragment extends LazyLoadFragment {
      * description: 刷新K线图
      */
     private void refreshChart(String mDataString) {
-        switch (mDataString) {
-            case OPEN:
-                break;
-            case CLOSE:
-                break;
-            case ERROR:
-                break;
-            case MESSAGE:
-                loadChartData();
-                break;
-            case MESSAGE_ORDER:
-                if (LoginActivity.isIsLogin() && mIsPending) {
-                    for (OrderEntity orderEntity :
-                            dataManager.getAccountBean().getOrder().values()) {
-                        if (orderEntity != null && (orderEntity.getExchange_id() + "." + orderEntity.getInstrument_id()).equals(instrument_id_transaction)) {
-                            String key = orderEntity.getKey();
-                            if (!orderLimitLines.containsKey(key)) {
-                                if ("ALIVE".equals(orderEntity.getStatus())) {
-                                    addOneOrderLimitLine(orderEntity);
-                                }
-                            } else {
-                                if ("FINISHED".equals(orderEntity.getStatus())) {
-                                    removeOneOrderLimitLine(key);
-                                }
-                            }
-                        }
-                    }
-                }
-                break;
-            case MESSAGE_POSITION:
-                if (LoginActivity.isIsLogin() && mIsPosition) {
-                    String key = instrument_id_transaction;
-                    if (!positionLimitLines.containsKey(key + "0")) {
-                        //添加多头持仓线
-                        addLongPositionLimitLine();
-                    } else {
-                        //刷新空头持仓线
-                        refreshLongPositionLimitLine();
-                    }
-
-                    if (!positionLimitLines.containsKey(key + "1")) {
-                        //添加多头持仓线
-                        addShortPositionLimitLine();
-                    } else {
-                        //刷新空头持仓线
-                        refreshShortPositionLimitLine();
-                    }
-                }
-                break;
-            default:
-                break;
+        try {
+            switch (mDataString) {
+                case OPEN:
+                    break;
+                case CLOSE:
+                    break;
+                case ERROR:
+                    break;
+                case MESSAGE:
+                    if (mIsUpdate)refreshMarketing();
+                    break;
+                case MESSAGE_TRADE:
+                    refreshTrade();
+                    break;
+                default:
+                    break;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
+
     }
 
     @Override
@@ -217,19 +184,20 @@ public class BaseChartFragment extends LazyLoadFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         instrument_id = ((FutureInfoActivity) getActivity()).getInstrument_id();
-        if (instrument_id.contains("KQ")) instrument_id_transaction = LatestFileManager.getSearchEntities().get(instrument_id).getUnderlying_symbol();
+        if (instrument_id.contains("KQ"))
+            instrument_id_transaction = LatestFileManager.getSearchEntities().get(instrument_id).getUnderlying_symbol();
         else instrument_id_transaction = instrument_id;
         exchange_id = instrument_id_transaction.split("\\.")[0];
         mIsAverage = ((FutureInfoActivity) getActivity()).isAverage();
         if (!mIsAverage) mChart.getLegend().setEnabled(false);
         mIsPosition = ((FutureInfoActivity) getActivity()).isPosition();
         mIsPending = ((FutureInfoActivity) getActivity()).isPending();
-        if (LoginActivity.isIsLogin()) {
+        if (sDataManager.IS_LOGIN) {
             if (mIsPosition) addPositionLimitLines();
             if (mIsPending) addOrderLimitLines();
         }
 
-        QuoteEntity quoteEntity = dataManager.getRtnData().getQuotes().get(instrument_id);
+        QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(instrument_id);
         if (quoteEntity != null) {
             try {
                 preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
@@ -237,15 +205,22 @@ public class BaseChartFragment extends LazyLoadFragment {
                 ex.printStackTrace();
             }
         } else preSettlement = 1;
-
     }
 
-    @Override
-    public void update() {
-        loadChartData();
-    }
+    protected void initData() {
+        mColorHomeBg = ContextCompat.getColor(getActivity(), R.color.kline_background);
+        mColorAxis = ContextCompat.getColor(getActivity(), R.color.kline_axis);
+        mColorGrid = ContextCompat.getColor(getActivity(), R.color.kline_grid);
+        mColorText = ContextCompat.getColor(getActivity(), R.color.kline_text);
+        mColorBuy = ContextCompat.getColor(getActivity(), R.color.kline_position);
+        mColorSell = ContextCompat.getColor(getActivity(), R.color.kline_order);
 
-    protected void loadChartData() {
+        mPositionLimitLines = new HashMap<>();
+        mOrderLimitLines = new HashMap<>();
+        mCalendar = Calendar.getInstance();
+        sDataManager = DataManager.getInstance();
+        xVals = new SparseArray<>();
+        mIsUpdate = true;
     }
 
     protected void initChart() {
@@ -263,35 +238,66 @@ public class BaseChartFragment extends LazyLoadFragment {
 
     }
 
-    protected void initData() {
-        mColorHomeBg = ContextCompat.getColor(getActivity(), R.color.kline_background);
-        mColorAxis = ContextCompat.getColor(getActivity(), R.color.kline_axis);
-        mColorGrid = ContextCompat.getColor(getActivity(), R.color.kline_grid);
-        mColorText = ContextCompat.getColor(getActivity(), R.color.kline_text);
-        mColorBuy = ContextCompat.getColor(getActivity(), R.color.kline_position);
-        mColorSell = ContextCompat.getColor(getActivity(), R.color.kline_order);
+    @Override
+    public void update() {
+        refreshMarketing();
     }
 
     /**
-     * date: 6/6/18
+     * date: 6/28/18
      * author: chenli
-     * description: 获取开仓均价
+     * description: 刷新行情信息
      */
-    private float getPrice(String open_cost, String open_price, String vm, int volume) {
-        try {
-            float openCost = Float.parseFloat(open_cost);
-            float openPrice = Float.parseFloat(open_price);
-            int vmI = Integer.parseInt(vm);
-            if (openPrice != 0) return openPrice;
-            else if (openCost != 0) {
-                return openCost / (volume * vmI);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0.0f;
+    protected void refreshMarketing() {
     }
 
+    /**
+     * date: 6/28/18
+     * author: chenli
+     * description: 刷新账户信息
+     */
+    private void refreshTrade() {
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        if (userEntity == null) return;
+        if (sDataManager.IS_LOGIN && mIsPending) {
+            for (OrderEntity orderEntity :
+                    userEntity.getOrders().values()) {
+                if (orderEntity != null &&
+                        (orderEntity.getExchange_id() + "." + orderEntity.getInstrument_id())
+                                .equals(instrument_id_transaction)) {
+                    String key = orderEntity.getKey();
+                    if (!mOrderLimitLines.containsKey(key)) {
+                        if ("ALIVE".equals(orderEntity.getStatus())) {
+                            addOneOrderLimitLine(orderEntity);
+                        }
+                    } else {
+                        if ("FINISHED".equals(orderEntity.getStatus())) {
+                            removeOneOrderLimitLine(key);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (sDataManager.IS_LOGIN && mIsPosition) {
+            String key = instrument_id_transaction;
+            if (!mPositionLimitLines.containsKey(key + "0")) {
+                //添加多头持仓线
+                addLongPositionLimitLine();
+            } else {
+                //刷新空头持仓线
+                refreshLongPositionLimitLine();
+            }
+
+            if (!mPositionLimitLines.containsKey(key + "1")) {
+                //添加多头持仓线
+                addShortPositionLimitLine();
+            } else {
+                //刷新空头持仓线
+                refreshShortPositionLimitLine();
+            }
+        }
+    }
 
     /**
      * date: 6/1/18
@@ -311,15 +317,13 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void addLongPositionLimitLine() {
         try {
             String key = instrument_id_transaction;
-            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(key);
-            String vm = searchEntity != null ? searchEntity.getVm() : "1";
-            PositionEntity positionEntity = dataManager.getAccountBean().getPosition().get(key);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            if (userEntity == null) return;
+            PositionEntity positionEntity = userEntity.getPositions().get(key);
             if (positionEntity == null) return;
-
-            String available_long = MathUtils.add(positionEntity.getVolume_long_his(), positionEntity.getVolume_long_today());
-            int volume_long = Integer.parseInt(MathUtils.add(available_long, positionEntity.getVolume_long_frozen()));
+            int volume_long = Integer.parseInt(positionEntity.getVolume_long());
             if (volume_long != 0) {
-                float limit_long = getPrice(positionEntity.getOpen_cost_long(), positionEntity.getOpen_price_long(), vm, volume_long);
+                float limit_long = Float.parseFloat(positionEntity.getOpen_price_long());
                 String label_long = positionEntity.getInstrument_id() + " " + limit_long;
                 generateLimitLine(limit_long, label_long, mColorBuy, key + "0");
             }
@@ -336,14 +340,14 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void addShortPositionLimitLine() {
         try {
             String key = instrument_id_transaction;
-            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(key);
-            String vm = searchEntity != null ? searchEntity.getVm() : "1";
-            PositionEntity positionEntity = dataManager.getAccountBean().getPosition().get(key);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            if (userEntity == null) return;
+            PositionEntity positionEntity = userEntity.getPositions().get(key);
             if (positionEntity == null) return;
-            String available_short = MathUtils.add(positionEntity.getVolume_short_his(), positionEntity.getVolume_short_today());
-            int volume_short = Integer.parseInt(MathUtils.add(available_short, positionEntity.getVolume_short_frozen()));
+
+            int volume_short = Integer.parseInt(positionEntity.getVolume_short());
             if (volume_short != 0) {
-                float limit_short = getPrice(positionEntity.getOpen_cost_short(), positionEntity.getOpen_price_short(), vm, volume_short);
+                float limit_short = Float.parseFloat(positionEntity.getOpen_price_short());
                 String label_short = positionEntity.getInstrument_id() + " " + limit_short;
                 generateLimitLine(limit_short, label_short, mColorSell, key + "1");
             }
@@ -365,7 +369,7 @@ public class BaseChartFragment extends LazyLoadFragment {
         limitLine.setLabelPosition(LimitLine.LimitLabelPosition.LEFT_BOTTOM);
         limitLine.setTextSize(10f);
         limitLine.setTextColor(mColorText);
-        positionLimitLines.put(limitKey, limitLine);
+        mPositionLimitLines.put(limitKey, limitLine);
         mChart.getAxisLeft().addLimitLine(limitLine);
     }
 
@@ -377,25 +381,25 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void refreshLongPositionLimitLine() {
         try {
             String key = instrument_id_transaction;
-            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(key);
-            String vm = searchEntity != null ? searchEntity.getVm() : "1";
-            PositionEntity positionEntity = dataManager.getAccountBean().getPosition().get(key);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            if (userEntity == null) return;
+            PositionEntity positionEntity = userEntity.getPositions().get(key);
             String limitKey = key + "0";
             if (positionEntity == null) return;
-            String available_long = MathUtils.add(positionEntity.getVolume_long_his(), positionEntity.getVolume_long_today());
-            int volume_long = Integer.parseInt(MathUtils.add(available_long, positionEntity.getVolume_long_frozen()));
+
+            int volume_long = Integer.parseInt(positionEntity.getVolume_long());
             if (volume_long != 0) {
-                float limit_long = getPrice(positionEntity.getOpen_cost_long(), positionEntity.getOpen_price_long(), vm, volume_long);
-                LimitLine limitLine = positionLimitLines.get(limitKey);
+                float limit_long = Float.parseFloat(positionEntity.getOpen_price_long());
+                LimitLine limitLine = mPositionLimitLines.get(limitKey);
                 if (limitLine.getLimit() != limit_long) {
                     String label_long = positionEntity.getInstrument_id() + " " + limit_long;
-                    mChart.getAxisLeft().removeLimitLine(positionLimitLines.get(limitKey));
-                    positionLimitLines.remove(limitKey);
+                    mChart.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
+                    mPositionLimitLines.remove(limitKey);
                     generateLimitLine(limit_long, label_long, mColorBuy, limitKey);
                 }
             } else {
-                mChart.getAxisLeft().removeLimitLine(positionLimitLines.get(limitKey));
-                positionLimitLines.remove(limitKey);
+                mChart.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
+                mPositionLimitLines.remove(limitKey);
             }
         } catch (NumberFormatException ex) {
             ex.printStackTrace();
@@ -411,25 +415,25 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void refreshShortPositionLimitLine() {
         try {
             String key = instrument_id_transaction;
-            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(key);
-            String vm = searchEntity != null ? searchEntity.getVm() : "1";
-            PositionEntity positionEntity = dataManager.getAccountBean().getPosition().get(key);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            if (userEntity == null) return;
+            PositionEntity positionEntity = userEntity.getPositions().get(key);
             String limitKey = key + "1";
             if (positionEntity == null) return;
-            String available_short = MathUtils.add(positionEntity.getVolume_short_his(), positionEntity.getVolume_short_today());
-            int volume_short = Integer.parseInt(MathUtils.add(available_short, positionEntity.getVolume_short_frozen()));
+
+            int volume_short = Integer.parseInt(positionEntity.getVolume_short());
             if (volume_short != 0) {
-                float limit_short = getPrice(positionEntity.getOpen_cost_short(), positionEntity.getOpen_price_short(), vm, volume_short);
-                LimitLine limitLine = positionLimitLines.get(limitKey);
+                float limit_short = Float.parseFloat(positionEntity.getOpen_price_short());
+                LimitLine limitLine = mPositionLimitLines.get(limitKey);
                 if (limitLine.getLimit() != limit_short) {
                     String label_short = positionEntity.getInstrument_id() + " " + limit_short;
-                    mChart.getAxisLeft().removeLimitLine(positionLimitLines.get(limitKey));
-                    positionLimitLines.remove(limitKey);
+                    mChart.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
+                    mPositionLimitLines.remove(limitKey);
                     generateLimitLine(limit_short, label_short, mColorSell, limitKey);
                 }
             } else {
-                mChart.getAxisLeft().removeLimitLine(positionLimitLines.get(limitKey));
-                positionLimitLines.remove(limitKey);
+                mChart.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
+                mPositionLimitLines.remove(limitKey);
             }
         } catch (NumberFormatException ex) {
             ex.printStackTrace();
@@ -442,13 +446,13 @@ public class BaseChartFragment extends LazyLoadFragment {
      * description: 移除持仓线
      */
     protected void removePositionLimitLines() {
-        if (!positionLimitLines.isEmpty()) {
+        if (!mPositionLimitLines.isEmpty()) {
             for (LimitLine limitLine :
-                    positionLimitLines.values()) {
+                    mPositionLimitLines.values()) {
                 mChart.getAxisLeft().removeLimitLine(limitLine);
             }
         }
-        positionLimitLines.clear();
+        mPositionLimitLines.clear();
     }
 
     /**
@@ -458,8 +462,9 @@ public class BaseChartFragment extends LazyLoadFragment {
      */
     private void addOneOrderLimitLine(OrderEntity orderEntity) {
         try {
-            LimitLine limitLine = new LimitLine(Float.parseFloat(orderEntity.getLimit_price()), orderEntity.getOrder_id() + "@" + orderEntity.getLimit_price());
-            orderLimitLines.put(orderEntity.getKey(), limitLine);
+            LimitLine limitLine = new LimitLine(Float.parseFloat(orderEntity.getLimit_price()),
+                    orderEntity.getOrder_id() + "@" + orderEntity.getLimit_price());
+            mOrderLimitLines.put(orderEntity.getKey(), limitLine);
             limitLine.setLineWidth(2f);
             limitLine.enableDashedLine(10f, 10f, 0f);
             if ("BUY".equals(orderEntity.getDirection()))
@@ -481,8 +486,8 @@ public class BaseChartFragment extends LazyLoadFragment {
      * description: 移除一条挂单线
      */
     private void removeOneOrderLimitLine(String key) {
-        mChart.getAxisLeft().removeLimitLine(orderLimitLines.get(key));
-        orderLimitLines.remove(key);
+        mChart.getAxisLeft().removeLimitLine(mOrderLimitLines.get(key));
+        mOrderLimitLines.remove(key);
     }
 
     /**
@@ -491,8 +496,10 @@ public class BaseChartFragment extends LazyLoadFragment {
      * description: 增加挂单线
      */
     protected void addOrderLimitLines() {
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        if (userEntity == null) return;
         for (OrderEntity orderEntity :
-                dataManager.getAccountBean().getOrder().values()) {
+                userEntity.getOrders().values()) {
             if (orderEntity != null && (orderEntity.getExchange_id() + "." + orderEntity.getInstrument_id())
                     .equals(instrument_id_transaction) && "ALIVE".equals(orderEntity.getStatus())) {
                 addOneOrderLimitLine(orderEntity);
@@ -506,13 +513,13 @@ public class BaseChartFragment extends LazyLoadFragment {
      * description: 移除挂单线
      */
     protected void removeOrderLimitLines() {
-        if (!orderLimitLines.isEmpty()) {
+        if (!mOrderLimitLines.isEmpty()) {
             for (LimitLine limitLine :
-                    orderLimitLines.values()) {
+                    mOrderLimitLines.values()) {
                 mChart.getAxisLeft().removeLimitLine(limitLine);
             }
         }
-        orderLimitLines.clear();
+        mOrderLimitLines.clear();
     }
 
     /**

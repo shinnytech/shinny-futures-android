@@ -30,25 +30,26 @@ import android.widget.TextView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
-import com.shinnytech.futures.view.adapter.DialogAdapter;
-import com.shinnytech.futures.view.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
-import com.shinnytech.futures.view.listener.SimpleRecyclerViewItemClickListener;
+import com.shinnytech.futures.model.engine.DataManager;
+import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.KeyboardUtils;
-import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.view.activity.FutureInfoActivity;
 import com.shinnytech.futures.view.activity.LoginActivity;
+import com.shinnytech.futures.view.adapter.DialogAdapter;
+import com.shinnytech.futures.view.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.view.fragment.CurrentDayFragment;
 import com.shinnytech.futures.view.fragment.HandicapFragment;
 import com.shinnytech.futures.view.fragment.KlineFragment;
 import com.shinnytech.futures.view.fragment.OrderFragment;
 import com.shinnytech.futures.view.fragment.PositionFragment;
 import com.shinnytech.futures.view.fragment.TransactionFragment;
+import com.shinnytech.futures.view.listener.SimpleRecyclerViewItemClickListener;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -389,7 +390,7 @@ public class FutureInfoActivityPresenter {
                         mBinding.vpInfoContent.setCurrentItem(0, false);
                         break;
                     case R.id.rb_position_info:
-                        if (!LoginActivity.isIsLogin()) {
+                        if (!DataManager.getInstance().IS_LOGIN) {
                             Intent intent = new Intent(mFutureInfoActivity, LoginActivity.class);
                             //判断从哪个页面跳到登录页，登录页的销毁方式不一样
                             intent.putExtra(ACTIVITY_TYPE, "FutureInfoActivity");
@@ -399,7 +400,7 @@ public class FutureInfoActivityPresenter {
                         mBinding.vpInfoContent.setCurrentItem(1, false);
                         break;
                     case R.id.rb_order_info:
-                        if (!LoginActivity.isIsLogin()) {
+                        if (!DataManager.getInstance().IS_LOGIN) {
                             Intent intent = new Intent(mFutureInfoActivity, LoginActivity.class);
                             intent.putExtra(ACTIVITY_TYPE, "FutureInfoActivity");
                             mFutureInfoActivity.startActivityForResult(intent, ORDER_JUMP_TO_LOG_IN_ACTIVITY);
@@ -408,7 +409,7 @@ public class FutureInfoActivityPresenter {
                         mBinding.vpInfoContent.setCurrentItem(2, false);
                         break;
                     case R.id.rb_transaction_info:
-                        if (!LoginActivity.isIsLogin()) {
+                        if (!DataManager.getInstance().IS_LOGIN) {
                             Intent intent = new Intent(mFutureInfoActivity, LoginActivity.class);
                             intent.putExtra(ACTIVITY_TYPE, "FutureInfoActivity");
                             mFutureInfoActivity.startActivityForResult(intent, TRANSACTION_JUMP_TO_LOG_IN_ACTIVITY);
@@ -430,13 +431,14 @@ public class FutureInfoActivityPresenter {
      * description: 当从持仓菜单进入本页时判断登录状态
      */
     public void checkLoginState() {
-        if (mNav_position == 1 && !LoginActivity.isIsLogin()) {
+        if (mNav_position == 1 && !DataManager.getInstance().IS_LOGIN) {
             Intent intent = new Intent(mFutureInfoActivity, LoginActivity.class);
             //判断从哪个页面跳到登录页，登录页的销毁方式不一样
             intent.putExtra(ACTIVITY_TYPE, "FutureInfoActivity");
             mFutureInfoActivity.startActivity(intent);
             mNav_position = 2;
-        } else if (mNav_position == 2 && !LoginActivity.isIsLogin()) mFutureInfoActivity.finish();
+        } else if (mNav_position == 2 && !DataManager.getInstance().IS_LOGIN)
+            mFutureInfoActivity.finish();
     }
 
     /**

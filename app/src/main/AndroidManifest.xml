@@ -85,6 +85,11 @@
         <activity
             android:name=".view.activity.ConfirmActivity"
             android:screenOrientation="portrait"/>
+        <activity
+            android:name=".view.activity.BankTransferActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/LoginActivityTheme"
+            android:windowSoftInputMode="adjustResize|stateHidden"></activity>
     </application>
 
 </manifest>

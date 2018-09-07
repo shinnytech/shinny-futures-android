@@ -25,7 +25,7 @@
                 android:gravity="center"
                 android:text="@string/position_fragment_instrument_id"
                 android:textColor="@color/white"
-                android:textSize="@dimen/font_size_normal"/>
+                android:textSize="@dimen/font_size_normal" />
 
             <TextView
                 android:layout_width="0dp"
@@ -34,7 +34,7 @@
                 android:gravity="center"
                 android:text="@string/position_fragment_direction"
                 android:textColor="@color/white"
-                android:textSize="@dimen/font_size_normal"/>
+                android:textSize="@dimen/font_size_normal" />
 
             <TextView
                 android:layout_width="0dp"
@@ -43,7 +43,7 @@
                 android:gravity="center"
                 android:text="@string/position_fragment_volume"
                 android:textColor="@color/white"
-                android:textSize="@dimen/font_size_normal"/>
+                android:textSize="@dimen/font_size_normal" />
 
             <TextView
                 android:layout_width="0dp"
@@ -52,25 +52,25 @@
                 android:gravity="center"
                 android:text="@string/position_fragment_available"
                 android:textColor="@color/white"
-                android:textSize="@dimen/font_size_normal"/>
+                android:textSize="@dimen/font_size_normal" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:gravity="center"
+                android:gravity="end"
                 android:text="@string/position_fragment_average_open_price"
                 android:textColor="@color/white"
-                android:textSize="@dimen/font_size_normal"/>
+                android:textSize="@dimen/font_size_normal" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:gravity="center"
+                android:gravity="end"
                 android:text="@string/position_fragment_profit_each"
                 android:textColor="@color/white"
-                android:textSize="@dimen/font_size_normal"/>
+                android:textSize="@dimen/font_size_normal" />
 
         </LinearLayout>
 
@@ -82,7 +82,7 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent" />
 
     </LinearLayout>
 </layout>

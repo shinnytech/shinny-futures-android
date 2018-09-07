@@ -14,13 +14,14 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplicationLike;
 import com.shinnytech.futures.databinding.ActivityAccountBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 
 import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
 import static com.shinnytech.futures.constants.CommonConstants.ERROR;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_ACCOUNT;
+import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_TRADE;
 import static com.shinnytech.futures.constants.CommonConstants.OPEN;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION_TRANSACTION;
@@ -52,8 +53,10 @@ public class AccountActivity extends BaseActivity {
                 break;
             case ERROR:
                 break;
-            case MESSAGE_ACCOUNT:
-                AccountEntity accountEntity = sDataManager.getAccountBean().getAccount().get("CNY");
+            case MESSAGE_TRADE:
+                UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+                if (userEntity == null) return;
+                AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
                 ((ActivityAccountBinding) mViewDataBinding).setAccount(accountEntity);
                 break;
             default:
@@ -121,13 +124,13 @@ public class AccountActivity extends BaseActivity {
     public void onResume() {
         super.onResume();
         updateToolbarFromNetwork(sContext, "资金账户");
-        if (!LoginActivity.isIsLogin()) {
+        if (!sDataManager.IS_LOGIN) {
             Intent intent = new Intent(this, LoginActivity.class);
             //判断从哪个页面跳到登录页，登录页的销毁方式不一样
             intent.putExtra(ACTIVITY_TYPE, "MainActivity");
             startActivity(intent);
         }
-        refreshUI(MESSAGE_ACCOUNT);
+        refreshUI(MESSAGE_TRADE);
         registerBroaderCast();
     }
 

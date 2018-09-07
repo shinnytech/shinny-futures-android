@@ -15,7 +15,6 @@ import com.shinnytech.futures.databinding.ItemFragmentQuoteBinding;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 
 import java.util.List;
@@ -156,10 +155,10 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                 String askPrice1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(), instrumentId);
                 String bidPrice1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(), instrumentId);
 
-                if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)){
-                    if (mSwitchLowerLimit){
-                        setTextColor(mBinding.quoteLatest,lowerLimit);
-                    }else {
+                if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
+                    if (mSwitchLowerLimit) {
+                        setTextColor(mBinding.quoteLatest, lowerLimit);
+                    } else {
                         setTextColor(mBinding.quoteLatest, upperLimit);
                     }
                     if (mSwitchChange) {
@@ -172,10 +171,10 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                     } else {
                         mBinding.quoteOpenInterest.setText(quoteEntity.getAsk_volume1());
                     }
-                }else {
+                } else {
                     setTextColor(mBinding.quoteLatest, latest);
                     if (mSwitchChange) {
-                        setTextColor(mBinding.quoteChangePercent,change);
+                        setTextColor(mBinding.quoteChangePercent, change);
                     } else {
                         setTextColor(mBinding.quoteChangePercent, changePercent);
                     }
@@ -197,7 +196,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                 switch (key) {
                     case "latest":
                         if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)))
-                        setTextColor(mBinding.quoteLatest, value);
+                            setTextColor(mBinding.quoteLatest, value);
                         break;
                     case "change":
                         if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchChange) {
@@ -221,7 +220,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                         break;
                     case "upper_limit":
                         if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle) && !mSwitchLowerLimit)
-                        setTextColor(mBinding.quoteLatest, value);
+                            setTextColor(mBinding.quoteLatest, value);
                         break;
                     case "lower_limit":
                         if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchLowerLimit) {

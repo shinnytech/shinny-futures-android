@@ -20,8 +20,8 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="-"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/font_size_small"/>
+            android:textColor="@color/white"
+            android:textSize="@dimen/font_size_small" />
 
         <TextView
             android:id="@+id/tv_trade_offset"
@@ -30,18 +30,18 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="-"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/font_size_small"/>
+            android:textColor="@color/white"
+            android:textSize="@dimen/font_size_small" />
 
         <TextView
             android:id="@+id/tv_trade_price"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center"
+            android:gravity="right"
             android:text="-"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/font_size_small"/>
+            android:textColor="@color/white"
+            android:textSize="@dimen/font_size_small" />
 
         <TextView
             android:id="@+id/tv_trade_volume"
@@ -50,8 +50,8 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="-"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/font_size_small"/>
+            android:textColor="@color/white"
+            android:textSize="@dimen/font_size_small" />
 
         <TextView
             android:id="@+id/tv_trade_time"
@@ -60,8 +60,8 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="-"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/font_size_small"/>
+            android:textColor="@color/white"
+            android:textSize="@dimen/font_size_small" />
 
     </LinearLayout>
 

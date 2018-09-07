@@ -6,7 +6,7 @@ import java.io.Serializable;
 /**
  * Created by chenli on 12/26/16.
  */
-public class QuoteEntity implements Serializable{
+public class QuoteEntity implements Serializable {
     private static final long serialVersionUID = 2631590509760908280L;
 
     private String instrument_id;//
