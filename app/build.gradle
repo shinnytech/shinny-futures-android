@@ -336,8 +336,8 @@ android {
         }
 
         nhqh_sim {
-            buildConfigField "String", "BROKER_ID", "\"南华期货-仿真\""
-            resValue("string", "app_name", "南华期货-仿真")
+            buildConfigField "String", "BROKER_ID", "\"南华模拟\""
+            resValue("string", "app_name", "南华模拟")
             manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".nhqh_sim"
             dimension "shinny"
