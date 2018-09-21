@@ -207,6 +207,14 @@ android {
             dimension "shinny"
         }
 
+        hzqh {
+            buildConfigField "String", "BROKER_ID", "\"海证期货\""
+            resValue("string", "app_name", "海证期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+            applicationIdSuffix ".hzqh"
+            dimension "shinny"
+        }
+
         hongyuanqh {
             buildConfigField "String", "BROKER_ID", "\"宏源期货\""
             resValue("string", "app_name", "宏源期货")
@@ -288,8 +296,8 @@ android {
         }
 
         ftol {
-            buildConfigField "String", "BROKER_ID", "\"江苏弘业主席\""
-            resValue("string", "app_name", "江苏弘业主席")
+            buildConfigField "String", "BROKER_ID", "\"弘业期货\""
+            resValue("string", "app_name", "弘业期货")
             manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".ftol"
             dimension "shinny"

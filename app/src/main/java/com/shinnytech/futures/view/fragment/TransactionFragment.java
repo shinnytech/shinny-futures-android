@@ -417,137 +417,21 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     public void onClick(final View v) {
         switch (v.getId()) {
             case R.id.bid_open_position:
-                if (mBinding.bidPrice11.getText() != null && mBinding.volume.getText() != null) {
-                    String price = mBinding.bidPrice11.getText().toString();
-                    String volume = mBinding.volume.getText().toString();
-                    String orderId = Calendar.getInstance().getTimeInMillis() + "";
-                    if (price.length() == 0)
-                        ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "价格不能为空");
-                    if (".".equals(price))
-                        ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "价格输入不合法");
-                    if (volume.length() == 0)
-                        ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数不能为空");
-                    if (volume.length() > 10)
-                        ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数太大");
-                    if ("0".equals(volume))
-                        ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数不能为零");
-                    if (price.length() != 0 && !".".equals(price) && volume.length() != 0 && volume.length() <= 10 && !"0".equals(volume)) {
-                        try {
-                            int volumeN = Integer.parseInt(volume);
-                            double priceN = Double.parseDouble(price);
-                            initDialog(orderId, mExchangeId, mInstrumentIdTransaction.split("\\.")[1], "买开", "BUY", "OPEN", volumeN, "LIMIT", priceN);
-                        } catch (NumberFormatException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                }
+                buyOpenPosition();
                 break;
             case R.id.ask_open_position:
-                if (mBinding.askPrice11.getText() != null && mBinding.volume.getText() != null) {
-                    String price = mBinding.askPrice11.getText().toString();
-                    String volume = mBinding.volume.getText().toString();
-                    String orderId = Calendar.getInstance().getTimeInMillis() + "";
-                    if (price.length() == 0)
-                        ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "价格不能为空");
-                    if (".".equals(price))
-                        ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "价格输入不合法");
-                    if (volume.length() == 0)
-                        ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数不能为空");
-                    if (volume.length() > 10)
-                        ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数太大");
-                    if ("0".equals(volume))
-                        ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数不能为零");
-                    if (price.length() != 0 && !".".equals(price) && volume.length() != 0 && volume.length() <= 10 && !"0".equals(volume)) {
-                        try {
-                            int volumeN = Integer.parseInt(volume);
-                            double priceN = Double.parseDouble(price);
-                            initDialog(orderId, mExchangeId, mInstrumentIdTransaction.split("\\.")[1], "卖开", "SELL", "OPEN", volumeN, "LIMIT", priceN);
-                        } catch (NumberFormatException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                }
+                sellOpenPosition();
                 break;
             case R.id.close_position:
                 switch (mBinding.closePrice.getText().toString()) {
                     case "锁仓状态":
-                        PopupMenu popup = new PopupMenu(getActivity(), v);
-                        popup.getMenuInflater().inflate(R.menu.fragment_transaction, popup.getMenu());
-                        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                            @Override
-                            public boolean onMenuItemClick(MenuItem item) {
-                                switch (item.getItemId()) {
-                                    case R.id.bid_position:
-                                        mDirection = "多";
-                                        mIsClosePriceShow = true;
-                                        mBinding.closeDirection.setText("平多");
-                                        mBinding.bidPrice1Direction.setText("加多");
-                                        mBinding.askPrice1Direction.setText("锁仓");
-                                        if ("排队价".equals(mPriceType))
-                                            mBinding.closePrice.setText(mBinding.askPrice11.getText().toString());
-                                        else
-                                            mBinding.closePrice.setText(mBinding.bidPrice11.getText().toString());
-                                        closePosition(v);
-                                        break;
-                                    case R.id.ask_position:
-                                        mDirection = "空";
-                                        mIsClosePriceShow = true;
-                                        mBinding.closeDirection.setText("平空");
-                                        mBinding.bidPrice1Direction.setText("锁仓");
-                                        mBinding.askPrice1Direction.setText("加空");
-                                        if ("对手价".equals(mPriceType))
-                                            mBinding.closePrice.setText(mBinding.askPrice11.getText().toString());
-                                        else
-                                            mBinding.closePrice.setText(mBinding.bidPrice11.getText().toString());
-                                        closePosition(v);
-                                        break;
-                                    default:
-                                        break;
-                                }
-                                return true;
-                            }
-                        });
-                        popup.show();
+                        lockClosePosition(v);
                         break;
                     case "先开先平":
-                        if (mInstrumentIdTransaction != null && mInstrumentIdTransaction.contains("&")) {
-                            PopupMenu popupCombine = new PopupMenu(getActivity(), v);
-                            popupCombine.getMenuInflater().inflate(R.menu.fragment_transaction, popupCombine.getMenu());
-                            popupCombine.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                                @Override
-                                public boolean onMenuItemClick(MenuItem item) {
-                                    switch (item.getItemId()) {
-                                        case R.id.bid_position:
-                                            mDirection = "多";
-                                            mIsClosePriceShow = true;
-                                            mBinding.closeDirection.setText("平多");
-                                            if ("排队价".equals(mPriceType))
-                                                mBinding.closePrice.setText(mBinding.askPrice11.getText().toString());
-                                            else
-                                                mBinding.closePrice.setText(mBinding.bidPrice11.getText().toString());
-                                            closePosition(v);
-                                            break;
-                                        case R.id.ask_position:
-                                            mDirection = "空";
-                                            mIsClosePriceShow = true;
-                                            mBinding.closeDirection.setText("平空");
-                                            if ("对手价".equals(mPriceType))
-                                                mBinding.closePrice.setText(mBinding.askPrice11.getText().toString());
-                                            else
-                                                mBinding.closePrice.setText(mBinding.bidPrice11.getText().toString());
-                                            closePosition(v);
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                    return true;
-                                }
-                            });
-                            popupCombine.show();
-                        }
+                        firstClosePosition(v);
                         break;
                     default:
-                        closePosition(v);
+                        defaultClosePosition(v);
                         break;
                 }
                 break;
@@ -557,11 +441,167 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     }
 
     /**
+     * date: 20/9/18
+     * author: chenli
+     * description: 买开仓处理逻辑
+     */
+    private void buyOpenPosition(){
+        if (mBinding.bidPrice11.getText() != null && mBinding.volume.getText() != null) {
+            String price = mBinding.bidPrice11.getText().toString();
+            String volume = mBinding.volume.getText().toString();
+            String orderId = Calendar.getInstance().getTimeInMillis() + "";
+            if (price.length() == 0)
+                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "价格不能为空");
+            if (".".equals(price))
+                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "价格输入不合法");
+            if (volume.length() == 0)
+                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数不能为空");
+            if (volume.length() > 10)
+                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数太大");
+            if ("0".equals(volume))
+                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数不能为零");
+            if (price.length() != 0 && !".".equals(price) && volume.length() != 0 && volume.length() <= 10 && !"0".equals(volume)) {
+                try {
+                    int volumeN = Integer.parseInt(volume);
+                    double priceN = Double.parseDouble(price);
+                    initDialog(orderId, mExchangeId, mInstrumentIdTransaction.split("\\.")[1], "买开", "BUY", "OPEN", volumeN, "LIMIT", priceN);
+                } catch (NumberFormatException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * date: 20/9/18
+     * author: chenli
+     * description: 卖开仓处理逻辑
+     */
+    private void sellOpenPosition(){
+        if (mBinding.askPrice11.getText() != null && mBinding.volume.getText() != null) {
+            String price = mBinding.askPrice11.getText().toString();
+            String volume = mBinding.volume.getText().toString();
+            String orderId = Calendar.getInstance().getTimeInMillis() + "";
+            if (price.length() == 0)
+                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "价格不能为空");
+            if (".".equals(price))
+                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "价格输入不合法");
+            if (volume.length() == 0)
+                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数不能为空");
+            if (volume.length() > 10)
+                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数太大");
+            if ("0".equals(volume))
+                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数不能为零");
+            if (price.length() != 0 && !".".equals(price) && volume.length() != 0 && volume.length() <= 10 && !"0".equals(volume)) {
+                try {
+                    int volumeN = Integer.parseInt(volume);
+                    double priceN = Double.parseDouble(price);
+                    initDialog(orderId, mExchangeId, mInstrumentIdTransaction.split("\\.")[1], "卖开", "SELL", "OPEN", volumeN, "LIMIT", priceN);
+                } catch (NumberFormatException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * date: 20/9/18
+     * author: chenli
+     * description: 锁仓平仓处理逻辑
+     */
+    private void lockClosePosition(final View v) {
+        PopupMenu popup = new PopupMenu(getActivity(), v);
+        popup.getMenuInflater().inflate(R.menu.fragment_transaction, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.bid_position:
+                        mDirection = "多";
+                        mIsClosePriceShow = true;
+                        mBinding.closeDirection.setText("平多");
+                        mBinding.bidPrice1Direction.setText("加多");
+                        mBinding.askPrice1Direction.setText("锁仓");
+                        if ("排队价".equals(mPriceType))
+                            mBinding.closePrice.setText(mBinding.askPrice11.getText().toString());
+                        else
+                            mBinding.closePrice.setText(mBinding.bidPrice11.getText().toString());
+                        defaultClosePosition(v);
+                        break;
+                    case R.id.ask_position:
+                        mDirection = "空";
+                        mIsClosePriceShow = true;
+                        mBinding.closeDirection.setText("平空");
+                        mBinding.bidPrice1Direction.setText("锁仓");
+                        mBinding.askPrice1Direction.setText("加空");
+                        if ("对手价".equals(mPriceType))
+                            mBinding.closePrice.setText(mBinding.askPrice11.getText().toString());
+                        else
+                            mBinding.closePrice.setText(mBinding.bidPrice11.getText().toString());
+                        defaultClosePosition(v);
+                        break;
+                    default:
+                        break;
+                }
+                return true;
+            }
+        });
+        popup.show();
+    }
+
+
+    /**
+     * date: 20/9/18
+     * author: chenli
+     * description: 先开先平平仓处理逻辑
+     */
+    private void firstClosePosition(final View v) {
+        if (mInstrumentIdTransaction != null && mInstrumentIdTransaction.contains("&")) {
+            PopupMenu popupCombine = new PopupMenu(getActivity(), v);
+            popupCombine.getMenuInflater().inflate(R.menu.fragment_transaction, popupCombine.getMenu());
+            popupCombine.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.bid_position:
+                            mDirection = "多";
+                            mIsClosePriceShow = true;
+                            mBinding.closeDirection.setText("平多");
+                            if ("排队价".equals(mPriceType))
+                                mBinding.closePrice.setText(mBinding.askPrice11.getText().toString());
+                            else
+                                mBinding.closePrice.setText(mBinding.bidPrice11.getText().toString());
+                            defaultClosePosition(v);
+                            break;
+                        case R.id.ask_position:
+                            mDirection = "空";
+                            mIsClosePriceShow = true;
+                            mBinding.closeDirection.setText("平空");
+                            if ("对手价".equals(mPriceType))
+                                mBinding.closePrice.setText(mBinding.askPrice11.getText().toString());
+                            else
+                                mBinding.closePrice.setText(mBinding.bidPrice11.getText().toString());
+                            defaultClosePosition(v);
+                            break;
+                        default:
+                            break;
+                    }
+                    return true;
+                }
+            });
+            popupCombine.show();
+        }else {
+            ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "您还没有此合约持仓～");
+        }
+    }
+
+
+    /**
      * date: 6/1/18
      * author: chenli
-     * description: 平仓处理逻辑
+     * description: 默认平仓处理逻辑
      */
-    private void closePosition(View v) {
+    private void defaultClosePosition(View v) {
         if (mBinding.closePrice.getText() != null && mBinding.volume.getText() != null && !"".equals(mDirection)) {
             String price = mBinding.closePrice.getText().toString();
             String volume = mBinding.volume.getText().toString();

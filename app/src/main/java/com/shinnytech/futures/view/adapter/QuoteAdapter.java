@@ -162,14 +162,14 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                         setTextColor(mBinding.quoteLatest, upperLimit);
                     }
                     if (mSwitchChange) {
-                        setTextColor(mBinding.quoteChangePercent, bidPrice1);
-                    } else {
                         setTextColor(mBinding.quoteChangePercent, askPrice1);
+                    } else {
+                        setTextColor(mBinding.quoteChangePercent, bidPrice1);
                     }
                     if (mSwitchVolume) {
-                        mBinding.quoteOpenInterest.setText(quoteEntity.getBid_volume1());
-                    } else {
                         mBinding.quoteOpenInterest.setText(quoteEntity.getAsk_volume1());
+                    } else {
+                        mBinding.quoteOpenInterest.setText(quoteEntity.getBid_volume1());
                     }
                 } else {
                     setTextColor(mBinding.quoteLatest, latest);

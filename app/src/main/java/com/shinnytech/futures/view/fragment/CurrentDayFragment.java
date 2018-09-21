@@ -86,6 +86,7 @@ public class CurrentDayFragment extends BaseChartFragment {
     private Map<Integer, Float> mSumCVMap = new HashMap<>();
     private int mStartIndex = 0;
     private int mEndIndex = 0;
+    private float preSettlement = 1.0f;
 
     @Nullable
     @Override
@@ -97,6 +98,13 @@ public class CurrentDayFragment extends BaseChartFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(instrument_id);
+        try {
+            preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override

@@ -377,11 +377,10 @@ public class KlineFragment extends BaseChartFragment {
                 KlineEntity klineEntity = klineEntities.get(mKlineType);
                 String ins_list = chartEntity.getState().get("ins_list");
                 if (klineEntity == null || ins_list == null || quoteEntity == null) return;
-                preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
                 String last_id = klineEntity.getLast_id();
                 mDataEntities = klineEntity.getData();
                 if (last_id == null || "-1".equals(last_id) ||
-                        mDataEntities.isEmpty() || !instrument_id.equals(ins_list) || preSettlement == 1)
+                        mDataEntities.isEmpty() || !instrument_id.equals(ins_list))
                     return;
                 mLastIndex = Integer.parseInt(last_id);
                 //开始加载数据
@@ -629,7 +628,6 @@ public class KlineFragment extends BaseChartFragment {
         String instrument_id_new = data.getInstrument_id();
         if (!instrument_id.equals(instrument_id_new)) {
             instrument_id = instrument_id_new;
-            preSettlement = 1;
             if (BaseApplicationLike.getWebSocketService() != null)
                 switch (mKlineType) {
                     case KLINE_DAY:

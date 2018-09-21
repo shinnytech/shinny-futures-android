@@ -124,7 +124,6 @@ public class BaseChartFragment extends LazyLoadFragment {
     protected String instrument_id;
     protected String instrument_id_transaction;
     protected String exchange_id;
-    protected float preSettlement;
     protected Calendar mCalendar;
     protected SimpleDateFormat mSimpleDateFormat;
     protected SparseArray<String> xVals;
@@ -150,7 +149,7 @@ public class BaseChartFragment extends LazyLoadFragment {
                 case ERROR:
                     break;
                 case MESSAGE:
-                    if (mIsUpdate)refreshMarketing();
+                    if (mIsUpdate) refreshMarketing();
                     break;
                 case MESSAGE_TRADE:
                     refreshTrade();
@@ -158,7 +157,7 @@ public class BaseChartFragment extends LazyLoadFragment {
                 default:
                     break;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -196,15 +195,6 @@ public class BaseChartFragment extends LazyLoadFragment {
             if (mIsPosition) addPositionLimitLines();
             if (mIsPending) addOrderLimitLines();
         }
-
-        QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(instrument_id);
-        if (quoteEntity != null) {
-            try {
-                preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
-            } catch (NumberFormatException ex) {
-                ex.printStackTrace();
-            }
-        } else preSettlement = 1;
     }
 
     protected void initData() {
