@@ -153,7 +153,7 @@ public class FutureInfoActivityPresenter {
         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
         if (searchEntity != null) mToolbarTitle.setText(searchEntity.getInstrumentName());
         else mToolbarTitle.setText(mInstrumentId);
-        mToolbar.setTitle("合约:");
+        mToolbar.setTitle("");
         mToolbar.setTitleTextAppearance(mFutureInfoActivity, R.style.toolBarTitle);
         mToolbar.setTitleMarginStart(120);
         mToolbarTitle.setBackgroundColor(ContextCompat.getColor(sContext, R.color.title));

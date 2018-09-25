@@ -19,6 +19,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
@@ -447,8 +448,9 @@ public class LatestFileManager {
      */
     public static void saveInsListToFile(Set<String> insList) {
         try {
+            ArrayList<String> insLists = new ArrayList<>(insList);
             ObjectOutputStream out = new ObjectOutputStream(BaseApplicationLike.getContext().openFileOutput(OPTIONAL_INS_LIST, Context.MODE_PRIVATE));
-            out.writeObject(insList);
+            out.writeObject(insLists);
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -464,7 +466,7 @@ public class LatestFileManager {
         //读取文件内容
         try {
             ObjectInputStream in = new ObjectInputStream(BaseApplicationLike.getContext().openFileInput(OPTIONAL_INS_LIST));
-            insList = (TreeSet<String>) in.readObject();
+            insList.addAll((ArrayList<String>) in.readObject());
             in.close();
         } catch (IOException e) {
             e.printStackTrace();

@@ -223,8 +223,12 @@ public class CurrentDayFragment extends BaseChartFragment {
                 if (klineEntity == null) return;
                 String last_id = klineEntity.getLast_id();
                 mDataEntities = klineEntity.getData();
-                preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
-                if (last_id == null || "-1".equals(last_id) || mDataEntities.isEmpty() || preSettlement == 1)
+                try {
+                    preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                if (last_id == null || "-1".equals(last_id) || mDataEntities.isEmpty())
                     return;
                 int last_index = Integer.parseInt(last_id);
                 //开始加载数据

@@ -111,6 +111,14 @@ android {
             dimension "shinny"
         }
 
+        gzjkqh {
+            buildConfigField "String", "BROKER_ID", "\"广金期货\""
+            resValue("string", "app_name", "广金期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+            applicationIdSuffix ".gzjkqh"
+            dimension "shinny"
+        }
+
         gdqh {
             buildConfigField "String", "BROKER_ID", "\"光大期货\""
             resValue("string", "app_name", "光大期货")
@@ -180,6 +188,14 @@ android {
             resValue("string", "app_name", "国信CTP")
             manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".guosenqh"
+            dimension "shinny"
+        }
+
+        haqh {
+            buildConfigField "String", "BROKER_ID", "\"华安期货\""
+            resValue("string", "app_name", "华安期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+            applicationIdSuffix ".haqh"
             dimension "shinny"
         }
 

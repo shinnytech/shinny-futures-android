@@ -378,7 +378,6 @@ public class QuoteFragment extends LazyLoadFragment {
                             String instrument_id = mAdapter.getData().get(position).getInstrument_id();
                             if (instrument_id == null || instrument_id.isEmpty()) return;
                             Map<String, QuoteEntity> insList = LatestFileManager.getOptionalInsList();
-                            LogUtils.e(insList.toString(), true);
                             if (insList.containsKey(instrument_id)) {
                                 initPopUp(view, instrument_id, insList, false);
                             } else {
