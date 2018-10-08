@@ -42,6 +42,7 @@ import com.tencent.tinker.loader.app.DefaultApplicationLike;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -263,12 +264,23 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
         MDUrlGroup.add(MARKET_URL_7);
         Collections.shuffle(MDUrlGroup);
         try {
-            Class.forName("com.shinnytech.futures.constants.LocalCommonConstants");
-            sMDURLs.add(com.shinnytech.futures.constants.LocalCommonConstants.MARKET_URL_8);
+            Class cl = Class.forName("com.shinnytech.futures.constants.LocalCommonConstants");
+            String MARKET_URL_8 = (String) cl.getMethod("getMARKET_URL_8").invoke(null);
+            sMDURLs.add(MARKET_URL_8);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             sMDURLs.add(MARKET_URL_1);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            sMDURLs.add(MARKET_URL_1);
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+            sMDURLs.add(MARKET_URL_1);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            sMDURLs.add(MARKET_URL_1);
         }
+        LogUtils.e(sMDURLs.get(0), true);
         sMDURLs.addAll(MDUrlGroup);
     }
 
