@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data></data>
 
@@ -19,6 +20,11 @@
             android:gravity="start|center_vertical"
             android:padding="@dimen/padding_5dp"
             android:text=""
+            android:maxLines="1"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+            app:autoSizeStepGranularity="1sp"
             android:textColor="@color/white"
             android:textSize="@dimen/font_size_normal"
             android:textStyle="bold" />
@@ -31,6 +37,11 @@
             android:gravity="end|center_vertical"
             android:padding="@dimen/padding_5dp"
             android:text=""
+            android:maxLines="1"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+            app:autoSizeStepGranularity="1sp"
             android:textColor="@color/white"
             android:textSize="@dimen/font_size_normal"
             android:textStyle="bold" />
@@ -43,6 +54,11 @@
             android:gravity="end|center_vertical"
             android:padding="@dimen/padding_5dp"
             android:text=""
+            android:maxLines="1"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+            app:autoSizeStepGranularity="1sp"
             android:textColor="@color/white"
             android:textSize="@dimen/font_size_normal"
             android:textStyle="bold" />
@@ -55,6 +71,11 @@
             android:gravity="end|center_vertical"
             android:padding="@dimen/padding_5dp"
             android:text=""
+            android:maxLines="1"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+            app:autoSizeStepGranularity="1sp"
             android:textColor="@color/white"
             android:textSize="@dimen/font_size_normal"
             android:textStyle="bold" />

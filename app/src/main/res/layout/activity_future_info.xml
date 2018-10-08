@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
         android:orientation="vertical"
-        tools:context=".view.activity.FutureInfoActivity">
+        tools:context=".controller.activity.FutureInfoActivity">
 
 
         <include layout="@layout/view_toolbar"></include>
@@ -23,7 +23,7 @@
             android:background="@color/black_light"
             android:orientation="vertical"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            tools:context=".view.activity.FutureInfoActivity"
+            tools:context=".controller.activity.FutureInfoActivity"
             tools:showIn="@layout/activity_future_info">
 
             <RadioGroup
@@ -65,8 +65,6 @@
                     style="@style/RadioButtonSetUp"
                     android:background="@drawable/set_up_button_background"
                     android:drawableEnd="@mipmap/ic_expand_more_white_24dp"
-                    android:paddingEnd="@dimen/padding_10dp"
-                    android:paddingStart="@dimen/padding_0dp"
                     android:text="@string/future_info_activity_set"
                     android:textColor="@color/white"
                     android:textSize="@dimen/font_size_normal" />

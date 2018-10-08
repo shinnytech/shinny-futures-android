@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context=".view.activity.LoginActivity">
+        tools:context=".controller.activity.LoginActivity">
 
         <include layout="@layout/view_toolbar"></include>
 
@@ -72,7 +72,6 @@
                 android:background="@null"
                 android:completionThreshold="1"
                 android:gravity="center_vertical"
-                android:inputType="phone"
                 android:maxLines="1"
                 android:padding="@dimen/padding_5dp"
                 android:textColor="@color/white"

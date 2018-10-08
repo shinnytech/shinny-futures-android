@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data></data>
 
@@ -7,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context=".view.activity.BankTransferActivity">
+        tools:context=".controller.activity.BankTransferActivity">
 
         <include layout="@layout/view_toolbar"></include>
 
@@ -202,43 +203,63 @@
             android:paddingBottom="@dimen/padding_4dp"
             android:paddingTop="@dimen/padding_4dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/layout_height_fragment_quote"
             android:background="@color/black_dark"
             android:orientation="horizontal">
 
             <TextView
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
                 android:text="转账时间"
                 android:textColor="@color/bg_gray_light"
                 android:textSize="@dimen/font_size_normal" />
 
             <TextView
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:gravity="right"
+                android:gravity="right|center_vertical"
                 android:text="转账金额"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
                 android:textColor="@color/bg_gray_light"
                 android:textSize="@dimen/font_size_normal" />
 
             <TextView
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="0.5"
                 android:gravity="center"
                 android:text="币种"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
                 android:textColor="@color/bg_gray_light"
                 android:textSize="@dimen/font_size_normal" />
 
             <TextView
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="转账结果"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
                 android:textColor="@color/bg_gray_light"
                 android:textSize="@dimen/font_size_normal" />
 

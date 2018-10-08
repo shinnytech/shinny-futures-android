@@ -18,7 +18,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplicationLike;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.view.activity.FutureInfoActivity;
+import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 
 import java.lang.reflect.Method;
 

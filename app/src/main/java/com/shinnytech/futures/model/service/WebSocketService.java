@@ -40,7 +40,6 @@ import static com.shinnytech.futures.constants.CommonConstants.KLINE_MINUTE;
 import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
 import static com.shinnytech.futures.constants.CommonConstants.OPEN;
 import static com.shinnytech.futures.constants.CommonConstants.SWITCH;
-import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_URL;
 import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
 
 /**
@@ -76,13 +75,13 @@ public class WebSocketService extends Service {
      */
     public static final String BROADCAST_ACTION_TRANSACTION = WebSocketService.class.getName() + ".TRANSACTION.BROADCAST";
 
-    private static final int TIMEOUT = 5000;
+    private static final int TIMEOUT = 500;
 
     private final IBinder binder = new LocalBinder();
 
     private WebSocket webSocketClient;
 
-    private WebSocket webSocketClientTransaction;
+    public WebSocket webSocketClientTransaction;
 
     private DataManager sDataManager = DataManager.getInstance();
 
@@ -156,7 +155,8 @@ public class WebSocketService extends Service {
                                         String ins_list = sDataManager.getRtnData().getIns_list();
                                         if (ins_list != null) sendSubscribeQuote(ins_list);
                                         else
-                                            sendSubscribeQuote(TextUtils.join(",", new ArrayList(LatestFileManager.getMainInsList().keySet()).subList(0, LOAD_QUOTE_NUM)));
+                                            sendSubscribeQuote(TextUtils.join(",",
+                                                    new ArrayList(LatestFileManager.getMainInsList().keySet()).subList(0, LOAD_QUOTE_NUM)));
 
                                         Map<String, ChartEntity> chartEntityMap = sDataManager.getRtnData().getCharts();
                                         if (chartEntityMap.size() != 0) {
@@ -190,7 +190,7 @@ public class WebSocketService extends Service {
                                         break;
                                     default:
                                         sendMessage(SWITCH, BROADCAST);
-                                        break;
+                                        return;
                                 }
                                 sendPeekMessage();
                             } catch (JSONException e) {
@@ -207,18 +207,23 @@ public class WebSocketService extends Service {
                         }
 
                         @Override
+                        public void onConnectError(WebSocket websocket, WebSocketException exception) {
+                            sendMessage(CLOSE, BROADCAST);
+                            LogUtils.e("onDisconnected", true);
+                        }
+
+                        @Override
                         public void onError(WebSocket websocket, WebSocketException cause) {
-                            ByteArrayOutputStream error = new ByteArrayOutputStream();
-                            cause.printStackTrace(new PrintStream(error));
-                            String exception = error.toString();
+                            cause.printStackTrace();
                             sendMessage(ERROR, BROADCAST);
-                            LogUtils.e(exception, true);
                         }
                     })
                     .addHeader("User-Agent", "shinnyfutures-Android")
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
                     .connectAsynchronously();
-            BaseApplicationLike.setIndex(BaseApplicationLike.getIndex() + 1);
+            int index = BaseApplicationLike.getIndex() + 1;
+            if (index == 7) index = 0;
+            BaseApplicationLike.setIndex(index);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -319,7 +324,7 @@ public class WebSocketService extends Service {
         try {
             webSocketClientTransaction = new WebSocketFactory()
                     .setConnectionTimeout(TIMEOUT)
-                    .createSocket(DataManager.getInstance().TRANSACTION_URL_FULL)
+                    .createSocket(CommonConstants.TRANSACTION_URL)
                     .addListener(new WebSocketAdapter() {
                         @Override
                         public void onConnected(WebSocket websocket, Map<String, List<String>> headers) {
@@ -340,6 +345,12 @@ public class WebSocketService extends Service {
 
                         @Override
                         public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) {
+                            sendMessage(CLOSE, BROADCAST_TRANSACTION);
+                            LogUtils.e("onDisconnected", true);
+                        }
+
+                        @Override
+                        public void onConnectError(WebSocket websocket, WebSocketException exception) {
                             sendMessage(CLOSE, BROADCAST_TRANSACTION);
                             LogUtils.e("onDisconnected", true);
                         }
@@ -397,9 +408,9 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 确认结算单
      */
-    public void sendReqConfirmSettlement(String req_id, String msg) {
+    public void sendReqConfirmSettlement() {
         if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
-            String confirmSettlement = "{\"aid\":\"MobileConfirmSettlement\",\"req_id\":\"" + req_id + "\",\"msg\":\"" + msg + "\"}";
+            String confirmSettlement = "{\"aid\":\"confirm_settlement\"}";
             LogUtils.e(confirmSettlement, true);
             webSocketClientTransaction.sendText(confirmSettlement);
         }
@@ -411,10 +422,10 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 下单
      */
-    public void sendReqInsertOrder(String order_id, String exchange_id, String instrument_id, String direction, String offset, int volume, String price_type, double price) {
+    public void sendReqInsertOrder(String exchange_id, String instrument_id, String direction, String offset, int volume, String price_type, double price) {
         if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
             String user_id = DataManager.getInstance().USER_ID;
-            String reqInsertOrder = "{\"aid\":\"insert_order\", \"user_id\":\"" + user_id + "\", \"order_id\":\"" + order_id + "\",\"exchange_id\":\"" + exchange_id + "\",\"instrument_id\":\"" + instrument_id + "\",\"direction\":\"" + direction + "\",\"offset\":\"" + offset + "\",\"volume\":" + volume + ",\"price_type\":\"" + price_type + "\",\"limit_price\":" + price + ", \"volume_condition\":\"ANY\", \"time_condition\":\"GFD\"}";
+            String reqInsertOrder = "{\"aid\":\"insert_order\", \"user_id\":\"" + user_id + "\", \"order_id\":\"\",\"exchange_id\":\"" + exchange_id + "\",\"instrument_id\":\"" + instrument_id + "\",\"direction\":\"" + direction + "\",\"offset\":\"" + offset + "\",\"volume\":" + volume + ",\"price_type\":\"" + price_type + "\",\"limit_price\":" + price + ", \"volume_condition\":\"ANY\", \"time_condition\":\"GFD\"}";
             LogUtils.e(reqInsertOrder, true);
             webSocketClientTransaction.sendText(reqInsertOrder);
         }

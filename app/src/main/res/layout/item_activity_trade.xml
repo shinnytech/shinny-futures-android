@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data></data>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/layout_height_fragment_quote"
         android:background="@drawable/item_touch_bg"
         android:clickable="true"
         android:gravity="center"
@@ -16,50 +17,75 @@
         <TextView
             android:id="@+id/tv_trade_name"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:text="-"
+            android:maxLines="1"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+            app:autoSizeMaxTextSize="@dimen/font_size_small"
+            app:autoSizeStepGranularity="1sp"
             android:textColor="@color/white"
             android:textSize="@dimen/font_size_small" />
 
         <TextView
             android:id="@+id/tv_trade_offset"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:text="-"
+            android:maxLines="1"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+            app:autoSizeMaxTextSize="@dimen/font_size_small"
+            app:autoSizeStepGranularity="1sp"
             android:textColor="@color/white"
             android:textSize="@dimen/font_size_small" />
 
         <TextView
             android:id="@+id/tv_trade_price"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="right"
             android:text="-"
+            android:maxLines="1"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+            app:autoSizeMaxTextSize="@dimen/font_size_small"
+            app:autoSizeStepGranularity="1sp"
             android:textColor="@color/white"
             android:textSize="@dimen/font_size_small" />
 
         <TextView
             android:id="@+id/tv_trade_volume"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:text="-"
+            android:maxLines="1"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+            app:autoSizeMaxTextSize="@dimen/font_size_small"
+            app:autoSizeStepGranularity="1sp"
             android:textColor="@color/white"
             android:textSize="@dimen/font_size_small" />
 
         <TextView
             android:id="@+id/tv_trade_time"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:text="-"
+            android:maxLines="1"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+            app:autoSizeMaxTextSize="@dimen/font_size_small"
+            app:autoSizeStepGranularity="1sp"
             android:textColor="@color/white"
             android:textSize="@dimen/font_size_small" />
 

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data></data>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/layout_height_popup_fragment_quote"
         android:background="@color/dialog_optional"
         android:gravity="center"
         android:orientation="vertical">
@@ -15,6 +16,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:maxLines="1"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="@dimen/font_size_normal_high"
+            app:autoSizeMaxTextSize="@dimen/font_size_small"
+            app:autoSizeStepGranularity="1sp"
             android:paddingBottom="@dimen/padding_10dp"
             android:paddingTop="@dimen/padding_10dp"
             android:textColor="@color/dialog_optional_text"

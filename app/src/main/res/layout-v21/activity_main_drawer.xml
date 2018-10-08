@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
-        tools:context=".view.activity.MainActivity">
+        tools:context=".controller.activity.MainActivity">
 
         <include layout="@layout/view_toolbar"></include>
 

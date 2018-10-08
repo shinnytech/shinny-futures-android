@@ -8,6 +8,9 @@
 # Java class files
 *.class
 
+# Java files
+app/src/main/java/com/shinnytech/futures/constantsLocalCommonConstants.java
+
 # Generated files
 bin/
 gen/

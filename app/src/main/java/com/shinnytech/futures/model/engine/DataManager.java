@@ -37,6 +37,7 @@ import java.util.TimeZone;
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_BROKER_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_LOGIN;
+import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_SETTLEMENT;
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_TRADE;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_URL;
 import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST;
@@ -81,12 +82,6 @@ public class DataManager {
      */
     public String USER_ID = "";
 
-    /**
-     * date: 9/7/18
-     * description: 交易服务器路径
-     */
-    public String TRANSACTION_URL_FULL = TRANSACTION_URL + "0";
-
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
 
     private DataManager() {
@@ -110,7 +105,7 @@ public class DataManager {
         return TRADE;
     }
 
-    public BrokerEntity getLogin() {
+    public BrokerEntity getBroker() {
         return BROKER;
     }
 
@@ -382,12 +377,19 @@ public class DataManager {
                                 String notifyKey = notifyIterator.next();
                                 JSONObject notify = data.getJSONObject(notifyKey);
                                 final String content = notify.optString("content");
-                                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), content);
-                                    }
-                                });
+                                String type = notify.optString("type");
+                                if ("SETTLEMENT".equals(type)){
+                                    BROKER.setSettlement(content);
+                                    if (BaseApplicationLike.getWebSocketService() != null)
+                                        BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_SETTLEMENT, BROADCAST_TRANSACTION);
+                                }else {
+                                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), content);
+                                        }
+                                    });
+                                }
                             }
                             break;
                         case "trade":

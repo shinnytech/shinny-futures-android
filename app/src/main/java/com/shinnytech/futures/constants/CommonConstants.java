@@ -1,16 +1,16 @@
 package com.shinnytech.futures.constants;
 
 public final class CommonConstants {
-    public static final String MARKET_URL_1 = "ws://u.shinnytech.com/t/md/front/mobile";
+    public static final String MARKET_URL_1 = "ws://openmd.shinnytech.com/t/md/front/mobile";
     public static final String MARKET_URL_2 = "ws://139.198.126.116/t/md/front/mobile";
     public static final String MARKET_URL_3 = "ws://139.198.122.80/t/md/front/mobile";
     public static final String MARKET_URL_4 = "ws://139.198.123.206/t/md/front/mobile";
     public static final String MARKET_URL_5 = "ws://106.15.82.247/t/md/front/mobile";
     public static final String MARKET_URL_6 = "ws://106.15.82.189/t/md/front/mobile";
     public static final String MARKET_URL_7 = "ws://106.15.219.160/t/md/front/mobile";
-    public static final String TRANSACTION_URL = "ws://opentd.shinnytech.com/trade/user";
+    public static final String TRANSACTION_URL = "wss://t.shinnytech.com/trade/shinny";
     public static final String JSON_FILE_URL = "http://openmd.shinnytech.com/t/md/symbols/latest.json";
-    public static final String FEED_BACK_URL = "http://redmine.kuaiqi.net/src/";
+    public static final String FEED_BACK_URL = "http://ask.shinnytech.com/src/indexm.html";
     public static final String SWITCH = "-1";
     public static final String OPEN = "0";
     public static final String CLOSE = "1";
@@ -18,9 +18,8 @@ public final class CommonConstants {
     public static final String MESSAGE = "3";
     public static final String MESSAGE_TRADE = "4";
     public static final String MESSAGE_LOGIN = "5";
-    public static final String MESSAGE_SETTLEMENT_NOT_SURE = "6";
-    public static final String MESSAGE_SETTLEMENT = "7";
-    public static final String MESSAGE_BROKER_INFO = "8";
+    public static final String MESSAGE_SETTLEMENT = "6";
+    public static final String MESSAGE_BROKER_INFO = "7";
     public static final String OPTIONAL = "自选合约";
     public static final String DOMINANT = "主力合约";
     public static final String SHANGHAI = "上海期货交易所";

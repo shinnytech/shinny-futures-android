@@ -29,6 +29,7 @@
 
     <dimen name="layout_height_item_activity_search_quote">35dp</dimen>
     <dimen name="layout_height_item_fragment_quote">40dp</dimen>
+    <dimen name="layout_height_fragment_quote">30dp</dimen>
     <dimen name="layout_height_popup_fragment_quote">42dp</dimen>
     <dimen name="layout_height_item_activity_nav_quote">45dp</dimen>
     <dimen name="layout_height_view_dialog_cancel_order">115dp</dimen>
@@ -55,4 +56,7 @@
     <dimen name="app_bar_height">180dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+
+    <dimen name="text_view_height">35dp</dimen>
+    <dimen name="text_view_width">140dp</dimen>
 </resources>

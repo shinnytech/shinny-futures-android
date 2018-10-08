@@ -359,6 +359,14 @@ android {
             dimension "shinny"
         }
 
+        qhqh {
+            buildConfigField "String", "BROKER_ID", "\"前海期货\""
+            resValue("string", "app_name", "前海期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+            applicationIdSuffix ".qhqh"
+            dimension "shinny"
+        }
+
         rdqh {
             buildConfigField "String", "BROKER_ID", "\"瑞达期货\""
             resValue("string", "app_name", "瑞达期货")

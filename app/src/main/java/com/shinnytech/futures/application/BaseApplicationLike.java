@@ -32,10 +32,9 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
-import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
-import com.shinnytech.futures.view.activity.ConfirmActivity;
-import com.shinnytech.futures.view.activity.MainActivity;
+import com.shinnytech.futures.controller.activity.ConfirmActivity;
+import com.shinnytech.futures.controller.activity.MainActivity;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.tencent.tinker.loader.app.DefaultApplicationLike;
@@ -46,7 +45,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -65,10 +63,8 @@ import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_5;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_6;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_7;
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_SETTLEMENT;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_SETTLEMENT_NOT_SURE;
 import static com.shinnytech.futures.constants.CommonConstants.OPEN;
 import static com.shinnytech.futures.constants.CommonConstants.SWITCH;
-import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_URL;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION;
 import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION_TRANSACTION;
@@ -91,6 +87,8 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
     private BroadcastReceiver mReceiverNetwork;
     private BroadcastReceiver mReceiverScreen;
     private boolean mIsBackground = false;
+    private boolean mIsTDClose = false;
+    private boolean mIsMDClose = false;
     private MyHandler mMyHandler = new MyHandler();
 
     public BaseApplicationLike(Application application, int tinkerFlags, boolean tinkerLoadVerifyFlag, long applicationStartElapsedTime, long applicationStartMillisTime, Intent tinkerResultIntent) {
@@ -127,9 +125,6 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
 
         //初始化行情服务器地址
         initMDUrl();
-
-        //初始化交易服务器地址
-        initTDUrl();
 
         //下载合约列表文件
         downloadLatestJsonFile();
@@ -267,28 +262,15 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
         MDUrlGroup.add(MARKET_URL_6);
         MDUrlGroup.add(MARKET_URL_7);
         Collections.shuffle(MDUrlGroup);
-        sMDURLs.add(MARKET_URL_1);
+        try {
+            Class.forName("com.shinnytech.futures.constants.LocalCommonConstants");
+            sMDURLs.add(com.shinnytech.futures.constants.LocalCommonConstants.MARKET_URL_8);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            sMDURLs.add(MARKET_URL_1);
+        }
         sMDURLs.addAll(MDUrlGroup);
     }
-
-    /**
-     * date: 9/7/18
-     * author: chenli
-     * description: 初始化交易服务器地址
-     */
-    private void initTDUrl() {
-        String TDUrlPath;
-        if (SPUtils.contains(sContext, "TDUrlPath")){
-            TDUrlPath = (String) SPUtils.get(sContext, "TDUrlPath", "0");
-        }else {
-            int uniqueID = Math.abs(UUID.randomUUID().toString().hashCode() % 10);
-            TDUrlPath = uniqueID + "";
-            SPUtils.putAndApply(sContext, "TDUrlPath", TDUrlPath);
-        }
-        DataManager.getInstance().TRANSACTION_URL_FULL =  TRANSACTION_URL + TDUrlPath;
-        LogUtils.e( DataManager.getInstance().TRANSACTION_URL_FULL, true);
-    }
-
 
     /**
      * date: 7/21/17
@@ -414,15 +396,21 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case OPEN:
-                        ToastNotificationUtils.showToast(sContext, "行情服务器连接成功");
+                        if (mIsMDClose){
+                            ToastNotificationUtils.showToast(sContext, "行情服务器连接成功");
+                            mIsMDClose = false;
+                        }
                         break;
                     case CLOSE:
                         //每隔两秒,断线重连
                         if (!mIsBackground) {
-                            ToastNotificationUtils.showToast(sContext, "行情服务器连接断开，正在重连...");
+                            if (!mIsMDClose){
+                                ToastNotificationUtils.showToast(sContext, "行情服务器连接断开，正在重连...");
+                                mIsMDClose = true;
+                            }
 
                             if (NetworkUtils.isNetworkConnected(sContext))
-                                mMyHandler.sendEmptyMessageDelayed(0, 2000);
+                                mMyHandler.sendEmptyMessageDelayed(0, 1500);
                             else
                                 ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
                         }
@@ -432,7 +420,7 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
                         //每隔两秒,断线重连
                         if (!mIsBackground) {
                             if (NetworkUtils.isNetworkConnected(sContext))
-                                mMyHandler.sendEmptyMessageDelayed(2, 2000);
+                                mMyHandler.sendEmptyMessageDelayed(2, 1500);
                             else
                                 ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
                         }
@@ -451,21 +439,25 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case OPEN:
-                        ToastNotificationUtils.showToast(sContext, "交易服务器连接成功");
+                        if (mIsTDClose){
+                            ToastNotificationUtils.showToast(sContext, "交易服务器连接成功");
+                            mIsTDClose = false;
+                        }
                         break;
                     case CLOSE:
                         DataManager.getInstance().IS_LOGIN = false;
                         //每隔两秒,断线重连
                         if (!mIsBackground) {
-                            ToastNotificationUtils.showToast(sContext, "交易服务器连接断开，正在重连...");
+                            if (!mIsTDClose){
+                                ToastNotificationUtils.showToast(sContext, "交易服务器连接断开，正在重连...");
+                                mIsTDClose = true;
+                            }
 
                             if (NetworkUtils.isNetworkConnected(sContext))
-                                mMyHandler.sendEmptyMessageDelayed(1, 2000);
+                                mMyHandler.sendEmptyMessageDelayed(1, 1500);
                             else
                                 ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
                         }
-                        break;
-                    case MESSAGE_SETTLEMENT_NOT_SURE:
                         break;
                     case MESSAGE_SETTLEMENT:
                         Intent intent1 = new Intent(context, ConfirmActivity.class);
@@ -487,9 +479,7 @@ public class BaseApplicationLike extends DefaultApplicationLike implements Servi
                 int networkStatus = intent.getIntExtra("networkStatus", 0);
                 switch (networkStatus) {
                     case 0:
-                        if (sWebSocketService != null) {
-                            LogUtils.e("连接断开", true);
-                        }
+                        LogUtils.e("连接断开", true);
                         break;
                     case 1:
                         if (sWebSocketService != null) {

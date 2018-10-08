@@ -45,6 +45,7 @@ public class LatestFileManager {
     private static Comparator<String> comparator = new Comparator<String>() {
         @Override
         public int compare(String instrumentId1, String instrumentId2) {
+            if (instrumentId1 == null || instrumentId2 == null) return 0;
             JSONObject jsonObject1 = jsonObject.optJSONObject(instrumentId1);
             JSONObject jsonObject2 = jsonObject.optJSONObject(instrumentId2);
             if (jsonObject1 == null || jsonObject2 == null) {
