@@ -38,7 +38,7 @@ import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnDrawLineChartTouchListener;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
@@ -176,7 +176,7 @@ public class KlineFragment extends BaseChartFragment {
         mColorMa20 = ContextCompat.getColor(getActivity(), R.color.kline_ma20);
         mViewWidth = VIEW_WIDTH;
         if (mScaleX == 0.0f)
-            mScaleX = (float) SPUtils.get(BaseApplicationLike.getContext(), "mScaleX", 1.0f);
+            mScaleX = (float) SPUtils.get(BaseApplication.getContext(), "mScaleX", 1.0f);
         mIsDrag = true;
     }
 
@@ -251,16 +251,16 @@ public class KlineFragment extends BaseChartFragment {
                             if ((int) (mChart.getLowestVisibleX() + 0.5f) == mLeftIndex) {
                                 if (xVals.size() >= mViewWidth) {
                                     mViewWidth = mViewWidth + 100;
-                                    if (BaseApplicationLike.getWebSocketService() != null)
+                                    if (BaseApplication.getWebSocketService() != null)
                                         switch (mKlineType) {
                                             case KLINE_DAY:
-                                                BaseApplicationLike.getWebSocketService().sendSetChartDay(instrument_id, mViewWidth);
+                                                BaseApplication.getWebSocketService().sendSetChartDay(instrument_id, mViewWidth);
                                                 break;
                                             case KLINE_HOUR:
-                                                BaseApplicationLike.getWebSocketService().sendSetChartHour(instrument_id, mViewWidth);
+                                                BaseApplication.getWebSocketService().sendSetChartHour(instrument_id, mViewWidth);
                                                 break;
                                             case KLINE_MINUTE:
-                                                BaseApplicationLike.getWebSocketService().sendSetChartMin(instrument_id, mViewWidth);
+                                                BaseApplication.getWebSocketService().sendSetChartMin(instrument_id, mViewWidth);
                                                 break;
                                             default:
                                                 break;
@@ -629,16 +629,16 @@ public class KlineFragment extends BaseChartFragment {
         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id_new);
         if (instrument_id.equals(instrument_id_new)) return;
         instrument_id = instrument_id_new;
-        if (BaseApplicationLike.getWebSocketService() != null)
+        if (BaseApplication.getWebSocketService() != null)
             switch (mKlineType) {
                 case KLINE_DAY:
-                    BaseApplicationLike.getWebSocketService().sendSetChartDay(instrument_id, VIEW_WIDTH);
+                    BaseApplication.getWebSocketService().sendSetChartDay(instrument_id, VIEW_WIDTH);
                     break;
                 case KLINE_HOUR:
-                    BaseApplicationLike.getWebSocketService().sendSetChartHour(instrument_id, VIEW_WIDTH);
+                    BaseApplication.getWebSocketService().sendSetChartHour(instrument_id, VIEW_WIDTH);
                     break;
                 case KLINE_MINUTE:
-                    BaseApplicationLike.getWebSocketService().sendSetChartMin(instrument_id, VIEW_WIDTH);
+                    BaseApplication.getWebSocketService().sendSetChartMin(instrument_id, VIEW_WIDTH);
                     break;
                 default:
                     break;
@@ -712,7 +712,7 @@ public class KlineFragment extends BaseChartFragment {
 
     @Override
     public void onDestroyView() {
-        SPUtils.putAndApply(BaseApplicationLike.getContext(), "mScaleX", mScaleX);
+        SPUtils.putAndApply(BaseApplication.getContext(), "mScaleX", mScaleX);
         super.onDestroyView();
     }
 

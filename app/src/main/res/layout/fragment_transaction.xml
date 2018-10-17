@@ -5,6 +5,8 @@
 
         <import type="com.shinnytech.futures.utils.MathUtils"></import>
 
+        <import type="com.shinnytech.futures.model.engine.LatestFileManager"></import>
+
         <variable
             name="quote"
             type="com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity"></variable>
@@ -225,7 +227,7 @@
                             android:ellipsize="end"
                             android:gravity="left"
                             android:maxLines="1"
-                            android:text="@{quote.last_price}"
+                            android:text="@{LatestFileManager.saveScaleByPtick(quote.last_price, quote.instrument_id)}"
                             android:textColor="@color/white"
                             android:textSize="@dimen/font_size_normal" />
 
@@ -270,7 +272,7 @@
                             android:ellipsize="end"
                             android:gravity="left"
                             android:maxLines="1"
-                            android:text="@{quote.ask_price1}"
+                            android:text="@{LatestFileManager.saveScaleByPtick(quote.ask_price1, quote.instrument_id)}"
                             android:textColor="@color/white"
                             android:textSize="@dimen/font_size_normal" />
 
@@ -313,7 +315,7 @@
                             android:ellipsize="end"
                             android:gravity="left"
                             android:maxLines="1"
-                            android:text="@{quote.bid_price1}"
+                            android:text="@{LatestFileManager.saveScaleByPtick(quote.bid_price1, quote.instrument_id)}"
                             android:textColor="@color/white"
                             android:textSize="@dimen/font_size_normal" />
 
@@ -484,7 +486,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{quote.upper_limit}"
+                    android:text="@{LatestFileManager.saveScaleByPtick(quote.upper_limit, quote.instrument_id)}"
                     android:textColor="@color/white" />
 
                 <TextView
@@ -497,7 +499,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{quote.lower_limit}"
+                    android:text="@{LatestFileManager.saveScaleByPtick(quote.lower_limit, quote.instrument_id)}"
                     android:textColor="@color/white" />
             </LinearLayout>
 

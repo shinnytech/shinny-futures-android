@@ -6,12 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityConfirmBinding;
 import com.shinnytech.futures.model.engine.DataManager;
-
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_SETTLEMENT;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_TRANSACTION;
 
 /**
  * date: 6/1/18
@@ -45,14 +42,14 @@ public class ConfirmActivity extends AppCompatActivity implements View.OnClickLi
 
     @Override
     public void onClick(View v) {
-        if (BaseApplicationLike.getWebSocketService() != null)
+        if (BaseApplication.getWebSocketService() != null)
             switch (v.getId()) {
                 case R.id.not_now:
                     finish();
                     break;
                 case R.id.confirm:
-                    if (BaseApplicationLike.getWebSocketService() != null)
-                        BaseApplicationLike.getWebSocketService().sendReqConfirmSettlement();
+                    if (BaseApplication.getWebSocketService() != null)
+                        BaseApplication.getWebSocketService().sendReqConfirmSettlement();
                     finish();
                     break;
                 default:

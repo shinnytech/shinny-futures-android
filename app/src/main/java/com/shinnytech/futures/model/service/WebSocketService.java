@@ -14,7 +14,7 @@ import com.neovisionaries.ws.client.WebSocketExtension;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
 import com.neovisionaries.ws.client.WebSocketState;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.model.bean.futureinfobean.ChartEntity;
 import com.shinnytech.futures.model.engine.DataManager;
@@ -24,9 +24,6 @@ import com.shinnytech.futures.utils.LogUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -133,6 +130,7 @@ public class WebSocketService extends Service {
      */
     public void connect(String url) {
         try {
+            String versionName = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
             webSocketClient = new WebSocketFactory()
                     .setConnectionTimeout(TIMEOUT)
                     .createSocket(url)
@@ -185,7 +183,7 @@ public class WebSocketService extends Service {
                                         }
                                         break;
                                     case "rtn_data":
-                                        BaseApplicationLike.setIndex(0);
+                                        BaseApplication.setIndex(0);
                                         sDataManager.refreshFutureBean(jsonObject);
                                         break;
                                     default:
@@ -218,13 +216,13 @@ public class WebSocketService extends Service {
                             sendMessage(ERROR, BROADCAST);
                         }
                     })
-                    .addHeader("User-Agent", "shinnyfutures-Android")
+                    .addHeader("User-Agent", "shinnyfutures-Android"+" "+versionName)
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
                     .connectAsynchronously();
-            int index = BaseApplicationLike.getIndex() + 1;
+            int index = BaseApplication.getIndex() + 1;
             if (index == 7) index = 0;
-            BaseApplicationLike.setIndex(index);
-        } catch (IOException e) {
+            BaseApplication.setIndex(index);
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -322,6 +320,7 @@ public class WebSocketService extends Service {
      */
     public void connectTransaction() {
         try {
+            String versionName = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
             webSocketClientTransaction = new WebSocketFactory()
                     .setConnectionTimeout(TIMEOUT)
                     .createSocket(CommonConstants.TRANSACTION_URL)
@@ -362,9 +361,9 @@ public class WebSocketService extends Service {
                         }
                     })
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
-                    .addHeader("User-Agent", "shinnyfutures-Android")
+                    .addHeader("User-Agent", "shinnyfutures-Android"+" "+versionName)
                     .connectAsynchronously();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

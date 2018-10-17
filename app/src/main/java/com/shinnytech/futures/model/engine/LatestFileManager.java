@@ -2,7 +2,7 @@ package com.shinnytech.futures.model.engine;
 
 import android.content.Context;
 
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.utils.LogUtils;
@@ -18,7 +18,6 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -41,22 +40,27 @@ public class LatestFileManager {
      * description: 自选合约列表名称
      */
     private static final String OPTIONAL_INS_LIST = "optionalInsList";
-    private static JSONObject jsonObject;
+    private static JSONObject jsonObject = new JSONObject();
     private static Comparator<String> comparator = new Comparator<String>() {
         @Override
         public int compare(String instrumentId1, String instrumentId2) {
-            if (instrumentId1 == null || instrumentId2 == null) return 0;
-            JSONObject jsonObject1 = jsonObject.optJSONObject(instrumentId1);
-            JSONObject jsonObject2 = jsonObject.optJSONObject(instrumentId2);
-            if (jsonObject1 == null || jsonObject2 == null) {
-                return instrumentId1.compareTo(instrumentId2);
-            }
-            int sort_key1 = jsonObject1.optInt("sort_key");
-            int sort_key2 = jsonObject2.optInt("sort_key");
-            if (sort_key1 == sort_key2) {
-                return instrumentId1.compareTo(instrumentId2);
-            } else {
-                return sort_key1 - sort_key2;
+            try {
+                if (instrumentId1 == null || instrumentId2 == null) return 0;
+                JSONObject jsonObject1 = jsonObject.optJSONObject(instrumentId1);
+                JSONObject jsonObject2 = jsonObject.optJSONObject(instrumentId2);
+                if (jsonObject1 == null || jsonObject2 == null) {
+                    return instrumentId1.compareTo(instrumentId2);
+                }
+                int sort_key1 = jsonObject1.optInt("sort_key");
+                int sort_key2 = jsonObject2.optInt("sort_key");
+                if (sort_key1 == sort_key2) {
+                    return instrumentId1.compareTo(instrumentId2);
+                } else {
+                    return sort_key1 - sort_key2;
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+                return 0;
             }
         }
     };
@@ -198,6 +202,7 @@ public class LatestFileManager {
                 String ins_name = subObject.optString("ins_name");
                 String exchange_id = subObject.optString("exchange_id");
                 String price_tick = subObject.optString("price_tick");
+                String price_decs = subObject.optString("price_decs");
                 String volume_multiple = subObject.optString("volume_multiple");
                 String sort_key = subObject.optString("sort_key");
                 String product_short_name = subObject.optString("product_short_name");
@@ -206,6 +211,7 @@ public class LatestFileManager {
                 Boolean expired = subObject.optBoolean("expired");
                 SearchEntity searchEntity = new SearchEntity();
                 searchEntity.setpTick(price_tick);
+                searchEntity.setpTick_decs(price_decs);
                 searchEntity.setInstrumentId(instrument_id);
                 searchEntity.setInstrumentName(ins_name);
                 searchEntity.setVm(volume_multiple);
@@ -413,9 +419,8 @@ public class LatestFileManager {
         if (searchEntity == null || data == null || !data.matches("-?\\d+(\\.\\d+)?"))
             return MathUtils.round(data, 1);
         try {
-            String pTick = searchEntity.getpTick();
-            DecimalFormat decimalFormat = new DecimalFormat(pTick);
-            return decimalFormat.format(Float.valueOf(data));
+            int pTick_decs = Integer.valueOf(searchEntity.getpTick_decs());
+            return MathUtils.round(data, pTick_decs);
         } catch (Exception e) {
             e.printStackTrace();
             return MathUtils.round(data, 1);
@@ -431,13 +436,8 @@ public class LatestFileManager {
         SearchEntity searchEntity = SEARCH_ENTITIES.get(instrumentId);
         if (searchEntity == null) return MathUtils.round(data, 2);
         try {
-            String pTick = searchEntity.getpTick();
-            int scale = 0;
-            if (pTick != null) {
-                if (pTick.contains(".")) scale = pTick.length() - pTick.indexOf(".");
-                else scale = 1;
-            }
-            return MathUtils.round(data, scale);
+            int pTick_decs = Integer.valueOf(searchEntity.getpTick_decs()) + 1;
+            return MathUtils.round(data, pTick_decs);
         } catch (Exception e) {
             e.printStackTrace();
             return MathUtils.round(data, 2);
@@ -450,7 +450,7 @@ public class LatestFileManager {
     public static void saveInsListToFile(Set<String> insList) {
         try {
             ArrayList<String> insLists = new ArrayList<>(insList);
-            ObjectOutputStream out = new ObjectOutputStream(BaseApplicationLike.getContext().openFileOutput(OPTIONAL_INS_LIST, Context.MODE_PRIVATE));
+            ObjectOutputStream out = new ObjectOutputStream(BaseApplication.getContext().openFileOutput(OPTIONAL_INS_LIST, Context.MODE_PRIVATE));
             out.writeObject(insLists);
             out.close();
         } catch (IOException e) {
@@ -466,7 +466,7 @@ public class LatestFileManager {
         //打开文件输入流
         //读取文件内容
         try {
-            ObjectInputStream in = new ObjectInputStream(BaseApplicationLike.getContext().openFileInput(OPTIONAL_INS_LIST));
+            ObjectInputStream in = new ObjectInputStream(BaseApplication.getContext().openFileInput(OPTIONAL_INS_LIST));
             insList.addAll((ArrayList<String>) in.readObject());
             in.close();
         } catch (IOException e) {
@@ -485,7 +485,7 @@ public class LatestFileManager {
         StringBuilder sb = new StringBuilder("");
         try {
             //打开文件输入流
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(BaseApplicationLike.getContext().openFileInput(fileName), "UTF-8"));
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(BaseApplication.getContext().openFileInput(fileName), "UTF-8"));
             //读取文件内容:
             String line;
             while ((line = bufferedReader.readLine()) != null) {

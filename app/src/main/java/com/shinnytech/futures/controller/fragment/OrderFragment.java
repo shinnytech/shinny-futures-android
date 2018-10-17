@@ -23,7 +23,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.FragmentOrderBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
@@ -91,8 +91,8 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
             @Override
             public void onClick(View v) {
                 try {
-                    if (BaseApplicationLike.getWebSocketService() != null)
-                        BaseApplicationLike.getWebSocketService().sendReqCancelOrder(order_id);
+                    if (BaseApplication.getWebSocketService() != null)
+                        BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
                 } catch (NumberFormatException ex) {
                     ex.printStackTrace();
                 }

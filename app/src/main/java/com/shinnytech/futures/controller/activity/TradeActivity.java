@@ -15,7 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityTradeBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.TradeEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
@@ -131,7 +131,7 @@ public class TradeActivity extends BaseActivity {
     @Override
     protected void initData() {
         mBinding = (ActivityTradeBinding) mViewDataBinding;
-        sContext = BaseApplicationLike.getContext();
+        sContext = BaseApplication.getContext();
         mBinding.rv.setLayoutManager(new LinearLayoutManager(this));
         mBinding.rv.addItemDecoration(
                 new DividerItemDecorationUtils(this, DividerItemDecorationUtils.VERTICAL_LIST));

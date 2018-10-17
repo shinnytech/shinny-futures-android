@@ -29,7 +29,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.FragmentQuoteBinding;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
@@ -151,8 +151,8 @@ public class QuoteFragment extends LazyLoadFragment {
                     mInsList.size() : (position + visibleItemCount1);
             int firstPosition1 = (lastPosition1 - position) != visibleItemCount1 ? (lastPosition1 - visibleItemCount1) : position;
             try {
-                if (mInsList.size() > LOAD_QUOTE_NUM && BaseApplicationLike.getWebSocketService() != null)
-                    BaseApplicationLike.getWebSocketService().sendSubscribeQuote(TextUtils.join(",",
+                if (mInsList.size() > LOAD_QUOTE_NUM && BaseApplication.getWebSocketService() != null)
+                    BaseApplication.getWebSocketService().sendSubscribeQuote(TextUtils.join(",",
                             mInsList.subList(firstPosition1, lastPosition1)));
             } catch (IndexOutOfBoundsException e) {
                 e.printStackTrace();
@@ -229,13 +229,13 @@ public class QuoteFragment extends LazyLoadFragment {
 
         mInsList = new ArrayList<>(mNewData.keySet());
 
-        if (BaseApplicationLike.getWebSocketService() != null) {
+        if (BaseApplication.getWebSocketService() != null) {
             try {
                 if (mInsList.size() <= LOAD_QUOTE_NUM)
-                    BaseApplicationLike.getWebSocketService().
+                    BaseApplication.getWebSocketService().
                             sendSubscribeQuote(TextUtils.join(",", mInsList));
                 else
-                    BaseApplicationLike.getWebSocketService().
+                    BaseApplication.getWebSocketService().
                             sendSubscribeQuote(TextUtils.join(",", mInsList.subList(0, LOAD_QUOTE_NUM)));
             } catch (IndexOutOfBoundsException e) {
                 e.printStackTrace();
@@ -333,8 +333,8 @@ public class QuoteFragment extends LazyLoadFragment {
                         int firstVisibleItemPosition = lm.findFirstVisibleItemPosition();
                         int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
                         try {
-                            if (mInsList.size() > LOAD_QUOTE_NUM && BaseApplicationLike.getWebSocketService() != null)
-                                BaseApplicationLike.getWebSocketService().sendSubscribeQuote(TextUtils.join(",",
+                            if (mInsList.size() > LOAD_QUOTE_NUM && BaseApplication.getWebSocketService() != null)
+                                BaseApplication.getWebSocketService().sendSubscribeQuote(TextUtils.join(",",
                                         mInsList.subList(firstVisibleItemPosition, lastVisibleItemPosition + 1)));
                         } catch (IndexOutOfBoundsException e) {
                             e.printStackTrace();
@@ -426,7 +426,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                         @Override
                                         public void run() {
                                             popWindow.dismiss();
-                                            ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已添加到自选列表");
+                                            ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
                                         }
                                     });
                                 } else {
@@ -439,7 +439,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                         @Override
                                         public void run() {
                                             popWindow.dismiss();
-                                            ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已被移除自选列表");
+                                            ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
                                         }
                                     });
                                 }
@@ -551,14 +551,14 @@ public class QuoteFragment extends LazyLoadFragment {
         if (OPTIONAL.equals(mToolbarTitle.getText().toString()) && mInsList.size() != LatestFileManager.getOptionalInsList().size())
             update();
         //三种情况:搜索页返回,合约详情页返回,搜索页点击进入合约详情页再返回
-        if (BaseApplicationLike.getWebSocketService() != null)
+        if (BaseApplication.getWebSocketService() != null)
             switch (requestCode) {
                 case JUMP_TO_FUTURE_INFO_ACTIVITY:
-                    BaseApplicationLike.getWebSocketService().sendSubscribeQuote(mIns);
+                    BaseApplication.getWebSocketService().sendSubscribeQuote(mIns);
                     break;
                 case JUMP_TO_SEARCH_ACTIVITY:
                     if (mIns != null && !mIns.equals(mDataManager.getRtnData().getIns_list()))
-                        BaseApplicationLike.getWebSocketService().sendSubscribeQuote(mIns);
+                        BaseApplication.getWebSocketService().sendSubscribeQuote(mIns);
                     break;
                 default:
                     break;

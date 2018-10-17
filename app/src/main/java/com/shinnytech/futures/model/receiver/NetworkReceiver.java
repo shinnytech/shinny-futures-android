@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.utils.NetworkUtils;
 
 /**
@@ -29,7 +29,7 @@ public class NetworkReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION) || action.equals(ACTION_BOOT)) {
-            if (!NetworkUtils.isNetworkConnected(BaseApplicationLike.getContext())) {
+            if (!NetworkUtils.isNetworkConnected(BaseApplication.getContext())) {
                 mNetworkStatus = 0;
             } else {
                 mNetworkStatus = 1;
@@ -37,7 +37,7 @@ public class NetworkReceiver extends BroadcastReceiver {
             Intent intent1 = new Intent();
             intent1.putExtra("networkStatus", mNetworkStatus);
             intent1.setAction(NETWORK_STATE);
-            BaseApplicationLike.getContext().sendBroadcast(intent1);
+            BaseApplication.getContext().sendBroadcast(intent1);
         }
     }
 }

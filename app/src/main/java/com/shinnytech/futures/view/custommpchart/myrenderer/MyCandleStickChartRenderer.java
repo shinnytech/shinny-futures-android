@@ -20,7 +20,7 @@ import com.github.mikephil.charting.utils.Transformer;
 import com.github.mikephil.charting.utils.Utils;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.view.custommpchart.mychart.CombinedChartKline;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyTransformer;
 
@@ -327,7 +327,7 @@ public class MyCandleStickChartRenderer extends CandleStickChartRenderer {
                         i,
                         xMax,
                         yMax,
-                        ContextCompat.getColor(BaseApplicationLike.getContext(), R.color.kline_red));
+                        ContextCompat.getColor(BaseApplication.getContext(), R.color.kline_red));
 
                 drawValue(c,
                         dataSet.getValueFormatter(),
@@ -336,7 +336,7 @@ public class MyCandleStickChartRenderer extends CandleStickChartRenderer {
                         i,
                         xMin,
                         yMin,
-                        ContextCompat.getColor(BaseApplicationLike.getContext(), R.color.kline_green));
+                        ContextCompat.getColor(BaseApplication.getContext(), R.color.kline_green));
 
             }
 

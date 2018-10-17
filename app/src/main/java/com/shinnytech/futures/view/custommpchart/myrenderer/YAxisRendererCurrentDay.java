@@ -12,7 +12,7 @@ import com.github.mikephil.charting.utils.Transformer;
 import com.github.mikephil.charting.utils.Utils;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyYAxis;
 
 import java.util.List;
@@ -106,23 +106,23 @@ public class YAxisRendererCurrentDay extends YAxisRenderer {
                     if (text.contains("-")) {
                         if (Float.parseFloat(text.replaceAll("[^\\d.]", "")) == 0) {
                             text = text.replace("-", "");
-                            mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplicationLike.getContext(), R.color.kline_text));
+                            mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplication.getContext(), R.color.kline_text));
                         } else {
-                            mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplicationLike.getContext(), R.color.text_green));
+                            mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplication.getContext(), R.color.text_green));
                         }
                     } else {
                         if (Float.parseFloat(text.replaceAll("[^\\d.]", "")) > 0) {
                             text = "+" + text;
-                            mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplicationLike.getContext(), R.color.text_red));
+                            mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplication.getContext(), R.color.text_red));
                         }
                     }
                 } else {
                     if (Float.parseFloat(text.replaceAll("[^\\d.]", "")) > mYAxis.getBaseValue()) {
-                        mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplicationLike.getContext(), R.color.text_red));
+                        mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplication.getContext(), R.color.text_red));
                     } else if (Float.parseFloat(text.replaceAll("[^\\d.]", "")) < mYAxis.getBaseValue()) {
-                        mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplicationLike.getContext(), R.color.text_green));
+                        mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplication.getContext(), R.color.text_green));
                     } else {
-                        mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplicationLike.getContext(), R.color.kline_text));
+                        mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplication.getContext(), R.color.kline_text));
                     }
                 }
             } catch (NumberFormatException ex) {

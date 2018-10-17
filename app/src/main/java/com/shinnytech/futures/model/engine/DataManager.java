@@ -4,7 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.google.gson.Gson;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.BankEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.BrokerEntity;
@@ -19,7 +19,6 @@ import com.shinnytech.futures.model.bean.futureinfobean.DiffEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.FutureBean;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.json.JSONArray;
@@ -39,7 +38,6 @@ import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_BROKER_IN
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_SETTLEMENT;
 import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_TRADE;
-import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_URL;
 import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST;
 import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_TRANSACTION;
 
@@ -151,8 +149,8 @@ public class DataManager {
                     }
                 }
             }
-            if (BaseApplicationLike.getWebSocketService() != null)
-                BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE, BROADCAST);
+            if (BaseApplication.getWebSocketService() != null)
+                BaseApplication.getWebSocketService().sendMessage(MESSAGE, BROADCAST);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -350,8 +348,8 @@ public class DataManager {
             case "rtn_brokers":
                 BrokerEntity brokerInfo = new Gson().fromJson(msg, BrokerEntity.class);
                 BROKER.setBrokers(brokerInfo.getBrokers());
-                if (BaseApplicationLike.getWebSocketService() != null)
-                    BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_BROKER_INFO, BROADCAST_TRANSACTION);
+                if (BaseApplication.getWebSocketService() != null)
+                    BaseApplication.getWebSocketService().sendMessage(MESSAGE_BROKER_INFO, BROADCAST_TRANSACTION);
                 break;
             case "rtn_data":
                 parseTradeData(tradeBeanObject);
@@ -380,13 +378,13 @@ public class DataManager {
                                 String type = notify.optString("type");
                                 if ("SETTLEMENT".equals(type)){
                                     BROKER.setSettlement(content);
-                                    if (BaseApplicationLike.getWebSocketService() != null)
-                                        BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_SETTLEMENT, BROADCAST_TRANSACTION);
+                                    if (BaseApplication.getWebSocketService() != null)
+                                        BaseApplication.getWebSocketService().sendMessage(MESSAGE_SETTLEMENT, BROADCAST_TRANSACTION);
                                 }else {
                                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), content);
+                                            ToastNotificationUtils.showToast(BaseApplication.getContext(), content);
                                         }
                                     });
                                 }
@@ -426,16 +424,16 @@ public class DataManager {
                                             String userId = user.getJSONObject("session").optString("user_id");
                                             USER_ID = userId;
                                             userEntity.setUser_id(userId);
-                                            if (BaseApplicationLike.getWebSocketService() != null && !IS_LOGIN )
-                                                BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_LOGIN, BROADCAST_TRANSACTION);
+                                            if (BaseApplication.getWebSocketService() != null && !IS_LOGIN )
+                                                BaseApplication.getWebSocketService().sendMessage(MESSAGE_LOGIN, BROADCAST_TRANSACTION);
                                             break;
                                         default:
                                             break;
                                     }
                                 }
                                 userEntities.put(userKey, userEntity);
-                                if (BaseApplicationLike.getWebSocketService() != null)
-                                    BaseApplicationLike.getWebSocketService().sendMessage(MESSAGE_TRADE, BROADCAST_TRANSACTION);
+                                if (BaseApplication.getWebSocketService() != null)
+                                    BaseApplication.getWebSocketService().sendMessage(MESSAGE_TRADE, BROADCAST_TRANSACTION);
                             }
                             break;
                         default:

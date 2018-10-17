@@ -19,7 +19,7 @@ import android.widget.ArrayAdapter;
 
 import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityLoginBinding;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.utils.AndroidBug5497Workaround;
@@ -93,7 +93,11 @@ public class LoginActivity extends BaseActivity {
                     }
                 }
             }
-        } else brokerList.add(" ");
+        } else {
+            if (BaseApplication.getWebSocketService() != null) {
+                BaseApplication.getWebSocketService().disConnectTransaction();
+            }
+        }
         return brokerList;
     }
 
@@ -107,7 +111,7 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     protected void initData() {
-        sContext = BaseApplicationLike.getContext();
+        sContext = BaseApplication.getContext();
         sDataManager = DataManager.getInstance();
         mHandler = new MyHandler(this);
         mBinding = (ActivityLoginBinding) mViewDataBinding;
@@ -275,8 +279,8 @@ public class LoginActivity extends BaseActivity {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user fragment_home attempt.
-            if (BaseApplicationLike.getWebSocketService() != null)
-                BaseApplicationLike.getWebSocketService().sendReqLogin(mBrokerId, mPhoneNumber, mPassword);
+            if (BaseApplication.getWebSocketService() != null)
+                BaseApplication.getWebSocketService().sendReqLogin(mBrokerId, mPhoneNumber, mPassword);
 
             //关闭键盘
             View view = getWindow().getCurrentFocus();

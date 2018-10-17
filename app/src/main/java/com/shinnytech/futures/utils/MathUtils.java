@@ -102,7 +102,7 @@ public class MathUtils {
 
     public static String divide(String v1, String v2, int scale) {
         try {
-            return divide(v1, v2, DEFAULT_DIV_SCALE, BigDecimal.ROUND_HALF_EVEN);
+            return divide(v1, v2, scale, BigDecimal.ROUND_HALF_EVEN);
         } catch (Exception e) {
             return v1;
         }

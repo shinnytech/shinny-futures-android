@@ -9,7 +9,7 @@ import android.view.MenuItem;
 import android.widget.RadioGroup;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
@@ -53,7 +53,7 @@ public class FutureInfoActivity extends BaseActivity {
     @Override
     protected void initData() {
         mBinding = (ActivityFutureInfoBinding) mViewDataBinding;
-        sContext = BaseApplicationLike.getContext();
+        sContext = BaseApplication.getContext();
         mFutureInfoActivityPresenter = new FutureInfoActivityPresenter(this, sContext, mBinding, mToolbar, mToolbarTitle);
         mInstrumentId = mFutureInfoActivityPresenter.getInstrumentId();
     }
@@ -67,8 +67,8 @@ public class FutureInfoActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         mFutureInfoActivityPresenter.checkLoginState();
-        if (BaseApplicationLike.getWebSocketService() != null)
-            BaseApplicationLike.getWebSocketService().sendSubscribeQuote(mInstrumentId);
+        if (BaseApplication.getWebSocketService() != null)
+            BaseApplication.getWebSocketService().sendSubscribeQuote(mInstrumentId);
         mFutureInfoActivityPresenter.updateToolbarFromNetwork();
         mFutureInfoActivityPresenter.registerBroaderCast();
     }
@@ -119,7 +119,7 @@ public class FutureInfoActivity extends BaseActivity {
                 if (insList.containsKey(mInstrumentId)) {
                     insList.remove(mInstrumentId);
                     LatestFileManager.saveInsListToFile(insList.keySet());
-                    ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已被移除自选列表");
+                    ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
                     mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
                     mFutureInfoActivityPresenter.refreshOptionalQuotesPopup(new ArrayList<>(insList.keySet()));
                 } else {
@@ -127,7 +127,7 @@ public class FutureInfoActivity extends BaseActivity {
                     quoteEntity.setInstrument_id(mInstrumentId);
                     insList.put(mInstrumentId, quoteEntity);
                     LatestFileManager.saveInsListToFile(insList.keySet());
-                    ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已添加到自选列表");
+                    ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
                     mMenuItem.setIcon(R.mipmap.ic_favorite_white_24dp);
                     mFutureInfoActivityPresenter.refreshOptionalQuotesPopup(new ArrayList<>(insList.keySet()));
                 }
@@ -192,8 +192,8 @@ public class FutureInfoActivity extends BaseActivity {
         String instrument_id_new = data.getInstrument_id();
         if (!mInstrumentId.equals(instrument_id_new)) {
             mInstrumentId = instrument_id_new;
-            if (BaseApplicationLike.getWebSocketService() != null)
-                BaseApplicationLike.getWebSocketService().sendSubscribeQuote(mInstrumentId);
+            if (BaseApplication.getWebSocketService() != null)
+                BaseApplication.getWebSocketService().sendSubscribeQuote(mInstrumentId);
             SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
             if (searchEntity != null) mToolbarTitle.setText(searchEntity.getInstrumentName());
             else mToolbarTitle.setText(mInstrumentId);

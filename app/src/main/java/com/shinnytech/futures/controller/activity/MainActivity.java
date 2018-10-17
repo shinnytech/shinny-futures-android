@@ -7,7 +7,7 @@ import android.support.v4.view.GravityCompat;
 import android.view.KeyEvent;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
 import com.shinnytech.futures.controller.MainActivityPresenter;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
@@ -48,7 +48,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void initData() {
         mBinding = (ActivityMainDrawerBinding) mViewDataBinding;
-        sContext = BaseApplicationLike.getContext();
+        sContext = BaseApplication.getContext();
         mMainActivityPresenter = new MainActivityPresenter(this, sContext, mBinding, mToolbar, mToolbarTitle);
         //检查是否第一次启动APP,弹出免责条款
         mMainActivityPresenter.checkResponsibility();
@@ -98,7 +98,7 @@ public class MainActivity extends BaseActivity {
         } else {
             if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
                 if ((System.currentTimeMillis() - mExitTime) > 2000) {
-                    ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), getString(R.string.main_activity_exit));
+                    ToastNotificationUtils.showToast(BaseApplication.getContext(), getString(R.string.main_activity_exit));
                     mExitTime = System.currentTimeMillis();
                 } else {
                     this.finish();
@@ -118,8 +118,8 @@ public class MainActivity extends BaseActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         //很重要,决定了quoteFragment中的方法能不能被调用
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == JUMP_TO_FUTURE_INFO_ACTIVITY && BaseApplicationLike.getWebSocketService() != null)
-            BaseApplicationLike.getWebSocketService().sendSubscribeQuote(mMainActivityPresenter.getPreSubscribedQuotes());
+        if (requestCode == JUMP_TO_FUTURE_INFO_ACTIVITY && BaseApplication.getWebSocketService() != null)
+            BaseApplication.getWebSocketService().sendSubscribeQuote(mMainActivityPresenter.getPreSubscribedQuotes());
     }
 
 }

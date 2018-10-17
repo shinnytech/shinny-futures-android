@@ -17,7 +17,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityBankTransferBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.BankEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.TransferEntity;
@@ -124,7 +124,7 @@ public class BankTransferActivity extends BaseActivity {
     @Override
     protected void initData() {
         mBinding = (ActivityBankTransferBinding) mViewDataBinding;
-        sContext = BaseApplicationLike.getContext();
+        sContext = BaseApplication.getContext();
         sDataManager = DataManager.getInstance();
         mIsUpdate = true;
         mOldData = new ArrayList<>();
@@ -163,7 +163,7 @@ public class BankTransferActivity extends BaseActivity {
                 String currency = (String) mBinding.spinnerCurrency.getSelectedItem();
                 try {
                     float amountF = -abs(Float.parseFloat(amount));
-                    BaseApplicationLike.getWebSocketService().sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
+                    BaseApplication.getWebSocketService().sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
                 } catch (Exception e) {
                     ToastNotificationUtils.showToast(sContext, "输入金额错误！");
                 }
@@ -182,7 +182,7 @@ public class BankTransferActivity extends BaseActivity {
                 String currency = (String) mBinding.spinnerCurrency.getSelectedItem();
                 try {
                     float amountF = abs(Float.parseFloat(amount)) ;
-                    BaseApplicationLike.getWebSocketService().sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
+                    BaseApplication.getWebSocketService().sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
                 } catch (Exception e) {
                     ToastNotificationUtils.showToast(sContext, "输入金额错误！");
                 }

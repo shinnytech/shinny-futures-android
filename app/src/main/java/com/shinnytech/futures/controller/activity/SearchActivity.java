@@ -19,7 +19,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivitySearchBinding;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
@@ -57,7 +57,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     }
 
     private void initData() {
-        sContext = BaseApplicationLike.getContext();
+        sContext = BaseApplication.getContext();
         mBinding.toolbarSearch.setTitle("");
         setSupportActionBar(mBinding.toolbarSearch);
         ActionBar actionBar = getSupportActionBar();
@@ -98,14 +98,14 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
                 if (insList.containsKey(instrument_id)) {
                     insList.remove(instrument_id);
                     LatestFileManager.saveInsListToFile(insList.keySet());
-                    ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已被移除自选列表");
+                    ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
                     ((ImageView) view).setImageResource(R.mipmap.ic_favorite_border_white_24dp);
                 } else {
                     QuoteEntity quoteEntity = new QuoteEntity();
                     quoteEntity.setInstrument_id(instrument_id);
                     insList.put(instrument_id, quoteEntity);
                     LatestFileManager.saveInsListToFile(insList.keySet());
-                    ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "该合约已添加到自选列表");
+                    ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
                     ((ImageView) view).setImageResource(R.mipmap.ic_favorite_white_24dp);
                 }
             }

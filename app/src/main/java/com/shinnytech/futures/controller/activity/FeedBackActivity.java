@@ -29,7 +29,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ActivityFeedBackBinding;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
@@ -95,7 +95,7 @@ public class FeedBackActivity extends BaseActivity {
     @Override
     protected void initData() {
         mBinding = (ActivityFeedBackBinding) mViewDataBinding;
-        sContext = BaseApplicationLike.getContext();
+        sContext = BaseApplication.getContext();
         WebSettings settings = mBinding.webView.getSettings();
         settings.setDomStorageEnabled(true);
         settings.setJavaScriptEnabled(true);  //设置WebView属性,运行执行js脚本
@@ -183,7 +183,7 @@ public class FeedBackActivity extends BaseActivity {
         DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         //将下载任务加入下载队列，否则不会进行下载
         if (downloadManager != null) downloadManager.enqueue(request);
-        ToastNotificationUtils.showToast(BaseApplicationLike.getContext(),
+        ToastNotificationUtils.showToast(BaseApplication.getContext(),
                 "下载完成:" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                         .getAbsolutePath() + File.separator + URLUtil.guessFileName(url, contentDisposition, mimetype));
     }
@@ -316,7 +316,7 @@ public class FeedBackActivity extends BaseActivity {
             mBinding.webView.goBack();
         } else {
             if ((System.currentTimeMillis() - mExitTime) > 2000) {
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), getString(R.string.main_activity_exit));
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), getString(R.string.main_activity_exit));
                 mExitTime = System.currentTimeMillis();
             } else {
                 super.onBackPressed();

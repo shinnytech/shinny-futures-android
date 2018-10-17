@@ -29,7 +29,7 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
@@ -445,8 +445,8 @@ public class CurrentDayFragment extends BaseChartFragment {
         mChart.clear();
         mSumVolume = 0.0f;
         mSumCV = 0.0f;
-        if (BaseApplicationLike.getWebSocketService() != null)
-            BaseApplicationLike.getWebSocketService().sendSetChart(instrument_id);
+        if (BaseApplication.getWebSocketService() != null)
+            BaseApplication.getWebSocketService().sendSetChart(instrument_id);
 
         if (sDataManager.IS_LOGIN) {
             if (mIsPosition) addPositionLimitLines();

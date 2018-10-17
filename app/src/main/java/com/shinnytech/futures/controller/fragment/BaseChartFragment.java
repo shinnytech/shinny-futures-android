@@ -18,7 +18,7 @@ import android.view.ViewGroup;
 import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.components.LimitLine;
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
@@ -27,6 +27,7 @@ import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
+import com.shinnytech.futures.utils.LogUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -182,14 +183,6 @@ public class BaseChartFragment extends LazyLoadFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mIsAverage = ((FutureInfoActivity) getActivity()).isAverage();
-        if (!mIsAverage) mChart.getLegend().setEnabled(false);
-        mIsPosition = ((FutureInfoActivity) getActivity()).isPosition();
-        mIsPending = ((FutureInfoActivity) getActivity()).isPending();
-        if (sDataManager.IS_LOGIN) {
-            if (mIsPosition) addPositionLimitLines();
-            if (mIsPending) addOrderLimitLines();
-        }
 
         instrument_id = ((FutureInfoActivity) getActivity()).getInstrument_id();
         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
@@ -198,6 +191,14 @@ public class BaseChartFragment extends LazyLoadFragment {
         else instrument_id_transaction = instrument_id;
         exchange_id = instrument_id_transaction.split("\\.")[0];
 
+        mIsAverage = ((FutureInfoActivity) getActivity()).isAverage();
+        if (!mIsAverage) mChart.getLegend().setEnabled(false);
+        mIsPosition = ((FutureInfoActivity) getActivity()).isPosition();
+        mIsPending = ((FutureInfoActivity) getActivity()).isPending();
+        if (sDataManager.IS_LOGIN) {
+            if (mIsPosition) addPositionLimitLines();
+            if (mIsPending) addOrderLimitLines();
+        }
     }
 
     protected void initData() {
@@ -313,12 +314,13 @@ public class BaseChartFragment extends LazyLoadFragment {
             UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
             PositionEntity positionEntity = userEntity.getPositions().get(key);
+
             if (positionEntity == null) return;
             int volume_long = Integer.parseInt(positionEntity.getVolume_long());
             if (volume_long != 0) {
-                float limit_long = Float.parseFloat(positionEntity.getOpen_price_long());
+                String limit_long = LatestFileManager.saveScaleByPtick(positionEntity.getOpen_price_long(), key);
                 String label_long = positionEntity.getInstrument_id() + " " + limit_long;
-                generateLimitLine(limit_long, label_long, mColorBuy, key + "0");
+                generateLimitLine(Float.valueOf(limit_long), label_long, mColorBuy, key + "0");
             }
         } catch (NumberFormatException ex) {
             ex.printStackTrace();
@@ -340,9 +342,9 @@ public class BaseChartFragment extends LazyLoadFragment {
 
             int volume_short = Integer.parseInt(positionEntity.getVolume_short());
             if (volume_short != 0) {
-                float limit_short = Float.parseFloat(positionEntity.getOpen_price_short());
+                String limit_short = LatestFileManager.saveScaleByPtick(positionEntity.getOpen_price_short(), key);
                 String label_short = positionEntity.getInstrument_id() + " " + limit_short;
-                generateLimitLine(limit_short, label_short, mColorSell, key + "1");
+                generateLimitLine(Float.valueOf(limit_short), label_short, mColorSell, key + "1");
             }
         } catch (NumberFormatException ex) {
             ex.printStackTrace();
@@ -382,10 +384,11 @@ public class BaseChartFragment extends LazyLoadFragment {
 
             int volume_long = Integer.parseInt(positionEntity.getVolume_long());
             if (volume_long != 0) {
-                float limit_long = Float.parseFloat(positionEntity.getOpen_price_long());
+                String limit_long_S = LatestFileManager.saveScaleByPtick(positionEntity.getOpen_price_long(), key);
+                float limit_long = Float.parseFloat(limit_long_S);
                 LimitLine limitLine = mPositionLimitLines.get(limitKey);
                 if (limitLine.getLimit() != limit_long) {
-                    String label_long = positionEntity.getInstrument_id() + " " + limit_long;
+                    String label_long = positionEntity.getInstrument_id() + " " + limit_long_S;
                     mChart.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
                     mPositionLimitLines.remove(limitKey);
                     generateLimitLine(limit_long, label_long, mColorBuy, limitKey);
@@ -416,10 +419,11 @@ public class BaseChartFragment extends LazyLoadFragment {
 
             int volume_short = Integer.parseInt(positionEntity.getVolume_short());
             if (volume_short != 0) {
-                float limit_short = Float.parseFloat(positionEntity.getOpen_price_short());
+                String limit_short_S = LatestFileManager.saveScaleByPtick(positionEntity.getOpen_price_short(), key);
+                float limit_short = Float.parseFloat(limit_short_S);
                 LimitLine limitLine = mPositionLimitLines.get(limitKey);
                 if (limitLine.getLimit() != limit_short) {
-                    String label_short = positionEntity.getInstrument_id() + " " + limit_short;
+                    String label_short = positionEntity.getInstrument_id() + " " + limit_short_S;
                     mChart.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
                     mPositionLimitLines.remove(limitKey);
                     generateLimitLine(limit_short, label_short, mColorSell, limitKey);
@@ -455,8 +459,9 @@ public class BaseChartFragment extends LazyLoadFragment {
      */
     private void addOneOrderLimitLine(OrderEntity orderEntity) {
         try {
-            LimitLine limitLine = new LimitLine(Float.parseFloat(orderEntity.getLimit_price()),
-                    orderEntity.getOrder_id() + "@" + orderEntity.getLimit_price());
+            String limit_price = LatestFileManager.saveScaleByPtick(orderEntity.getLimit_price(), instrument_id_transaction);
+            LimitLine limitLine = new LimitLine(Float.parseFloat(limit_price),
+                    orderEntity.getOrder_id() + "@" + limit_price);
             mOrderLimitLines.put(orderEntity.getKey(), limitLine);
             limitLine.setLineWidth(2f);
             limitLine.enableDashedLine(10f, 10f, 0f);
@@ -549,19 +554,19 @@ public class BaseChartFragment extends LazyLoadFragment {
     public void onResume() {
         super.onResume();
         registerBroaderCast();
-        if (BaseApplicationLike.getWebSocketService() != null)
+        if (BaseApplication.getWebSocketService() != null)
             switch (mKlineType) {
                 case CURRENT_DAY:
-                    BaseApplicationLike.getWebSocketService().sendSetChart(instrument_id);
+                    BaseApplication.getWebSocketService().sendSetChart(instrument_id);
                     break;
                 case KLINE_DAY:
-                    BaseApplicationLike.getWebSocketService().sendSetChartDay(instrument_id, VIEW_WIDTH);
+                    BaseApplication.getWebSocketService().sendSetChartDay(instrument_id, VIEW_WIDTH);
                     break;
                 case KLINE_HOUR:
-                    BaseApplicationLike.getWebSocketService().sendSetChartHour(instrument_id, VIEW_WIDTH);
+                    BaseApplication.getWebSocketService().sendSetChartHour(instrument_id, VIEW_WIDTH);
                     break;
                 case KLINE_MINUTE:
-                    BaseApplicationLike.getWebSocketService().sendSetChartMin(instrument_id, VIEW_WIDTH);
+                    BaseApplication.getWebSocketService().sendSetChartMin(instrument_id, VIEW_WIDTH);
                     break;
                 default:
                     break;
@@ -584,19 +589,19 @@ public class BaseChartFragment extends LazyLoadFragment {
     public void onDestroyView() {
         super.onDestroyView();
         EventBus.getDefault().unregister(this);
-        if (BaseApplicationLike.getWebSocketService() != null)
+        if (BaseApplication.getWebSocketService() != null)
             switch (mKlineType) {
                 case CURRENT_DAY:
-                    BaseApplicationLike.getWebSocketService().sendSetChart("");
+                    BaseApplication.getWebSocketService().sendSetChart("");
                     break;
                 case KLINE_DAY:
-                    BaseApplicationLike.getWebSocketService().sendSetChartDay("", VIEW_WIDTH);
+                    BaseApplication.getWebSocketService().sendSetChartDay("", VIEW_WIDTH);
                     break;
                 case KLINE_HOUR:
-                    BaseApplicationLike.getWebSocketService().sendSetChartHour("", VIEW_WIDTH);
+                    BaseApplication.getWebSocketService().sendSetChartHour("", VIEW_WIDTH);
                     break;
                 case KLINE_MINUTE:
-                    BaseApplicationLike.getWebSocketService().sendSetChartMin("", VIEW_WIDTH);
+                    BaseApplication.getWebSocketService().sendSetChartMin("", VIEW_WIDTH);
                     break;
                 default:
                     break;

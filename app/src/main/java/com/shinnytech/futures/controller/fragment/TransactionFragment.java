@@ -23,7 +23,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplicationLike;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.FragmentTransactionBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
@@ -34,15 +34,12 @@ import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.KeyboardUtils;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-
-import java.util.Calendar;
 
 import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
 import static com.shinnytech.futures.constants.CommonConstants.ERROR;
@@ -117,7 +114,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 mKeyboardUtilsPrice = new KeyboardUtils(getActivity(),
-                        R.xml.future_price, mInstrumentIdTransaction);
+                        R.xml.future_price, mInstrumentId);
                 mKeyboardUtilsPrice.attachTo(mBinding.price);
                 if (!mKeyboardUtilsPrice.isVisible()) {
                     mKeyboardUtilsPrice.showKeyboard();
@@ -132,7 +129,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 mKeyboardUtilsVolume = new KeyboardUtils(getActivity(),
-                        R.xml.future_volume, mInstrumentIdTransaction);
+                        R.xml.future_volume, mInstrumentId);
                 mKeyboardUtilsVolume.attachTo(mBinding.volume);
                 if (!mKeyboardUtilsVolume.isVisible()) {
                     mKeyboardUtilsVolume.showKeyboard();
@@ -158,42 +155,57 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             public void afterTextChanged(Editable s) {
                 QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
                 if (quoteEntity != null) {
+
                     switch (mBinding.price.getText().toString()) {
                         case "排队价":
+                            String ask_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(),
+                                    quoteEntity.getInstrument_id());
+                            String bid_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(),
+                                    quoteEntity.getInstrument_id());
                             mPriceType = "排队价";
-                            mBinding.bidPrice11.setText(quoteEntity.getBid_price1());
-                            mBinding.askPrice11.setText(quoteEntity.getAsk_price1());
+                            mBinding.bidPrice11.setText(bid_price1);
+                            mBinding.askPrice11.setText(ask_price1);
                             if (mIsClosePriceShow) {
                                 if ("多".equals(mDirection))
-                                    mBinding.closePrice.setText(quoteEntity.getAsk_price1());
+                                    mBinding.closePrice.setText(ask_price1);
                                 else if ("空".equals(mDirection))
-                                    mBinding.closePrice.setText(quoteEntity.getBid_price1());
+                                    mBinding.closePrice.setText(bid_price1);
                             }
                             break;
                         case "对手价":
+                            String ask_price1_1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(),
+                                    quoteEntity.getInstrument_id());
+                            String bid_price1_1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(),
+                                    quoteEntity.getInstrument_id());
                             mPriceType = "对手价";
-                            mBinding.bidPrice11.setText(quoteEntity.getAsk_price1());
-                            mBinding.askPrice11.setText(quoteEntity.getBid_price1());
+                            mBinding.bidPrice11.setText(ask_price1_1);
+                            mBinding.askPrice11.setText(bid_price1_1);
                             if (mIsClosePriceShow) {
                                 if ("多".equals(mDirection))
-                                    mBinding.closePrice.setText(quoteEntity.getBid_price1());
+                                    mBinding.closePrice.setText(bid_price1_1);
                                 else if ("空".equals(mDirection))
-                                    mBinding.closePrice.setText(quoteEntity.getAsk_price1());
+                                    mBinding.closePrice.setText(ask_price1_1);
                             }
                             break;
                         case "市价":
+                            String lower_limit = LatestFileManager.saveScaleByPtick(quoteEntity.getLower_limit(),
+                                    quoteEntity.getInstrument_id());
+                            String upper_limit = LatestFileManager.saveScaleByPtick(quoteEntity.getUpper_limit(),
+                                    quoteEntity.getInstrument_id());
                             mPriceType = "市价";
-                            mBinding.bidPrice11.setText(quoteEntity.getUpper_limit());
-                            mBinding.askPrice11.setText(quoteEntity.getLower_limit());
+                            mBinding.bidPrice11.setText(upper_limit);
+                            mBinding.askPrice11.setText(lower_limit);
                             if (mIsClosePriceShow)
-                                mBinding.closePrice.setText(quoteEntity.getUpper_limit());
+                                mBinding.closePrice.setText(upper_limit);
                             break;
                         case "最新价":
+                            String last_price = LatestFileManager.saveScaleByPtick(quoteEntity.getLast_price(),
+                                    quoteEntity.getInstrument_id());
                             mPriceType = "最新价";
-                            mBinding.bidPrice11.setText(quoteEntity.getLast_price());
-                            mBinding.askPrice11.setText(quoteEntity.getLast_price());
+                            mBinding.bidPrice11.setText(last_price);
+                            mBinding.askPrice11.setText(last_price);
                             if (mIsClosePriceShow)
-                                mBinding.closePrice.setText(quoteEntity.getLast_price());
+                                mBinding.closePrice.setText(last_price);
                             break;
                         default:
                             mPriceType = "用户设置价";
@@ -233,7 +245,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     public void update() {
         refreshPrice();
         refreshAccount();
-        initPosition();
+        refreshPosition();
     }
 
     /**
@@ -241,7 +253,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      * author: chenli
      * description: 初始化持仓信息，据此设置下单版的显示状态
      */
-    private void initPosition() {
+    private void refreshPosition() {
         try {
             mBinding.minPrice.setText(LatestFileManager.getSearchEntities().get(mInstrumentIdTransaction).getpTick());
             mBinding.price.setText("最新价");
@@ -298,6 +310,55 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         }
     }
 
+    private void updatePosition(){
+        try {
+            String key = mInstrumentIdTransaction;
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            if (userEntity == null) return;
+            PositionEntity positionEntity = userEntity.getPositions().get(key);
+            if (positionEntity == null) {
+                this.mDirection = "";
+                mIsClosePriceShow = false;
+                mBinding.bidPrice1Direction.setText("买多");
+                mBinding.askPrice1Direction.setText("卖空");
+                mBinding.closePrice.setText("先开先平");
+            } else {
+                String volume_available_long = MathUtils.add(positionEntity.getVolume_long_his(), positionEntity.getVolume_long_today());
+                int volume_long = Integer.parseInt(MathUtils.add(volume_available_long, positionEntity.getVolume_long_frozen_his()));
+                String volume_available_short = MathUtils.add(positionEntity.getVolume_short_his(), positionEntity.getVolume_short_today());
+                int volume_short = Integer.parseInt(MathUtils.add(volume_available_short, positionEntity.getVolume_short_frozen_his()));
+                if (volume_long != 0 && volume_short == 0) {
+                    this.mDirection = "多";
+                    mIsClosePriceShow = true;
+                    mBinding.bidPrice1Direction.setText("加多");
+                    mBinding.askPrice1Direction.setText("锁仓");
+                    mBinding.closePrice.setText(mBinding.bidPrice11.getText().toString());
+                } else if (volume_long == 0 && volume_short != 0) {
+                    this.mDirection = "空";
+                    mIsClosePriceShow = true;
+                    mBinding.bidPrice1Direction.setText("锁仓");
+                    mBinding.askPrice1Direction.setText("加空");
+                    mBinding.closePrice.setText(mBinding.bidPrice11.getText().toString());
+                } else if (volume_long != 0 && volume_short != 0) {
+                    this.mDirection = "双向";
+                    mIsClosePriceShow = false;
+                    mBinding.bidPrice1Direction.setText("买多");
+                    mBinding.askPrice1Direction.setText("卖空");
+                    mBinding.closePrice.setText("锁仓状态");
+                } else {
+                    this.mDirection = "";
+                    mIsClosePriceShow = false;
+                    mBinding.bidPrice1Direction.setText("买多");
+                    mBinding.askPrice1Direction.setText("卖空");
+                    mBinding.closePrice.setText("先开先平");
+                }
+            }
+            mBinding.closeDirection.setText("平仓");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * date: 7/9/17
      * author: chenli
@@ -307,39 +368,52 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
         if (quoteEntity != null) {
             mBinding.setQuote(quoteEntity);
-
             //控制下单板的显示模式
             switch (mPriceType) {
                 case "排队价":
-                    mBinding.bidPrice11.setText(quoteEntity.getBid_price1());
-                    mBinding.askPrice11.setText(quoteEntity.getAsk_price1());
+                    String ask_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(),
+                            quoteEntity.getInstrument_id());
+                    String bid_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(),
+                            quoteEntity.getInstrument_id());
+                    mBinding.bidPrice11.setText(bid_price1);
+                    mBinding.askPrice11.setText(ask_price1);
                     if (mIsClosePriceShow) {
                         if ("多".equals(mDirection))
-                            mBinding.closePrice.setText(quoteEntity.getAsk_price1());
+                            mBinding.closePrice.setText(ask_price1);
                         else if ("空".equals(mDirection))
-                            mBinding.closePrice.setText(quoteEntity.getBid_price1());
+                            mBinding.closePrice.setText(bid_price1);
                     }
                     break;
                 case "对手价":
-                    mBinding.bidPrice11.setText(quoteEntity.getAsk_price1());
-                    mBinding.askPrice11.setText(quoteEntity.getBid_price1());
+                    String ask_price1_1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(),
+                            quoteEntity.getInstrument_id());
+                    String bid_price1_1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(),
+                            quoteEntity.getInstrument_id());
+                    mBinding.bidPrice11.setText(ask_price1_1);
+                    mBinding.askPrice11.setText(bid_price1_1);
                     if (mIsClosePriceShow) {
                         if ("多".equals(mDirection))
-                            mBinding.closePrice.setText(quoteEntity.getBid_price1());
+                            mBinding.closePrice.setText(bid_price1_1);
                         else if ("空".equals(mDirection))
-                            mBinding.closePrice.setText(quoteEntity.getAsk_price1());
+                            mBinding.closePrice.setText(ask_price1_1);
                     }
                     break;
                 case "市价":
-                    mBinding.bidPrice11.setText(quoteEntity.getUpper_limit());
-                    mBinding.askPrice11.setText(quoteEntity.getLower_limit());
+                    String lower_limit = LatestFileManager.saveScaleByPtick(quoteEntity.getLower_limit(),
+                            quoteEntity.getInstrument_id());
+                    String upper_limit = LatestFileManager.saveScaleByPtick(quoteEntity.getUpper_limit(),
+                            quoteEntity.getInstrument_id());
+                    mBinding.bidPrice11.setText(upper_limit);
+                    mBinding.askPrice11.setText(lower_limit);
                     if (mIsClosePriceShow)
-                        mBinding.closePrice.setText(quoteEntity.getUpper_limit());
+                        mBinding.closePrice.setText(upper_limit);
                     break;
                 case "最新价":
-                    mBinding.bidPrice11.setText(quoteEntity.getLast_price());
-                    mBinding.askPrice11.setText(quoteEntity.getLast_price());
-                    if (mIsClosePriceShow) mBinding.closePrice.setText(quoteEntity.getLast_price());
+                    String last_price = LatestFileManager.saveScaleByPtick(quoteEntity.getLast_price(),
+                            quoteEntity.getInstrument_id());
+                    mBinding.bidPrice11.setText(last_price);
+                    mBinding.askPrice11.setText(last_price);
+                    if (mIsClosePriceShow) mBinding.closePrice.setText(last_price);
                     break;
                 default:
                     break;
@@ -452,24 +526,18 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             String price = mBinding.bidPrice11.getText().toString();
             String volume = mBinding.volume.getText().toString();
             if (price.length() == 0)
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "价格不能为空");
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), "价格不能为空");
             if (".".equals(price))
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "价格输入不合法");
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), "价格输入不合法");
             if (volume.length() == 0)
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数不能为空");
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数不能为空");
             if (volume.length() > 10)
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数太大");
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数太大");
             if ("0".equals(volume))
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数不能为零");
-            if (price.length() != 0 && !".".equals(price) && volume.length() != 0 && volume.length() <= 10 && !"0".equals(volume)) {
-                try {
-                    int volumeN = Integer.parseInt(volume);
-                    double priceN = Double.parseDouble(price);
-                    initDialog(mExchangeId, mInstrumentIdTransaction.split("\\.")[1], "买开", "BUY", "OPEN", volumeN, "LIMIT", priceN);
-                } catch (NumberFormatException ex) {
-                    ex.printStackTrace();
-                }
-            }
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数不能为零");
+            if (price.length() != 0 && !".".equals(price) && volume.length() != 0 && volume.length() <= 10 && !"0".equals(volume))
+                initDialog(mExchangeId, mInstrumentIdTransaction.split("\\.")[1], "买开", "BUY", "OPEN", volume, "LIMIT", price);
+
         }
     }
 
@@ -483,23 +551,18 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             String price = mBinding.askPrice11.getText().toString();
             String volume = mBinding.volume.getText().toString();
             if (price.length() == 0)
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "价格不能为空");
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), "价格不能为空");
             if (".".equals(price))
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "价格输入不合法");
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), "价格输入不合法");
             if (volume.length() == 0)
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数不能为空");
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数不能为空");
             if (volume.length() > 10)
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数太大");
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数太大");
             if ("0".equals(volume))
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数不能为零");
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数不能为零");
             if (price.length() != 0 && !".".equals(price) && volume.length() != 0 && volume.length() <= 10 && !"0".equals(volume)) {
-                try {
-                    int volumeN = Integer.parseInt(volume);
-                    double priceN = Double.parseDouble(price);
-                    initDialog(mExchangeId, mInstrumentIdTransaction.split("\\.")[1], "卖开", "SELL", "OPEN", volumeN, "LIMIT", priceN);
-                } catch (NumberFormatException ex) {
-                    ex.printStackTrace();
-                }
+                initDialog(mExchangeId, mInstrumentIdTransaction.split("\\.")[1], "卖开", "SELL", "OPEN", volume, "LIMIT", price);
+
             }
         }
     }
@@ -591,7 +654,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             });
             popupCombine.show();
         }else {
-            ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "您还没有此合约持仓～");
+            ToastNotificationUtils.showToast(BaseApplication.getContext(), "您还没有此合约持仓～");
         }
     }
 
@@ -603,32 +666,31 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      */
     private void defaultClosePosition(View v) {
         if (mBinding.closePrice.getText() != null && mBinding.volume.getText() != null && !"".equals(mDirection)) {
-            String price = mBinding.closePrice.getText().toString();
-            String volume = mBinding.volume.getText().toString();
+            final String price = mBinding.closePrice.getText().toString();
+            final String volume = mBinding.volume.getText().toString();
             final String direction = "多".equals(mDirection) ? "SELL" : "BUY";
             if (price.length() == 0) {
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "价格不能为空");
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), "价格不能为空");
                 return;
             }
             if (".".equals(price)) {
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "价格输入不合法");
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), "价格输入不合法");
                 return;
             }
             if (volume.length() == 0) {
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数不能为空");
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数不能为空");
                 return;
             }
             if (volume.length() > 10) {
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数太大");
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数太大");
                 return;
             }
             if ("0".equals(volume)) {
-                ToastNotificationUtils.showToast(BaseApplicationLike.getContext(), "手数不能为零");
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数不能为零");
                 return;
             }
             try {
                 final int volumeN = Integer.parseInt(volume);
-                final double priceN = Double.parseDouble(price);
                 final String instrumentId = mInstrumentIdTransaction.split("\\.")[1];
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentIdTransaction);
                 if (searchEntity != null && ("上海国际能源交易中心".equals(searchEntity.getExchangeName())
@@ -639,13 +701,14 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                     if (positionEntity == null) return;
                     int volume_today = 0;
                     int volume_history = 0;
-                    if ("多".equals(mDirection)) {
+                    if ("SELL".equals(direction)) {
                         volume_today = Integer.parseInt(positionEntity.getVolume_long_today());
                         volume_history = Integer.parseInt(positionEntity.getVolume_long_his());
-                    } else if ("空".equals(mDirection)) {
+                    } else if ("BUY".equals(direction)) {
                         volume_today = Integer.parseInt(positionEntity.getVolume_short_today());
                         volume_history = Integer.parseInt(positionEntity.getVolume_short_his());
                     }
+
                     if (volume_today > 0 && volume_history > 0) {
                         if (volumeN <= volume_today || volumeN <= volume_history) {
                             PopupMenu popup = new PopupMenu(getActivity(), v);
@@ -655,10 +718,10 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                                 public boolean onMenuItemClick(MenuItem item) {
                                     switch (item.getItemId()) {
                                         case R.id.close_today:
-                                            initDialog(mExchangeId, instrumentId, "平今", direction, "CLOSETODAY", volumeN, "LIMIT", priceN);
+                                            initDialog(mExchangeId, instrumentId, "平今", direction, "CLOSETODAY", volume, "LIMIT", price);
                                             break;
                                         case R.id.close_history:
-                                            initDialog(mExchangeId, instrumentId, "平昨", direction, "CLOSE", volumeN, "LIMIT", priceN);
+                                            initDialog(mExchangeId, instrumentId, "平昨", direction, "CLOSE", volume, "LIMIT", price);
                                             break;
                                         default:
                                             break;
@@ -669,16 +732,16 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                             popup.show();
                         } else if (volumeN > volume_today || volumeN > volume_history) {
                             int volume_sub = volumeN - volume_today;
-                            initDialog(mExchangeId, instrumentId, "平今", "平昨", direction, "CLOSETODAY", "CLOSE", volume_today, volume_sub, "LIMIT", priceN);
+                            initDialog(mExchangeId, instrumentId, "平今", "平昨", direction, "CLOSETODAY", "CLOSE", volume_today, volume_sub, "LIMIT", price);
                         }
                     } else if (volume_today == 0 && volume_history > 0) {
-                        initDialog(mExchangeId, instrumentId, "平昨", direction, "CLOSE", volumeN, "LIMIT", priceN);
+                        initDialog(mExchangeId, instrumentId, "平昨", direction, "CLOSE", volume, "LIMIT", price);
                     } else if (volume_today > 0 && volume_history == 0) {
-                        initDialog(mExchangeId, instrumentId, "平今", direction, "CLOSETODAY", volumeN, "LIMIT", priceN);
+                        initDialog(mExchangeId, instrumentId, "平今", direction, "CLOSETODAY", volume, "LIMIT", price);
                     }
 
                 } else
-                    initDialog(mExchangeId, instrumentId, "平仓", direction, "CLOSE", volumeN, "LIMIT", priceN);
+                    initDialog(mExchangeId, instrumentId, "平仓", direction, "CLOSE", volume, "LIMIT", price);
             } catch (NumberFormatException ex) {
                 ex.printStackTrace();
             }
@@ -688,7 +751,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     /**
      * date: 7/9/17
      * author: chenli
-     * description: 更新合约代码以及持仓信息
+     * description: 更新合约代码以及持仓信息--来自自选择约选择以及持仓列表点击切换
      */
     @Subscribe
     public void onEvent(IdEvent data) {
@@ -699,6 +762,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             mInstrumentIdTransaction = searchEntity.getUnderlying_symbol();
         else mInstrumentIdTransaction = mInstrumentId;
         mExchangeId = mInstrumentIdTransaction.split("\\.")[0];
+        update();
     }
 
     /**
@@ -709,7 +773,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     private void initDialog(final String exchange_id, final String instrument_id,
                             String direction_title, String direction_title1, final String direction,
                             final String offset, final String offset1, final int volume, final int volume1,
-                            final String price_type, final double price) {
+                            final String price_type, final String price) {
         final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
         View view = View.inflate(getActivity(), R.layout.view_dialog_insert_order, null);
         Window dialogWindow = dialog.getWindow();
@@ -740,22 +804,27 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         TextView tv_unit = view.findViewById(R.id.order_unit);
         tv_unit.setVisibility(View.VISIBLE);
         tv_instrument_id.setText(instrument_id);
-        tv_price.setText(price + "");
+        tv_price.setText(price);
         tv_direction.setText(direction_title);
         tv_direction1.setText(direction_title1);
-        tv_volume.setText(volume + "");
-        tv_volume1.setText(volume1 + "");
-        ok.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (BaseApplicationLike.getWebSocketService() != null) {
-                    BaseApplicationLike.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
-                    BaseApplicationLike.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, price);
+        tv_volume.setText(volume);
+        tv_volume1.setText(volume1);
+        try {
+            final double priceN = Double.parseDouble(price);
+            ok.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (BaseApplication.getWebSocketService() != null) {
+                        BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, priceN);
+                        BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, priceN);
+                    }
+                    updatePosition();
+                    dialog.dismiss();
                 }
-                initPosition();
-                dialog.dismiss();
-            }
-        });
+            });
+        } catch (NumberFormatException ex) {
+            ex.printStackTrace();
+        }
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -771,8 +840,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      * description: 下单弹出框，根据固定宽高值自定义dialog，注意宽高值从dimens.xml文件中得到
      */
     private void initDialog(final String exchange_id, final String instrument_id,
-                            String direction_title, final String direction, final String offset, final int volume,
-                            final String price_type, final double price) {
+                            String direction_title, final String direction, final String offset, final String volume,
+                            final String price_type, final String price) {
         final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
         View view = View.inflate(getActivity(), R.layout.view_dialog_insert_order, null);
         Window dialogWindow = dialog.getWindow();
@@ -793,18 +862,24 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         TextView ok = view.findViewById(R.id.order_ok);
         TextView cancel = view.findViewById(R.id.order_cancel);
         tv_instrument_id.setText(instrument_id);
-        tv_price.setText(price + "");
+        tv_price.setText(price);
         tv_direction.setText(direction_title);
-        tv_volume.setText(volume + "");
-        ok.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (BaseApplicationLike.getWebSocketService() != null)
-                    BaseApplicationLike.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
-                initPosition();
-                dialog.dismiss();
-            }
-        });
+        tv_volume.setText(volume);
+        try {
+            final int volumeN = Integer.parseInt(volume);
+            final double priceN = Double.parseDouble(price);
+            ok.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (BaseApplication.getWebSocketService() != null)
+                        BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volumeN, price_type, priceN);
+                    updatePosition();
+                    dialog.dismiss();
+                }
+            });
+        } catch (NumberFormatException ex) {
+            ex.printStackTrace();
+        }
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

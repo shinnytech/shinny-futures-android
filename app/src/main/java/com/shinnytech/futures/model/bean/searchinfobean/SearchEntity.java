@@ -13,10 +13,19 @@ public class SearchEntity {
     private String exchangeId = "";
     private String py = "";
     private String pTick = "";
+    private String pTick_decs = "";
     private String vm = "";
     private String sort_key = "";
     private String margin = "";
     private String underlying_symbol = "";
+
+    public String getpTick_decs() {
+        return pTick_decs;
+    }
+
+    public void setpTick_decs(String pTick_decs) {
+        this.pTick_decs = pTick_decs;
+    }
 
     public String getUnderlying_symbol() {
         return underlying_symbol;

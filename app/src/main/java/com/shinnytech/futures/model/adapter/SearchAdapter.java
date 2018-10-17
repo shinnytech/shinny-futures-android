@@ -71,9 +71,9 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ItemViewHo
                 if (searchEntity.getPy().toLowerCase().contains(text)
                         || searchEntity.getInstrumentName().toLowerCase().contains(text)
                         || searchEntity.getInstrumentId().toLowerCase().contains(text)
-                        || searchEntity.getExchangeName().toLowerCase().contains(text)) {
+                        || searchEntity.getExchangeName().toLowerCase().contains(text))
                     mData.add(searchEntity);
-                }
+
             }
         }
         notifyDataSetChanged();
