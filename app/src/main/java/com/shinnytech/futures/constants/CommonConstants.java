@@ -50,5 +50,6 @@ public final class CommonConstants {
     public static final int JUMP_TO_SEARCH_ACTIVITY = 4;
     public static final int JUMP_TO_FUTURE_INFO_ACTIVITY = 5;
     public static final String KUAI_QI_XIAO_Q = "快期小Q";
-    public static final String LOG_OUT = "登出";
+    public static final String LOG_OUT = "LOGOUT";
+    public static final String BACKGROUND = "BACKGROUND";
 }

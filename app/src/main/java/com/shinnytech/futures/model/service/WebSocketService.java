@@ -21,6 +21,7 @@ import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.LogUtils;
 
+import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.shinnytech.futures.constants.CommonConstants.BACKGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
 import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY;
 import static com.shinnytech.futures.constants.CommonConstants.ERROR;
@@ -35,6 +37,7 @@ import static com.shinnytech.futures.constants.CommonConstants.KLINE_DAY;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_HOUR;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_MINUTE;
 import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
+import static com.shinnytech.futures.constants.CommonConstants.LOG_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.OPEN;
 import static com.shinnytech.futures.constants.CommonConstants.SWITCH;
 import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
@@ -73,6 +76,8 @@ public class WebSocketService extends Service {
     public static final String BROADCAST_ACTION_TRANSACTION = WebSocketService.class.getName() + ".TRANSACTION.BROADCAST";
 
     private static final int TIMEOUT = 500;
+
+    private boolean mBackground = false;
 
     private final IBinder binder = new LocalBinder();
 
@@ -121,6 +126,13 @@ public class WebSocketService extends Service {
                 break;
         }
 
+    }
+
+    @Subscribe
+    public void onEvent(String msg) {
+        if (BACKGROUND.equals(msg)) {
+            mBackground = true;
+        }
     }
 
     /**
@@ -190,12 +202,18 @@ public class WebSocketService extends Service {
                                         sendMessage(SWITCH, BROADCAST);
                                         return;
                                 }
-                                sendPeekMessage();
+                                if (!mBackground)sendPeekMessage();
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
+                        }
+
+                        @Override
+                        public void onPongFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
+                            super.onPongFrame(websocket, frame);
+                            LogUtils.e("111111", true);
                         }
 
                         @Override
@@ -207,7 +225,7 @@ public class WebSocketService extends Service {
                         @Override
                         public void onConnectError(WebSocket websocket, WebSocketException exception) {
                             sendMessage(CLOSE, BROADCAST);
-                            LogUtils.e("onDisconnected", true);
+                            LogUtils.e("onConnectError", true);
                         }
 
                         @Override
@@ -218,6 +236,7 @@ public class WebSocketService extends Service {
                     })
                     .addHeader("User-Agent", "shinnyfutures-Android"+" "+versionName)
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
+                    .setPingInterval(1000*15)
                     .connectAsynchronously();
             int index = BaseApplication.getIndex() + 1;
             if (index == 7) index = 0;
@@ -339,7 +358,7 @@ public class WebSocketService extends Service {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            sendPeekMessageTransaction();
+                            if (!mBackground)sendPeekMessageTransaction();
                         }
 
                         @Override
@@ -351,7 +370,7 @@ public class WebSocketService extends Service {
                         @Override
                         public void onConnectError(WebSocket websocket, WebSocketException exception) {
                             sendMessage(CLOSE, BROADCAST_TRANSACTION);
-                            LogUtils.e("onDisconnected", true);
+                            LogUtils.e("onConnectError", true);
                         }
 
                         @Override

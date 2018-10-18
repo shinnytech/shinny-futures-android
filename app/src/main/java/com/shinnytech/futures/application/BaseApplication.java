@@ -26,14 +26,14 @@ import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
 import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.controller.activity.ConfirmActivity;
+import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
-import com.shinnytech.futures.controller.activity.ConfirmActivity;
-import com.shinnytech.futures.controller.activity.MainActivity;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 
@@ -49,6 +49,7 @@ import java.util.logging.Level;
 
 import okhttp3.OkHttpClient;
 
+import static com.shinnytech.futures.constants.CommonConstants.BACKGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.ERROR;
@@ -312,7 +313,11 @@ public class BaseApplication extends Application implements ServiceConnection {
                     LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverTransaction);
                     sContext.unregisterReceiver(mReceiverNetwork);
                     sContext.unregisterReceiver(mReceiverScreen);
-                    notifyBackground();
+                    if (sWebSocketService != null) {
+                        sWebSocketService.disConnect();
+                        sWebSocketService.disConnectTransaction();
+                        LogUtils.e("连接断开", true);
+                    }
                     if (mServiceBound) {
                         sContext.unbindService(BaseApplication.this);
                         LogUtils.e("解除绑定", true);
@@ -346,12 +351,15 @@ public class BaseApplication extends Application implements ServiceConnection {
      */
     private void notifyBackground() {
         // This is where you can notify listeners, handle session tracking, etc
-        if (sWebSocketService != null) {
-            sWebSocketService.disConnect();
-            sWebSocketService.disConnectTransaction();
-            LogUtils.e("连接断开", true);
-            EventBus.getDefault().post(LOG_OUT);
-        }
+//        if (sWebSocketService != null) {
+//            sWebSocketService.disConnect();
+//            sWebSocketService.disConnectTransaction();
+//            LogUtils.e("连接断开", true);
+//            EventBus.getDefault().post(LOG_OUT);
+//        }
+        //登出
+        EventBus.getDefault().post(BACKGROUND);
+
     }
 
     /**
@@ -387,7 +395,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case OPEN:
-                        if (mIsMDClose){
+                        if (mIsMDClose) {
                             ToastNotificationUtils.showToast(sContext, "行情服务器连接成功");
                             mIsMDClose = false;
                         }
@@ -395,7 +403,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                     case CLOSE:
                         //每隔两秒,断线重连
                         if (!mIsBackground) {
-                            if (!mIsMDClose){
+                            if (!mIsMDClose) {
                                 ToastNotificationUtils.showToast(sContext, "行情服务器连接断开，正在重连...");
                                 mIsMDClose = true;
                             }
@@ -430,7 +438,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case OPEN:
-                        if (mIsTDClose){
+                        if (mIsTDClose) {
                             ToastNotificationUtils.showToast(sContext, "交易服务器连接成功");
                             mIsTDClose = false;
                         }
@@ -439,7 +447,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                         DataManager.getInstance().IS_LOGIN = false;
                         //每隔两秒,断线重连
                         if (!mIsBackground) {
-                            if (!mIsTDClose){
+                            if (!mIsTDClose) {
                                 ToastNotificationUtils.showToast(sContext, "交易服务器连接断开，正在重连...");
                                 mIsTDClose = true;
                             }
