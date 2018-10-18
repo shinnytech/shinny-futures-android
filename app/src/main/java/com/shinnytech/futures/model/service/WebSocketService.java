@@ -1,9 +1,16 @@
 package com.shinnytech.futures.model.service;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 
@@ -37,7 +44,6 @@ import static com.shinnytech.futures.constants.CommonConstants.KLINE_DAY;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_HOUR;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_MINUTE;
 import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
-import static com.shinnytech.futures.constants.CommonConstants.LOG_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.OPEN;
 import static com.shinnytech.futures.constants.CommonConstants.SWITCH;
 import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
@@ -50,6 +56,12 @@ import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
  * state: done
  */
 public class WebSocketService extends Service {
+
+    /**
+     * date: 10/19/18
+     * description: alarm
+     */
+    public static final String ALARM = "ALARM";
 
     /**
      * date: 7/9/17
@@ -76,35 +88,73 @@ public class WebSocketService extends Service {
     public static final String BROADCAST_ACTION_TRANSACTION = WebSocketService.class.getName() + ".TRANSACTION.BROADCAST";
 
     private static final int TIMEOUT = 500;
+    private static final long TIME_INTERVAL = 15000;
 
     private boolean mBackground = false;
 
-    private final IBinder binder = new LocalBinder();
+    private final IBinder mBinder = new LocalBinder();
 
-    private WebSocket webSocketClient;
+    private WebSocket mWebSocketClient;
 
-    public WebSocket webSocketClientTransaction;
+    public WebSocket mWebSocketClientTransaction;
 
     private DataManager sDataManager = DataManager.getInstance();
 
     private LocalBroadcastManager mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+
+    private AlarmManager mAlarmManager;
+
+    private BroadcastReceiver mAlarmReceiver;
+
+    private long mLastPong = System.currentTimeMillis() / 1000;
 
     public WebSocketService() {
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        return binder;
+        return mBinder;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        // Schedule the alarm!
+        mAlarmManager = (AlarmManager)getSystemService(this.ALARM_SERVICE);
+        Intent intent = new Intent(ALARM);
+        final PendingIntent pendingIntent = PendingIntent.getBroadcast(this,0, intent, 0);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), pendingIntent);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), pendingIntent);
+        } else {
+            mAlarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), TIME_INTERVAL, pendingIntent);
+        }
+
+        mAlarmReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // 重复定时任务
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + TIME_INTERVAL, pendingIntent);
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + TIME_INTERVAL, pendingIntent);
+                }
+                if ((System.currentTimeMillis() / 1000 - mLastPong) >= 20){
+                    LogUtils.e("行情断链", true);
+                }
+
+                LogUtils.e( "" + (System.currentTimeMillis() / 1000 - mLastPong), true);
+
+            }
+        };
+        registerReceiver(mAlarmReceiver, new IntentFilter(ALARM));
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(mAlarmReceiver);
     }
 
     @Override
@@ -143,7 +193,7 @@ public class WebSocketService extends Service {
     public void connect(String url) {
         try {
             String versionName = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
-            webSocketClient = new WebSocketFactory()
+            mWebSocketClient = new WebSocketFactory()
                     .setConnectionTimeout(TIMEOUT)
                     .createSocket(url)
                     .addListener(new WebSocketAdapter() {
@@ -213,7 +263,8 @@ public class WebSocketService extends Service {
                         @Override
                         public void onPongFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
                             super.onPongFrame(websocket, frame);
-                            LogUtils.e("111111", true);
+                            mLastPong = System.currentTimeMillis() / 1000;
+                            LogUtils.e("onPongFrame", false);
                         }
 
                         @Override
@@ -236,7 +287,7 @@ public class WebSocketService extends Service {
                     })
                     .addHeader("User-Agent", "shinnyfutures-Android"+" "+versionName)
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
-                    .setPingInterval(1000*15)
+                    .setPingInterval(1000 * 15)
                     .connectAsynchronously();
             int index = BaseApplication.getIndex() + 1;
             if (index == 7) index = 0;
@@ -248,9 +299,9 @@ public class WebSocketService extends Service {
     }
 
     public void disConnect() {
-        if (webSocketClient != null && webSocketClient.getState() == WebSocketState.OPEN) {
-            webSocketClient.disconnect();
-            webSocketClient = null;
+        if (mWebSocketClient != null && mWebSocketClient.getState() == WebSocketState.OPEN) {
+            mWebSocketClient.disconnect();
+            mWebSocketClient = null;
         }
     }
 
@@ -260,10 +311,10 @@ public class WebSocketService extends Service {
      * description: 行情订阅
      */
     public void sendSubscribeQuote(String insList) {
-        if (webSocketClient != null && webSocketClient.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClient != null && mWebSocketClient.getState() == WebSocketState.OPEN) {
             String subScribeQuote = "{\"aid\":\"subscribe_quote\",\"ins_list\":\"" + insList + "\"}";
             LogUtils.e(subScribeQuote, true);
-            webSocketClient.sendText(subScribeQuote);
+            mWebSocketClient.sendText(subScribeQuote);
         }
     }
 
@@ -273,9 +324,9 @@ public class WebSocketService extends Service {
      * description: 获取合约信息
      */
     public void sendPeekMessage() {
-        if (webSocketClient != null && webSocketClient.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClient != null && mWebSocketClient.getState() == WebSocketState.OPEN) {
             String peekMessage = "{\"aid\":\"peek_message\"}";
-            webSocketClient.sendText(peekMessage);
+            mWebSocketClient.sendText(peekMessage);
             LogUtils.e(peekMessage, false);
         }
     }
@@ -286,10 +337,10 @@ public class WebSocketService extends Service {
      * description: 分时图
      */
     public void sendSetChart(String ins_list) {
-        if (webSocketClient != null && webSocketClient.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClient != null && mWebSocketClient.getState() == WebSocketState.OPEN) {
             String setChart = "{\"aid\":\"set_chart\",\"chart_id\":\"" + CURRENT_DAY + "\",\"ins_list\":\"" + ins_list + "\",\"duration\":\"60000000000\",\"trading_day_start\":\"0\",\"trading_day_count\":\"86400000000000\"}";
             LogUtils.e(setChart, true);
-            webSocketClient.sendText(setChart);
+            mWebSocketClient.sendText(setChart);
         }
     }
 
@@ -299,10 +350,10 @@ public class WebSocketService extends Service {
      * description: 日线
      */
     public void sendSetChartDay(String ins_list, int view_width) {
-        if (webSocketClient != null && webSocketClient.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClient != null && mWebSocketClient.getState() == WebSocketState.OPEN) {
             String setChart = "{\"aid\":\"set_chart\",\"chart_id\":\"" + KLINE_DAY + "\",\"ins_list\":\"" + ins_list + "\",\"duration\":\"86400000000000\",\"view_width\":\"" + view_width + "\"}";
             LogUtils.e(setChart, true);
-            webSocketClient.sendText(setChart);
+            mWebSocketClient.sendText(setChart);
         }
     }
 
@@ -312,10 +363,10 @@ public class WebSocketService extends Service {
      * description: 小时线
      */
     public void sendSetChartHour(String ins_list, int view_width) {
-        if (webSocketClient != null && webSocketClient.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClient != null && mWebSocketClient.getState() == WebSocketState.OPEN) {
             String setChart = "{\"aid\":\"set_chart\",\"chart_id\":\"" + KLINE_HOUR + "\",\"ins_list\":\"" + ins_list + "\",\"duration\":\"3600000000000\",\"view_width\":\"" + view_width + "\"}";
             LogUtils.e(setChart, true);
-            webSocketClient.sendText(setChart);
+            mWebSocketClient.sendText(setChart);
         }
     }
 
@@ -325,10 +376,10 @@ public class WebSocketService extends Service {
      * description: 分钟线
      */
     public void sendSetChartMin(String ins_list, int view_width) {
-        if (webSocketClient != null && webSocketClient.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClient != null && mWebSocketClient.getState() == WebSocketState.OPEN) {
             String setChart = "{\"aid\":\"set_chart\",\"chart_id\":\"" + CommonConstants.KLINE_MINUTE + "\",\"ins_list\":\"" + ins_list + "\",\"duration\":\"300000000000\",\"view_width\":\"" + view_width + "\"}";
             LogUtils.e(setChart, true);
-            webSocketClient.sendText(setChart);
+            mWebSocketClient.sendText(setChart);
         }
     }
 
@@ -340,7 +391,7 @@ public class WebSocketService extends Service {
     public void connectTransaction() {
         try {
             String versionName = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
-            webSocketClientTransaction = new WebSocketFactory()
+            mWebSocketClientTransaction = new WebSocketFactory()
                     .setConnectionTimeout(TIMEOUT)
                     .createSocket(CommonConstants.TRANSACTION_URL)
                     .addListener(new WebSocketAdapter() {
@@ -389,9 +440,9 @@ public class WebSocketService extends Service {
     }
 
     public void disConnectTransaction() {
-        if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
-            webSocketClientTransaction.disconnect();
-            webSocketClientTransaction = null;
+        if (mWebSocketClientTransaction != null && mWebSocketClientTransaction.getState() == WebSocketState.OPEN) {
+            mWebSocketClientTransaction.disconnect();
+            mWebSocketClientTransaction = null;
         }
     }
 
@@ -401,9 +452,9 @@ public class WebSocketService extends Service {
      * description: 获取合约信息
      */
     public void sendPeekMessageTransaction() {
-        if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClientTransaction != null && mWebSocketClientTransaction.getState() == WebSocketState.OPEN) {
             String peekMessage = "{\"aid\":\"peek_message\"}";
-            webSocketClientTransaction.sendText(peekMessage);
+            mWebSocketClientTransaction.sendText(peekMessage);
             LogUtils.e(peekMessage, false);
         }
     }
@@ -414,10 +465,10 @@ public class WebSocketService extends Service {
      * description: 用户登录
      */
     public void sendReqLogin(String bid, String user_name, String password) {
-        if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClientTransaction != null && mWebSocketClientTransaction.getState() == WebSocketState.OPEN) {
             String reqLogin = "{\"aid\":\"req_login\",\"bid\":\"" + bid + "\",\"user_name\":\"" + user_name + "\",\"password\":\"" + password + "\"}";
             LogUtils.e(reqLogin, true);
-            webSocketClientTransaction.sendText(reqLogin);
+            mWebSocketClientTransaction.sendText(reqLogin);
         }
     }
 
@@ -427,10 +478,10 @@ public class WebSocketService extends Service {
      * description: 确认结算单
      */
     public void sendReqConfirmSettlement() {
-        if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClientTransaction != null && mWebSocketClientTransaction.getState() == WebSocketState.OPEN) {
             String confirmSettlement = "{\"aid\":\"confirm_settlement\"}";
             LogUtils.e(confirmSettlement, true);
-            webSocketClientTransaction.sendText(confirmSettlement);
+            mWebSocketClientTransaction.sendText(confirmSettlement);
         }
     }
 
@@ -441,11 +492,11 @@ public class WebSocketService extends Service {
      * description: 下单
      */
     public void sendReqInsertOrder(String exchange_id, String instrument_id, String direction, String offset, int volume, String price_type, double price) {
-        if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClientTransaction != null && mWebSocketClientTransaction.getState() == WebSocketState.OPEN) {
             String user_id = DataManager.getInstance().USER_ID;
             String reqInsertOrder = "{\"aid\":\"insert_order\", \"user_id\":\"" + user_id + "\", \"order_id\":\"\",\"exchange_id\":\"" + exchange_id + "\",\"instrument_id\":\"" + instrument_id + "\",\"direction\":\"" + direction + "\",\"offset\":\"" + offset + "\",\"volume\":" + volume + ",\"price_type\":\"" + price_type + "\",\"limit_price\":" + price + ", \"volume_condition\":\"ANY\", \"time_condition\":\"GFD\"}";
             LogUtils.e(reqInsertOrder, true);
-            webSocketClientTransaction.sendText(reqInsertOrder);
+            mWebSocketClientTransaction.sendText(reqInsertOrder);
         }
     }
 
@@ -455,11 +506,11 @@ public class WebSocketService extends Service {
      * description: 撤单
      */
     public void sendReqCancelOrder(String order_id) {
-        if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClientTransaction != null && mWebSocketClientTransaction.getState() == WebSocketState.OPEN) {
             String user_id = DataManager.getInstance().USER_ID;
             String reqInsertOrder = "{\"aid\":\"cancel_order\", \"user_id\":\"" + user_id + "\",\"order_id\":\"" + order_id + "\"}";
             LogUtils.e(reqInsertOrder, true);
-            webSocketClientTransaction.sendText(reqInsertOrder);
+            mWebSocketClientTransaction.sendText(reqInsertOrder);
         }
     }
 
@@ -469,10 +520,10 @@ public class WebSocketService extends Service {
      * description: 银期转帐
      */
     public void sendReqTransfer(String future_account, String future_password, String bank_id, String bank_password, String currency, float amount) {
-        if (webSocketClientTransaction != null && webSocketClientTransaction.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClientTransaction != null && mWebSocketClientTransaction.getState() == WebSocketState.OPEN) {
             String reqTransfer = "{\"aid\":\"req_transfer\",\"future_account\":\"" + future_account + "\",\"future_password\":\"" + future_password + "\",\"bank_id\":\"" + bank_id + "\",\"bank_password\":\"" + bank_password + "\",\"currency\":\"" + currency + "\",\"amount\": " + amount + "}";
             LogUtils.e(reqTransfer, true);
-            webSocketClientTransaction.sendText(reqTransfer);
+            mWebSocketClientTransaction.sendText(reqTransfer);
         }
     }
 
