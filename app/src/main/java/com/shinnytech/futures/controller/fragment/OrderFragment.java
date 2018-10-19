@@ -39,11 +39,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
-import static com.shinnytech.futures.constants.CommonConstants.ERROR;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_TRADE;
-import static com.shinnytech.futures.constants.CommonConstants.OPEN;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION_TRANSACTION;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
+import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 5/10/17
@@ -192,13 +189,7 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
             public void onReceive(Context context, Intent intent) {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
-                    case OPEN:
-                        break;
-                    case CLOSE:
-                        break;
-                    case ERROR:
-                        break;
-                    case MESSAGE_TRADE:
+                    case TD_MESSAGE:
                         if ((R.id.rb_order_info == ((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId())
                                 && mIsUpdate)
                             refreshOrder();
@@ -208,7 +199,7 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
                 }
             }
         };
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, new IntentFilter(BROADCAST_ACTION_TRANSACTION));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, new IntentFilter(TD_BROADCAST_ACTION));
     }
 
     /**

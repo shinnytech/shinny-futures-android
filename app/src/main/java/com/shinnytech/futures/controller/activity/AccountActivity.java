@@ -19,12 +19,9 @@ import com.shinnytech.futures.model.engine.DataManager;
 
 import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
-import static com.shinnytech.futures.constants.CommonConstants.ERROR;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_TRADE;
-import static com.shinnytech.futures.constants.CommonConstants.OPEN;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION_TRANSACTION;
+import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 7/7/17
@@ -47,13 +44,7 @@ public class AccountActivity extends BaseActivity {
      */
     private void refreshUI(String mDataString) {
         switch (mDataString) {
-            case OPEN:
-                break;
-            case CLOSE:
-                break;
-            case ERROR:
-                break;
-            case MESSAGE_TRADE:
+            case TD_MESSAGE:
                 UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
                 if (userEntity == null) return;
                 AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
@@ -101,7 +92,7 @@ public class AccountActivity extends BaseActivity {
                 refreshUI(mDataString);
             }
         };
-        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter(BROADCAST_ACTION_TRANSACTION));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter(TD_BROADCAST_ACTION));
     }
 
     @Override
@@ -130,7 +121,7 @@ public class AccountActivity extends BaseActivity {
             intent.putExtra(ACTIVITY_TYPE, "MainActivity");
             startActivity(intent);
         }
-        refreshUI(MESSAGE_TRADE);
+        refreshUI(TD_MESSAGE);
         registerBroaderCast();
     }
 

@@ -11,15 +11,17 @@ public final class CommonConstants {
     public static final String TRANSACTION_URL = "wss://t.shinnytech.com/trade/shinny";
     public static final String JSON_FILE_URL = "http://openmd.shinnytech.com/t/md/symbols/latest.json";
     public static final String FEED_BACK_URL = "http://ask.shinnytech.com/src/indexm.html";
-    public static final String SWITCH = "-1";
-    public static final String OPEN = "0";
-    public static final String CLOSE = "1";
-    public static final String ERROR = "2";
-    public static final String MESSAGE = "3";
-    public static final String MESSAGE_TRADE = "4";
-    public static final String MESSAGE_LOGIN = "5";
-    public static final String MESSAGE_SETTLEMENT = "6";
-    public static final String MESSAGE_BROKER_INFO = "7";
+    public static final String MD_ONLINE = "MD_ONLINE";
+    public static final String MD_OFFLINE = "MD_OFFLINE";
+    public static final String MD_SWITCH = "MD_SWITCH";
+    public static final String MD_MESSAGE = "MD_MESSAGE";
+    public static final String TD_ONLINE = "TD_ONLINE";
+    public static final String TD_OFFLINE = "TD_OFFLINE";
+    public static final String TD_SWITCH = "TD_SWITCH";
+    public static final String TD_MESSAGE = "TD_MESSAGE";
+    public static final String TD_MESSAGE_LOGIN = "TD_MESSAGE_LOGIN";
+    public static final String TD_MESSAGE_SETTLEMENT = "TD_MESSAGE_SETTLEMENT";
+    public static final String TD_MESSAGE_BROKER_INFO = "TD_MESSAGE_BROKER_INFO";
     public static final String OPTIONAL = "自选合约";
     public static final String DOMINANT = "主力合约";
     public static final String SHANGHAI = "上海期货交易所";
@@ -52,4 +54,5 @@ public final class CommonConstants {
     public static final String KUAI_QI_XIAO_Q = "快期小Q";
     public static final String LOG_OUT = "LOGOUT";
     public static final String BACKGROUND = "BACKGROUND";
+    public static final String FOREGROUND = "FOREGROUND";
 }

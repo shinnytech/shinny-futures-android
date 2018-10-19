@@ -27,7 +27,6 @@ import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
-import com.shinnytech.futures.utils.LogUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -36,18 +35,15 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
 import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY;
-import static com.shinnytech.futures.constants.CommonConstants.ERROR;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_DAY;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_HOUR;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_MINUTE;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_TRADE;
-import static com.shinnytech.futures.constants.CommonConstants.OPEN;
+import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION_TRANSACTION;
+import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
+import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 9/20/17
@@ -143,16 +139,10 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void refreshChart(String mDataString) {
         try {
             switch (mDataString) {
-                case OPEN:
-                    break;
-                case CLOSE:
-                    break;
-                case ERROR:
-                    break;
-                case MESSAGE:
+                case MD_MESSAGE:
                     if (mIsUpdate) refreshMarketing();
                     break;
-                case MESSAGE_TRADE:
+                case TD_MESSAGE:
                     refreshTrade();
                     break;
                 default:
@@ -533,7 +523,7 @@ public class BaseChartFragment extends LazyLoadFragment {
                 refreshChart(mDataString);
             }
         };
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, new IntentFilter(BROADCAST_ACTION));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, new IntentFilter(MD_BROADCAST_ACTION));
 
         mReceiver1 = new BroadcastReceiver() {
             @Override
@@ -542,7 +532,7 @@ public class BaseChartFragment extends LazyLoadFragment {
                 refreshChart(mDataString);
             }
         };
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver1, new IntentFilter(BROADCAST_ACTION_TRANSACTION));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver1, new IntentFilter(TD_BROADCAST_ACTION));
     }
 
     /**

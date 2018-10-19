@@ -41,13 +41,10 @@ import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
-import static com.shinnytech.futures.constants.CommonConstants.ERROR;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_TRADE;
-import static com.shinnytech.futures.constants.CommonConstants.OPEN;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION_TRANSACTION;
+import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
+import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
+import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 6/8/17
@@ -445,13 +442,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             public void onReceive(Context context, Intent intent) {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
-                    case OPEN:
-                        break;
-                    case CLOSE:
-                        break;
-                    case ERROR:
-                        break;
-                    case MESSAGE_TRADE:
+                    case TD_MESSAGE:
                         if (((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId() == R.id.rb_transaction_info)
                             refreshAccount();
                         break;
@@ -466,13 +457,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             public void onReceive(Context context, Intent intent) {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
-                    case OPEN:
-                        break;
-                    case CLOSE:
-                        break;
-                    case ERROR:
-                        break;
-                    case MESSAGE:
+                    case MD_MESSAGE:
                         if (((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId() == R.id.rb_transaction_info)
                             refreshPrice();
                     default:
@@ -480,8 +465,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 }
             }
         };
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiverAccount, new IntentFilter(BROADCAST_ACTION_TRANSACTION));
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiverPrice, new IntentFilter(BROADCAST_ACTION));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiverAccount, new IntentFilter(TD_BROADCAST_ACTION));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiverPrice, new IntentFilter(MD_BROADCAST_ACTION));
     }
 
     /**

@@ -21,11 +21,8 @@ import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
-import static com.shinnytech.futures.constants.CommonConstants.ERROR;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE;
-import static com.shinnytech.futures.constants.CommonConstants.OPEN;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION;
+import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
+import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
 
 /**
  * date: 7/9/17
@@ -68,13 +65,7 @@ public class HandicapFragment extends LazyLoadFragment {
             public void onReceive(Context context, Intent intent) {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
-                    case OPEN:
-                        break;
-                    case CLOSE:
-                        break;
-                    case ERROR:
-                        break;
-                    case MESSAGE:
+                    case MD_MESSAGE:
                         if (((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId()
                                 == R.id.rb_handicap_info) refreshUI();
                         break;
@@ -83,7 +74,7 @@ public class HandicapFragment extends LazyLoadFragment {
                 }
             }
         };
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, new IntentFilter(BROADCAST_ACTION));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, new IntentFilter(MD_BROADCAST_ACTION));
     }
 
     /**

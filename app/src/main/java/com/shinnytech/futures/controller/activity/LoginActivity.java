@@ -32,14 +32,11 @@ import java.util.List;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
 import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
-import static com.shinnytech.futures.constants.CommonConstants.ERROR;
 import static com.shinnytech.futures.constants.CommonConstants.KUAI_QI_XIAO_Q;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_BROKER_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_LOGIN;
-import static com.shinnytech.futures.constants.CommonConstants.OPEN;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION_TRANSACTION;
+import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 6/1/17
@@ -95,7 +92,7 @@ public class LoginActivity extends BaseActivity {
             }
         } else {
             if (BaseApplication.getWebSocketService() != null) {
-                BaseApplication.getWebSocketService().disConnectTransaction();
+                BaseApplication.getWebSocketService().disConnectTD();
             }
         }
         return brokerList;
@@ -327,16 +324,10 @@ public class LoginActivity extends BaseActivity {
             public void onReceive(Context context, Intent intent) {
                 String msg = intent.getStringExtra("msg");
                 switch (msg) {
-                    case OPEN:
-                        break;
-                    case CLOSE:
-                        break;
-                    case ERROR:
-                        break;
-                    case MESSAGE_LOGIN:
+                    case TD_MESSAGE_LOGIN:
                         mHandler.sendEmptyMessageDelayed(0, 2000);
                         break;
-                    case MESSAGE_BROKER_INFO:
+                    case TD_MESSAGE_BROKER_INFO:
                         //如果客户端打开后期货公司列表信息还没有解析完毕，服务器发送brokerId后更新期货公司列表
                         mHandler.sendEmptyMessage(1);
                         break;
@@ -346,7 +337,7 @@ public class LoginActivity extends BaseActivity {
             }
         };
         registerReceiver(mReceiver, new IntentFilter(NETWORK_STATE));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverLogin, new IntentFilter(BROADCAST_ACTION_TRANSACTION));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverLogin, new IntentFilter(TD_BROADCAST_ACTION));
     }
 
     /**

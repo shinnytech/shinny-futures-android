@@ -50,10 +50,8 @@ import java.util.logging.Level;
 import okhttp3.OkHttpClient;
 
 import static com.shinnytech.futures.constants.CommonConstants.BACKGROUND;
-import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
-import static com.shinnytech.futures.constants.CommonConstants.ERROR;
-import static com.shinnytech.futures.constants.CommonConstants.LOG_OUT;
+import static com.shinnytech.futures.constants.CommonConstants.FOREGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_1;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_2;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_3;
@@ -61,12 +59,16 @@ import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_4;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_5;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_6;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_7;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_SETTLEMENT;
-import static com.shinnytech.futures.constants.CommonConstants.OPEN;
-import static com.shinnytech.futures.constants.CommonConstants.SWITCH;
+import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
+import static com.shinnytech.futures.constants.CommonConstants.MD_ONLINE;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
+import static com.shinnytech.futures.constants.CommonConstants.MD_SWITCH;
+import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
+import static com.shinnytech.futures.constants.CommonConstants.TD_ONLINE;
+import static com.shinnytech.futures.constants.CommonConstants.TD_SWITCH;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION_TRANSACTION;
+import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
+import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * Created on 12/21/17.
@@ -86,8 +88,6 @@ public class BaseApplication extends Application implements ServiceConnection {
     private BroadcastReceiver mReceiverNetwork;
     private BroadcastReceiver mReceiverScreen;
     private boolean mIsBackground = false;
-    private boolean mIsTDClose = false;
-    private boolean mIsMDClose = false;
     private MyHandler mMyHandler = new MyHandler();
 
     public static int getIndex() {
@@ -145,7 +145,10 @@ public class BaseApplication extends Application implements ServiceConnection {
         } catch (ClassCastException e) {
             e.printStackTrace();
         }
-        notifyForeground();
+        //连接行情服务器
+        sWebSocketService.connectMD(sMDURLs.get(index));
+        //连接交易服务器
+        sWebSocketService.connectTD();
         mServiceBound = true;
     }
 
@@ -170,7 +173,6 @@ public class BaseApplication extends Application implements ServiceConnection {
         super.onTrimMemory(level);
         Beta.unInit();
         if (level == TRIM_MEMORY_UI_HIDDEN) {
-            mIsBackground = true;
             notifyBackground();
         }
 
@@ -284,10 +286,7 @@ public class BaseApplication extends Application implements ServiceConnection {
 
             @Override
             public void onActivityResumed(Activity activity) {
-                if (mIsBackground) {
-                    mIsBackground = false;
-                    notifyForeground();
-                }
+                notifyForeground();
             }
 
             @Override
@@ -314,8 +313,8 @@ public class BaseApplication extends Application implements ServiceConnection {
                     sContext.unregisterReceiver(mReceiverNetwork);
                     sContext.unregisterReceiver(mReceiverScreen);
                     if (sWebSocketService != null) {
-                        sWebSocketService.disConnect();
-                        sWebSocketService.disConnectTransaction();
+                        sWebSocketService.disConnectMD();
+                        sWebSocketService.disConnectTD();
                         LogUtils.e("连接断开", true);
                     }
                     if (mServiceBound) {
@@ -335,12 +334,10 @@ public class BaseApplication extends Application implements ServiceConnection {
      * description: 前台任务--连接服务器
      */
     private void notifyForeground() {
-        if (sWebSocketService != null) {
-            //连接行情服务器
-            sWebSocketService.connect(sMDURLs.get(index));
-            //连接交易服务器
-            sWebSocketService.connectTransaction();
-            LogUtils.e("连接打开", true);
+        if (mIsBackground) {
+            mIsBackground = false;
+            //前台
+            EventBus.getDefault().post(FOREGROUND);
         }
     }
 
@@ -350,16 +347,11 @@ public class BaseApplication extends Application implements ServiceConnection {
      * description: 后台任务--关闭服务器
      */
     private void notifyBackground() {
-        // This is where you can notify listeners, handle session tracking, etc
-//        if (sWebSocketService != null) {
-//            sWebSocketService.disConnect();
-//            sWebSocketService.disConnectTransaction();
-//            LogUtils.e("连接断开", true);
-//            EventBus.getDefault().post(LOG_OUT);
-//        }
-        //登出
-        EventBus.getDefault().post(BACKGROUND);
-
+        if (!mIsBackground) {
+            mIsBackground = true;
+            //后台
+            EventBus.getDefault().post(BACKGROUND);
+        }
     }
 
     /**
@@ -394,42 +386,32 @@ public class BaseApplication extends Application implements ServiceConnection {
             public void onReceive(Context context, Intent intent) {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
-                    case OPEN:
-                        if (mIsMDClose) {
-                            ToastNotificationUtils.showToast(sContext, "行情服务器连接成功");
-                            mIsMDClose = false;
-                        }
+                    case MD_ONLINE:
+                        ToastNotificationUtils.showToast(sContext, "行情服务器连接成功");
                         break;
-                    case CLOSE:
-                        //每隔两秒,断线重连
-                        if (!mIsBackground) {
-                            if (!mIsMDClose) {
-                                ToastNotificationUtils.showToast(sContext, "行情服务器连接断开，正在重连...");
-                                mIsMDClose = true;
-                            }
+                    case MD_OFFLINE:
+                        //断线重连
+                        ToastNotificationUtils.showToast(sContext, "行情服务器连接断开，正在重连...");
 
-                            if (NetworkUtils.isNetworkConnected(sContext))
-                                mMyHandler.sendEmptyMessageDelayed(0, 1500);
-                            else
-                                ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
-                        }
+                        if (NetworkUtils.isNetworkConnected(sContext))
+                            mMyHandler.sendEmptyMessage(0);
+                        else
+                            ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
                         break;
-                    case ERROR:
-                    case SWITCH:
-                        //每隔两秒,断线重连
-                        if (!mIsBackground) {
-                            if (NetworkUtils.isNetworkConnected(sContext))
-                                mMyHandler.sendEmptyMessageDelayed(2, 1500);
-                            else
-                                ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
-                        }
+                    case MD_SWITCH:
+                        //断线重连
+                        ToastNotificationUtils.showToast(sContext, "正在切换最优行情服务器...");
+                        if (NetworkUtils.isNetworkConnected(sContext))
+                            mMyHandler.sendEmptyMessage(2);
+                        else
+                            ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
                         break;
                     default:
                         break;
                 }
             }
         };
-        LocalBroadcastManager.getInstance(sContext).registerReceiver(mReceiverMarket, new IntentFilter(BROADCAST_ACTION));
+        LocalBroadcastManager.getInstance(sContext).registerReceiver(mReceiverMarket, new IntentFilter(MD_BROADCAST_ACTION));
 
         //交易服务器断线重连广播
         mReceiverTransaction = new BroadcastReceiver() {
@@ -437,28 +419,29 @@ public class BaseApplication extends Application implements ServiceConnection {
             public void onReceive(Context context, Intent intent) {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
-                    case OPEN:
-                        if (mIsTDClose) {
-                            ToastNotificationUtils.showToast(sContext, "交易服务器连接成功");
-                            mIsTDClose = false;
-                        }
+                    case TD_ONLINE:
+                        ToastNotificationUtils.showToast(sContext, "交易服务器连接成功");
                         break;
-                    case CLOSE:
+                    case TD_OFFLINE:
                         DataManager.getInstance().IS_LOGIN = false;
-                        //每隔两秒,断线重连
-                        if (!mIsBackground) {
-                            if (!mIsTDClose) {
-                                ToastNotificationUtils.showToast(sContext, "交易服务器连接断开，正在重连...");
-                                mIsTDClose = true;
-                            }
+                        //断线重连
+                        ToastNotificationUtils.showToast(sContext, "交易服务器连接断开，正在重连...");
 
-                            if (NetworkUtils.isNetworkConnected(sContext))
-                                mMyHandler.sendEmptyMessageDelayed(1, 1500);
-                            else
-                                ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
-                        }
+                        if (NetworkUtils.isNetworkConnected(sContext))
+                            mMyHandler.sendEmptyMessage(1);
+                        else
+                            ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
                         break;
-                    case MESSAGE_SETTLEMENT:
+                    case TD_SWITCH:
+                        DataManager.getInstance().IS_LOGIN = false;
+                        //断线重连
+                        ToastNotificationUtils.showToast(sContext, "正在切换最优交易服务器...");
+                        if (NetworkUtils.isNetworkConnected(sContext))
+                            mMyHandler.sendEmptyMessage(3);
+                        else
+                            ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
+                        break;
+                    case TD_MESSAGE_SETTLEMENT:
                         Intent intent1 = new Intent(context, ConfirmActivity.class);
                         intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         sContext.startActivity(intent1);
@@ -469,7 +452,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                 }
             }
         };
-        LocalBroadcastManager.getInstance(sContext).registerReceiver(mReceiverTransaction, new IntentFilter(BROADCAST_ACTION_TRANSACTION));
+        LocalBroadcastManager.getInstance(sContext).registerReceiver(mReceiverTransaction, new IntentFilter(TD_BROADCAST_ACTION));
 
         //网络状态变化监听广播
         mReceiverNetwork = new BroadcastReceiver() {
@@ -483,9 +466,9 @@ public class BaseApplication extends Application implements ServiceConnection {
                     case 1:
                         if (sWebSocketService != null) {
                             //连接行情服务器
-                            sWebSocketService.connect(sMDURLs.get(index));
+                            sWebSocketService.connectMD(sMDURLs.get(index));
                             //连接交易服务器
-                            sWebSocketService.connectTransaction();
+                            sWebSocketService.connectTD();
                             LogUtils.e("连接打开", true);
                         }
                         break;
@@ -500,7 +483,6 @@ public class BaseApplication extends Application implements ServiceConnection {
         mReceiverScreen = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                mIsBackground = true;
                 notifyBackground();
             }
         };
@@ -519,16 +501,22 @@ public class BaseApplication extends Application implements ServiceConnection {
             switch (msg.what) {
                 case 0:
                     if (sWebSocketService != null)
-                        sWebSocketService.connect(sMDURLs.get(index));
+                        sWebSocketService.connectMD(sMDURLs.get(index));
                     break;
                 case 1:
                     if (sWebSocketService != null)
-                        sWebSocketService.connectTransaction();
+                        sWebSocketService.connectTD();
                     break;
                 case 2:
                     if (sWebSocketService != null) {
-                        sWebSocketService.disConnect();
-                        sWebSocketService.connect(sMDURLs.get(index));
+                        sWebSocketService.disConnectMD();
+                        sWebSocketService.connectMD(sMDURLs.get(index));
+                    }
+                    break;
+                case 3:
+                    if (sWebSocketService != null) {
+                        sWebSocketService.disConnectTD();
+                        sWebSocketService.connectTD();
                     }
                     break;
                 default:
