@@ -117,7 +117,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:autoLink="phone"
-                android:text="400-800-7951"
+                android:text="400-820-7951"
                 android:textColor="@color/gray" />
         </LinearLayout>
 
@@ -150,6 +150,7 @@
                 android:textColor="@color/white" />
 
             <TextView
+                android:id="@+id/version"
                 android:gravity="center_vertical|end"
                 android:maxLines="1"
                 app:autoSizeTextType="uniform"
@@ -160,7 +161,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
-                android:text="1.2.19"
+                android:text="1.0.0"
                 android:textColor="@color/gray" />
         </LinearLayout>
 

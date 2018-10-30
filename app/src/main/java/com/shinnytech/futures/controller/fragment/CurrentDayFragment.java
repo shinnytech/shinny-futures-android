@@ -448,15 +448,14 @@ public class CurrentDayFragment extends BaseChartFragment {
         if (BaseApplication.getWebSocketService() != null)
             BaseApplication.getWebSocketService().sendSetChart(instrument_id);
 
-        if (sDataManager.IS_LOGIN) {
-            if (mIsPosition) addPositionLimitLines();
-            if (mIsPending) addOrderLimitLines();
-        }
-
         if (instrument_id.contains("KQ") && searchEntity != null)
             instrument_id_transaction = searchEntity.getUnderlying_symbol();
         else instrument_id_transaction = instrument_id;
 
+        if (sDataManager.IS_LOGIN) {
+            if (mIsPosition) addPositionLimitLines();
+            if (mIsPending) addOrderLimitLines();
+        }
     }
 
     /**

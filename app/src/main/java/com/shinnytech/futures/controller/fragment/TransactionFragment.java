@@ -73,7 +73,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      * description: 手数键盘
      */
     private KeyboardUtils mKeyboardUtilsVolume;
-    private String mPriceType = "最新价";
+    private String mPriceType = "对手价";
     /**
      * date: 7/9/17
      * description: 平仓状态是否为实时数字标志
@@ -257,8 +257,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     private void refreshPosition() {
         try {
             mBinding.minPrice.setText(LatestFileManager.getSearchEntities().get(mInstrumentIdTransaction).getpTick());
-            mBinding.price.setText("最新价");
-            mPriceType = "最新价";
+            mBinding.price.setText("对手价");
+            mPriceType = "对手价";
             String key = mInstrumentIdTransaction;
             UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;

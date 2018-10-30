@@ -27,6 +27,7 @@ import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
+import com.shinnytech.futures.utils.LogUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -120,7 +121,6 @@ public class BaseChartFragment extends LazyLoadFragment {
     protected BroadcastReceiver mReceiver1;
     protected String instrument_id;
     protected String instrument_id_transaction;
-    protected String exchange_id;
     protected Calendar mCalendar;
     protected SimpleDateFormat mSimpleDateFormat;
     protected SparseArray<String> xVals;
@@ -179,7 +179,6 @@ public class BaseChartFragment extends LazyLoadFragment {
         if (instrument_id.contains("KQ") && searchEntity != null)
             instrument_id_transaction = searchEntity.getUnderlying_symbol();
         else instrument_id_transaction = instrument_id;
-        exchange_id = instrument_id_transaction.split("\\.")[0];
 
         mIsAverage = ((FutureInfoActivity) getActivity()).isAverage();
         if (!mIsAverage) mChart.getLegend().setEnabled(false);
@@ -289,6 +288,7 @@ public class BaseChartFragment extends LazyLoadFragment {
      * description: 增加持仓线
      */
     protected void addPositionLimitLines() {
+        LogUtils.e("", true);
         addLongPositionLimitLine();
         addShortPositionLimitLine();
     }
@@ -309,7 +309,7 @@ public class BaseChartFragment extends LazyLoadFragment {
             int volume_long = Integer.parseInt(positionEntity.getVolume_long());
             if (volume_long != 0) {
                 String limit_long = LatestFileManager.saveScaleByPtick(positionEntity.getOpen_price_long(), key);
-                String label_long = positionEntity.getInstrument_id() + " " + limit_long;
+                String label_long = positionEntity.getInstrument_id() + "@" + limit_long + "/" + volume_long + "手";
                 generateLimitLine(Float.valueOf(limit_long), label_long, mColorBuy, key + "0");
             }
         } catch (NumberFormatException ex) {
@@ -333,7 +333,7 @@ public class BaseChartFragment extends LazyLoadFragment {
             int volume_short = Integer.parseInt(positionEntity.getVolume_short());
             if (volume_short != 0) {
                 String limit_short = LatestFileManager.saveScaleByPtick(positionEntity.getOpen_price_short(), key);
-                String label_short = positionEntity.getInstrument_id() + " " + limit_short;
+                String label_short = positionEntity.getInstrument_id() + "@" + limit_short + "/" + volume_short + "手";
                 generateLimitLine(Float.valueOf(limit_short), label_short, mColorSell, key + "1");
             }
         } catch (NumberFormatException ex) {
@@ -348,7 +348,7 @@ public class BaseChartFragment extends LazyLoadFragment {
      */
     private void generateLimitLine(float limit, String label, int color, String limitKey) {
         LimitLine limitLine = new LimitLine(limit, label);
-        limitLine.setLineWidth(2f);
+        limitLine.setLineWidth(1f);
         limitLine.enableDashedLine(10f, 10f, 0f);
         limitLine.setLineColor(color);
         limitLine.setLabelPosition(LimitLine.LimitLabelPosition.LEFT_BOTTOM);
@@ -378,7 +378,7 @@ public class BaseChartFragment extends LazyLoadFragment {
                 float limit_long = Float.parseFloat(limit_long_S);
                 LimitLine limitLine = mPositionLimitLines.get(limitKey);
                 if (limitLine.getLimit() != limit_long) {
-                    String label_long = positionEntity.getInstrument_id() + " " + limit_long_S;
+                    String label_long = positionEntity.getInstrument_id() + "@" + limit_long_S + "/" + volume_long + "手";
                     mChart.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
                     mPositionLimitLines.remove(limitKey);
                     generateLimitLine(limit_long, label_long, mColorBuy, limitKey);
@@ -413,7 +413,7 @@ public class BaseChartFragment extends LazyLoadFragment {
                 float limit_short = Float.parseFloat(limit_short_S);
                 LimitLine limitLine = mPositionLimitLines.get(limitKey);
                 if (limitLine.getLimit() != limit_short) {
-                    String label_short = positionEntity.getInstrument_id() + " " + limit_short_S;
+                    String label_short = positionEntity.getInstrument_id() + "@" + limit_short_S + "/" + volume_short + "手";
                     mChart.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
                     mPositionLimitLines.remove(limitKey);
                     generateLimitLine(limit_short, label_short, mColorSell, limitKey);
@@ -449,12 +449,13 @@ public class BaseChartFragment extends LazyLoadFragment {
      */
     private void addOneOrderLimitLine(OrderEntity orderEntity) {
         try {
+            String limit_volume = orderEntity.getVolume_orign();
             String limit_price = LatestFileManager.saveScaleByPtick(orderEntity.getLimit_price(), instrument_id_transaction);
             LimitLine limitLine = new LimitLine(Float.parseFloat(limit_price),
-                    orderEntity.getInstrument_id() + "@" + limit_price);
+                    orderEntity.getInstrument_id() + "@" + limit_price + "/" + limit_volume + "手");
             mOrderLimitLines.put(orderEntity.getKey(), limitLine);
-            limitLine.setLineWidth(2f);
-            limitLine.enableDashedLine(10f, 10f, 0f);
+            limitLine.setLineWidth(1f);
+            limitLine.disableDashedLine();
             if ("BUY".equals(orderEntity.getDirection()))
                 limitLine.setLineColor(mColorBuy);
             else limitLine.setLineColor(mColorSell);
