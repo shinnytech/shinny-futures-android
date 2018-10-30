@@ -35,6 +35,7 @@ public final class CommonConstants {
     public static final String DEAL = "成交记录";
     public static final String BANK = "银期转帐";
     public static final String FEEDBACK = "反馈";
+    public static final String ABOUT = "关于";
     public static final String CURRENT_DAY_FRAGMENT = "当日";
     public static final String DAY_FRAGMENT = "日线";
     public static final String HOUR_FRAGMENT = "小时线";

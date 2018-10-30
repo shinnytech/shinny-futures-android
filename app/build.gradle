@@ -638,5 +638,3 @@ dependencies {
     implementation 'com.tencent.bugly:crashreport_upgrade:latest.release'
     implementation 'com.neovisionaries:nv-websocket-client:2.5'
 }
-
-

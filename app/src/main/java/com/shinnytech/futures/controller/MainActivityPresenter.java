@@ -33,6 +33,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.controller.activity.AboutActivity;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
@@ -86,7 +87,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
     private Toolbar mToolbar;
     private TextView mToolbarTitle;
     private QuoteNavAdapter mNavAdapter;
-    private String[] mMenuTitle = new String[]{"自选", "主力", "上海", "上期能源", "大连", "郑州", "中金", "大连组合", "郑州组合", "账户", "持仓", "成交", "转账", "反馈"};
+    private String[] mMenuTitle = new String[]{"自选", "主力", "上海", "上期能源", "大连", "郑州", "中金", "大连组合", "郑州组合", "账户", "持仓", "成交", "转账", "反馈", "关于"};
     private Map<String, String> mInsListNameNav = new TreeMap<>();
     private String mIns;
     private BroadcastReceiver mReceiver;
@@ -353,7 +354,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
     /**
      * date: 1/17/18
      * author: chenli
-     * description: 点击侧滑栏后后发生的事
+     * description: 点击侧滑栏事件
      */
     private void switchPages(int mCurItemId) {
         switch (mCurItemId) {
@@ -441,6 +442,10 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
             case R.id.nav_feedback:
                 Intent intentFeed = new Intent(mMainActivity, FeedBackActivity.class);
                 mMainActivity.startActivity(intentFeed);
+                break;
+            case R.id.nav_about:
+                Intent intentAbout = new Intent(mMainActivity, AboutActivity.class);
+                mMainActivity.startActivity(intentAbout);
                 break;
             default:
                 break;

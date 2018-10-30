@@ -125,7 +125,7 @@ public class FutureInfoActivityPresenter {
     private FragmentManager mFragmentManager;
     private Fragment mCurFragment;
     private Drawable mRightDrawable;
-    private int mNav_position = 0;
+    private int mNav_position;
     private Dialog mDialog;
     private RecyclerView mRecyclerView;
     private DialogAdapter mDialogAdapter;
@@ -517,15 +517,8 @@ public class FutureInfoActivityPresenter {
             mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.black_dark));
             mToolbarTitle.setTextColor(Color.WHITE);
             SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
-            if (searchEntity != null) {
-                if (mInstrumentId.contains("KQ")) {
-                    String underlying_symbol = searchEntity.getUnderlying_symbol();
-                    SearchEntity searchEntity1 = LatestFileManager.getSearchEntities().get(underlying_symbol);
-                    if (searchEntity1 != null)
-                        mToolbarTitle.setText(searchEntity1.getInstrumentName());
-                    else mToolbarTitle.setText(underlying_symbol);
-                } else mToolbarTitle.setText(searchEntity.getInstrumentName());
-            } else mToolbarTitle.setText(mInstrumentId);
+            if (searchEntity != null) mToolbarTitle.setText(searchEntity.getInstrumentName());
+            else mToolbarTitle.setText(mInstrumentId);
             mToolbarTitle.setCompoundDrawables(null, null, mRightDrawable, null);
             mToolbarTitle.setBackgroundColor(ContextCompat.getColor(sContext, R.color.title));
         } else {

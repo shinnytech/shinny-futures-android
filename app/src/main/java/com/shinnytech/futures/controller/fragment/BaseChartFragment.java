@@ -451,7 +451,7 @@ public class BaseChartFragment extends LazyLoadFragment {
         try {
             String limit_price = LatestFileManager.saveScaleByPtick(orderEntity.getLimit_price(), instrument_id_transaction);
             LimitLine limitLine = new LimitLine(Float.parseFloat(limit_price),
-                    orderEntity.getOrder_id() + "@" + limit_price);
+                    orderEntity.getInstrument_id() + "@" + limit_price);
             mOrderLimitLines.put(orderEntity.getKey(), limitLine);
             limitLine.setLineWidth(2f);
             limitLine.enableDashedLine(10f, 10f, 0f);

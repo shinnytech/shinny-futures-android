@@ -423,7 +423,7 @@ public class KlineFragment extends BaseChartFragment {
                     }
                     combinedData.notifyDataChanged();
                     mChart.notifyDataSetChanged();
-                    mChart.getXAxis().setAxisMaximum(combinedData.getXMax() + 0.5f);
+                    mChart.getXAxis().setAxisMaximum(combinedData.getXMax() + 2.5f);
                     mChart.getXAxis().setAxisMinimum(combinedData.getXMin() - 0.5f);
                     mChart.invalidate();
                 } else {
@@ -465,7 +465,7 @@ public class KlineFragment extends BaseChartFragment {
                     if (mIsAverage) combinedData.setData(mLineData);
                     else combinedData.setData(new LineData());
                     mChart.setData(combinedData);//当前屏幕会显示所有的数据
-                    mChart.getXAxis().setAxisMaximum(combinedData.getXMax() + 0.5f);
+                    mChart.getXAxis().setAxisMaximum(combinedData.getXMax() + 2.5f);
                     mChart.getXAxis().setAxisMinimum(combinedData.getXMin() - 0.5f);
                     mChart.setVisibleXRangeMinimum(7);
                     mChart.setVisibleXRangeMaximum(200);

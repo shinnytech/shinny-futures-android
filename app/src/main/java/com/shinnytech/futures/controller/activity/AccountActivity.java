@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
@@ -36,6 +37,7 @@ public class AccountActivity extends BaseActivity {
     private BroadcastReceiver mReceiver1;
     private DataManager sDataManager = DataManager.getInstance();
     private Context sContext;
+    private ActivityAccountBinding mBinding;
 
     /**
      * date: 7/7/17
@@ -105,10 +107,18 @@ public class AccountActivity extends BaseActivity {
     @Override
     protected void initData() {
         sContext = BaseApplication.getContext();
+        mBinding = (ActivityAccountBinding) mViewDataBinding;
     }
 
     @Override
     protected void initEvent() {
+        mBinding.buttonIdLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sDataManager.IS_LOGIN = false;
+                AccountActivity.this.finish();
+            }
+        });
     }
 
     @Override
@@ -120,6 +130,8 @@ public class AccountActivity extends BaseActivity {
             //判断从哪个页面跳到登录页，登录页的销毁方式不一样
             intent.putExtra(ACTIVITY_TYPE, "MainActivity");
             startActivity(intent);
+        }else {
+            mBinding.buttonIdLogout.setVisibility(View.VISIBLE);
         }
         refreshUI(TD_MESSAGE);
         registerBroaderCast();

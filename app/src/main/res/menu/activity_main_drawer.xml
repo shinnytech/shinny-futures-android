@@ -99,4 +99,12 @@
             android:id="@+id/nav_feedback"
             android:title="反馈" />
     </group>
+
+    <group
+        android:id="@+id/gp14"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_about"
+            android:title="关于" />
+    </group>
 </menu>
