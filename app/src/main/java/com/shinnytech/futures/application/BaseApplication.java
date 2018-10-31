@@ -391,7 +391,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                         break;
                     case MD_OFFLINE:
                         //断线重连
-                        ToastNotificationUtils.showToast(sContext, "行情服务器连接断开，正在重连...");
+                        LogUtils.e("行情服务器连接断开，正在重连...", true);
 
                         if (NetworkUtils.isNetworkConnected(sContext))
                             mMyHandler.sendEmptyMessage(0);
@@ -400,7 +400,8 @@ public class BaseApplication extends Application implements ServiceConnection {
                         break;
                     case MD_SWITCH:
                         //断线重连
-                        ToastNotificationUtils.showToast(sContext, "正在切换最优行情服务器...");
+                        LogUtils.e("正在切换最优行情服务器...", true);
+
                         if (NetworkUtils.isNetworkConnected(sContext))
                             mMyHandler.sendEmptyMessage(2);
                         else
@@ -425,7 +426,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                     case TD_OFFLINE:
                         DataManager.getInstance().IS_LOGIN = false;
                         //断线重连
-                        ToastNotificationUtils.showToast(sContext, "交易服务器连接断开，正在重连...");
+                        LogUtils.e("交易服务器连接断开，正在重连...", true);
 
                         if (NetworkUtils.isNetworkConnected(sContext))
                             mMyHandler.sendEmptyMessage(1);
@@ -435,7 +436,8 @@ public class BaseApplication extends Application implements ServiceConnection {
                     case TD_SWITCH:
                         DataManager.getInstance().IS_LOGIN = false;
                         //断线重连
-                        ToastNotificationUtils.showToast(sContext, "正在切换最优交易服务器...");
+                        LogUtils.e("正在切换最优交易服务器...", true);
+
                         if (NetworkUtils.isNetworkConnected(sContext))
                             mMyHandler.sendEmptyMessage(3);
                         else
