@@ -12,6 +12,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ItemActivityBankTransferBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.TransferEntity;
 import com.shinnytech.futures.model.engine.DataManager;
+import com.shinnytech.futures.utils.MathUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -84,7 +85,7 @@ public class BankTransferAdapter extends RecyclerView.Adapter<BankTransferAdapte
                 if (transferEntity == null) return;
                 String date = DataManager.getInstance().getSimpleDateFormat().format(new Date(Long.valueOf(transferEntity.getDatetime()) / 1000000));
                 mBinding.datetime.setText(date);
-                mBinding.amount.setText(transferEntity.getAmount());
+                mBinding.amount.setText(MathUtils.round(transferEntity.getAmount(), 2));
                 mBinding.currency.setText(transferEntity.getCurrency());
                 mBinding.tradeResult.setText(transferEntity.getError_msg());
             }
