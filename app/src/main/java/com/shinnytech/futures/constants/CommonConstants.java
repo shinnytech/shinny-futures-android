@@ -8,7 +8,7 @@ public final class CommonConstants {
     public static final String MARKET_URL_5 = "ws://106.15.82.247/t/md/front/mobile";
     public static final String MARKET_URL_6 = "ws://106.15.82.189/t/md/front/mobile";
     public static final String MARKET_URL_7 = "ws://106.15.219.160/t/md/front/mobile";
-    public static final String TRANSACTION_URL = "wss://t.shinnytech.com/trade/shinny";
+    public static String TRANSACTION_URL = "ws://opentd.shinnytech.com/trade/shinny";
     public static final String JSON_FILE_URL = "http://openmd.shinnytech.com/t/md/symbols/latest.json";
     public static final String FEED_BACK_URL = "http://ask.shinnytech.com/src/indexm.html";
     public static final String MD_ONLINE = "MD_ONLINE";

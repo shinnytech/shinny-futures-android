@@ -66,6 +66,7 @@ import static com.shinnytech.futures.constants.CommonConstants.MD_SWITCH;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_ONLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_SWITCH;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_URL;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
@@ -119,7 +120,7 @@ public class BaseApplication extends Application implements ServiceConnection {
         initOkGo();
 
         //初始化行情服务器地址
-        initMDUrl();
+        initTMDUrl();
 
         //下载合约列表文件
         downloadLatestJsonFile();
@@ -235,9 +236,9 @@ public class BaseApplication extends Application implements ServiceConnection {
     /**
      * date: 8/6/18
      * author: chenli
-     * description: 初始化行情服务器地址
+     * description: 初始化服务器地址
      */
-    private void initMDUrl() {
+    private void initTMDUrl() {
         List<String> MDUrlGroup = new ArrayList<>();
         MDUrlGroup.add(MARKET_URL_2);
         MDUrlGroup.add(MARKET_URL_3);
@@ -249,7 +250,9 @@ public class BaseApplication extends Application implements ServiceConnection {
         try {
             Class cl = Class.forName("com.shinnytech.futures.constants.LocalCommonConstants");
             String MARKET_URL_8 = (String) cl.getMethod("getMARKET_URL_8").invoke(null);
+            String TRANSACTION_URL_L = (String) cl.getMethod("getTransactionUrl").invoke(null);
             sMDURLs.add(MARKET_URL_8);
+            TRANSACTION_URL = TRANSACTION_URL_L;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             sMDURLs.add(MARKET_URL_1);
