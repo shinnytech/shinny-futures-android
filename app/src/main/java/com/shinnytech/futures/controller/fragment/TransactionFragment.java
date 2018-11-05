@@ -435,9 +435,11 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
         if (userEntity == null) return;
         AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
-        mBinding.setAccount(accountEntity);
         if (accountEntity == null) return;
-        String margin = LatestFileManager.getSearchEntities().get(mInstrumentIdTransaction).getMargin();
+        mBinding.setAccount(accountEntity);
+        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentIdTransaction);
+        if (searchEntity == null) return;
+        String margin = searchEntity.getMargin();
         if (margin.isEmpty()) mBinding.maxVolume.setText("0");
         else
             mBinding.maxVolume.setText(MathUtils.round(MathUtils.divide(accountEntity.getAvailable(), margin), 0));

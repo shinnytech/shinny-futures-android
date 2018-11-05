@@ -268,20 +268,25 @@ public class BankTransferActivity extends BaseActivity {
     }
 
     private void refreshTransfer() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
-        if (userEntity == null) return;
-        mNewData.clear();
-        for (TransferEntity transferEntity :
-                userEntity.getTransfers().values()) {
-            TransferEntity t = CloneUtils.clone(transferEntity);
-            mNewData.add(t);
+        try {
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            if (userEntity == null) return;
+            mNewData.clear();
+            for (TransferEntity transferEntity :
+                    userEntity.getTransfers().values()) {
+                TransferEntity t = CloneUtils.clone(transferEntity);
+                mNewData.add(t);
+            }
+            Collections.sort(mNewData);
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new TransferDiffCallback(mOldData, mNewData), false);
+            mAdapter.setData(mNewData);
+            diffResult.dispatchUpdatesTo(mAdapter);
+            mOldData.clear();
+            mOldData.addAll(mNewData);
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        Collections.sort(mNewData);
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new TransferDiffCallback(mOldData, mNewData), false);
-        mAdapter.setData(mNewData);
-        diffResult.dispatchUpdatesTo(mAdapter);
-        mOldData.clear();
-        mOldData.addAll(mNewData);
+
     }
 
 }

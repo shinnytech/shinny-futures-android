@@ -93,6 +93,7 @@ public class LoginActivity extends BaseActivity {
         } else {
             if (BaseApplication.getWebSocketService() != null) {
                 BaseApplication.getWebSocketService().disConnectTD();
+                BaseApplication.getWebSocketService().connectTD();
             }
         }
         return brokerList;

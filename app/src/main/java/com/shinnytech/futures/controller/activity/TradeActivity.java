@@ -95,20 +95,25 @@ public class TradeActivity extends BaseActivity {
     }
 
     public void refreshUI() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
-        if (userEntity == null) return;
-        mNewData.clear();
-        for (TradeEntity tradeEntity :
-                userEntity.getTrades().values()) {
-            TradeEntity t = CloneUtils.clone(tradeEntity);
-            mNewData.add(t);
+        try {
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            if (userEntity == null) return;
+            mNewData.clear();
+            for (TradeEntity tradeEntity :
+                    userEntity.getTrades().values()) {
+                TradeEntity t = CloneUtils.clone(tradeEntity);
+                mNewData.add(t);
+            }
+            Collections.sort(mNewData);
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new TradeDiffCallback(mOldData, mNewData), false);
+            mAdapter.setData(mNewData);
+            diffResult.dispatchUpdatesTo(mAdapter);
+            mOldData.clear();
+            mOldData.addAll(mNewData);
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        Collections.sort(mNewData);
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new TradeDiffCallback(mOldData, mNewData), false);
-        mAdapter.setData(mNewData);
-        diffResult.dispatchUpdatesTo(mAdapter);
-        mOldData.clear();
-        mOldData.addAll(mNewData);
+
     }
 
 

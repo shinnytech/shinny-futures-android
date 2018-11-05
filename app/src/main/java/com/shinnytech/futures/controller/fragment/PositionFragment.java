@@ -117,25 +117,30 @@ public class PositionFragment extends LazyLoadFragment {
     }
 
     protected void refreshPosition() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
-        if (userEntity == null) return;
-        mNewData.clear();
+        try {
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            if (userEntity == null) return;
+            mNewData.clear();
 
-        for (PositionEntity positionEntity :
-                userEntity.getPositions().values()) {
-            int volume_long = Integer.parseInt(positionEntity.getVolume_long());
-            int volume_short = Integer.parseInt(positionEntity.getVolume_short());
-            if (volume_long != 0 || volume_short != 0) {
-                PositionEntity p = CloneUtils.clone(positionEntity);
-                mNewData.add(p);
+            for (PositionEntity positionEntity :
+                    userEntity.getPositions().values()) {
+                int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+                int volume_short = Integer.parseInt(positionEntity.getVolume_short());
+                if (volume_long != 0 || volume_short != 0) {
+                    PositionEntity p = CloneUtils.clone(positionEntity);
+                    mNewData.add(p);
+                }
             }
+            Collections.sort(mNewData);
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new PositionDiffCallback(mOldData, mNewData), false);
+            mAdapter.setData(mNewData);
+            diffResult.dispatchUpdatesTo(mAdapter);
+            mOldData.clear();
+            mOldData.addAll(mNewData);
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        Collections.sort(mNewData);
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new PositionDiffCallback(mOldData, mNewData), false);
-        mAdapter.setData(mNewData);
-        diffResult.dispatchUpdatesTo(mAdapter);
-        mOldData.clear();
-        mOldData.addAll(mNewData);
+
     }
 
     protected void registerBroaderCast() {

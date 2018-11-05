@@ -208,24 +208,28 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
      * description: 根据用户选择显示全部挂单或未成交单
      */
     protected void refreshOrder() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
-        if (userEntity == null) return;
-        mNewData.clear();
-        for (OrderEntity orderEntity :
-                userEntity.getOrders().values()) {
-            OrderEntity o = CloneUtils.clone(orderEntity);
-            if (mBinding.rbAllOrder.isChecked()) {
-                mNewData.add(o);
-            } else if (("ALIVE").equals(orderEntity.getStatus())) {
-                mNewData.add(o);
+        try {
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            if (userEntity == null) return;
+            mNewData.clear();
+            for (OrderEntity orderEntity :
+                    userEntity.getOrders().values()) {
+                OrderEntity o = CloneUtils.clone(orderEntity);
+                if (mBinding.rbAllOrder.isChecked()) {
+                    mNewData.add(o);
+                } else if (("ALIVE").equals(orderEntity.getStatus())) {
+                    mNewData.add(o);
+                }
             }
+            Collections.sort(mNewData);
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new OrderDiffCallback(mOldData, mNewData), false);
+            mAdapter.setData(mNewData);
+            diffResult.dispatchUpdatesTo(mAdapter);
+            mOldData.clear();
+            mOldData.addAll(mNewData);
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        Collections.sort(mNewData);
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new OrderDiffCallback(mOldData, mNewData), false);
-        mAdapter.setData(mNewData);
-        diffResult.dispatchUpdatesTo(mAdapter);
-        mOldData.clear();
-        mOldData.addAll(mNewData);
     }
 
     @Override
