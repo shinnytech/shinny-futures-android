@@ -48,6 +48,7 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.KeyboardUtils;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
@@ -166,14 +167,14 @@ public class FutureInfoActivityPresenter {
 
         //初始化开关状态
         if (SPUtils.contains(sContext, "isPosition")) {
-            mIsPosition = (boolean) SPUtils.get(sContext, "isPosition", false);
-        }
+            mIsPosition = (boolean) SPUtils.get(sContext, "isPosition", true);
+        }else mIsPosition = true;
         if (SPUtils.contains(sContext, "isPending")) {
-            mIsPending = (boolean) SPUtils.get(sContext, "isPending", false);
-        }
+            mIsPending = (boolean) SPUtils.get(sContext, "isPending", true);
+        }else mIsPending = true;
         if (SPUtils.contains(sContext, "isAverage")) {
-            mIsAverage = (boolean) SPUtils.get(sContext, "isAverage", false);
-        }
+            mIsAverage = (boolean) SPUtils.get(sContext, "isAverage", true);
+        }else mIsAverage = true;
 
         //初始化盘口、持仓、挂单、交易切换容器，fragment实例保存，有生命周期的变化，默认情况下屏幕外初始化两个fragment
         List<Fragment> fragmentList = new ArrayList<>();
@@ -236,6 +237,7 @@ public class FutureInfoActivityPresenter {
                             //添加判断，防止自选合约列表为空时产生无效的点击事件
                             if (instrumentId != null) {
                                 if (!instrumentId.isEmpty()) {
+                                    mInstrumentId = instrumentId;
                                     IdEvent idEvent = new IdEvent();
                                     idEvent.setInstrument_id(instrumentId);
                                     EventBus.getDefault().post(idEvent);
@@ -462,10 +464,7 @@ public class FutureInfoActivityPresenter {
                     case 1:
                         mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.black_dark));
                         mToolbarTitle.setTextColor(Color.WHITE);
-                        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
-                        if (searchEntity != null)
-                            mToolbarTitle.setText(searchEntity.getInstrumentName());
-                        else mToolbarTitle.setText(mInstrumentId);
+                        setToolbarTitle();
                         mToolbarTitle.setCompoundDrawables(null, null, mRightDrawable, null);
                         mToolbarTitle.setBackgroundColor(ContextCompat.getColor(context, R.color.title));
                         break;
@@ -473,6 +472,19 @@ public class FutureInfoActivityPresenter {
             }
         };
         mFutureInfoActivity.registerReceiver(mReceiver, new IntentFilter(NETWORK_STATE));
+    }
+
+    public void setToolbarTitle() {
+        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
+        if (searchEntity != null){
+            String underlying_symbol = searchEntity.getUnderlying_symbol();
+            SearchEntity searchEntity1 = LatestFileManager.getSearchEntities().get(underlying_symbol);
+            LogUtils.e(underlying_symbol, true);
+
+            if (searchEntity1 != null) mToolbarTitle.setText(searchEntity1.getInstrumentName());
+            else mToolbarTitle.setText(underlying_symbol);
+        }
+        else mToolbarTitle.setText(mInstrumentId);
     }
 
     /**
@@ -516,9 +528,7 @@ public class FutureInfoActivityPresenter {
         if (NetworkUtils.isNetworkConnected(sContext)) {
             mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.black_dark));
             mToolbarTitle.setTextColor(Color.WHITE);
-            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
-            if (searchEntity != null) mToolbarTitle.setText(searchEntity.getInstrumentName());
-            else mToolbarTitle.setText(mInstrumentId);
+            setToolbarTitle();
             mToolbarTitle.setCompoundDrawables(null, null, mRightDrawable, null);
             mToolbarTitle.setBackgroundColor(ContextCompat.getColor(sContext, R.color.title));
         } else {
