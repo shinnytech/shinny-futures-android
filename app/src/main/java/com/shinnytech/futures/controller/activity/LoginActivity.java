@@ -90,12 +90,8 @@ public class LoginActivity extends BaseActivity {
                     }
                 }
             }
-        } else {
-            if (BaseApplication.getWebSocketService() != null) {
-                BaseApplication.getWebSocketService().disConnectTD();
-                BaseApplication.getWebSocketService().connectTD();
-            }
-        }
+        } else if (BaseApplication.getWebSocketService() != null) BaseApplication.getWebSocketService().reConnectTD();
+
         return brokerList;
     }
 

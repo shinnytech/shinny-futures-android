@@ -62,10 +62,8 @@ import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_7;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.MD_ONLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
-import static com.shinnytech.futures.constants.CommonConstants.MD_SWITCH;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_ONLINE;
-import static com.shinnytech.futures.constants.CommonConstants.TD_SWITCH;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_URL;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
@@ -180,19 +178,6 @@ public class BaseApplication extends Application implements ServiceConnection {
     }
 
     private void initBugly() {
-        // 设置是否开启热更新能力，默认为true
-        Beta.enableHotfix = true;
-        // 设置是否自动下载补丁，默认为true
-        Beta.canAutoDownloadPatch = true;
-        // 设置是否自动合成补丁，默认为true
-        Beta.canAutoPatch = true;
-        // 设置是否提示用户重启，默认为false
-        Beta.canNotifyUserRestart = true;
-        // 设置开发设备，默认为false，上传补丁如果下发范围指定为“开发设备”，需要调用此接口来标识开发设备
-        Bugly.setIsDevelopmentDevice(sContext, true);
-        // 多渠道需求塞入
-        String channel = BuildConfig.BROKER_ID;
-        Bugly.setAppChannel(sContext, channel);
         Bugly.init(sContext, "247bd4965f", false);
     }
 
@@ -401,15 +386,6 @@ public class BaseApplication extends Application implements ServiceConnection {
                         else
                             ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
                         break;
-                    case MD_SWITCH:
-                        //断线重连
-                        LogUtils.e("正在切换最优行情服务器...", true);
-
-                        if (NetworkUtils.isNetworkConnected(sContext))
-                            mMyHandler.sendEmptyMessage(2);
-                        else
-                            ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
-                        break;
                     default:
                         break;
                 }
@@ -433,16 +409,6 @@ public class BaseApplication extends Application implements ServiceConnection {
 
                         if (NetworkUtils.isNetworkConnected(sContext))
                             mMyHandler.sendEmptyMessage(1);
-                        else
-                            ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
-                        break;
-                    case TD_SWITCH:
-                        DataManager.getInstance().IS_LOGIN = false;
-                        //断线重连
-                        LogUtils.e("正在切换最优交易服务器...", true);
-
-                        if (NetworkUtils.isNetworkConnected(sContext))
-                            mMyHandler.sendEmptyMessage(3);
                         else
                             ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
                         break;
@@ -471,9 +437,9 @@ public class BaseApplication extends Application implements ServiceConnection {
                     case 1:
                         if (sWebSocketService != null) {
                             //连接行情服务器
-                            sWebSocketService.connectMD(sMDURLs.get(index));
+                            sWebSocketService.reConnectMD(sMDURLs.get(index));
                             //连接交易服务器
-                            sWebSocketService.connectTD();
+                            sWebSocketService.reConnectTD();
                             LogUtils.e("连接打开", true);
                         }
                         break;
@@ -505,24 +471,10 @@ public class BaseApplication extends Application implements ServiceConnection {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 0:
-                    if (sWebSocketService != null)
-                        sWebSocketService.connectMD(sMDURLs.get(index));
+                    if (sWebSocketService != null) sWebSocketService.reConnectMD(sMDURLs.get(index));
                     break;
                 case 1:
-                    if (sWebSocketService != null)
-                        sWebSocketService.connectTD();
-                    break;
-                case 2:
-                    if (sWebSocketService != null) {
-                        sWebSocketService.disConnectMD();
-                        sWebSocketService.connectMD(sMDURLs.get(index));
-                    }
-                    break;
-                case 3:
-                    if (sWebSocketService != null) {
-                        sWebSocketService.disConnectTD();
-                        sWebSocketService.connectTD();
-                    }
+                    if (sWebSocketService != null) sWebSocketService.reConnectTD();
                     break;
                 default:
                     break;

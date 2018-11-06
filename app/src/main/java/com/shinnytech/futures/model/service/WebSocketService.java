@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import com.google.gson.Gson;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
+import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketExtension;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
@@ -32,8 +33,11 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.shinnytech.futures.constants.CommonConstants.BACKGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY;
@@ -97,8 +101,6 @@ public class WebSocketService extends Service {
 
     private boolean mMDOnline = false;
 
-    private boolean mTDOnline = false;
-
     private final IBinder mBinder = new LocalBinder();
 
     private WebSocket mWebSocketClientMD;
@@ -113,12 +115,6 @@ public class WebSocketService extends Service {
 
     private long mTDLastPong = System.currentTimeMillis() / 1000;
 
-    private AlarmManager mAlarmManager;
-
-    private BroadcastReceiver mAlarmReceiver;
-
-    private PendingIntent mPendingIntent;
-
     public WebSocketService() {
     }
 
@@ -130,38 +126,26 @@ public class WebSocketService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        // Schedule the alarm!
-        mAlarmManager = (AlarmManager)getSystemService(this.ALARM_SERVICE);
-        mPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ALARM), 0);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + TIME_INTERVAL, mPendingIntent);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + TIME_INTERVAL, mPendingIntent);
-        } else {
-            mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), TIME_INTERVAL, mPendingIntent);
-        }
-        mAlarmReceiver = new BroadcastReceiver() {
+
+        Timer timer = new Timer();
+        TimerTask timerTask = new TimerTask() {
             @Override
-            public void onReceive(Context context, Intent intent) {
-                // 重复定时任务
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + TIME_INTERVAL, mPendingIntent);
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + TIME_INTERVAL, mPendingIntent);
-                }
+            public void run() {
+
                 if ((System.currentTimeMillis() / 1000 - mMDLastPong) >= 20){
                     mMDOnline = false;
                     sendMessage(MD_OFFLINE, MD_BROADCAST);
                 }
 
                 if ((System.currentTimeMillis() / 1000 - mTDLastPong) >= 20){
-                    mTDOnline = false;
                     sendMessage(TD_OFFLINE, TD_BROADCAST);
                 }
 
+                mWebSocketClientMD.sendPing();
+                mWebSocketClientTD.sendPing();
             }
         };
-        registerReceiver(mAlarmReceiver, new IntentFilter(ALARM));
+        timer.schedule(timerTask, 15000, 15000);
 
         EventBus.getDefault().register(this);
     }
@@ -169,7 +153,6 @@ public class WebSocketService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(mAlarmReceiver);
         EventBus.getDefault().unregister(this);
     }
 
@@ -288,7 +271,6 @@ public class WebSocketService extends Service {
                     })
                     .addHeader("User-Agent", "shinnyfutures-Android"+" "+versionName)
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
-                    .setPingInterval(TIME_INTERVAL)
                     .connectAsynchronously();
             int index = BaseApplication.getIndex() + 1;
             if (index == 7) index = 0;
@@ -297,6 +279,11 @@ public class WebSocketService extends Service {
             e.printStackTrace();
         }
 
+    }
+
+    public void reConnectMD(String url){
+        disConnectMD();
+        connectMD(url);
     }
 
     public void disConnectMD() {
@@ -399,7 +386,7 @@ public class WebSocketService extends Service {
                         @Override
 
                         // A text message arrived from the server.
-                        public void onTextMessage(WebSocket websocket, String message) {
+                        public void onTextMessage(final WebSocket websocket, String message) {
                             LogUtils.e(message, false);
                             try {
                                 JSONObject jsonObject = new JSONObject(message);
@@ -409,16 +396,13 @@ public class WebSocketService extends Service {
                                         BrokerEntity brokerInfo = new Gson().fromJson(message, BrokerEntity.class);
                                         sDataManager.getBroker().setBrokers(brokerInfo.getBrokers());
                                         sendMessage(TD_MESSAGE_BROKER_INFO, TD_BROADCAST);
+                                        sendMessage(TD_ONLINE, TD_BROADCAST);
                                         break;
                                     case "rtn_data":
-                                        if (!mTDOnline){
-                                            sendMessage(TD_ONLINE, TD_BROADCAST);
-                                            mTDOnline = true;
-                                        }
                                         sDataManager.refreshTradeBean(jsonObject);
                                         break;
                                     default:
-                                        sendMessage(TD_SWITCH, TD_BROADCAST);
+                                        sendMessage(TD_OFFLINE, TD_BROADCAST);
                                         return;
                                 }
                                 if (!mBackground)sendPeekMessageTransaction();
@@ -436,7 +420,6 @@ public class WebSocketService extends Service {
 
                     })
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
-                    .setPingInterval(TIME_INTERVAL)
                     .addHeader("User-Agent", "shinnyfutures-Android"+" "+versionName)
                     .connectAsynchronously();
         } catch (Exception e) {
@@ -445,10 +428,14 @@ public class WebSocketService extends Service {
 
     }
 
+    public void reConnectTD(){
+        disConnectTD();
+        connectTD();
+    }
+
     public void disConnectTD() {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
             mWebSocketClientTD.disconnect();
-            mWebSocketClientTD = null;
         }
     }
 
