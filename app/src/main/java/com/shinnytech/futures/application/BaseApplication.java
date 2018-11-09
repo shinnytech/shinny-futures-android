@@ -64,6 +64,7 @@ import okhttp3.OkHttpClient;
 import static com.shinnytech.futures.constants.CommonConstants.BACKGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.FOREGROUND;
+import static com.shinnytech.futures.constants.CommonConstants.JSON_FILE_URL;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_1;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_2;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_3;
@@ -126,11 +127,11 @@ public class BaseApplication extends Application implements ServiceConnection {
         //获取版本号
         initAppVersion();
 
-        //OkHttp网络框架初始化
-        initOkGo();
-
         //初始化行情服务器地址
         initTMDUrl();
+
+        //OkHttp网络框架初始化
+        initOkGo();
 
         //下载合约列表文件
         downloadLatestJsonFile();
@@ -258,11 +259,13 @@ public class BaseApplication extends Application implements ServiceConnection {
             Class cl = Class.forName("com.shinnytech.futures.constants.LocalCommonConstants");
             String MARKET_URL_8 = (String) cl.getMethod("getMarketUrl8").invoke(null);
             String TRANSACTION_URL_L = (String) cl.getMethod("getTransactionUrl").invoke(null);
+            String JSON_FILE_URL_L = (String) cl.getMethod("getJsonFileUrl").invoke(null);
             String BUGLY_KEY = (String) cl.getMethod("getBuglyKey").invoke(null);
             String UMENG_KEY = (String) cl.getMethod("getUmengKey").invoke(null);
             String BAIDU_KEY = (String) cl.getMethod("getBaiduKey").invoke(null);
             sMDURLs.add(MARKET_URL_8);
             TRANSACTION_URL = TRANSACTION_URL_L;
+            JSON_FILE_URL = JSON_FILE_URL_L;
             Bugly.init(sContext, BUGLY_KEY, false);
             UMConfigure.init(sContext, UMENG_KEY, "ShinnyTech", UMConfigure.DEVICE_TYPE_PHONE, "");
             StatService.setAppKey(BAIDU_KEY);
