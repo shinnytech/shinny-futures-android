@@ -155,8 +155,8 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
      * description: 检查是否第一次启动APP,弹出免责条款框
      */
     public void checkResponsibility() {
-        final float nowVersionCode = getVersionCode(mMainActivity);
-        float versionCode = (float) SPUtils.get(sContext, "versionCode", 0.0f);
+        final int nowVersionCode = DataManager.getInstance().APP_CODE;
+        int versionCode = (int) SPUtils.get(sContext, "versionCode", 0);
         if (nowVersionCode > versionCode) {
             final Dialog dialog = new Dialog(mMainActivity, R.style.responsibilityDialog);
             View view = View.inflate(mMainActivity, R.layout.view_dialog_responsibility, null);
@@ -571,18 +571,6 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
         mBinding.rvQuoteNavigation.setVisibility(View.VISIBLE);
         mBinding.quoteNavLeft.setVisibility(View.VISIBLE);
         mBinding.quoteNavRight.setVisibility(View.VISIBLE);
-    }
-
-
-    //获取软件版本号
-    private float getVersionCode(Context context) {
-        float versionCode = 0;
-        try {
-            versionCode = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        return versionCode;
     }
 
     /**

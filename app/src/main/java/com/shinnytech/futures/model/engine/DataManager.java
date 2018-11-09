@@ -18,6 +18,7 @@ import com.shinnytech.futures.model.bean.futureinfobean.DiffEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.FutureBean;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.json.JSONArray;
@@ -85,6 +86,24 @@ public class DataManager {
      * description: 账户id
      */
     public String USER_ID = "";
+
+    /**
+     * date: 2018/11/7
+     * description: appVersion
+     */
+    public String APP_VERSION= "";
+
+    /**
+     * date: 2018/11/7
+     * description: appCode
+     */
+    public int APP_CODE= 0;
+
+    /**
+     * date: 2018/11/7
+     * description: 用户下单价格类型
+     */
+    public String PRICE_TYPE = "对手价";
 
     /**
      * date: 6/16/17

@@ -1,14 +1,8 @@
 package com.shinnytech.futures.model.service;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
@@ -16,7 +10,6 @@ import android.text.TextUtils;
 import com.google.gson.Gson;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
-import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketExtension;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
@@ -33,7 +26,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Timer;
@@ -49,10 +41,8 @@ import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.MD_ONLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.MD_SWITCH;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_ONLINE;
-import static com.shinnytech.futures.constants.CommonConstants.TD_SWITCH;
 import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
 
 /**
@@ -63,12 +53,6 @@ import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
  * state: done
  */
 public class WebSocketService extends Service {
-
-    /**
-     * date: 10/19/18
-     * description: alarm
-     */
-    public static final String ALARM = "ALARM";
 
     /**
      * date: 7/9/17
@@ -95,14 +79,9 @@ public class WebSocketService extends Service {
     public static final String TD_BROADCAST_ACTION = WebSocketService.class.getName() + "." + TD_BROADCAST;
 
     private static final int TIMEOUT = 500;
-    private static final long TIME_INTERVAL = 15000;
-
-    private boolean mBackground = false;
-
-    private boolean mMDOnline = false;
-
     private final IBinder mBinder = new LocalBinder();
-
+    private boolean mBackground = false;
+    private boolean mMDOnline = false;
     private WebSocket mWebSocketClientMD;
 
     private WebSocket mWebSocketClientTD;
@@ -132,12 +111,12 @@ public class WebSocketService extends Service {
             @Override
             public void run() {
 
-                if ((System.currentTimeMillis() / 1000 - mMDLastPong) >= 20){
+                if ((System.currentTimeMillis() / 1000 - mMDLastPong) >= 20) {
                     mMDOnline = false;
                     sendMessage(MD_OFFLINE, MD_BROADCAST);
                 }
 
-                if ((System.currentTimeMillis() / 1000 - mTDLastPong) >= 20){
+                if ((System.currentTimeMillis() / 1000 - mTDLastPong) >= 20) {
                     sendMessage(TD_OFFLINE, TD_BROADCAST);
                 }
 
@@ -183,7 +162,7 @@ public class WebSocketService extends Service {
             mBackground = true;
         }
 
-        if (FOREGROUND.equals(msg)){
+        if (FOREGROUND.equals(msg)) {
             mBackground = false;
             sendPeekMessage();
         }
@@ -196,7 +175,6 @@ public class WebSocketService extends Service {
      */
     public void connectMD(String url) {
         try {
-            String versionName = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
             mWebSocketClientMD = new WebSocketFactory()
                     .setConnectionTimeout(TIMEOUT)
                     .createSocket(url)
@@ -244,7 +222,7 @@ public class WebSocketService extends Service {
                                         }
                                         break;
                                     case "rtn_data":
-                                        if (!mMDOnline){
+                                        if (!mMDOnline) {
                                             sendMessage(MD_ONLINE, MD_BROADCAST);
                                             mMDOnline = true;
                                         }
@@ -252,11 +230,11 @@ public class WebSocketService extends Service {
                                         sDataManager.refreshFutureBean(jsonObject);
                                         break;
                                     default:
-                                        sendMessage(MD_SWITCH, MD_BROADCAST);
+                                        sendMessage(MD_OFFLINE, MD_BROADCAST);
                                         return;
                                 }
-                                if (!mBackground)sendPeekMessage();
-                            }  catch (Exception e) {
+                                if (!mBackground) sendPeekMessage();
+                            } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         }
@@ -269,7 +247,7 @@ public class WebSocketService extends Service {
                         }
 
                     })
-                    .addHeader("User-Agent", "shinnyfutures-Android"+" "+versionName)
+                    .addHeader("User-Agent", "shinnyfutures-Android" + " " + sDataManager.APP_VERSION)
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
                     .connectAsynchronously();
             int index = BaseApplication.getIndex() + 1;
@@ -281,7 +259,7 @@ public class WebSocketService extends Service {
 
     }
 
-    public void reConnectMD(String url){
+    public void reConnectMD(String url) {
         disConnectMD();
         connectMD(url);
     }
@@ -378,7 +356,6 @@ public class WebSocketService extends Service {
      */
     public void connectTD() {
         try {
-            String versionName = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
             mWebSocketClientTD = new WebSocketFactory()
                     .setConnectionTimeout(TIMEOUT)
                     .createSocket(CommonConstants.TRANSACTION_URL)
@@ -405,8 +382,8 @@ public class WebSocketService extends Service {
                                         sendMessage(TD_OFFLINE, TD_BROADCAST);
                                         return;
                                 }
-                                if (!mBackground)sendPeekMessageTransaction();
-                            }  catch (Exception e) {
+                                if (!mBackground) sendPeekMessageTransaction();
+                            } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         }
@@ -420,7 +397,7 @@ public class WebSocketService extends Service {
 
                     })
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
-                    .addHeader("User-Agent", "shinnyfutures-Android"+" "+versionName)
+                    .addHeader("User-Agent", "shinnyfutures-Android" + " " + sDataManager.APP_VERSION)
                     .connectAsynchronously();
         } catch (Exception e) {
             e.printStackTrace();
@@ -428,7 +405,7 @@ public class WebSocketService extends Service {
 
     }
 
-    public void reConnectTD(){
+    public void reConnectTD() {
         disConnectTD();
         connectTD();
     }

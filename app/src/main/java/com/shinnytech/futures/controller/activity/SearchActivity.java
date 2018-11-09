@@ -28,6 +28,7 @@ import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.shinnytech.futures.model.adapter.SearchAdapter;
+import com.umeng.analytics.MobclickAgent;
 
 import java.util.Map;
 
@@ -119,12 +120,14 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         super.onResume();
         registerBroaderCast();
         updateToolbarFromNetwork();
+        MobclickAgent.onResume(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         unregisterReceiver(mReceiver);
+        MobclickAgent.onPause(this);
     }
 
     /**

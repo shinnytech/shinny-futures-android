@@ -66,7 +66,7 @@ public class LoginActivity extends BaseActivity {
     private String mActivityType;
     private DataManager sDataManager;
     private Context sContext;
-    private String mBrokerId;
+    private String mBrokerName;
     private String mPhoneNumber;
     private ArrayAdapter<String> mSpinnerAdapter;
     private Handler mHandler;
@@ -116,9 +116,12 @@ public class LoginActivity extends BaseActivity {
         mBinding.spinner.setAdapter(mSpinnerAdapter);
 
         //获取用户登录成功后保存在sharedPreference里的期货公司
-        if (SPUtils.contains(sContext, "brokerId") && brokerList.size() > 1) {
-            int brokerId = (int) SPUtils.get(sContext, "brokerId", 0);
-            if (brokerId < brokerList.size()) mBinding.spinner.setSelection(brokerId, true);
+        if (SPUtils.contains(sContext, "brokerName") && brokerList.size() > 1) {
+            String brokerName = (String) SPUtils.get(sContext, "brokerName", "");
+            if (brokerList.contains(brokerName)){
+                int brokerId = brokerList.indexOf(brokerName);
+                mBinding.spinner.setSelection(brokerId, true);
+            }
         }
 
         //获取用户登录成功后保存在sharedPreference里的用户名
@@ -245,7 +248,7 @@ public class LoginActivity extends BaseActivity {
         mBinding.etIdPassword.setError(null);
 
         // Store values at the time of the fragment_home attempt.
-        mBrokerId = (String) mBinding.spinner.getSelectedItem();
+        mBrokerName = (String) mBinding.spinner.getSelectedItem();
         mPhoneNumber = mBinding.tvIdPhone.getText().toString();
         mPassword = mBinding.etIdPassword.getText().toString();
 
@@ -274,7 +277,7 @@ public class LoginActivity extends BaseActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user fragment_home attempt.
             if (BaseApplication.getWebSocketService() != null)
-                BaseApplication.getWebSocketService().sendReqLogin(mBrokerId, mPhoneNumber, mPassword);
+                BaseApplication.getWebSocketService().sendReqLogin(mBrokerName, mPhoneNumber, mPassword);
 
             //关闭键盘
             View view = getWindow().getCurrentFocus();
@@ -360,7 +363,7 @@ public class LoginActivity extends BaseActivity {
                         activity.sDataManager.IS_LOGIN = true;
                         SPUtils.putAndApply(activity.sContext, "phone", activity.mPhoneNumber);
                         SPUtils.putAndApply(activity.sContext, "password", activity.mPassword);
-                        SPUtils.putAndApply(activity.sContext, "brokerId", activity.mBinding.spinner.getSelectedItemPosition());
+                        SPUtils.putAndApply(activity.sContext, "brokerName", activity.mBinding.spinner.getSelectedItem());
                         //关闭键盘
                         View view = activity.getWindow().getCurrentFocus();
                         if (view != null) {
@@ -381,10 +384,12 @@ public class LoginActivity extends BaseActivity {
                         List<String> brokerList = activity.getBrokerIdFromBuildConfig(activity.sDataManager.getBroker().getBrokers());
                         activity.mSpinnerAdapter.addAll(brokerList);
                         //获取用户登录成功后保存在sharedPreference里的期货公司
-                        if (SPUtils.contains(activity.sContext, "brokerId") && brokerList.size() > 1) {
-                            int brokerId = (int) SPUtils.get(activity.sContext, "brokerId", 0);
-                            if (brokerId < brokerList.size())
+                        if (SPUtils.contains(activity.sContext, "brokerName") && brokerList.size() > 1) {
+                            String brokerName = (String) SPUtils.get(activity.sContext, "brokerName", "");
+                            if (brokerList.contains(brokerName)){
+                                int brokerId = brokerList.indexOf(brokerName);
                                 activity.mBinding.spinner.setSelection(brokerId, true);
+                            }
                         }
                         break;
                     default:

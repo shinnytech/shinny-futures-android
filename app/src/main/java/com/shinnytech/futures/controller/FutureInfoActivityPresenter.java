@@ -477,14 +477,18 @@ public class FutureInfoActivityPresenter {
     public void setToolbarTitle() {
         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
         if (searchEntity != null){
-            String underlying_symbol = searchEntity.getUnderlying_symbol();
-            SearchEntity searchEntity1 = LatestFileManager.getSearchEntities().get(underlying_symbol);
-            LogUtils.e(underlying_symbol, true);
+            if (mInstrumentId.contains("KQ")){
+                String underlying_symbol = searchEntity.getUnderlying_symbol();
+                SearchEntity searchEntity1 = LatestFileManager.getSearchEntities().get(underlying_symbol);
 
-            if (searchEntity1 != null) mToolbarTitle.setText(searchEntity1.getInstrumentName());
-            else mToolbarTitle.setText(underlying_symbol);
-        }
-        else mToolbarTitle.setText(mInstrumentId);
+                if (searchEntity1 != null) mToolbarTitle.setText(searchEntity1.getInstrumentName());
+                else mToolbarTitle.setText(underlying_symbol);
+            }else {
+                String instrument_name = searchEntity.getInstrumentName();
+                mToolbarTitle.setText(instrument_name);
+            }
+
+        } else mToolbarTitle.setText(mInstrumentId);
     }
 
     /**

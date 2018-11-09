@@ -9,6 +9,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityConfirmBinding;
 import com.shinnytech.futures.model.engine.DataManager;
+import com.umeng.analytics.MobclickAgent;
 
 /**
  * date: 6/1/18
@@ -55,5 +56,15 @@ public class ConfirmActivity extends AppCompatActivity implements View.OnClickLi
                 default:
                     break;
             }
+    }
+
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
     }
 }

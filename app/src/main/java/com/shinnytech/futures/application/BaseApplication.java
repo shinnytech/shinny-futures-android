@@ -1,5 +1,6 @@
 package com.shinnytech.futures.application;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
@@ -9,6 +10,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,7 +20,10 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
+import android.util.Log;
 
+import com.baidu.mobstat.StatService;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheEntity;
 import com.lzy.okgo.cache.CacheMode;
@@ -36,14 +43,19 @@ import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
+import com.umeng.commonsdk.UMConfigure;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -111,8 +123,8 @@ public class BaseApplication extends Application implements ServiceConnection {
         super.onCreate();
         if (sContext == null) sContext = getApplicationContext();
 
-        //初始化bugly
-        initBugly();
+        //获取版本号
+        initAppVersion();
 
         //OkHttp网络框架初始化
         initOkGo();
@@ -129,6 +141,20 @@ public class BaseApplication extends Application implements ServiceConnection {
         //广播注册
         registerBroaderCast();
 
+    }
+
+    /**
+     * date: 2018/11/7
+     * author: chenli
+     * description: 获取app版本号
+     */
+    private void initAppVersion() {
+        try {
+            DataManager.getInstance().APP_CODE = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionCode;
+            DataManager.getInstance().APP_VERSION = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -175,10 +201,6 @@ public class BaseApplication extends Application implements ServiceConnection {
             notifyBackground();
         }
 
-    }
-
-    private void initBugly() {
-        Bugly.init(sContext, "247bd4965f", false);
     }
 
     private void initOkGo() {
@@ -234,10 +256,17 @@ public class BaseApplication extends Application implements ServiceConnection {
         Collections.shuffle(MDUrlGroup);
         try {
             Class cl = Class.forName("com.shinnytech.futures.constants.LocalCommonConstants");
-            String MARKET_URL_8 = (String) cl.getMethod("getMARKET_URL_8").invoke(null);
+            String MARKET_URL_8 = (String) cl.getMethod("getMarketUrl8").invoke(null);
             String TRANSACTION_URL_L = (String) cl.getMethod("getTransactionUrl").invoke(null);
+            String BUGLY_KEY = (String) cl.getMethod("getBuglyKey").invoke(null);
+            String UMENG_KEY = (String) cl.getMethod("getUmengKey").invoke(null);
+            String BAIDU_KEY = (String) cl.getMethod("getBaiduKey").invoke(null);
             sMDURLs.add(MARKET_URL_8);
             TRANSACTION_URL = TRANSACTION_URL_L;
+            Bugly.init(sContext, BUGLY_KEY, false);
+            UMConfigure.init(sContext, UMENG_KEY, "ShinnyTech", UMConfigure.DEVICE_TYPE_PHONE, "");
+            StatService.setAppKey(BAIDU_KEY);
+            StatService.start(this);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             sMDURLs.add(MARKET_URL_1);
@@ -253,6 +282,7 @@ public class BaseApplication extends Application implements ServiceConnection {
         }
         sMDURLs.addAll(MDUrlGroup);
     }
+
 
     /**
      * date: 7/21/17

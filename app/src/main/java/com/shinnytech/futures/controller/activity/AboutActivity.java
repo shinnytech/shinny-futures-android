@@ -1,12 +1,11 @@
 package com.shinnytech.futures.controller.activity;
 
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.databinding.ActivityAboutBinding;
+import com.shinnytech.futures.model.engine.DataManager;
 
 import static com.shinnytech.futures.constants.CommonConstants.ABOUT;
 
@@ -21,12 +20,7 @@ public class AboutActivity extends BaseActivity {
 
     @Override
     protected void initData() {
-        try {
-            String versionName = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
-            ((TextView)findViewById(R.id.version)).setText(versionName);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
+        ((TextView)findViewById(R.id.version)).setText(DataManager.getInstance().APP_VERSION);
     }
 
     @Override
