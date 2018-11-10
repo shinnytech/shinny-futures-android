@@ -155,29 +155,34 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
      * description: 检查是否第一次启动APP,弹出免责条款框
      */
     public void checkResponsibility() {
-        final int nowVersionCode = DataManager.getInstance().APP_CODE;
-        int versionCode = (int) SPUtils.get(sContext, "versionCode", 0);
-        if (nowVersionCode > versionCode) {
-            final Dialog dialog = new Dialog(mMainActivity, R.style.responsibilityDialog);
-            View view = View.inflate(mMainActivity, R.layout.view_dialog_responsibility, null);
-            dialog.setContentView(view);
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.setCancelable(false);
-            dialog.show();
-            view.findViewById(R.id.agree).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    SPUtils.putAndApply(mMainActivity, "versionCode", nowVersionCode);
-                    dialog.dismiss();
-                }
-            });
-            view.findViewById(R.id.disagree).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mMainActivity.finish();
-                }
-            });
+        try {
+            final float nowVersionCode = DataManager.getInstance().APP_CODE;
+            float versionCode = (float) SPUtils.get(sContext, "versionCode", 0.0f);
+            if (nowVersionCode > versionCode) {
+                final Dialog dialog = new Dialog(mMainActivity, R.style.responsibilityDialog);
+                View view = View.inflate(mMainActivity, R.layout.view_dialog_responsibility, null);
+                dialog.setContentView(view);
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.setCancelable(false);
+                dialog.show();
+                view.findViewById(R.id.agree).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        SPUtils.putAndApply(mMainActivity, "versionCode", nowVersionCode);
+                        dialog.dismiss();
+                    }
+                });
+                view.findViewById(R.id.disagree).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mMainActivity.finish();
+                    }
+                });
+            }
+        }catch (Exception e){
+           e.printStackTrace();
         }
+
     }
 
     /**
