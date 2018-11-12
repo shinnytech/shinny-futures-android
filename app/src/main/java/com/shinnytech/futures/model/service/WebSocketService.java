@@ -81,7 +81,6 @@ public class WebSocketService extends Service {
     private static final int TIMEOUT = 500;
     private final IBinder mBinder = new LocalBinder();
     private boolean mBackground = false;
-    private boolean mMDOnline = false;
     private WebSocket mWebSocketClientMD;
 
     private WebSocket mWebSocketClientTD;
@@ -112,16 +111,17 @@ public class WebSocketService extends Service {
             public void run() {
 
                 if ((System.currentTimeMillis() / 1000 - mMDLastPong) >= 20) {
-                    mMDOnline = false;
                     sendMessage(MD_OFFLINE, MD_BROADCAST);
+                } else {
+                    mWebSocketClientMD.sendPing();
                 }
 
                 if ((System.currentTimeMillis() / 1000 - mTDLastPong) >= 20) {
                     sendMessage(TD_OFFLINE, TD_BROADCAST);
+                } else {
+                    mWebSocketClientTD.sendPing();
                 }
 
-                mWebSocketClientMD.sendPing();
-                mWebSocketClientTD.sendPing();
             }
         };
         timer.schedule(timerTask, 15000, 15000);
@@ -189,6 +189,7 @@ public class WebSocketService extends Service {
                                 switch (aid) {
                                     case "rsp_login":
                                         //首次连接行情服务器与断开重连的行情订阅处理
+                                        mWebSocketClientMD.sendPing();
                                         String ins_list = sDataManager.getRtnData().getIns_list();
                                         if (ins_list != null) sendSubscribeQuote(ins_list);
                                         else
@@ -222,10 +223,6 @@ public class WebSocketService extends Service {
                                         }
                                         break;
                                     case "rtn_data":
-                                        if (!mMDOnline) {
-                                            sendMessage(MD_ONLINE, MD_BROADCAST);
-                                            mMDOnline = true;
-                                        }
                                         BaseApplication.setIndex(0);
                                         sDataManager.refreshFutureBean(jsonObject);
                                         break;
@@ -243,7 +240,7 @@ public class WebSocketService extends Service {
                         public void onPongFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
                             super.onPongFrame(websocket, frame);
                             mMDLastPong = System.currentTimeMillis() / 1000;
-                            LogUtils.e("onPongFrame", true);
+                            LogUtils.e("MDPong", true);
                         }
 
                     })
@@ -370,10 +367,10 @@ public class WebSocketService extends Service {
                                 String aid = jsonObject.getString("aid");
                                 switch (aid) {
                                     case "rtn_brokers":
+                                        mWebSocketClientTD.sendPing();
                                         BrokerEntity brokerInfo = new Gson().fromJson(message, BrokerEntity.class);
                                         sDataManager.getBroker().setBrokers(brokerInfo.getBrokers());
                                         sendMessage(TD_MESSAGE_BROKER_INFO, TD_BROADCAST);
-                                        sendMessage(TD_ONLINE, TD_BROADCAST);
                                         break;
                                     case "rtn_data":
                                         sDataManager.refreshTradeBean(jsonObject);
@@ -392,7 +389,7 @@ public class WebSocketService extends Service {
                         public void onPongFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
                             super.onPongFrame(websocket, frame);
                             mTDLastPong = System.currentTimeMillis() / 1000;
-                            LogUtils.e("onPongFrame", true);
+                            LogUtils.e("TDPong", true);
                         }
 
                     })

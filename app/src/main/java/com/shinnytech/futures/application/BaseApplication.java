@@ -408,7 +408,8 @@ public class BaseApplication extends Application implements ServiceConnection {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case MD_ONLINE:
-                        ToastNotificationUtils.showToast(sContext, "行情服务器连接成功");
+                        //不给用户造成干扰，此条暂且不发
+//                        ToastNotificationUtils.showToast(sContext, "行情服务器连接成功");
                         break;
                     case MD_OFFLINE:
                         //断线重连
@@ -433,7 +434,8 @@ public class BaseApplication extends Application implements ServiceConnection {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case TD_ONLINE:
-                        ToastNotificationUtils.showToast(sContext, "交易服务器连接成功");
+                        //不给用户造成干扰，此条暂且不发
+//                        ToastNotificationUtils.showToast(sContext, "交易服务器连接成功");
                         break;
                     case TD_OFFLINE:
                         DataManager.getInstance().IS_LOGIN = false;
