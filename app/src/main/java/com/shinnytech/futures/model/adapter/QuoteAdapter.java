@@ -131,12 +131,11 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
         }
 
         public void update() {
-            if (mData != null && mData.size() != 0) {
-                QuoteEntity quoteEntity = mData.get(getLayoutPosition());
-                if (quoteEntity == null) {
-                    return;
-                }
+            if (mData == null || mData.size() == 0) return;
+            QuoteEntity quoteEntity = mData.get(getLayoutPosition());
+            if (quoteEntity == null) return;
 
+            try {
                 String instrumentId = quoteEntity.getInstrument_id();
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrumentId);
                 String instrumentName = instrumentId;
@@ -184,9 +183,11 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                         mBinding.quoteOpenInterest.setText(quoteEntity.getOpen_interest());
                     }
                 }
-
-
+            }catch (Exception e){
+                e.printStackTrace();
             }
+
+
         }
 
         private void updatePart(Bundle bundle) {

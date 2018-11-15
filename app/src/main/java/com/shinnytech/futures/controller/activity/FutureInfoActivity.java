@@ -194,6 +194,7 @@ public class FutureInfoActivity extends BaseActivity {
             mInstrumentId = instrument_id_new;
             if (BaseApplication.getWebSocketService() != null)
                 BaseApplication.getWebSocketService().sendSubscribeQuote(mInstrumentId);
+            mFutureInfoActivityPresenter.setInstrumentId(mInstrumentId);
             mFutureInfoActivityPresenter.setToolbarTitle();
             if (LatestFileManager.getOptionalInsList().containsKey(mInstrumentId)) {
                 mMenuItem.setIcon(R.mipmap.ic_favorite_white_24dp);

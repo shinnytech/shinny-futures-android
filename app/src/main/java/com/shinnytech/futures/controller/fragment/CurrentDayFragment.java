@@ -39,6 +39,7 @@ import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
+import com.shinnytech.futures.view.custommpchart.mycomponent.MyMarkerView;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyXAxis;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyYAxis;
 
@@ -123,7 +124,7 @@ public class CurrentDayFragment extends BaseChartFragment {
         super.initChart();
 
         mChart.setScaleEnabled(false);
-        MyMarkerView marker = new MyMarkerView(getActivity());
+        CurrentDayMarkerView marker = new CurrentDayMarkerView(getActivity());
         marker.setChartView(mChart);
         mChart.setMarker(marker);
 
@@ -292,6 +293,9 @@ public class CurrentDayFragment extends BaseChartFragment {
                     combinedData.setData(lineData);
                     mChart.setData(combinedData);//当前屏幕会显示所有的数据
                     mChart.setVisibleXRangeMinimum(mEndIndex - mStartIndex);
+                    int height = (int) mChart.getViewPortHandler().contentHeight() - 80;
+                    int width = (int) (mChart.getViewPortHandler().contentWidth() / 5);
+                    ((CurrentDayMarkerView)mChart.getMarker()).resize(width, height);
                 }
                 ((MyXAxis) mChart.getXAxis()).setXLabels(mStringSparseArray);
                 mChart.invalidate();
@@ -545,7 +549,7 @@ public class CurrentDayFragment extends BaseChartFragment {
      * version:
      * state: done
      */
-    public class MyMarkerView extends MarkerView {
+    public class CurrentDayMarkerView extends MyMarkerView {
 
         private TextView yValue;
         private TextView xValue;
@@ -566,7 +570,7 @@ public class CurrentDayFragment extends BaseChartFragment {
          *
          * @param context
          */
-        public MyMarkerView(Context context) {
+        public CurrentDayMarkerView(Context context) {
             super(context, R.layout.view_marker_current_day);
             yValue = findViewById(R.id.y_value);
             xValue = findViewById(R.id.x_value);

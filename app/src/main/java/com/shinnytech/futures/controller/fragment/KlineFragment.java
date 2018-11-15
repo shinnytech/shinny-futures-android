@@ -50,6 +50,7 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.view.custommpchart.mycomponent.MyMarkerView;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyXAxis;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyYAxis;
 
@@ -186,9 +187,10 @@ public class KlineFragment extends BaseChartFragment {
         mChart.setScaleYEnabled(false);
         mChart.setDrawOrder(
                 new CombinedChart.DrawOrder[]{CombinedChart.DrawOrder.CANDLE, CombinedChart.DrawOrder.LINE});
-        final MyMarkerView marker = new MyMarkerView(getActivity());
+        final KlineMarkerView marker = new KlineMarkerView(getActivity());
         marker.setChartView(mChart);
         mChart.setMarker(marker);
+
         mChart.setDrawBorders(true);
         mChart.setBorderColor(mColorGrid);
         mChart.setHighlightPerDragEnabled(false);
@@ -470,6 +472,9 @@ public class KlineFragment extends BaseChartFragment {
                     mChart.setVisibleXRangeMinimum(7);
                     mChart.setVisibleXRangeMaximum(200);
                     mChart.zoom(mScaleX, 1.0f, mLastIndex, 0, YAxis.AxisDependency.LEFT);
+                    int height = (int) mChart.getViewPortHandler().contentHeight();
+                    int width = (int) (mChart.getViewPortHandler().contentWidth() / 5);
+                    ((KlineMarkerView)mChart.getMarker()).resize(width, height);
                     LogUtils.e("xVals.size()" + xVals.size(), true);
                 }
             } catch (Exception ex) {
@@ -725,7 +730,7 @@ public class KlineFragment extends BaseChartFragment {
      * version:
      * state: done
      */
-    public class MyMarkerView extends MarkerView {
+    public class KlineMarkerView extends MyMarkerView {
         private TextView yValue;
         private TextView xValue;
         private TextView open;
@@ -745,7 +750,7 @@ public class KlineFragment extends BaseChartFragment {
         /**
          * Constructor. Sets up the MarkerView with a custom layout resource.
          */
-        public MyMarkerView(Context context) {
+        public KlineMarkerView(Context context) {
             super(context, R.layout.view_marker_kline);
             yValue = findViewById(R.id.y_value);
             xValue = findViewById(R.id.x_value);

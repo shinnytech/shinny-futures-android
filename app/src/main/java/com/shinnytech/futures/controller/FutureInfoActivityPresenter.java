@@ -560,6 +560,10 @@ public class FutureInfoActivityPresenter {
         return mInstrumentId;
     }
 
+    public void setInstrumentId(String instrumentId) {
+        mInstrumentId = instrumentId;
+    }
+
     /**
      * date: 7/7/17
      * author: chenli
