@@ -37,12 +37,9 @@ import java.util.Map;
 
 import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.BANK;
-import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
-import static com.shinnytech.futures.constants.CommonConstants.ERROR;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_TRADE;
-import static com.shinnytech.futures.constants.CommonConstants.OPEN;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION_TRANSACTION;
+import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 import static java.lang.Math.abs;
 
 public class BankTransferActivity extends BaseActivity {
@@ -95,13 +92,7 @@ public class BankTransferActivity extends BaseActivity {
             public void onReceive(Context context, Intent intent) {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
-                    case OPEN:
-                        break;
-                    case CLOSE:
-                        break;
-                    case ERROR:
-                        break;
-                    case MESSAGE_TRADE:
+                    case TD_MESSAGE:
                         if (mBankSpinnerAdapter.isEmpty())refreshBank();
                         if (mCurrencySpinnerAdapter.isEmpty()) refreshCurrency();
                         if (mIsUpdate) refreshTransfer();
@@ -111,7 +102,7 @@ public class BankTransferActivity extends BaseActivity {
                 }
             }
         };
-        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter(BROADCAST_ACTION_TRANSACTION));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter(TD_BROADCAST_ACTION));
     }
 
     @Override
@@ -277,20 +268,25 @@ public class BankTransferActivity extends BaseActivity {
     }
 
     private void refreshTransfer() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
-        if (userEntity == null) return;
-        mNewData.clear();
-        for (TransferEntity transferEntity :
-                userEntity.getTransfers().values()) {
-            TransferEntity t = CloneUtils.clone(transferEntity);
-            mNewData.add(t);
+        try {
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            if (userEntity == null) return;
+            mNewData.clear();
+            for (TransferEntity transferEntity :
+                    userEntity.getTransfers().values()) {
+                TransferEntity t = CloneUtils.clone(transferEntity);
+                mNewData.add(t);
+            }
+            Collections.sort(mNewData);
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new TransferDiffCallback(mOldData, mNewData), false);
+            mAdapter.setData(mNewData);
+            diffResult.dispatchUpdatesTo(mAdapter);
+            mOldData.clear();
+            mOldData.addAll(mNewData);
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        Collections.sort(mNewData);
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new TransferDiffCallback(mOldData, mNewData), false);
-        mAdapter.setData(mNewData);
-        diffResult.dispatchUpdatesTo(mAdapter);
-        mOldData.clear();
-        mOldData.addAll(mNewData);
+
     }
 
 }

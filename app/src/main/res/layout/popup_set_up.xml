@@ -25,6 +25,7 @@
             android:textColor="@color/white" />
 
         <Switch
+            android:checked="true"
             android:id="@+id/position"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -52,6 +53,7 @@
             android:textColor="@color/white" />
 
         <Switch
+            android:checked="true"
             android:id="@+id/pending"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -78,6 +80,7 @@
             android:textColor="@color/white" />
 
         <Switch
+            android:checked="true"
             android:id="@+id/average_line"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

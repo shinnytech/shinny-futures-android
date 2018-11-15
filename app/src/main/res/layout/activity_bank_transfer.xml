@@ -145,7 +145,7 @@
                 android:layout_marginEnd="@dimen/margin_10dp"
                 android:background="@null"
                 android:gravity="center_vertical"
-                android:inputType="number"
+                android:inputType="numberDecimal"
                 android:maxLines="1"
                 android:hint="请输入转账金额"
                 android:padding="@dimen/padding_5dp"

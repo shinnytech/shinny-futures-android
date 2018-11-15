@@ -423,7 +423,7 @@ public class KlineFragment extends BaseChartFragment {
                     }
                     combinedData.notifyDataChanged();
                     mChart.notifyDataSetChanged();
-                    mChart.getXAxis().setAxisMaximum(combinedData.getXMax() + 0.5f);
+                    mChart.getXAxis().setAxisMaximum(combinedData.getXMax() + 2.5f);
                     mChart.getXAxis().setAxisMinimum(combinedData.getXMin() - 0.5f);
                     mChart.invalidate();
                 } else {
@@ -465,7 +465,7 @@ public class KlineFragment extends BaseChartFragment {
                     if (mIsAverage) combinedData.setData(mLineData);
                     else combinedData.setData(new LineData());
                     mChart.setData(combinedData);//当前屏幕会显示所有的数据
-                    mChart.getXAxis().setAxisMaximum(combinedData.getXMax() + 0.5f);
+                    mChart.getXAxis().setAxisMaximum(combinedData.getXMax() + 2.5f);
                     mChart.getXAxis().setAxisMinimum(combinedData.getXMin() - 0.5f);
                     mChart.setVisibleXRangeMinimum(7);
                     mChart.setVisibleXRangeMaximum(200);
@@ -629,6 +629,7 @@ public class KlineFragment extends BaseChartFragment {
         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id_new);
         if (instrument_id.equals(instrument_id_new)) return;
         instrument_id = instrument_id_new;
+
         if (BaseApplication.getWebSocketService() != null)
             switch (mKlineType) {
                 case KLINE_DAY:
@@ -649,14 +650,15 @@ public class KlineFragment extends BaseChartFragment {
         mChart.clear();
         mChart.fitScreen();
 
+        if (instrument_id.contains("KQ") && searchEntity != null)
+            instrument_id_transaction = searchEntity.getUnderlying_symbol();
+        else instrument_id_transaction = instrument_id;
+
         if (sDataManager.IS_LOGIN) {
             if (mIsPosition) addPositionLimitLines();
             if (mIsPending) addOrderLimitLines();
         }
 
-        if (instrument_id.contains("KQ") && searchEntity != null)
-            instrument_id_transaction = searchEntity.getUnderlying_symbol();
-        else instrument_id_transaction = instrument_id;
 
     }
 

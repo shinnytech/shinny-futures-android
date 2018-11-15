@@ -32,14 +32,11 @@ import java.util.List;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
 import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
-import static com.shinnytech.futures.constants.CommonConstants.ERROR;
 import static com.shinnytech.futures.constants.CommonConstants.KUAI_QI_XIAO_Q;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_BROKER_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_LOGIN;
-import static com.shinnytech.futures.constants.CommonConstants.OPEN;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION_TRANSACTION;
+import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 6/1/17
@@ -69,7 +66,7 @@ public class LoginActivity extends BaseActivity {
     private String mActivityType;
     private DataManager sDataManager;
     private Context sContext;
-    private String mBrokerId;
+    private String mBrokerName;
     private String mPhoneNumber;
     private ArrayAdapter<String> mSpinnerAdapter;
     private Handler mHandler;
@@ -93,11 +90,8 @@ public class LoginActivity extends BaseActivity {
                     }
                 }
             }
-        } else {
-            if (BaseApplication.getWebSocketService() != null) {
-                BaseApplication.getWebSocketService().disConnectTransaction();
-            }
-        }
+        } else if (BaseApplication.getWebSocketService() != null) BaseApplication.getWebSocketService().reConnectTD();
+
         return brokerList;
     }
 
@@ -122,9 +116,12 @@ public class LoginActivity extends BaseActivity {
         mBinding.spinner.setAdapter(mSpinnerAdapter);
 
         //获取用户登录成功后保存在sharedPreference里的期货公司
-        if (SPUtils.contains(sContext, "brokerId") && brokerList.size() > 1) {
-            int brokerId = (int) SPUtils.get(sContext, "brokerId", 0);
-            if (brokerId < brokerList.size()) mBinding.spinner.setSelection(brokerId, true);
+        if (SPUtils.contains(sContext, "brokerName") && brokerList.size() > 1) {
+            String brokerName = (String) SPUtils.get(sContext, "brokerName", "");
+            if (brokerList.contains(brokerName)){
+                int brokerId = brokerList.indexOf(brokerName);
+                mBinding.spinner.setSelection(brokerId, true);
+            }
         }
 
         //获取用户登录成功后保存在sharedPreference里的用户名
@@ -251,7 +248,7 @@ public class LoginActivity extends BaseActivity {
         mBinding.etIdPassword.setError(null);
 
         // Store values at the time of the fragment_home attempt.
-        mBrokerId = (String) mBinding.spinner.getSelectedItem();
+        mBrokerName = (String) mBinding.spinner.getSelectedItem();
         mPhoneNumber = mBinding.tvIdPhone.getText().toString();
         mPassword = mBinding.etIdPassword.getText().toString();
 
@@ -280,7 +277,7 @@ public class LoginActivity extends BaseActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user fragment_home attempt.
             if (BaseApplication.getWebSocketService() != null)
-                BaseApplication.getWebSocketService().sendReqLogin(mBrokerId, mPhoneNumber, mPassword);
+                BaseApplication.getWebSocketService().sendReqLogin(mBrokerName, mPhoneNumber, mPassword);
 
             //关闭键盘
             View view = getWindow().getCurrentFocus();
@@ -327,16 +324,10 @@ public class LoginActivity extends BaseActivity {
             public void onReceive(Context context, Intent intent) {
                 String msg = intent.getStringExtra("msg");
                 switch (msg) {
-                    case OPEN:
-                        break;
-                    case CLOSE:
-                        break;
-                    case ERROR:
-                        break;
-                    case MESSAGE_LOGIN:
+                    case TD_MESSAGE_LOGIN:
                         mHandler.sendEmptyMessageDelayed(0, 2000);
                         break;
-                    case MESSAGE_BROKER_INFO:
+                    case TD_MESSAGE_BROKER_INFO:
                         //如果客户端打开后期货公司列表信息还没有解析完毕，服务器发送brokerId后更新期货公司列表
                         mHandler.sendEmptyMessage(1);
                         break;
@@ -346,7 +337,7 @@ public class LoginActivity extends BaseActivity {
             }
         };
         registerReceiver(mReceiver, new IntentFilter(NETWORK_STATE));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverLogin, new IntentFilter(BROADCAST_ACTION_TRANSACTION));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverLogin, new IntentFilter(TD_BROADCAST_ACTION));
     }
 
     /**
@@ -372,7 +363,7 @@ public class LoginActivity extends BaseActivity {
                         activity.sDataManager.IS_LOGIN = true;
                         SPUtils.putAndApply(activity.sContext, "phone", activity.mPhoneNumber);
                         SPUtils.putAndApply(activity.sContext, "password", activity.mPassword);
-                        SPUtils.putAndApply(activity.sContext, "brokerId", activity.mBinding.spinner.getSelectedItemPosition());
+                        SPUtils.putAndApply(activity.sContext, "brokerName", activity.mBinding.spinner.getSelectedItem());
                         //关闭键盘
                         View view = activity.getWindow().getCurrentFocus();
                         if (view != null) {
@@ -393,10 +384,12 @@ public class LoginActivity extends BaseActivity {
                         List<String> brokerList = activity.getBrokerIdFromBuildConfig(activity.sDataManager.getBroker().getBrokers());
                         activity.mSpinnerAdapter.addAll(brokerList);
                         //获取用户登录成功后保存在sharedPreference里的期货公司
-                        if (SPUtils.contains(activity.sContext, "brokerId") && brokerList.size() > 1) {
-                            int brokerId = (int) SPUtils.get(activity.sContext, "brokerId", 0);
-                            if (brokerId < brokerList.size())
+                        if (SPUtils.contains(activity.sContext, "brokerName") && brokerList.size() > 1) {
+                            String brokerName = (String) SPUtils.get(activity.sContext, "brokerName", "");
+                            if (brokerList.contains(brokerName)){
+                                int brokerId = brokerList.indexOf(brokerName);
                                 activity.mBinding.spinner.setSelection(brokerId, true);
+                            }
                         }
                         break;
                     default:

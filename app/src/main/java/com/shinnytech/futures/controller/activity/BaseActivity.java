@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.utils.NetworkUtils;
+import com.umeng.analytics.MobclickAgent;
 
 /**
  * date: 7/7/17
@@ -44,6 +45,16 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
         initData();
         initEvent();
+    }
+
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
     }
 
     /**

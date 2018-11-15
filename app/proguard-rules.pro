@@ -145,6 +145,7 @@
 #-----------处理实体类---------------
 # 在开发的时候我们可以将所有的实体类放在一个包内，这样我们写一次混淆就行了。
 -keep public class com.shinnytech.futures.model.bean.** { *; }
+-keep public class com.shinnytech.futures.constants.** { *; }
 
 
 #-----------处理第三方依赖库---------
@@ -194,3 +195,19 @@
 -dontwarn com.tencent.bugly.**
 -keep public class com.tencent.bugly.**{*;}
 -keep class android.support.**{*;}
+
+#umeng
+-keep class com.umeng.** {*;}
+-keepclassmembers class * {
+   public <init> (org.json.JSONObject);
+}
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+-keep public class com.shinnytech.futures.R$*{
+public static final int *;
+}
+
+#baidu
+-keep class com.baidu.mobstat.** { *; }

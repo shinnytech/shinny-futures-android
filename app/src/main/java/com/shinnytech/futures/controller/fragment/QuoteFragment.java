@@ -54,23 +54,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
-import static com.shinnytech.futures.constants.CommonConstants.ERROR;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_SEARCH_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE;
+import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
-import static com.shinnytech.futures.constants.CommonConstants.OPEN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.SHANGHAI;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOU;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION;
+import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
 
 /**
  * date: 7/9/17
@@ -136,7 +133,7 @@ public class QuoteFragment extends LazyLoadFragment {
     //开机合约列表解析完毕刷新主力行情
     @Subscribe
     public void onEvent(String msg) {
-        if (DOMINANT.equals(mTitle))
+        if (DOMINANT.equals(mTitle) && DOMINANT.equals(msg))
             update();
     }
 
@@ -456,13 +453,7 @@ public class QuoteFragment extends LazyLoadFragment {
             public void onReceive(Context context, Intent intent) {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
-                    case OPEN:
-                        break;
-                    case CLOSE:
-                        break;
-                    case ERROR:
-                        break;
-                    case MESSAGE:
+                    case MD_MESSAGE:
                         refreshUI(mToolbarTitle.getText().toString());
                         break;
                     default:
@@ -470,7 +461,7 @@ public class QuoteFragment extends LazyLoadFragment {
                 }
             }
         };
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, new IntentFilter(BROADCAST_ACTION));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, new IntentFilter(MD_BROADCAST_ACTION));
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.shinnytech.futures.application;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
@@ -9,6 +10,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,7 +20,10 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
+import android.util.Log;
 
+import com.baidu.mobstat.StatService;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheEntity;
 import com.lzy.okgo.cache.CacheMode;
@@ -26,33 +33,38 @@ import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
 import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.controller.activity.ConfirmActivity;
+import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
-import com.shinnytech.futures.controller.activity.ConfirmActivity;
-import com.shinnytech.futures.controller.activity.MainActivity;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
+import com.umeng.commonsdk.UMConfigure;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import okhttp3.OkHttpClient;
 
-import static com.shinnytech.futures.constants.CommonConstants.CLOSE;
+import static com.shinnytech.futures.constants.CommonConstants.BACKGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
-import static com.shinnytech.futures.constants.CommonConstants.ERROR;
-import static com.shinnytech.futures.constants.CommonConstants.LOG_OUT;
+import static com.shinnytech.futures.constants.CommonConstants.FOREGROUND;
+import static com.shinnytech.futures.constants.CommonConstants.JSON_FILE_URL;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_1;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_2;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_3;
@@ -60,12 +72,15 @@ import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_4;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_5;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_6;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_7;
-import static com.shinnytech.futures.constants.CommonConstants.MESSAGE_SETTLEMENT;
-import static com.shinnytech.futures.constants.CommonConstants.OPEN;
-import static com.shinnytech.futures.constants.CommonConstants.SWITCH;
+import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
+import static com.shinnytech.futures.constants.CommonConstants.MD_ONLINE;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
+import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
+import static com.shinnytech.futures.constants.CommonConstants.TD_ONLINE;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_URL;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION;
-import static com.shinnytech.futures.model.service.WebSocketService.BROADCAST_ACTION_TRANSACTION;
+import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
+import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * Created on 12/21/17.
@@ -85,8 +100,6 @@ public class BaseApplication extends Application implements ServiceConnection {
     private BroadcastReceiver mReceiverNetwork;
     private BroadcastReceiver mReceiverScreen;
     private boolean mIsBackground = false;
-    private boolean mIsTDClose = false;
-    private boolean mIsMDClose = false;
     private MyHandler mMyHandler = new MyHandler();
 
     public static int getIndex() {
@@ -111,14 +124,14 @@ public class BaseApplication extends Application implements ServiceConnection {
         super.onCreate();
         if (sContext == null) sContext = getApplicationContext();
 
-        //初始化bugly
-        initBugly();
+        //获取版本号
+        initAppVersion();
+
+        //初始化行情服务器地址
+        initTMDUrl();
 
         //OkHttp网络框架初始化
         initOkGo();
-
-        //初始化行情服务器地址
-        initMDUrl();
 
         //下载合约列表文件
         downloadLatestJsonFile();
@@ -129,6 +142,20 @@ public class BaseApplication extends Application implements ServiceConnection {
         //广播注册
         registerBroaderCast();
 
+    }
+
+    /**
+     * date: 2018/11/7
+     * author: chenli
+     * description: 获取app版本号
+     */
+    private void initAppVersion() {
+        try {
+            DataManager.getInstance().APP_CODE = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionCode;
+            DataManager.getInstance().APP_VERSION = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -144,7 +171,10 @@ public class BaseApplication extends Application implements ServiceConnection {
         } catch (ClassCastException e) {
             e.printStackTrace();
         }
-        notifyForeground();
+        //连接行情服务器
+        sWebSocketService.connectMD(sMDURLs.get(index));
+        //连接交易服务器
+        sWebSocketService.connectTD();
         mServiceBound = true;
     }
 
@@ -169,27 +199,9 @@ public class BaseApplication extends Application implements ServiceConnection {
         super.onTrimMemory(level);
         Beta.unInit();
         if (level == TRIM_MEMORY_UI_HIDDEN) {
-            mIsBackground = true;
             notifyBackground();
         }
 
-    }
-
-    private void initBugly() {
-        // 设置是否开启热更新能力，默认为true
-        Beta.enableHotfix = true;
-        // 设置是否自动下载补丁，默认为true
-        Beta.canAutoDownloadPatch = true;
-        // 设置是否自动合成补丁，默认为true
-        Beta.canAutoPatch = true;
-        // 设置是否提示用户重启，默认为false
-        Beta.canNotifyUserRestart = true;
-        // 设置开发设备，默认为false，上传补丁如果下发范围指定为“开发设备”，需要调用此接口来标识开发设备
-        Bugly.setIsDevelopmentDevice(sContext, true);
-        // 多渠道需求塞入
-        String channel = BuildConfig.BROKER_ID;
-        Bugly.setAppChannel(sContext, channel);
-        Bugly.init(sContext, "247bd4965f", false);
     }
 
     private void initOkGo() {
@@ -232,9 +244,9 @@ public class BaseApplication extends Application implements ServiceConnection {
     /**
      * date: 8/6/18
      * author: chenli
-     * description: 初始化行情服务器地址
+     * description: 初始化服务器地址
      */
-    private void initMDUrl() {
+    private void initTMDUrl() {
         List<String> MDUrlGroup = new ArrayList<>();
         MDUrlGroup.add(MARKET_URL_2);
         MDUrlGroup.add(MARKET_URL_3);
@@ -245,8 +257,19 @@ public class BaseApplication extends Application implements ServiceConnection {
         Collections.shuffle(MDUrlGroup);
         try {
             Class cl = Class.forName("com.shinnytech.futures.constants.LocalCommonConstants");
-            String MARKET_URL_8 = (String) cl.getMethod("getMARKET_URL_8").invoke(null);
+            String MARKET_URL_8 = (String) cl.getMethod("getMarketUrl8").invoke(null);
+            String TRANSACTION_URL_L = (String) cl.getMethod("getTransactionUrl").invoke(null);
+            String JSON_FILE_URL_L = (String) cl.getMethod("getJsonFileUrl").invoke(null);
+            String BUGLY_KEY = (String) cl.getMethod("getBuglyKey").invoke(null);
+            String UMENG_KEY = (String) cl.getMethod("getUmengKey").invoke(null);
+            String BAIDU_KEY = (String) cl.getMethod("getBaiduKey").invoke(null);
             sMDURLs.add(MARKET_URL_8);
+            TRANSACTION_URL = TRANSACTION_URL_L;
+            JSON_FILE_URL = JSON_FILE_URL_L;
+            Bugly.init(sContext, BUGLY_KEY, false);
+            UMConfigure.init(sContext, UMENG_KEY, "ShinnyTech", UMConfigure.DEVICE_TYPE_PHONE, "");
+            StatService.setAppKey(BAIDU_KEY);
+            StatService.start(this);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             sMDURLs.add(MARKET_URL_1);
@@ -262,6 +285,7 @@ public class BaseApplication extends Application implements ServiceConnection {
         }
         sMDURLs.addAll(MDUrlGroup);
     }
+
 
     /**
      * date: 7/21/17
@@ -283,10 +307,7 @@ public class BaseApplication extends Application implements ServiceConnection {
 
             @Override
             public void onActivityResumed(Activity activity) {
-                if (mIsBackground) {
-                    mIsBackground = false;
-                    notifyForeground();
-                }
+                notifyForeground();
             }
 
             @Override
@@ -312,7 +333,11 @@ public class BaseApplication extends Application implements ServiceConnection {
                     LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverTransaction);
                     sContext.unregisterReceiver(mReceiverNetwork);
                     sContext.unregisterReceiver(mReceiverScreen);
-                    notifyBackground();
+                    if (sWebSocketService != null) {
+                        sWebSocketService.disConnectMD();
+                        sWebSocketService.disConnectTD();
+                        LogUtils.e("连接断开", true);
+                    }
                     if (mServiceBound) {
                         sContext.unbindService(BaseApplication.this);
                         LogUtils.e("解除绑定", true);
@@ -330,12 +355,10 @@ public class BaseApplication extends Application implements ServiceConnection {
      * description: 前台任务--连接服务器
      */
     private void notifyForeground() {
-        if (sWebSocketService != null) {
-            //连接行情服务器
-            sWebSocketService.connect(sMDURLs.get(index));
-            //连接交易服务器
-            sWebSocketService.connectTransaction();
-            LogUtils.e("连接打开", true);
+        if (mIsBackground) {
+            mIsBackground = false;
+            //前台
+            EventBus.getDefault().post(FOREGROUND);
         }
     }
 
@@ -345,12 +368,10 @@ public class BaseApplication extends Application implements ServiceConnection {
      * description: 后台任务--关闭服务器
      */
     private void notifyBackground() {
-        // This is where you can notify listeners, handle session tracking, etc
-        if (sWebSocketService != null) {
-            sWebSocketService.disConnect();
-            sWebSocketService.disConnectTransaction();
-            LogUtils.e("连接断开", true);
-            EventBus.getDefault().post(LOG_OUT);
+        if (!mIsBackground) {
+            mIsBackground = true;
+            //后台
+            EventBus.getDefault().post(BACKGROUND);
         }
     }
 
@@ -386,42 +407,24 @@ public class BaseApplication extends Application implements ServiceConnection {
             public void onReceive(Context context, Intent intent) {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
-                    case OPEN:
-                        if (mIsMDClose){
-                            ToastNotificationUtils.showToast(sContext, "行情服务器连接成功");
-                            mIsMDClose = false;
-                        }
+                    case MD_ONLINE:
+                        ToastNotificationUtils.showToast(sContext, "行情服务器连接成功");
                         break;
-                    case CLOSE:
-                        //每隔两秒,断线重连
-                        if (!mIsBackground) {
-                            if (!mIsMDClose){
-                                ToastNotificationUtils.showToast(sContext, "行情服务器连接断开，正在重连...");
-                                mIsMDClose = true;
-                            }
+                    case MD_OFFLINE:
+                        //断线重连
+                        LogUtils.e("行情服务器连接断开，正在重连...", true);
 
-                            if (NetworkUtils.isNetworkConnected(sContext))
-                                mMyHandler.sendEmptyMessageDelayed(0, 1500);
-                            else
-                                ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
-                        }
-                        break;
-                    case ERROR:
-                    case SWITCH:
-                        //每隔两秒,断线重连
-                        if (!mIsBackground) {
-                            if (NetworkUtils.isNetworkConnected(sContext))
-                                mMyHandler.sendEmptyMessageDelayed(2, 1500);
-                            else
-                                ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
-                        }
+                        if (NetworkUtils.isNetworkConnected(sContext))
+                            mMyHandler.sendEmptyMessage(0);
+                        else
+                            ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
                         break;
                     default:
                         break;
                 }
             }
         };
-        LocalBroadcastManager.getInstance(sContext).registerReceiver(mReceiverMarket, new IntentFilter(BROADCAST_ACTION));
+        LocalBroadcastManager.getInstance(sContext).registerReceiver(mReceiverMarket, new IntentFilter(MD_BROADCAST_ACTION));
 
         //交易服务器断线重连广播
         mReceiverTransaction = new BroadcastReceiver() {
@@ -429,28 +432,20 @@ public class BaseApplication extends Application implements ServiceConnection {
             public void onReceive(Context context, Intent intent) {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
-                    case OPEN:
-                        if (mIsTDClose){
-                            ToastNotificationUtils.showToast(sContext, "交易服务器连接成功");
-                            mIsTDClose = false;
-                        }
+                    case TD_ONLINE:
+                        ToastNotificationUtils.showToast(sContext, "交易服务器连接成功");
                         break;
-                    case CLOSE:
+                    case TD_OFFLINE:
                         DataManager.getInstance().IS_LOGIN = false;
-                        //每隔两秒,断线重连
-                        if (!mIsBackground) {
-                            if (!mIsTDClose){
-                                ToastNotificationUtils.showToast(sContext, "交易服务器连接断开，正在重连...");
-                                mIsTDClose = true;
-                            }
+                        //断线重连
+                        LogUtils.e("交易服务器连接断开，正在重连...", true);
 
-                            if (NetworkUtils.isNetworkConnected(sContext))
-                                mMyHandler.sendEmptyMessageDelayed(1, 1500);
-                            else
-                                ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
-                        }
+                        if (NetworkUtils.isNetworkConnected(sContext))
+                            mMyHandler.sendEmptyMessage(1);
+                        else
+                            ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
                         break;
-                    case MESSAGE_SETTLEMENT:
+                    case TD_MESSAGE_SETTLEMENT:
                         Intent intent1 = new Intent(context, ConfirmActivity.class);
                         intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         sContext.startActivity(intent1);
@@ -461,7 +456,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                 }
             }
         };
-        LocalBroadcastManager.getInstance(sContext).registerReceiver(mReceiverTransaction, new IntentFilter(BROADCAST_ACTION_TRANSACTION));
+        LocalBroadcastManager.getInstance(sContext).registerReceiver(mReceiverTransaction, new IntentFilter(TD_BROADCAST_ACTION));
 
         //网络状态变化监听广播
         mReceiverNetwork = new BroadcastReceiver() {
@@ -475,9 +470,9 @@ public class BaseApplication extends Application implements ServiceConnection {
                     case 1:
                         if (sWebSocketService != null) {
                             //连接行情服务器
-                            sWebSocketService.connect(sMDURLs.get(index));
+                            sWebSocketService.reConnectMD(sMDURLs.get(index));
                             //连接交易服务器
-                            sWebSocketService.connectTransaction();
+                            sWebSocketService.reConnectTD();
                             LogUtils.e("连接打开", true);
                         }
                         break;
@@ -492,7 +487,6 @@ public class BaseApplication extends Application implements ServiceConnection {
         mReceiverScreen = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                mIsBackground = true;
                 notifyBackground();
             }
         };
@@ -510,18 +504,10 @@ public class BaseApplication extends Application implements ServiceConnection {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 0:
-                    if (sWebSocketService != null)
-                        sWebSocketService.connect(sMDURLs.get(index));
+                    if (sWebSocketService != null) sWebSocketService.reConnectMD(sMDURLs.get(index));
                     break;
                 case 1:
-                    if (sWebSocketService != null)
-                        sWebSocketService.connectTransaction();
-                    break;
-                case 2:
-                    if (sWebSocketService != null) {
-                        sWebSocketService.disConnect();
-                        sWebSocketService.connect(sMDURLs.get(index));
-                    }
+                    if (sWebSocketService != null) sWebSocketService.reConnectTD();
                     break;
                 default:
                     break;
