@@ -542,7 +542,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             if ("0".equals(volume))
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数不能为零");
             if (price.length() != 0 && !".".equals(price) && volume.length() != 0 && volume.length() <= 10 && !"0".equals(volume))
-                initDialog(mExchangeId, mInstrumentIdTransaction.split("\\.")[1], "买开", "BUY", "OPEN", volume, "LIMIT", price);
+                initDialog(mExchangeId, mInstrumentIdTransaction.split("\\.")[1],
+                        "买开", "BUY", "OPEN", volume, "LIMIT", price);
 
         }
     }
@@ -567,7 +568,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             if ("0".equals(volume))
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数不能为零");
             if (price.length() != 0 && !".".equals(price) && volume.length() != 0 && volume.length() <= 10 && !"0".equals(volume)) {
-                initDialog(mExchangeId, mInstrumentIdTransaction.split("\\.")[1], "卖开", "SELL", "OPEN", volume, "LIMIT", price);
+                initDialog(mExchangeId, mInstrumentIdTransaction.split("\\.")[1],
+                        "卖开", "SELL", "OPEN", volume, "LIMIT", price);
 
             }
         }
@@ -776,10 +778,12 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                                 public boolean onMenuItemClick(MenuItem item) {
                                     switch (item.getItemId()) {
                                         case R.id.close_today:
-                                            initDialog(mExchangeId, instrumentId, "平今", direction, "CLOSETODAY", volume, "LIMIT", price);
+                                            initDialog(mExchangeId, instrumentId, "平今",
+                                                    direction, "CLOSETODAY", volume, "LIMIT", price);
                                             break;
                                         case R.id.close_history:
-                                            initDialog(mExchangeId, instrumentId, "平昨", direction, "CLOSE", volume, "LIMIT", price);
+                                            initDialog(mExchangeId, instrumentId, "平昨",
+                                                    direction, "CLOSE", volume, "LIMIT", price);
                                             break;
                                         default:
                                             break;
@@ -790,16 +794,21 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                             popup.show();
                         } else if (volumeN > volume_today || volumeN > volume_history) {
                             int volume_sub = volumeN - volume_today;
-                            initDialog(mExchangeId, instrumentId, "平今", "平昨", direction, "CLOSETODAY", "CLOSE", volume_today, volume_sub, "LIMIT", price);
+                            initDialog(mExchangeId, instrumentId, "平今", "平昨",
+                                    direction, "CLOSETODAY", "CLOSE", volume_today, volume_sub,
+                                    "LIMIT", price);
                         }
                     } else if (volume_today == 0 && volume_history > 0) {
-                        initDialog(mExchangeId, instrumentId, "平昨", direction, "CLOSE", volume, "LIMIT", price);
+                        initDialog(mExchangeId, instrumentId, "平昨", direction,
+                                "CLOSE", volume, "LIMIT", price);
                     } else if (volume_today > 0 && volume_history == 0) {
-                        initDialog(mExchangeId, instrumentId, "平今", direction, "CLOSETODAY", volume, "LIMIT", price);
+                        initDialog(mExchangeId, instrumentId, "平今", direction,
+                                "CLOSETODAY", volume, "LIMIT", price);
                     }
 
                 } else
-                    initDialog(mExchangeId, instrumentId, "平仓", direction, "CLOSE", volume, "LIMIT", price);
+                    initDialog(mExchangeId, instrumentId, "平仓", direction,
+                            "CLOSE", volume, "LIMIT", price);
             } catch (NumberFormatException ex) {
                 ex.printStackTrace();
             }
@@ -867,8 +876,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         tv_price.setText(price);
         tv_direction.setText(direction_title);
         tv_direction1.setText(direction_title1);
-        tv_volume.setText(volume);
-        tv_volume1.setText(volume1);
+        tv_volume.setText(volume + "");
+        tv_volume1.setText(volume1 + "");
         try {
             final double priceN = Double.parseDouble(price);
             ok.setOnClickListener(new View.OnClickListener() {

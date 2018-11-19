@@ -10,7 +10,7 @@
 
     <dimen name="margin_1dp">1dp</dimen>
     <dimen name="margin_2dp">2dp</dimen>
-    <dimen name="margin_2.5dp">2.5dp</dimen>
+    <dimen name="margin_2_5dp">2.5dp</dimen>
     <dimen name="margin_3dp">3dp</dimen>
     <dimen name="margin_5dp">5dp</dimen>
     <dimen name="margin_10dp">10dp</dimen>
@@ -34,7 +34,6 @@
     <dimen name="layout_height_popup_fragment_quote">42dp</dimen>
     <dimen name="layout_height_item_activity_nav_quote">45dp</dimen>
     <dimen name="layout_height_view_dialog_cancel_order">115dp</dimen>
-
     <dimen name="layout_width_view_dialog_cancel_order">220dp</dimen>
     <dimen name="layout_width_item_activity_nav_quote">40dp</dimen>
 

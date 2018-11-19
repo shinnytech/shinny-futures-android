@@ -450,7 +450,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                             update();
                                         }
                                     });
-                                    mDialogAdapter = new DialogAdapter(getActivity(), new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
+                                    mDialogAdapter = new DialogAdapter(getActivity(), new ArrayList<>(insList.keySet()));
                                     mRecyclerView = viewDialog.findViewById(R.id.dialog_rv);
                                     ((TextView)viewDialog.findViewById(R.id.dialog_hint)).setText("长按拖拽改变顺序");
                                     mRecyclerView.setLayoutManager(

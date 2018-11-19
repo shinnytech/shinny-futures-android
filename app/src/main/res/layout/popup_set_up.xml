@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="#99000000"
+    android:background="@color/bg_popup_set_up"
     android:orientation="vertical">
 
     <View
@@ -13,14 +13,14 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/margin_2.5dp"
+        android:layout_marginBottom="@dimen/margin_2_5dp"
         android:layout_marginStart="@dimen/margin_5dp"
         android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/margin_2.5dp"
+            android:layout_marginEnd="@dimen/margin_2_5dp"
             android:text="@string/future_info_activity_position_set_up"
             android:textColor="@color/white" />
 
@@ -29,7 +29,7 @@
             android:id="@+id/position"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_2.5dp" />
+            android:layout_marginStart="@dimen/margin_2_5dp" />
 
     </LinearLayout>
 
@@ -41,14 +41,14 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/margin_2.5dp"
+        android:layout_marginBottom="@dimen/margin_2_5dp"
         android:layout_marginStart="@dimen/margin_5dp"
         android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/margin_2.5dp"
+            android:layout_marginEnd="@dimen/margin_2_5dp"
             android:text="@string/future_info_activity_order_set_up"
             android:textColor="@color/white" />
 
@@ -57,7 +57,7 @@
             android:id="@+id/pending"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_2.5dp" />
+            android:layout_marginStart="@dimen/margin_2_5dp" />
 
     </LinearLayout>
 
@@ -75,7 +75,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/margin_2.5dp"
+            android:layout_marginEnd="@dimen/margin_2_5dp"
             android:text="@string/future_info_activity_average_set_up"
             android:textColor="@color/white" />
 
@@ -84,7 +84,7 @@
             android:id="@+id/average_line"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_2.5dp" />
+            android:layout_marginStart="@dimen/margin_2_5dp" />
 
     </LinearLayout>
 

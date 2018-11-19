@@ -112,4 +112,5 @@
     ---------------------------------------------------------------
     <!--related to my chart-->
     <color name="minute_yellow">#E7B448</color>
+    <color name="bg_popup_set_up">#99000000</color>
 </resources>
