@@ -821,8 +821,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         else mInstrumentIdTransaction = mInstrumentId;
         mExchangeId = mInstrumentIdTransaction.split("\\.")[0];
         update();
-        mKeyboardUtilsPrice.refreshInstrumentId(mInstrumentId);
-        mKeyboardUtilsVolume.refreshInstrumentId(mInstrumentId);
+        if (mKeyboardUtilsPrice != null) mKeyboardUtilsPrice.refreshInstrumentId(mInstrumentId);
+        if (mKeyboardUtilsVolume != null) mKeyboardUtilsVolume.refreshInstrumentId(mInstrumentId);
     }
 
     /**

@@ -288,7 +288,6 @@ public class BaseChartFragment extends LazyLoadFragment {
      * description: 增加持仓线
      */
     protected void addPositionLimitLines() {
-        LogUtils.e("", true);
         addLongPositionLimitLine();
         addShortPositionLimitLine();
     }

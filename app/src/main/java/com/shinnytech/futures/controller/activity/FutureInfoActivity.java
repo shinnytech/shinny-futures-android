@@ -118,7 +118,7 @@ public class FutureInfoActivity extends BaseActivity {
                 Map<String, QuoteEntity> insList = LatestFileManager.getOptionalInsList();
                 if (insList.containsKey(mInstrumentId)) {
                     insList.remove(mInstrumentId);
-                    LatestFileManager.saveInsListToFile(insList.keySet());
+                    LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
                     ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
                     mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
                     mFutureInfoActivityPresenter.refreshOptionalQuotesPopup(new ArrayList<>(insList.keySet()));
@@ -126,7 +126,7 @@ public class FutureInfoActivity extends BaseActivity {
                     QuoteEntity quoteEntity = new QuoteEntity();
                     quoteEntity.setInstrument_id(mInstrumentId);
                     insList.put(mInstrumentId, quoteEntity);
-                    LatestFileManager.saveInsListToFile(insList.keySet());
+                    LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
                     ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
                     mMenuItem.setIcon(R.mipmap.ic_favorite_white_24dp);
                     mFutureInfoActivityPresenter.refreshOptionalQuotesPopup(new ArrayList<>(insList.keySet()));

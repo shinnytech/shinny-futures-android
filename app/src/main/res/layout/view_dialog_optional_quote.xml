@@ -20,6 +20,6 @@
         android:layout_marginBottom="@dimen/margin_10dp"
         android:layout_marginLeft="@dimen/margin_10dp"
         android:layout_marginRight="@dimen/margin_10dp"
-        android:background="@color/dialog_optional"></android.support.v7.widget.RecyclerView>
+        android:background="@drawable/popup_item_touch_bg"></android.support.v7.widget.RecyclerView>
 
 </LinearLayout>

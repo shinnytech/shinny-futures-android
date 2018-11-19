@@ -7,7 +7,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/layout_height_popup_fragment_quote"
-        android:background="@color/dialog_optional"
+        android:background="@drawable/popup_item_touch_bg"
+        android:clickable="true"
+        android:focusable="true"
         android:gravity="center"
         android:orientation="vertical">
 

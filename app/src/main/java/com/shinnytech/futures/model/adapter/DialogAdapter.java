@@ -4,6 +4,7 @@ import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -11,8 +12,11 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ItemDialogOptionalBinding;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.model.listener.ItemTouchHelperListener;
+import com.shinnytech.futures.utils.LogUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -23,7 +27,7 @@ import java.util.List;
  * version:
  * state: done
  */
-public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ItemViewHolder> {
+public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ItemViewHolder> implements ItemTouchHelperListener {
     private Context sContext;
     private List<String> mData = new ArrayList<>();
 
@@ -38,6 +42,16 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ItemViewHo
         notifyDataSetChanged();
     }
 
+    public void saveOptionalList(){
+        LatestFileManager.saveInsListToFile(mData);
+    }
+
+    @Override
+    public void onItemMove(int fromPosition, int toPosition) {
+        Collections.swap(mData,fromPosition,toPosition);
+        notifyItemMoved(fromPosition,toPosition);
+    }
+
     @Override
     public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         ItemDialogOptionalBinding binding = DataBindingUtil.inflate(LayoutInflater
@@ -48,7 +62,7 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ItemViewHo
     }
 
     @Override
-    public void onBindViewHolder(ItemViewHolder holder, int position) {
+    public void onBindViewHolder(final ItemViewHolder holder, int position) {
         holder.update();
     }
 

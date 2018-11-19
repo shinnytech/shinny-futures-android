@@ -6,7 +6,19 @@
     android:orientation="horizontal">
 
     <TextView
-        android:id="@+id/quote_name"
+        android:visibility="invisible"
+        android:id="@+id/drag_quote"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="start|center_vertical"
+        android:drawableStart="@android:drawable/ic_menu_share"
+        android:text="拖拽"
+        android:padding="@dimen/padding_5dp"
+        android:textColor="@color/white"
+        android:textSize="@dimen/font_size_normal" />
+
+    <TextView
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -14,15 +26,6 @@
         android:padding="@dimen/padding_5dp" />
 
     <TextView
-        android:id="@+id/quote_latest"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:padding="@dimen/padding_5dp" />
-
-    <TextView
-        android:id="@+id/quote_change_percent"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"

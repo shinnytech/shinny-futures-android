@@ -1,7 +1,9 @@
 package com.shinnytech.futures.controller.fragment;
 
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
@@ -14,8 +16,10 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -25,12 +29,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.FragmentQuoteBinding;
+import com.shinnytech.futures.model.adapter.DialogAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
@@ -38,7 +45,9 @@ import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DensityUtils;
+import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.activity.SearchActivity;
@@ -50,6 +59,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -99,7 +109,9 @@ public class QuoteFragment extends LazyLoadFragment {
     private List<QuoteEntity> mOldData = new ArrayList<>();
     private Map<String, QuoteEntity> mNewData = new TreeMap<>();
     private FragmentQuoteBinding mBinding;
-
+    private Dialog mDialog;
+    private RecyclerView mRecyclerView;
+    private DialogAdapter mDialogAdapter;
     /**
      * date: 7/9/17
      * author: chenli
@@ -393,6 +405,9 @@ public class QuoteFragment extends LazyLoadFragment {
                         //点击空白处popupWindow消失
                         popWindow.setBackgroundDrawable(new ColorDrawable(0x00000000));
                         TextView add = popUpView.findViewById(R.id.add_remove_quote);
+                        TextView drag = popUpView.findViewById(R.id.drag_quote);
+                        if (OPTIONAL.equals(mTitle))drag.setVisibility(View.VISIBLE);
+                        else drag.setVisibility(View.INVISIBLE);
                         if (isAdd) {
                             Drawable leftDrawable = ContextCompat.getDrawable(getActivity(), R.mipmap.ic_favorite_border_white_18dp);
                             if (leftDrawable != null)
@@ -411,6 +426,87 @@ public class QuoteFragment extends LazyLoadFragment {
                         getActivity().getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
                         popWindow.showAsDropDown(view, outMetrics.widthPixels / 4 * 3, 0);
 
+                        drag.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                popWindow.dismiss();
+                                if (mDialog == null) {
+                                    //初始化自选合约弹出框
+                                    mDialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
+                                    View viewDialog = View.inflate(getActivity(), R.layout.view_dialog_optional_quote, null);
+                                    Window dialogWindow = mDialog.getWindow();
+                                    if (dialogWindow != null) {
+                                        dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+                                        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+                                        dialogWindow.setGravity(Gravity.CENTER);
+                                        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                                        lp.height = getActivity().getResources().getDisplayMetrics().heightPixels * 3 / 4;
+                                        dialogWindow.setAttributes(lp);
+                                    }
+                                    mDialog.setContentView(viewDialog);
+                                    mDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                        @Override
+                                        public void onDismiss(DialogInterface dialog) {
+                                            update();
+                                        }
+                                    });
+                                    mDialogAdapter = new DialogAdapter(getActivity(), new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
+                                    mRecyclerView = viewDialog.findViewById(R.id.dialog_rv);
+                                    ((TextView)viewDialog.findViewById(R.id.dialog_hint)).setText("长按拖拽改变顺序");
+                                    mRecyclerView.setLayoutManager(
+                                            new LinearLayoutManager(getActivity()));
+                                    mRecyclerView.addItemDecoration(
+                                            new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
+                                    mRecyclerView.setAdapter(mDialogAdapter);
+                                    final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.Callback() {
+                                        @Override
+                                        public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                                            int swipeFlag=0;
+                                            int dragFlag = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+                                            return  makeMovementFlags(dragFlag,swipeFlag);
+                                        }
+
+
+                                        @Override
+                                        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                                            mDialogAdapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                                            return true;
+                                        }
+
+                                        @Override
+                                        public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
+                                            super.onSelectedChanged(viewHolder, actionState);
+                                            if (actionState == ItemTouchHelper.ACTION_STATE_DRAG){
+                                                Vibrator vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+                                                vibrator.vibrate(70);
+                                            }
+                                            if (actionState == ItemTouchHelper.ACTION_STATE_IDLE)
+                                                mDialogAdapter.saveOptionalList();
+                                        }
+
+                                        @Override
+                                        public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                                            //暂不处理
+                                        }
+
+                                        @Override
+                                        public boolean canDropOver(RecyclerView recyclerView, RecyclerView.ViewHolder current, RecyclerView.ViewHolder target) {
+                                            return true;
+                                        }
+
+                                        @Override
+                                        public boolean isLongPressDragEnabled() {
+                                            //return true后，可以实现长按拖动排序和拖动动画了
+                                            return true;
+                                        }
+                                    });
+                                    itemTouchHelper.attachToRecyclerView(mRecyclerView);
+                                }
+
+                                if (!mDialog.isShowing()) mDialog.show();
+                            }
+                        });
+
                         add.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -418,7 +514,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                     QuoteEntity quoteEntity = new QuoteEntity();
                                     quoteEntity.setInstrument_id(instrument_id);
                                     insList.put(instrument_id, quoteEntity);
-                                    LatestFileManager.saveInsListToFile(insList.keySet());
+                                    LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -428,7 +524,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                     });
                                 } else {
                                     insList.remove(instrument_id);
-                                    LatestFileManager.saveInsListToFile(insList.keySet());
+                                    LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
                                     if (mTitle.equals(OPTIONAL)) {
                                         update();
                                     }
@@ -440,6 +536,8 @@ public class QuoteFragment extends LazyLoadFragment {
                                         }
                                     });
                                 }
+                                if (mDialogAdapter != null)
+                                    mDialogAdapter.updateList(new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
                             }
                         });
                     }

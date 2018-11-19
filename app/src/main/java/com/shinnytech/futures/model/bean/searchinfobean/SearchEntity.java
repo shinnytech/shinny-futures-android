@@ -1,12 +1,14 @@
 package com.shinnytech.futures.model.bean.searchinfobean;
 
+import android.support.annotation.NonNull;
+
 /**
  * Created on 6/20/17.
  * Created by chenli.
  * Description: .
  */
 
-public class SearchEntity {
+public class SearchEntity implements Comparable<SearchEntity>{
     private String instrumentName = "";
     private String instrumentId = "";
     private String exchangeName = "";
@@ -18,6 +20,8 @@ public class SearchEntity {
     private String sort_key = "";
     private String margin = "";
     private String underlying_symbol = "";
+    private boolean expired = false;
+    private int pre_volume = 0;
 
     public String getpTick_decs() {
         return pTick_decs;
@@ -105,5 +109,31 @@ public class SearchEntity {
 
     public void setExchangeId(String exchangeId) {
         this.exchangeId = exchangeId;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+
+    public int getPre_volume() {
+        return pre_volume;
+    }
+
+    public void setPre_volume(int pre_volume) {
+        this.pre_volume = pre_volume;
+    }
+
+    @Override
+    public int compareTo(@NonNull SearchEntity o) {
+        String instrument_id1 = this.instrumentId;
+        String instrument_id2 = o.instrumentId;
+        int pre_volume1 = this.pre_volume;
+        int pre_volume2 = o.pre_volume;
+        if (pre_volume1 != pre_volume2) return pre_volume2 - pre_volume1;
+        else return - instrument_id1.compareTo(instrument_id2);
     }
 }

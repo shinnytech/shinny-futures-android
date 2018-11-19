@@ -30,6 +30,7 @@ import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.shinnytech.futures.model.adapter.SearchAdapter;
 import com.umeng.analytics.MobclickAgent;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
@@ -98,14 +99,14 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
 
                 if (insList.containsKey(instrument_id)) {
                     insList.remove(instrument_id);
-                    LatestFileManager.saveInsListToFile(insList.keySet());
+                    LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
                     ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
                     ((ImageView) view).setImageResource(R.mipmap.ic_favorite_border_white_24dp);
                 } else {
                     QuoteEntity quoteEntity = new QuoteEntity();
                     quoteEntity.setInstrument_id(instrument_id);
                     insList.put(instrument_id, quoteEntity);
-                    LatestFileManager.saveInsListToFile(insList.keySet());
+                    LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
                     ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
                     ((ImageView) view).setImageResource(R.mipmap.ic_favorite_white_24dp);
                 }

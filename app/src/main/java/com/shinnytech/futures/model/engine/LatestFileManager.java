@@ -20,7 +20,10 @@ import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -74,7 +77,7 @@ public class LatestFileManager {
      * date: 7/9/17
      * description: 自选合约列表
      */
-    private static Map<String, QuoteEntity> sOptionalInsList = new TreeMap<>(comparator);
+    private static Map<String, QuoteEntity> sOptionalInsList = new LinkedHashMap<>();
 
     /**
      * date: 7/9/17
@@ -208,7 +211,8 @@ public class LatestFileManager {
                 String product_short_name = subObject.optString("product_short_name");
                 String py = subObject.optString("py");
                 String margin = subObject.optString("margin");
-                Boolean expired = subObject.optBoolean("expired");
+                boolean expired = subObject.optBoolean("expired");
+                int pre_volume = subObject.optInt("pre_volume");
                 SearchEntity searchEntity = new SearchEntity();
                 searchEntity.setpTick(price_tick);
                 searchEntity.setpTick_decs(price_decs);
@@ -219,6 +223,8 @@ public class LatestFileManager {
                 searchEntity.setSort_key(sort_key);
                 searchEntity.setPy(py);
                 searchEntity.setMargin(margin);
+                searchEntity.setExpired(expired);
+                searchEntity.setPre_volume(pre_volume);
                 QuoteEntity quoteEntity = new QuoteEntity();
                 quoteEntity.setInstrument_id(instrument_id);
 
@@ -226,6 +232,9 @@ public class LatestFileManager {
                     String underlying_symbol = subObject.optString("underlying_symbol");
                     if ("".equals(underlying_symbol)) continue;
                     searchEntity.setUnderlying_symbol(underlying_symbol);
+                    JSONObject subObjectFuture = jsonObject.optJSONObject(underlying_symbol);
+                    int pre_volume_f = subObjectFuture.optInt("pre_volume");
+                    searchEntity.setPre_volume(pre_volume_f);
                     sMainInsList.put(instrument_id, quoteEntity);
                     sMainInsListNameNav.put(instrument_id, ins_name.replace("主连", ""));
                 }
@@ -305,7 +314,8 @@ public class LatestFileManager {
      * description: 获取合约列表
      */
     public static Map<String, QuoteEntity> getOptionalInsList() {
-        Set<String> insList = readInsListFromFile();
+        List<String> insList = readInsListFromFile();
+        sOptionalInsList.clear();
         for (String ins :
                 insList) {
             QuoteEntity quoteEntity = DataManager.getInstance().getRtnData().getQuotes().get(ins);
@@ -447,11 +457,10 @@ public class LatestFileManager {
     /**
      * 保存合约列表字符串到本地文件
      */
-    public static void saveInsListToFile(Set<String> insList) {
+    public static void saveInsListToFile(List<String> insList) {
         try {
-            ArrayList<String> insLists = new ArrayList<>(insList);
             ObjectOutputStream out = new ObjectOutputStream(BaseApplication.getContext().openFileOutput(OPTIONAL_INS_LIST, Context.MODE_PRIVATE));
-            out.writeObject(insLists);
+            out.writeObject(insList);
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -461,8 +470,8 @@ public class LatestFileManager {
     /**
      * 读取本地文件合约列表
      */
-    private static Set<String> readInsListFromFile() {
-        Set<String> insList = new TreeSet<>(comparator);
+    private static List<String> readInsListFromFile() {
+        List<String> insList = new ArrayList<>();
         //打开文件输入流
         //读取文件内容
         try {

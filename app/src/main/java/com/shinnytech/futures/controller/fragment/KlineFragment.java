@@ -18,6 +18,7 @@ import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.LegendEntry;
+import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.MarkerView;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
@@ -61,6 +62,7 @@ import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -110,6 +112,12 @@ public class KlineFragment extends BaseChartFragment {
     private boolean mIsDrag;
     private Highlight mLastHighlighted;
     private int mLastIndex;
+
+    /**
+     * date: 2018/11/19
+     * description: 最新价线
+     */
+    protected Map<String, LimitLine> mLatestLimitLines;
 
 
     /**
@@ -179,6 +187,7 @@ public class KlineFragment extends BaseChartFragment {
         if (mScaleX == 0.0f)
             mScaleX = (float) SPUtils.get(BaseApplication.getContext(), "mScaleX", 1.0f);
         mIsDrag = true;
+        mLatestLimitLines = new HashMap<>();
     }
 
     @Override
@@ -401,6 +410,7 @@ public class KlineFragment extends BaseChartFragment {
                         mLineData.removeEntry(mLastIndex, 1);
                         mLineData.removeEntry(mLastIndex, 2);
                         generateCandleAndLineDataEntry(candleData, mLeftIndex, mLastIndex);
+                        refreshLatestLine(dataEntity);
                     } else {
                         String left_id = chartEntity.getLeft_id();
                         String right_id = chartEntity.getRight_id();
@@ -421,7 +431,7 @@ public class KlineFragment extends BaseChartFragment {
                             }
                             this.mRightIndex = right_index;
                         }
-
+                        refreshLatestLine(mDataEntities.get(right_id));
                     }
                     combinedData.notifyDataChanged();
                     mChart.notifyDataSetChanged();
@@ -476,6 +486,7 @@ public class KlineFragment extends BaseChartFragment {
                     int width = (int) (mChart.getViewPortHandler().contentWidth() / 5);
                     ((KlineMarkerView)mChart.getMarker()).resize(width, height);
                     LogUtils.e("xVals.size()" + xVals.size(), true);
+                    generateLatestLine(mDataEntities.get(right_id));
                 }
             } catch (Exception ex) {
                 ByteArrayOutputStream error = new ByteArrayOutputStream();
@@ -567,6 +578,47 @@ public class KlineFragment extends BaseChartFragment {
             }
         }
         return sum;
+    }
+
+    /**
+     * date: 2018/11/19
+     * author: chenli
+     * description: 生成最新价线
+     */
+    private void generateLatestLine( KlineEntity.DataEntity dataEntity){
+        try {
+            String limit = dataEntity.getClose();
+            LimitLine limitLine = new LimitLine(Float.valueOf(limit), LatestFileManager.saveScaleByPtick(limit, instrument_id));
+            limitLine.setLineWidth(1f);
+            limitLine.enableDashedLine(2f, 2f, 0f);
+            limitLine.setLineColor( ContextCompat.getColor(getActivity(), R.color.black_light_more));
+            limitLine.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_TOP);
+            limitLine.setTextSize(10f);
+            limitLine.setTextColor(ContextCompat.getColor(getActivity(), R.color.black_light_more));
+            mChart.getAxisLeft().addLimitLine(limitLine);
+            mLatestLimitLines.put("latest", limitLine);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * date: 2018/11/19
+     * author: chenli
+     * description: 生成最新价线
+     */
+    private void refreshLatestLine( KlineEntity.DataEntity dataEntity){
+        try {
+            float limit = Float.valueOf(dataEntity.getClose());
+            LimitLine limitLine = mLatestLimitLines.get("latest");
+            if (limitLine.getLimit() != limit){
+                mChart.getAxisLeft().removeLimitLine(limitLine);
+                mLatestLimitLines.remove("latest");
+                generateLatestLine(dataEntity);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
