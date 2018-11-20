@@ -3,16 +3,20 @@ package com.shinnytech.futures.model.adapter;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.databinding.ItemDialogOptionalBinding;
+import com.shinnytech.futures.databinding.ItemDialogOptionalDragBinding;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.model.listener.ItemTouchHelperListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -23,11 +27,12 @@ import java.util.List;
  * version:
  * state: done
  */
-public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ItemViewHolder> {
+public class DragDialogAdapter extends RecyclerView.Adapter<DragDialogAdapter.ItemViewHolder> implements ItemTouchHelperListener {
     private Context sContext;
     private List<String> mData = new ArrayList<>();
+    private ItemTouchHelper itemTouchHelper;
 
-    public DialogAdapter(Context context, List<String> data) {
+    public DragDialogAdapter(Context context, List<String> data) {
         this.sContext = context;
         this.mData.addAll(data);
     }
@@ -38,10 +43,24 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ItemViewHo
         notifyDataSetChanged();
     }
 
+    public void setItemTouchHelper(ItemTouchHelper itemTouchHelper) {
+        this.itemTouchHelper = itemTouchHelper;
+    }
+
+    public void saveOptionalList() {
+        LatestFileManager.saveInsListToFile(mData);
+    }
+
+    @Override
+    public void onItemMove(int fromPosition, int toPosition) {
+        Collections.swap(mData, fromPosition, toPosition);
+        notifyItemMoved(fromPosition, toPosition);
+    }
+
     @Override
     public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        ItemDialogOptionalBinding binding = DataBindingUtil.inflate(LayoutInflater
-                .from(sContext), R.layout.item_dialog_optional, parent, false);
+        ItemDialogOptionalDragBinding binding = DataBindingUtil.inflate(LayoutInflater
+                .from(sContext), R.layout.item_dialog_optional_drag, parent, false);
         ItemViewHolder holder = new ItemViewHolder(binding.getRoot());
         holder.setBinding(binding);
         return holder;
@@ -60,17 +79,17 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ItemViewHo
     public class ItemViewHolder extends RecyclerView.ViewHolder {
         String instrumentId;
 
-        private ItemDialogOptionalBinding mBinding;
+        private ItemDialogOptionalDragBinding mBinding;
 
         public ItemViewHolder(View itemView) {
             super(itemView);
         }
 
-        public ItemDialogOptionalBinding getBinding() {
+        public ItemDialogOptionalDragBinding getBinding() {
             return this.mBinding;
         }
 
-        public void setBinding(ItemDialogOptionalBinding binding) {
+        public void setBinding(ItemDialogOptionalDragBinding binding) {
             this.mBinding = binding;
         }
 
@@ -82,7 +101,16 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ItemViewHo
             if (insName != null) mBinding.tvIdDialog.setText(insName.getInstrumentName());
             else mBinding.tvIdDialog.setText(instrumentId);
             itemView.setTag(instrumentId);
-        }
 
+            mBinding.tvDragDialog.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (event.getAction()== MotionEvent.ACTION_DOWN) {
+                        if (itemTouchHelper != null)itemTouchHelper.startDrag(ItemViewHolder.this);
+                    }
+                    return false;
+                }
+            });
+        }
     }
 }

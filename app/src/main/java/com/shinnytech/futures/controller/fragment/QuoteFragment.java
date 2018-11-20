@@ -16,7 +16,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -37,7 +36,7 @@ import android.widget.TextView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.FragmentQuoteBinding;
-import com.shinnytech.futures.model.adapter.DialogAdapter;
+import com.shinnytech.futures.model.adapter.DragDialogAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
@@ -45,9 +44,7 @@ import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DensityUtils;
-import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.activity.SearchActivity;
@@ -59,7 +56,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -111,7 +107,7 @@ public class QuoteFragment extends LazyLoadFragment {
     private FragmentQuoteBinding mBinding;
     private Dialog mDialog;
     private RecyclerView mRecyclerView;
-    private DialogAdapter mDialogAdapter;
+    private DragDialogAdapter mDragDialogAdapter;
     /**
      * date: 7/9/17
      * author: chenli
@@ -430,6 +426,9 @@ public class QuoteFragment extends LazyLoadFragment {
                             @Override
                             public void onClick(View v) {
                                 popWindow.dismiss();
+                                if (mDragDialogAdapter != null)
+                                    mDragDialogAdapter.updateList(new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
+
                                 if (mDialog == null) {
                                     //初始化自选合约弹出框
                                     mDialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
@@ -450,14 +449,14 @@ public class QuoteFragment extends LazyLoadFragment {
                                             update();
                                         }
                                     });
-                                    mDialogAdapter = new DialogAdapter(getActivity(), new ArrayList<>(insList.keySet()));
+                                    mDragDialogAdapter = new DragDialogAdapter(getActivity(), new ArrayList<>(insList.keySet()));
                                     mRecyclerView = viewDialog.findViewById(R.id.dialog_rv);
-                                    ((TextView)viewDialog.findViewById(R.id.dialog_hint)).setText("长按拖拽改变顺序");
+                                    ((TextView)viewDialog.findViewById(R.id.dialog_hint)).setText("自选合约调控");
                                     mRecyclerView.setLayoutManager(
                                             new LinearLayoutManager(getActivity()));
                                     mRecyclerView.addItemDecoration(
                                             new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
-                                    mRecyclerView.setAdapter(mDialogAdapter);
+                                    mRecyclerView.setAdapter(mDragDialogAdapter);
                                     final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.Callback() {
                                         @Override
                                         public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
@@ -469,7 +468,7 @@ public class QuoteFragment extends LazyLoadFragment {
 
                                         @Override
                                         public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                                            mDialogAdapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                                            mDragDialogAdapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
                                             return true;
                                         }
 
@@ -481,7 +480,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                                 vibrator.vibrate(70);
                                             }
                                             if (actionState == ItemTouchHelper.ACTION_STATE_IDLE)
-                                                mDialogAdapter.saveOptionalList();
+                                                mDragDialogAdapter.saveOptionalList();
                                         }
 
                                         @Override
@@ -501,6 +500,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                         }
                                     });
                                     itemTouchHelper.attachToRecyclerView(mRecyclerView);
+                                    mDragDialogAdapter.setItemTouchHelper(itemTouchHelper);
                                 }
 
                                 if (!mDialog.isShowing()) mDialog.show();
@@ -536,8 +536,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                         }
                                     });
                                 }
-                                if (mDialogAdapter != null)
-                                    mDialogAdapter.updateList(new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
+
                             }
                         });
                     }

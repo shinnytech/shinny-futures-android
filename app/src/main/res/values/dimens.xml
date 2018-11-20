@@ -16,10 +16,12 @@
     <dimen name="margin_10dp">10dp</dimen>
     <dimen name="margin_15dp">15dp</dimen>
     <dimen name="margin_16dp">16dp</dimen>
+    <dimen name="margin_18dp">18dp</dimen>
     <dimen name="margin_20dp">20dp</dimen>
     <dimen name="margin_30dp">30dp</dimen>
     <dimen name="margin_32dp">32dp</dimen>
     <dimen name="margin_45dp">45dp</dimen>
+    <dimen name="margin_100dp">100dp</dimen>
 
     <dimen name="line_width">1dp</dimen>
     <dimen name="line_width_half">0.5dp</dimen>
@@ -44,6 +46,7 @@
     <dimen name="padding_4dp">4dp</dimen>
     <dimen name="padding_5dp">5dp</dimen>
     <dimen name="padding_10dp">10dp</dimen>
+    <dimen name="padding_20dp">20dp</dimen>
 
     <dimen name="font_size_tiny_high">8sp</dimen>
     <dimen name="font_size_tiny">10sp</dimen>
@@ -59,4 +62,5 @@
 
     <dimen name="text_view_height">35dp</dimen>
     <dimen name="text_view_width">140dp</dimen>
+    <dimen name="item_dialog_optional_drag_width">38dp</dimen>
 </resources>
