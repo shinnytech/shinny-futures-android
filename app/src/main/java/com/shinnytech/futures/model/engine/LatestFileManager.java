@@ -29,6 +29,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_INS_LIST;
+
 /**
  * date: 3/30/17
  * author: chenli
@@ -42,7 +44,6 @@ public class LatestFileManager {
      * date: 7/9/17
      * description: 自选合约列表名称
      */
-    private static final String OPTIONAL_INS_LIST = "optionalInsList";
     private static JSONObject jsonObject = new JSONObject();
     private static Comparator<String> comparator = new Comparator<String>() {
         @Override

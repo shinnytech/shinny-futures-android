@@ -66,6 +66,10 @@ public final class CommonConstants {
     //app名称
     public static final String KUAI_QI_XIAO_Q = "快期小Q";
 
+    //本地自选合约文件名
+    public static final String OPTIONAL_INS_LIST = "optionalInsList";
+
+
     //EventBus通知
     public static final String LOG_OUT = "LOGOUT";
     public static final String BACKGROUND = "BACKGROUND";

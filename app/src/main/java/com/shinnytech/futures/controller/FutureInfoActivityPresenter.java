@@ -166,15 +166,9 @@ public class FutureInfoActivityPresenter {
             mRightDrawable.setBounds(0, 0, mRightDrawable.getMinimumWidth(), mRightDrawable.getMinimumHeight());
 
         //初始化开关状态
-        if (SPUtils.contains(sContext, "isPosition")) {
-            mIsPosition = (boolean) SPUtils.get(sContext, "isPosition", true);
-        }else mIsPosition = true;
-        if (SPUtils.contains(sContext, "isPending")) {
-            mIsPending = (boolean) SPUtils.get(sContext, "isPending", true);
-        }else mIsPending = true;
-        if (SPUtils.contains(sContext, "isAverage")) {
-            mIsAverage = (boolean) SPUtils.get(sContext, "isAverage", true);
-        }else mIsAverage = true;
+        mIsPosition = (boolean) SPUtils.get(sContext, "isPosition", true);
+        mIsPending = (boolean) SPUtils.get(sContext, "isPending", true);
+        mIsAverage = (boolean) SPUtils.get(sContext, "isAverage", true);
 
         //初始化盘口、持仓、挂单、交易切换容器，fragment实例保存，有生命周期的变化，默认情况下屏幕外初始化两个fragment
         List<Fragment> fragmentList = new ArrayList<>();

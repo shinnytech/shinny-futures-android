@@ -117,10 +117,10 @@
                 android:textSize="@dimen/font_size_normal" />
 
             <ImageView
-                android:background="@drawable/popup_item_touch_bg"
+                android:background="@drawable/lock_password_bg"
                 android:clickable="true"
                 android:layout_alignEnd="@id/spinner"
-                android:id="@+id/tv_id_password_lock"
+                android:id="@+id/iv_id_password_lock"
                 android:padding="@dimen/padding_6dp"
                 android:layout_width="30dp"
                 android:layout_height="30dp"

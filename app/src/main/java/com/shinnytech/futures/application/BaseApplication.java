@@ -1,6 +1,5 @@
 package com.shinnytech.futures.application;
 
-import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
@@ -11,8 +10,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,8 +17,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
-import android.util.Log;
 
 import com.baidu.mobstat.StatService;
 import com.lzy.okgo.OkGo;
@@ -31,7 +26,6 @@ import com.lzy.okgo.callback.FileCallback;
 import com.lzy.okgo.cookie.store.SPCookieStore;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
-import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.ConfirmActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
@@ -40,6 +34,7 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
+import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
@@ -48,14 +43,11 @@ import com.umeng.commonsdk.UMConfigure;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -74,6 +66,7 @@ import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_6;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_7;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.MD_ONLINE;
+import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_INS_LIST;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_ONLINE;
@@ -130,6 +123,9 @@ public class BaseApplication extends Application implements ServiceConnection {
         //初始化行情服务器地址
         initTMDUrl();
 
+        //初始化默认配置
+        initDefaultConfig();
+
         //OkHttp网络框架初始化
         initOkGo();
 
@@ -141,6 +137,36 @@ public class BaseApplication extends Application implements ServiceConnection {
 
         //广播注册
         registerBroaderCast();
+
+    }
+
+    /**
+     * date: 2018/11/20
+     * author: chenli
+     * description: 初始化默认配置
+     */
+    private void initDefaultConfig() {
+        try {
+            BaseApplication.getContext().openFileInput(OPTIONAL_INS_LIST);
+        } catch (FileNotFoundException e) {
+            LatestFileManager.saveInsListToFile(new ArrayList<String>());
+        }
+
+        if (!SPUtils.contains(sContext, "isPosition")) {
+            SPUtils.putAndApply(sContext, "isPosition", true);
+        }
+
+        if (!SPUtils.contains(sContext, "isPending")) {
+            SPUtils.putAndApply(sContext, "isPending", true);
+        }
+
+        if (!SPUtils.contains(sContext, "isAverage")) {
+            SPUtils.putAndApply(sContext, "isAverage", true);
+        }
+
+        if (!SPUtils.contains(sContext, "isLocked")) {
+            SPUtils.putAndApply(sContext, "isLocked", false);
+        }
 
     }
 

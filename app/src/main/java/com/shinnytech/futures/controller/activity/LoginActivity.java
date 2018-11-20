@@ -24,6 +24,7 @@ import com.shinnytech.futures.databinding.ActivityLoginBinding;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.utils.AndroidBug5497Workaround;
 import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -72,6 +73,7 @@ public class LoginActivity extends BaseActivity {
     private Handler mHandler;
     private ActivityLoginBinding mBinding;
     private String mPassword;
+    private boolean mIsLocked;
 
     /**
      * date: 6/1/18
@@ -135,6 +137,13 @@ public class LoginActivity extends BaseActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, mData);
         mBinding.tvIdPhone.setAdapter(adapter);
 
+        mIsLocked = (boolean) SPUtils.get(sContext, "isLocked", false);
+        if (mIsLocked){
+            mBinding.ivIdPasswordLock.setImageResource(R.mipmap.ic_lock_outline_white_24dp);
+        }else {
+            mBinding.ivIdPasswordLock.setImageResource(R.mipmap.ic_lock_open_white_24dp);
+        }
+
         if (SPUtils.contains(sContext, "password")) {
             String password = (String) SPUtils.get(sContext, "password", "");
             mBinding.etIdPassword.setText(password);
@@ -143,6 +152,24 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     protected void initEvent() {
+
+        //点击切换密码保存
+        mBinding.ivIdPasswordLock.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mIsLocked){
+                    mBinding.ivIdPasswordLock.setImageResource(R.mipmap.ic_lock_open_white_24dp);
+                    mIsLocked = false;
+                    SPUtils.putAndApply(sContext, "isLocked", false);
+                    ToastNotificationUtils.showToast(sContext, "不保存密码");
+                }else {
+                    mBinding.ivIdPasswordLock.setImageResource(R.mipmap.ic_lock_outline_white_24dp);
+                    mIsLocked = true;
+                    SPUtils.putAndApply(sContext, "isLocked", true);
+                    ToastNotificationUtils.showToast(sContext, "保存密码");
+                }
+            }
+        });
 
         //点击登录
         mBinding.buttonIdLogin.setOnClickListener(new View.OnClickListener() {
@@ -362,7 +389,8 @@ public class LoginActivity extends BaseActivity {
                     case 0:
                         activity.sDataManager.IS_LOGIN = true;
                         SPUtils.putAndApply(activity.sContext, "phone", activity.mPhoneNumber);
-                        SPUtils.putAndApply(activity.sContext, "password", activity.mPassword);
+                        if (activity.mIsLocked)SPUtils.putAndApply(activity.sContext, "password", activity.mPassword);
+                        else SPUtils.putAndApply(activity.sContext, "password", "");
                         SPUtils.putAndApply(activity.sContext, "brokerName", activity.mBinding.spinner.getSelectedItem());
                         //关闭键盘
                         View view = activity.getWindow().getCurrentFocus();
