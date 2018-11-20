@@ -21,6 +21,8 @@
     <dimen name="margin_30dp">30dp</dimen>
     <dimen name="margin_32dp">32dp</dimen>
     <dimen name="margin_45dp">45dp</dimen>
+    <dimen name="margin_50dp">50dp</dimen>
+    <dimen name="margin_70dp">70dp</dimen>
     <dimen name="margin_100dp">100dp</dimen>
 
     <dimen name="line_width">1dp</dimen>
@@ -45,6 +47,7 @@
     <dimen name="padding_0dp">0dp</dimen>
     <dimen name="padding_4dp">4dp</dimen>
     <dimen name="padding_5dp">5dp</dimen>
+    <dimen name="padding_6dp">6dp</dimen>
     <dimen name="padding_10dp">10dp</dimen>
     <dimen name="padding_20dp">20dp</dimen>
 

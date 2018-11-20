@@ -111,6 +111,23 @@ public class DragDialogAdapter extends RecyclerView.Adapter<DragDialogAdapter.It
                     return false;
                 }
             });
+
+            mBinding.tvTopDialog.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onItemMove(getLayoutPosition(), 0);
+                    saveOptionalList();
+                }
+            });
+
+            mBinding.tvCutDialog.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mData.remove(getLayoutPosition());
+                    notifyItemRemoved(getLayoutPosition());
+                    saveOptionalList();
+                }
+            });
         }
     }
 }

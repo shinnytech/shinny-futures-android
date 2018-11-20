@@ -54,6 +54,7 @@ import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -432,14 +433,14 @@ public class QuoteFragment extends LazyLoadFragment {
                                 if (mDialog == null) {
                                     //初始化自选合约弹出框
                                     mDialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
-                                    View viewDialog = View.inflate(getActivity(), R.layout.view_dialog_optional_quote, null);
+                                    View viewDialog = View.inflate(getActivity(), R.layout.view_dialog_optional_drag_quote, null);
                                     Window dialogWindow = mDialog.getWindow();
                                     if (dialogWindow != null) {
                                         dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
                                         WindowManager.LayoutParams lp = dialogWindow.getAttributes();
                                         dialogWindow.setGravity(Gravity.CENTER);
                                         lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-                                        lp.height = getActivity().getResources().getDisplayMetrics().heightPixels * 3 / 4;
+                                        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
                                         dialogWindow.setAttributes(lp);
                                     }
                                     mDialog.setContentView(viewDialog);
@@ -451,7 +452,13 @@ public class QuoteFragment extends LazyLoadFragment {
                                     });
                                     mDragDialogAdapter = new DragDialogAdapter(getActivity(), new ArrayList<>(insList.keySet()));
                                     mRecyclerView = viewDialog.findViewById(R.id.dialog_rv);
-                                    ((TextView)viewDialog.findViewById(R.id.dialog_hint)).setText("自选合约调控");
+                                    viewDialog.findViewById(R.id.iv_close).setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            mDialog.dismiss();
+                                        }
+                                    });
+
                                     mRecyclerView.setLayoutManager(
                                             new LinearLayoutManager(getActivity()));
                                     mRecyclerView.addItemDecoration(

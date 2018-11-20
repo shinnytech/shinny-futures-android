@@ -122,6 +122,7 @@
 
     <!--related to dialog change quote view-->
     <string name="select_from_optional">从自选列表中选择合约</string>
+    <string name="drag_optional">自选合约管理</string>
 
     <!--related to confirm activity-->
     <string name="confirm_activity_title">账单确认</string>
