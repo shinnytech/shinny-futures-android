@@ -430,8 +430,8 @@ public class KlineFragment extends BaseChartFragment {
                                 generateCandleAndLineDataEntry(candleData, mLeftIndex, i);
                             }
                             this.mRightIndex = right_index;
+                            refreshLatestLine(mDataEntities.get(right_id));
                         }
-                        refreshLatestLine(mDataEntities.get(right_id));
                     }
                     combinedData.notifyDataChanged();
                     mChart.notifyDataSetChanged();
@@ -605,7 +605,7 @@ public class KlineFragment extends BaseChartFragment {
     /**
      * date: 2018/11/19
      * author: chenli
-     * description: 生成最新价线
+     * description: 刷新最新价线
      */
     private void refreshLatestLine( KlineEntity.DataEntity dataEntity){
         try {
