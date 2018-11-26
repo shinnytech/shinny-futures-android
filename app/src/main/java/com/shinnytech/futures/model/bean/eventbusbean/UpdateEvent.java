@@ -7,13 +7,13 @@ package com.shinnytech.futures.model.bean.eventbusbean;
  */
 
 public class UpdateEvent {
-    private boolean update;
+    private int state;
 
-    public boolean isUpdate() {
-        return update;
+    public int getState() {
+        return state;
     }
 
-    public void setUpdate(boolean update) {
-        this.update = update;
+    public void setState(int state) {
+        this.state = state;
     }
 }

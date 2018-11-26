@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="start|center_vertical"
-        android:drawableStart="@android:drawable/ic_menu_share"
+        android:drawableStart="@mipmap/ic_share_white_18dp"
         android:text="拖拽"
         android:padding="@dimen/padding_5dp"
         android:textColor="@color/white"

@@ -641,17 +641,16 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
     @Override
     public void onDrawerClosed(View drawerView) {
         UpdateEvent updateEvent = new UpdateEvent();
-        updateEvent.setUpdate(true);
+        updateEvent.setState(1);
         EventBus.getDefault().post(updateEvent);
     }
 
     @Override
     public void onDrawerStateChanged(int newState) {
-        if (newState == ViewDragHelper.STATE_SETTLING) {
-            UpdateEvent updateEvent = new UpdateEvent();
-            updateEvent.setUpdate(false);
-            EventBus.getDefault().post(updateEvent);
-        }
+        UpdateEvent updateEvent = new UpdateEvent();
+        updateEvent.setState(newState);
+        EventBus.getDefault().post(updateEvent);
+
     }
 
 

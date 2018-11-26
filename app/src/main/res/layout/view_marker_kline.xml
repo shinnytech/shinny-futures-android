@@ -20,8 +20,8 @@
         android:textColor="@color/minute_yellow"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high" />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal" />
 
     <TextView
         android:id="@+id/x_value"
@@ -35,8 +35,8 @@
         android:textColor="@color/minute_yellow"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high"  />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal"  />
 
 
     <TextView
@@ -50,8 +50,8 @@
         android:textColor="@color/white"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high"  />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal"  />
 
     <TextView
         android:id="@+id/open"
@@ -65,8 +65,8 @@
         android:textColor="@color/white"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high"  />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal"  />
 
 
     <TextView
@@ -80,8 +80,8 @@
         android:textColor="@color/white"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high"  />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal"  />
 
     <TextView
         android:id="@+id/high"
@@ -95,8 +95,8 @@
         android:textColor="@color/white"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high"  />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal"  />
 
     <TextView
         android:layout_width="match_parent"
@@ -109,8 +109,8 @@
         android:textColor="@color/white"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high"  />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal"  />
 
     <TextView
         android:id="@+id/low"
@@ -124,8 +124,8 @@
         android:textColor="@color/white"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high"  />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal"  />
 
     <TextView
         android:layout_width="match_parent"
@@ -138,8 +138,8 @@
         android:textColor="@color/white"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high"  />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal"  />
 
     <TextView
         android:id="@+id/close"
@@ -153,8 +153,8 @@
         android:textColor="@color/white"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high" />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal" />
 
     <TextView
         android:id="@+id/close_change"
@@ -168,8 +168,8 @@
         android:textColor="@color/white"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high"  />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal"  />
 
     <TextView
         android:id="@+id/close_change_percent"
@@ -183,8 +183,8 @@
         android:textColor="@color/white"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high"  />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal"  />
 
     <TextView
         android:layout_width="match_parent"
@@ -197,8 +197,8 @@
         android:textColor="@color/white"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high"  />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal"  />
 
     <TextView
         android:id="@+id/volume"
@@ -212,8 +212,8 @@
         android:textColor="@color/white"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high"  />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal"  />
 
     <TextView
         android:layout_width="match_parent"
@@ -226,8 +226,8 @@
         android:textColor="@color/white"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high"  />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal"  />
 
     <TextView
         android:id="@+id/close_oi"
@@ -241,8 +241,8 @@
         android:textColor="@color/white"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high"  />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal"  />
 
     <TextView
         android:id="@+id/close_oi_delta"
@@ -256,7 +256,7 @@
         android:textColor="@color/white"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_small_high"
-        android:textSize="@dimen/font_size_small_high"  />
+        app:autoSizeMaxTextSize="@dimen/font_size_normal"
+        android:textSize="@dimen/font_size_normal"  />
 
 </LinearLayout>

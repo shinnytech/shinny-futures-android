@@ -45,6 +45,7 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.activity.SearchActivity;
@@ -169,8 +170,27 @@ public class QuoteFragment extends LazyLoadFragment {
     //控制行情是否刷新
     @Subscribe
     public void onEvent(UpdateEvent updateEvent) {
-        if (mTitle.equals(mToolbarTitle.getText().toString()))
-            this.mIsUpdate = updateEvent.isUpdate();
+        if (mTitle.equals(mToolbarTitle.getText().toString())){
+            switch (updateEvent.getState()){
+                case 0:
+                    //防止首次打开app时导航栏先出来后行情不加载bug
+                    if (mAdapter.getData().isEmpty()){
+                        mIsUpdate = true;
+                        refreshUI(mToolbarTitle.getText().toString());
+                        mIsUpdate = false;
+                    }
+                    break;
+                case 1:
+                    mIsUpdate = true;
+                    break;
+                case 2:
+                    mIsUpdate = false;
+                    break;
+                default:
+                    break;
+            }
+
+        }
     }
 
     private void initData() {

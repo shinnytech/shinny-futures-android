@@ -37,7 +37,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@id/broker"
-                android:layout_marginEnd="@dimen/margin_20dp"
+                android:layout_marginEnd="@dimen/margin_26dp"
                 android:layout_toRightOf="@id/broker"></android.support.v7.widget.AppCompatSpinner>
 
             <View
@@ -119,7 +119,7 @@
             <ImageView
                 android:background="@drawable/lock_password_bg"
                 android:clickable="true"
-                android:layout_alignEnd="@id/spinner"
+                android:layout_alignEnd="@id/tv_id_phone"
                 android:id="@+id/iv_id_password_lock"
                 android:padding="@dimen/padding_6dp"
                 android:layout_width="30dp"

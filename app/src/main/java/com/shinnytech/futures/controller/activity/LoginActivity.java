@@ -139,7 +139,7 @@ public class LoginActivity extends BaseActivity {
 
         mIsLocked = (boolean) SPUtils.get(sContext, "isLocked", false);
         if (mIsLocked){
-            mBinding.ivIdPasswordLock.setImageResource(R.mipmap.ic_lock_outline_white_24dp);
+            mBinding.ivIdPasswordLock.setImageResource(R.mipmap.ic_lock_black_24dp);
         }else {
             mBinding.ivIdPasswordLock.setImageResource(R.mipmap.ic_lock_open_white_24dp);
         }
@@ -163,7 +163,7 @@ public class LoginActivity extends BaseActivity {
                     SPUtils.putAndApply(sContext, "isLocked", false);
                     ToastNotificationUtils.showToast(sContext, "不保存密码");
                 }else {
-                    mBinding.ivIdPasswordLock.setImageResource(R.mipmap.ic_lock_outline_white_24dp);
+                    mBinding.ivIdPasswordLock.setImageResource(R.mipmap.ic_lock_black_24dp);
                     mIsLocked = true;
                     SPUtils.putAndApply(sContext, "isLocked", true);
                     ToastNotificationUtils.showToast(sContext, "保存密码");
