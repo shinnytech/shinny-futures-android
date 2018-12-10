@@ -152,6 +152,17 @@ public class LatestFileManager {
      */
     private static Map<String, String> sNengyuanInsListNameNav = new TreeMap<>(comparator);
 
+    /**
+     * date: 2018/12/4
+     * description: 大宗商品合约列表
+     */
+    private static Map<String, QuoteEntity> sDazongInsList = new TreeMap<>(comparator);
+
+    /**
+     * date: 2018/12/4
+     * description: 大宗商品合约列表导航
+     */
+    private static Map<String, String> sDazongInsListNameNav = new TreeMap<>(comparator);
 
     /**
      * date: 7/9/17
@@ -200,7 +211,8 @@ public class LatestFileManager {
                 String instrument_id = instrumentIds.next();
                 JSONObject subObject = jsonObject.getJSONObject(instrument_id);
                 String classN = subObject.optString("class");
-                if (!"FUTURE_CONT".equals(classN) && !"FUTURE".equals(classN) && !"FUTURE_COMBINE".equals(classN)) {
+                if (!"FUTURE_CONT".equals(classN) && !"FUTURE".equals(classN) &&
+                        !"FUTURE_COMBINE".equals(classN) && !"SPOT".equals(classN)) {
                     continue;
                 }
                 String ins_name = subObject.optString("ins_name");
@@ -240,7 +252,7 @@ public class LatestFileManager {
                     sMainInsListNameNav.put(instrument_id, ins_name.replace("主连", ""));
                 }
 
-                if ("FUTURE".equals(classN)) {
+                if ("FUTURE".equals(classN) || "SPOT".equals(classN)) {
                     switch (exchange_id) {
                         case "SHFE"://上期所
                             if (!expired)sShangqiInsList.put(instrument_id, quoteEntity);
@@ -271,6 +283,12 @@ public class LatestFileManager {
                             if (!sNengyuanInsListNameNav.containsValue(product_short_name))
                                 sNengyuanInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("上海国际能源交易中心");
+                            break;
+                        case "SSWE":
+                            if (!expired)sDazongInsList.put(instrument_id, quoteEntity);
+                            if (!sDazongInsListNameNav.containsValue(product_short_name))
+                                sDazongInsListNameNav.put(instrument_id, product_short_name);
+                            searchEntity.setExchangeName("上海大宗商品交易所");
                             break;
                         default:
                             break;
@@ -353,6 +371,10 @@ public class LatestFileManager {
         return sNengyuanInsList;
     }
 
+    public static Map<String, QuoteEntity> getsDazongInsList() {
+        return sDazongInsList;
+    }
+
     public static Map<String, QuoteEntity> getDalianzuheInsList() {
         return sDalianzuheInsList;
     }
@@ -385,6 +407,10 @@ public class LatestFileManager {
         return sNengyuanInsListNameNav;
     }
 
+    public static Map<String, String> getsDazongInsListNameNav() {
+        return sDazongInsListNameNav;
+    }
+
     public static Map<String, String> getDalianzuheInsListNameNav() {
         return sDalianzuheInsListNameNav;
     }
@@ -415,8 +441,8 @@ public class LatestFileManager {
      * author: chenli
      * description: 根据最新价与昨收获取合约涨跌
      */
-    public static String getUpDown(String latest, String preClose) {
-        return MathUtils.subtract(latest, preClose);
+    public static String getUpDown(String latest, String preSettlement) {
+        return MathUtils.subtract(latest, preSettlement);
     }
 
 

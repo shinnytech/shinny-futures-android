@@ -29,6 +29,7 @@ public final class CommonConstants {
     public static final String DOMINANT = "主力合约";
     public static final String SHANGHAI = "上海期货交易所";
     public static final String NENGYUAN = "上海能源";
+    public static final String DAZONG = "上海大宗";
     public static final String DALIAN = "大连商品交易所";
     public static final String ZHENGZHOU = "郑州商品交易所";
     public static final String ZHONGJIN = "中国金融期货交易所";

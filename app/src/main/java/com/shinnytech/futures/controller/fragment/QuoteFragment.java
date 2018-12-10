@@ -64,6 +64,7 @@ import java.util.TreeMap;
 
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
+import static com.shinnytech.futures.constants.CommonConstants.DAZONG;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_SEARCH_ACTIVITY;
@@ -233,6 +234,9 @@ public class QuoteFragment extends LazyLoadFragment {
                 break;
             case NENGYUAN:
                 mNewData = LatestFileManager.getNengyuanInsList();
+                break;
+            case DAZONG:
+                mNewData = LatestFileManager.getsDazongInsList();
                 break;
             case DALIAN:
                 mNewData = LatestFileManager.getDalianInsList();

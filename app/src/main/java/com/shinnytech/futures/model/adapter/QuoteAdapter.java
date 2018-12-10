@@ -117,6 +117,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
     class ItemViewHolder extends RecyclerView.ViewHolder {
 
         private ItemFragmentQuoteBinding mBinding;
+        private String pre_settlement;
 
         public ItemViewHolder(View itemView) {
             super(itemView);
@@ -137,6 +138,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
 
             try {
                 String instrumentId = quoteEntity.getInstrument_id();
+                pre_settlement = quoteEntity.getPre_settlement();
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrumentId);
                 String instrumentName = instrumentId;
                 if (searchEntity != null) instrumentName = searchEntity.getInstrumentName();
@@ -171,7 +173,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                         mBinding.quoteOpenInterest.setText(quoteEntity.getBid_volume1());
                     }
                 } else {
-                    setTextColor(mBinding.quoteLatest, latest);
+                    setLatestTextColor(mBinding.quoteLatest, latest, pre_settlement);
                     if (mSwitchChange) {
                         setTextColor(mBinding.quoteChangePercent, change);
                     } else {
@@ -197,7 +199,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                 switch (key) {
                     case "latest":
                         if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)))
-                            setTextColor(mBinding.quoteLatest, value);
+                            setLatestTextColor(mBinding.quoteLatest, value, pre_settlement);
                         break;
                     case "change":
                         if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchChange) {
@@ -260,16 +262,32 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
          */
         public void setTextColor(TextView textView, String data) {
             textView.setText(data);
-            if (data != null) {
-                if (data.contains("-")) {
-                    if (data.length() > 1) {
-                        textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
-                    } else {
-                        textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
-                    }
-                } else {
-                    textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
-                }
+            try{
+                float value = new Float(data);
+                if (value < 0) textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
+                else if (value > 0 )textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
+                else textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+            }catch (Exception e){
+                e.printStackTrace();
+
+            }
+        }
+
+        /**
+         * date: 2018/12/4
+         * author: chenli
+         * description: 设置颜色
+         */
+        public void setLatestTextColor(TextView textView, String latest, String pre_settlement){
+            textView.setText(latest);
+            try{
+                float value = new Float(latest) - new Float(pre_settlement);
+                if (value < 0) textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
+                else if (value > 0 )textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
+                else textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+            }catch (Exception e){
+                e.printStackTrace();
+
             }
         }
     }

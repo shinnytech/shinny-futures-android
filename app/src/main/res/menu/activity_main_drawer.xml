@@ -30,6 +30,13 @@
             android:title="上期能源" />
     </group>
     <group
+        android:id="@+id/gp32"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_dazong"
+            android:title="上期大宗" />
+    </group>
+    <group
         android:id="@+id/gp4"
         android:checkableBehavior="single">
         <item

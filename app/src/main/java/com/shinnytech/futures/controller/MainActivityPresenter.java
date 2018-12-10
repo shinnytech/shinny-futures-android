@@ -62,6 +62,7 @@ import java.util.TreeMap;
 
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
+import static com.shinnytech.futures.constants.CommonConstants.DAZONG;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
@@ -87,7 +88,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
     private Toolbar mToolbar;
     private TextView mToolbarTitle;
     private QuoteNavAdapter mNavAdapter;
-    private String[] mMenuTitle = new String[]{"自选", "主力", "上海", "上期能源", "大连", "郑州", "中金", "大连组合", "郑州组合", "账户", "持仓", "成交", "转账", "反馈", "关于"};
+    private String[] mMenuTitle = new String[]{"自选", "主力", "上海", "上期能源", "上海大宗", "大连", "郑州", "中金", "大连组合", "郑州组合", "账户", "持仓", "成交", "转账", "反馈", "关于"};
     private Map<String, String> mInsListNameNav = new TreeMap<>();
     private String mIns;
     private BroadcastReceiver mReceiver;
@@ -118,6 +119,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
         fragmentList.add(QuoteFragment.newInstance(DOMINANT));
         fragmentList.add(QuoteFragment.newInstance(SHANGHAI));
         fragmentList.add(QuoteFragment.newInstance(NENGYUAN));
+        fragmentList.add(QuoteFragment.newInstance(DAZONG));
         fragmentList.add(QuoteFragment.newInstance(DALIAN));
         fragmentList.add(QuoteFragment.newInstance(ZHENGZHOU));
         fragmentList.add(QuoteFragment.newInstance(ZHONGJIN));
@@ -318,33 +320,40 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                 break;
             case 4:
                 if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
+                    mToolbarTitle.setText(DAZONG);
+
+                if (state == ViewPager.SCROLL_STATE_IDLE)
+                    refreshQuotesNavigation(DAZONG);
+                break;
+            case 5:
+                if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(DALIAN);
 
                 if (state == ViewPager.SCROLL_STATE_IDLE)
                     refreshQuotesNavigation(DALIAN);
                 break;
-            case 5:
+            case 6:
                 if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(ZHENGZHOU);
 
                 if (state == ViewPager.SCROLL_STATE_IDLE)
                     refreshQuotesNavigation(ZHENGZHOU);
                 break;
-            case 6:
+            case 7:
                 if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(ZHONGJIN);
 
                 if (state == ViewPager.SCROLL_STATE_IDLE)
                     refreshQuotesNavigation(ZHONGJIN);
                 break;
-            case 7:
+            case 8:
                 if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(DALIANZUHE);
 
                 if (state == ViewPager.SCROLL_STATE_IDLE)
                     refreshQuotesNavigation(DALIANZUHE);
                 break;
-            case 8:
+            case 9:
                 if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(ZHENGZHOUZUHE);
 
@@ -390,34 +399,40 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                 mBinding.vpContent.setCurrentItem(3, false);
                 refreshQuotesNavigation(NENGYUAN);
                 break;
+            case R.id.nav_dazong:
+                if (NetworkUtils.isNetworkConnected(sContext))
+                    mToolbarTitle.setText(DAZONG);
+                mBinding.vpContent.setCurrentItem(4, false);
+                refreshQuotesNavigation(DAZONG);
+                break;
             case R.id.nav_dalian:
                 if (NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(DALIAN);
-                mBinding.vpContent.setCurrentItem(4, false);
+                mBinding.vpContent.setCurrentItem(5, false);
                 refreshQuotesNavigation(DALIAN);
                 break;
             case R.id.nav_zhengzhou:
                 if (NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(ZHENGZHOU);
-                mBinding.vpContent.setCurrentItem(5, false);
+                mBinding.vpContent.setCurrentItem(6, false);
                 refreshQuotesNavigation(ZHENGZHOU);
                 break;
             case R.id.nav_zhongjin:
                 if (NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(ZHONGJIN);
-                mBinding.vpContent.setCurrentItem(6, false);
+                mBinding.vpContent.setCurrentItem(7, false);
                 refreshQuotesNavigation(ZHONGJIN);
                 break;
             case R.id.nav_dalian_zuhe:
                 if (NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(DALIANZUHE);
-                mBinding.vpContent.setCurrentItem(7, false);
+                mBinding.vpContent.setCurrentItem(8, false);
                 refreshQuotesNavigation(DALIANZUHE);
                 break;
             case R.id.nav_zhengzhou_zuhe:
                 if (NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(ZHENGZHOUZUHE);
-                mBinding.vpContent.setCurrentItem(8, false);
+                mBinding.vpContent.setCurrentItem(9, false);
                 refreshQuotesNavigation(ZHENGZHOUZUHE);
                 break;
             case R.id.nav_account:
@@ -479,6 +494,9 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
             case NENGYUAN:
                 insListName = new ArrayList<>(LatestFileManager.getNengyuanInsList().keySet());
                 break;
+            case DAZONG:
+                insListName = new ArrayList<>(LatestFileManager.getsDazongInsList().keySet());
+                break;
             case DALIAN:
                 insListName = new ArrayList<>(LatestFileManager.getDalianInsList().keySet());
                 break;
@@ -534,6 +552,11 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
             case NENGYUAN:
                 setNavVisiable();
                 mInsListNameNav = LatestFileManager.getNengyuanInsListNameNav();
+                mNavAdapter.updateList(mInsListNameNav);
+                break;
+            case DAZONG:
+                setNavVisiable();
+                mInsListNameNav = LatestFileManager.getsDazongInsListNameNav();
                 mNavAdapter.updateList(mInsListNameNav);
                 break;
             case DALIAN:
