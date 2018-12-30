@@ -1,22 +1,36 @@
 package com.shinnytech.futures.controller.activity;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
 import com.shinnytech.futures.controller.MainActivityPresenter;
+import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
-import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.LOGIN;
+import static com.shinnytech.futures.constants.CommonConstants.LOGOUT;
+import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
+import static com.shinnytech.futures.constants.CommonConstants.POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
+import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
+import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 6/14/17
@@ -33,7 +47,6 @@ public class MainActivity extends BaseActivity {
      * 记录系统时间，用于退出时做判断
      */
     private long mExitTime = 0;
-    private Context sContext;
     private ActivityMainDrawerBinding mBinding;
     private MainActivityPresenter mMainActivityPresenter;
 
@@ -48,7 +61,6 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void initData() {
         mBinding = (ActivityMainDrawerBinding) mViewDataBinding;
-        sContext = BaseApplication.getContext();
         mMainActivityPresenter = new MainActivityPresenter(this, sContext, mBinding, mToolbar, mToolbarTitle);
         //检查是否第一次启动APP,弹出免责条款
         mMainActivityPresenter.checkResponsibility();
@@ -61,6 +73,10 @@ public class MainActivity extends BaseActivity {
         mMainActivityPresenter.registerListeners();
     }
 
+    @Override
+    protected void refreshUI() {
+    }
+
     //开机合约列表解析完毕刷新主力导航
     @Subscribe
     public void onEvent(String msg) {
@@ -71,20 +87,86 @@ public class MainActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         mMainActivityPresenter.resetNavigationItem();
-        updateToolbarFromNetwork(sContext, mToolbarTitle.getText().toString());
-        mMainActivityPresenter.registerBroaderCast();
+        //合约详情页登录切回主页刷新右导航栏
+        if (sDataManager.IS_LOGIN){
+            mBinding.nvMenuRight.getMenu().findItem(R.id.nav_login).setTitle(LOGOUT);
+            mBinding.nvMenuRight.getMenu().findItem(R.id.nav_password).setVisible(true);
+        }else {
+            mBinding.nvMenuRight.getMenu().findItem(R.id.nav_login).setTitle(LOGIN);
+            mBinding.nvMenuRight.getMenu().findItem(R.id.nav_password).setVisible(false);
+        }
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        mMainActivityPresenter.unRegisterBroaderCast();
+    protected void registerBroaderCast() {
+        mReceiverNetwork = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int networkStatus = intent.getIntExtra("networkStatus", 0);
+                switch (networkStatus) {
+                    case 0:
+                        if (OFFLINE.equals(mToolbarTitle.getText().toString()))
+                            mTitle = mToolbarTitle.getText().toString();
+                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.off_line));
+                        mToolbarTitle.setTextColor(Color.BLACK);
+                        mToolbarTitle.setText(OFFLINE);
+                        mToolbarTitle.setTextSize(20);
+                        break;
+                    case 1:
+                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.black_dark));
+                        mToolbarTitle.setTextColor(Color.WHITE);
+                        mToolbarTitle.setText(mTitle);
+                        mToolbarTitle.setTextSize(25);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+        registerReceiver(mReceiverNetwork, new IntentFilter(NETWORK_STATE));
+
+        mReceiverLocal = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String msg = intent.getStringExtra("msg");
+                if (TD_OFFLINE.equals(msg))refreshMenu();
+            }
+        };
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverLocal, new IntentFilter(TD_BROADCAST_ACTION));
+    }
+
+    //断线刷新右导航
+    private void refreshMenu() {
+        DataManager.getInstance().IS_LOGIN = false;
+        MenuItem menuLogin = mBinding.nvMenuRight.getMenu().findItem(R.id.nav_login);
+        menuLogin.setTitle(LOGIN);
+        mBinding.nvMenuRight.getMenu().findItem(R.id.nav_password).setVisible(false);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.drawer_right, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.right_navigation) {
+            if (mBinding.drawerLayout.isDrawerVisible(GravityCompat.END)) {
+                mBinding.drawerLayout.closeDrawer(GravityCompat.END);
+            } else {
+                mBinding.drawerLayout.openDrawer(GravityCompat.END);
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -95,7 +177,10 @@ public class MainActivity extends BaseActivity {
         if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             mBinding.drawerLayout.closeDrawer(GravityCompat.START);
             return true;
-        } else {
+        } else if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.END)){
+            mBinding.drawerLayout.closeDrawer(GravityCompat.END);
+            return true;
+        }else {
             if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
                 if ((System.currentTimeMillis() - mExitTime) > 2000) {
                     ToastNotificationUtils.showToast(BaseApplication.getContext(), getString(R.string.main_activity_exit));
@@ -118,8 +203,16 @@ public class MainActivity extends BaseActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         //很重要,决定了quoteFragment中的方法能不能被调用
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == JUMP_TO_FUTURE_INFO_ACTIVITY && BaseApplication.getWebSocketService() != null)
-            BaseApplication.getWebSocketService().sendSubscribeQuote(mMainActivityPresenter.getPreSubscribedQuotes());
+        if (resultCode == RESULT_OK){
+            switch (requestCode){
+                case POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY:
+                    if (BaseApplication.getWebSocketService() != null)
+                        BaseApplication.getWebSocketService().sendSubscribeQuote(mMainActivityPresenter.getPreSubscribedQuotes());
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
 }

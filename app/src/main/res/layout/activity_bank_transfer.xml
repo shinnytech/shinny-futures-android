@@ -277,6 +277,7 @@
             android:orientation="horizontal">
 
             <Button
+                android:layout_margin="@dimen/margin_5dp"
                 android:id="@+id/future_bank"
                 style="?android:textAppearanceSmall"
                 android:layout_width="0dp"
@@ -289,6 +290,7 @@
                 android:textSize="@dimen/font_size_normal" />
 
             <Button
+                android:layout_margin="@dimen/margin_5dp"
                 android:id="@+id/bank_future"
                 style="?android:textAppearanceSmall"
                 android:layout_width="0dp"

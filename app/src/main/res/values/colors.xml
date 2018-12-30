@@ -6,6 +6,7 @@
     <color name="colorPrimary">#111111</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorLaunch">#BE000F</color>
     <!--状态栏颜色-->
     <color name="black">#000000</color>
     <!--标题栏颜色-->
@@ -112,4 +113,5 @@
     ---------------------------------------------------------------
     <!--related to my chart-->
     <color name="minute_yellow">#E7B448</color>
+    <color name="bg_popup_set_up">#99000000</color>
 </resources>

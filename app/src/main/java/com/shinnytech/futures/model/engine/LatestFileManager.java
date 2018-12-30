@@ -20,11 +20,16 @@ import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_INS_LIST;
 
 /**
  * date: 3/30/17
@@ -39,7 +44,6 @@ public class LatestFileManager {
      * date: 7/9/17
      * description: 自选合约列表名称
      */
-    private static final String OPTIONAL_INS_LIST = "optionalInsList";
     private static JSONObject jsonObject = new JSONObject();
     private static Comparator<String> comparator = new Comparator<String>() {
         @Override
@@ -74,7 +78,7 @@ public class LatestFileManager {
      * date: 7/9/17
      * description: 自选合约列表
      */
-    private static Map<String, QuoteEntity> sOptionalInsList = new TreeMap<>(comparator);
+    private static Map<String, QuoteEntity> sOptionalInsList = new LinkedHashMap<>();
 
     /**
      * date: 7/9/17
@@ -148,7 +152,6 @@ public class LatestFileManager {
      */
     private static Map<String, String> sNengyuanInsListNameNav = new TreeMap<>(comparator);
 
-
     /**
      * date: 7/9/17
      * description: 大连组合列表
@@ -196,7 +199,8 @@ public class LatestFileManager {
                 String instrument_id = instrumentIds.next();
                 JSONObject subObject = jsonObject.getJSONObject(instrument_id);
                 String classN = subObject.optString("class");
-                if (!"FUTURE_CONT".equals(classN) && !"FUTURE".equals(classN) && !"FUTURE_COMBINE".equals(classN)) {
+                if (!"FUTURE_CONT".equals(classN) && !"FUTURE".equals(classN) &&
+                        !"FUTURE_COMBINE".equals(classN) && !"SPOT".equals(classN)) {
                     continue;
                 }
                 String ins_name = subObject.optString("ins_name");
@@ -208,7 +212,8 @@ public class LatestFileManager {
                 String product_short_name = subObject.optString("product_short_name");
                 String py = subObject.optString("py");
                 String margin = subObject.optString("margin");
-                Boolean expired = subObject.optBoolean("expired");
+                boolean expired = subObject.optBoolean("expired");
+                int pre_volume = subObject.optInt("pre_volume");
                 SearchEntity searchEntity = new SearchEntity();
                 searchEntity.setpTick(price_tick);
                 searchEntity.setpTick_decs(price_decs);
@@ -219,6 +224,8 @@ public class LatestFileManager {
                 searchEntity.setSort_key(sort_key);
                 searchEntity.setPy(py);
                 searchEntity.setMargin(margin);
+                searchEntity.setExpired(expired);
+                searchEntity.setPre_volume(pre_volume);
                 QuoteEntity quoteEntity = new QuoteEntity();
                 quoteEntity.setInstrument_id(instrument_id);
 
@@ -226,11 +233,14 @@ public class LatestFileManager {
                     String underlying_symbol = subObject.optString("underlying_symbol");
                     if ("".equals(underlying_symbol)) continue;
                     searchEntity.setUnderlying_symbol(underlying_symbol);
+                    JSONObject subObjectFuture = jsonObject.optJSONObject(underlying_symbol);
+                    int pre_volume_f = subObjectFuture.optInt("pre_volume");
+                    searchEntity.setPre_volume(pre_volume_f);
                     sMainInsList.put(instrument_id, quoteEntity);
                     sMainInsListNameNav.put(instrument_id, ins_name.replace("主连", ""));
                 }
 
-                if ("FUTURE".equals(classN)) {
+                if ("FUTURE".equals(classN) || "SPOT".equals(classN)) {
                     switch (exchange_id) {
                         case "SHFE"://上期所
                             if (!expired)sShangqiInsList.put(instrument_id, quoteEntity);
@@ -305,7 +315,8 @@ public class LatestFileManager {
      * description: 获取合约列表
      */
     public static Map<String, QuoteEntity> getOptionalInsList() {
-        Set<String> insList = readInsListFromFile();
+        List<String> insList = readInsListFromFile();
+        sOptionalInsList.clear();
         for (String ins :
                 insList) {
             QuoteEntity quoteEntity = DataManager.getInstance().getRtnData().getQuotes().get(ins);
@@ -404,8 +415,8 @@ public class LatestFileManager {
      * author: chenli
      * description: 根据最新价与昨收获取合约涨跌
      */
-    public static String getUpDown(String latest, String preClose) {
-        return MathUtils.subtract(latest, preClose);
+    public static String getUpDown(String latest, String preSettlement) {
+        return MathUtils.subtract(latest, preSettlement);
     }
 
 
@@ -447,11 +458,10 @@ public class LatestFileManager {
     /**
      * 保存合约列表字符串到本地文件
      */
-    public static void saveInsListToFile(Set<String> insList) {
+    public static void saveInsListToFile(List<String> insList) {
         try {
-            ArrayList<String> insLists = new ArrayList<>(insList);
             ObjectOutputStream out = new ObjectOutputStream(BaseApplication.getContext().openFileOutput(OPTIONAL_INS_LIST, Context.MODE_PRIVATE));
-            out.writeObject(insLists);
+            out.writeObject(insList);
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -461,8 +471,8 @@ public class LatestFileManager {
     /**
      * 读取本地文件合约列表
      */
-    private static Set<String> readInsListFromFile() {
-        Set<String> insList = new TreeSet<>(comparator);
+    private static List<String> readInsListFromFile() {
+        List<String> insList = new ArrayList<>();
         //打开文件输入流
         //读取文件内容
         try {

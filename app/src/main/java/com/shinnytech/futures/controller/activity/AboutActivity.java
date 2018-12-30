@@ -29,12 +29,8 @@ public class AboutActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
-            case android.R.id.home:
-                finish();
-        }
-        return super.onOptionsItemSelected(item);
+    protected void refreshUI() {
+
     }
+
 }

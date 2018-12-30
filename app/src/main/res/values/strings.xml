@@ -5,10 +5,11 @@
     <string name="main_activity_closeDrawer">close</string>
 
     <!--related to future info activity -->
-    <string name="future_info_activity_current_day">当日</string>
-    <string name="future_info_activity_day">日线</string>
-    <string name="future_info_activity_hour">小时</string>
-    <string name="future_info_activity_five_minute">5分钟</string>
+    <string name="future_info_activity_current_day">分时</string>
+    <string name="future_info_activity_day">1日</string>
+    <string name="future_info_activity_hour">1时</string>
+    <string name="future_info_activity_minute">5分</string>
+    <string name="future_info_activity_second">3秒</string>
     <string name="future_info_activity_set">设置</string>
     <string name="future_info_activity_handicap">信息</string>
     <string name="future_info_activity_position">持仓</string>
@@ -17,6 +18,9 @@
     <string name="future_info_activity_position_set_up">持仓</string>
     <string name="future_info_activity_order_set_up">挂单</string>
     <string name="future_info_activity_average_set_up">均线</string>
+
+    <!--Strings related to change password activity-->
+    <string name="change_password_activity_btn_change">修改</string>
 
     <!-- Strings related to login activity -->
     <string name="login_activity_btn_login">登录</string>
@@ -32,6 +36,7 @@
     <string name="search_activity_title">主力合约</string>
 
     <!--related to account activity-->
+    <string name="account_activity_user">用户</string>
     <string name="account_activity_date">日期</string>
     <string name="account_activity_static_balance">=静态权益</string>
     <string name="account_activity_close_profit">+平仓盈亏</string>
@@ -122,6 +127,7 @@
 
     <!--related to dialog change quote view-->
     <string name="select_from_optional">从自选列表中选择合约</string>
+    <string name="drag_optional">自选合约管理</string>
 
     <!--related to confirm activity-->
     <string name="confirm_activity_title">账单确认</string>

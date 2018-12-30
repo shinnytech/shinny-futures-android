@@ -19,7 +19,42 @@
         android:background="@color/black_light"
         android:orientation="vertical">
 
-        <include layout="@layout/view_toolbar"></include>
+        <include layout="@layout/view_toolbar"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_margin="@dimen/margin_5dp">
+
+            <TextView
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="@string/account_activity_user"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:textAlignment="textEnd"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:id="@+id/account_user"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="@{account.user_id}"
+                android:textColor="@color/white" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -197,11 +232,10 @@
         </LinearLayout>
 
         <View
+            android:layout_margin="@dimen/margin_5dp"
             android:layout_width="match_parent"
             android:layout_height="@dimen/line_width"
-            android:layout_marginBottom="@dimen/margin_10dp"
-            android:layout_marginTop="@dimen/margin_10dp"
-            android:background="@color/bg_gray_light_more"></View>
+            android:background="@color/bg_gray_light_more"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -379,11 +413,10 @@
         </LinearLayout>
 
         <View
+            android:layout_margin="@dimen/margin_5dp"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
-            android:background="@color/bg_gray_light_more"></View>
+            android:background="@color/bg_gray_light_more"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -421,11 +454,10 @@
         </LinearLayout>
 
         <View
+            android:layout_margin="@dimen/margin_5dp"
             android:layout_width="match_parent"
             android:layout_height="@dimen/line_width"
-            android:layout_marginBottom="@dimen/margin_10dp"
-            android:layout_marginTop="@dimen/margin_10dp"
-            android:background="@color/bg_gray_light_more"></View>
+            android:background="@color/bg_gray_light_more"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -496,22 +528,6 @@
                 android:text="@{MathUtils.round(account.withdraw, 2)}"
                 android:textColor="@color/white" />
         </LinearLayout>
-
-        <Button
-            android:visibility="gone"
-            android:id="@+id/button_id_logout"
-            style="?android:textAppearanceSmall"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/margin_5dp"
-            android:layout_marginLeft="@dimen/margin_10dp"
-            android:layout_marginRight="@dimen/margin_10dp"
-            android:background="@drawable/login_selector"
-            android:gravity="center"
-            android:text="登出"
-            android:textColor="@color/white"
-            android:textSize="@dimen/font_size_normal_high"
-            />
 
     </LinearLayout>
 </layout>

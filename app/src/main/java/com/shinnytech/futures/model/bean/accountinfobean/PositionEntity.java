@@ -13,6 +13,88 @@ import java.io.Serializable;
 
 public class PositionEntity implements Comparable<PositionEntity>, Serializable {
     private static final long serialVersionUID = 2631590509760908283L;
+
+    public PositionEntity cloneLong(){
+        PositionEntity positionEntity = new PositionEntity();
+        positionEntity.key = key;
+        positionEntity.user_id = user_id;
+        positionEntity.exchange_id = exchange_id;
+        positionEntity.instrument_id = instrument_id;
+
+        positionEntity.volume_long = volume_long;
+        positionEntity.volume_long_his = volume_long_his;
+        positionEntity.volume_long_today = volume_long_today;
+        positionEntity.volume_long_frozen_his = volume_long_frozen_his;
+        positionEntity.volume_long_frozen_today = volume_long_frozen_today;
+        positionEntity.volume_short = "0";
+        positionEntity.volume_short_his = "0";
+        positionEntity.volume_short_today = "0";
+        positionEntity.volume_short_frozen = "0";
+        positionEntity.volume_short_frozen_his = "0";
+        positionEntity.volume_short_frozen_today = "0";
+
+        positionEntity.open_price_long = open_price_long;
+        positionEntity.open_cost_long = open_cost_long;
+        positionEntity.position_price_long = position_price_long;
+        positionEntity.position_cost_long = position_cost_long;
+        positionEntity.last_price = last_price;
+        positionEntity.float_profit_long = float_profit_long;
+        positionEntity.float_profit = float_profit;
+        positionEntity.position_profit_long = position_profit_long;
+        positionEntity.position_profit = position_profit;
+        positionEntity.open_price_short = "0.0";
+        positionEntity.open_cost_short = "0.0";
+        positionEntity.position_price_short = "0.0";
+        positionEntity.position_cost_short = "0.0";
+        positionEntity.float_profit_short = "0.0";
+        positionEntity.position_profit_short = "0.0";
+
+        positionEntity.margin = margin;
+        positionEntity.margin_long = margin_long;
+        positionEntity.margin_short = "0.0";
+        return positionEntity;
+    }
+
+    public PositionEntity cloneShort(){
+        PositionEntity positionEntity = new PositionEntity();
+        positionEntity.key = key;
+        positionEntity.user_id = user_id;
+        positionEntity.exchange_id = exchange_id;
+        positionEntity.instrument_id = instrument_id;
+
+        positionEntity.volume_long = "0";
+        positionEntity.volume_long_his = "0";
+        positionEntity.volume_long_today = "0";
+        positionEntity.volume_long_frozen = "0";
+        positionEntity.volume_long_frozen_his = "0";
+        positionEntity.volume_long_frozen_today = "0";
+        positionEntity.volume_short = volume_short;
+        positionEntity.volume_short_his = volume_short_his;
+        positionEntity.volume_short_today = volume_short_today;
+        positionEntity.volume_short_frozen_his = volume_short_frozen_his;
+        positionEntity.volume_short_frozen_today = volume_short_frozen_today;
+
+        positionEntity.open_price_long = "0.0";
+        positionEntity.open_cost_long = "0.0";
+        positionEntity.position_price_long = "0.0";
+        positionEntity.position_cost_long = "0.0";
+        positionEntity.float_profit_long = "0.0";
+        positionEntity.position_profit_long = "0.0";
+        positionEntity.open_price_short = open_price_short;
+        positionEntity.open_cost_short = open_cost_short;
+        positionEntity.position_price_short = position_price_short;
+        positionEntity.position_cost_short = position_cost_short;
+        positionEntity.last_price = last_price;
+        positionEntity.float_profit_short = float_profit_short;
+        positionEntity.float_profit = float_profit;
+        positionEntity.position_profit_short = position_profit_short;
+        positionEntity.position_profit = position_profit;
+
+        positionEntity.margin = margin;
+        positionEntity.margin_short = margin_short;
+        positionEntity.margin_long = "0.0";
+        return positionEntity;
+    }
     private String key = "";
     private String user_id = "";
     private String exchange_id = "";
@@ -23,11 +105,13 @@ public class PositionEntity implements Comparable<PositionEntity>, Serializable 
     private String volume_long = "";
     private String volume_long_frozen_today = "";
     private String volume_long_frozen_his = "";
+    private String volume_long_frozen = "";
     private String volume_short_today = "";
     private String volume_short_his = "";
     private String volume_short = "";
     private String volume_short_frozen_today = "";
     private String volume_short_frozen_his = "";
+    private String volume_short_frozen = "";
 
     private String open_price_long = "";
     private String open_price_short = "";
@@ -48,6 +132,22 @@ public class PositionEntity implements Comparable<PositionEntity>, Serializable 
     private String margin_long = "";
     private String margin_short = "";
     private String margin = "";
+
+    public String getVolume_long_frozen() {
+        return volume_long_frozen;
+    }
+
+    public void setVolume_long_frozen(String volume_long_frozen) {
+        this.volume_long_frozen = volume_long_frozen;
+    }
+
+    public String getVolume_short_frozen() {
+        return volume_short_frozen;
+    }
+
+    public void setVolume_short_frozen(String volume_short_frozen) {
+        this.volume_short_frozen = volume_short_frozen;
+    }
 
     public String getKey() {
         return key;

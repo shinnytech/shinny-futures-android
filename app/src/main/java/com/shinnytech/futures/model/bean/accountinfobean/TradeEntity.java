@@ -29,6 +29,16 @@ public class TradeEntity implements Comparable<TradeEntity>, Serializable {
     private String trade_date_time = "";
     private String commission = "";
 
+    private String seqno = "";
+
+    public String getSeqno() {
+        return seqno;
+    }
+
+    public void setSeqno(String seqno) {
+        this.seqno = seqno;
+    }
+
     public String getKey() {
         return key;
     }

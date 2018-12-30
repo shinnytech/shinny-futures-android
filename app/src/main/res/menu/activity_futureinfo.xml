@@ -4,6 +4,13 @@
     tools:context=".controller.activity.FutureInfoActivity">
 
     <item
+        android:id="@+id/search_quote"
+        android:icon="@mipmap/ic_search_white_24dp"
+        android:orderInCategory="100"
+        android:title="搜索"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/action_collect"
         android:icon="@mipmap/ic_favorite_border_white_24dp"
         android:orderInCategory="100"

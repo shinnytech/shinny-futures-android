@@ -57,17 +57,26 @@
                 <RadioButton
                     android:id="@+id/rb_minute_up"
                     style="@style/RadioButtonTabUp"
-                    android:text="@string/future_info_activity_five_minute"
+                    android:text="@string/future_info_activity_minute"
                     android:textSize="@dimen/font_size_normal" />
+
+                <RadioButton
+                    android:id="@+id/rb_second_up"
+                    style="@style/RadioButtonTabUp"
+                    android:text="@string/future_info_activity_second"
+                    android:textSize="@dimen/font_size_normal" />
+
+                <Button
+                    android:id="@+id/rb_kline_more"
+                    style="@style/RadioButtonSetUp"
+                    android:background="@drawable/set_up_button_background"
+                    android:drawableStart="@mipmap/ic_watch_later_white_18dp" />
 
                 <Button
                     android:id="@+id/rb_set_up"
                     style="@style/RadioButtonSetUp"
                     android:background="@drawable/set_up_button_background"
-                    android:drawableEnd="@mipmap/ic_expand_more_white_24dp"
-                    android:text="@string/future_info_activity_set"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_normal" />
+                    android:drawableStart="@mipmap/ic_settings_white_18dp" />
             </RadioGroup>
 
             <FrameLayout

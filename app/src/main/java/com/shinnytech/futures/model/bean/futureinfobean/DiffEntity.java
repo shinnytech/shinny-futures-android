@@ -9,18 +9,18 @@ import java.util.Map;
  */
 
 public class DiffEntity {
-    private String mdhis_more_data;
+    private boolean mdhis_more_data;
     private String ins_list;
     private Map<String, QuoteEntity> quotes = new HashMap<>(1600);
     private Map<String, Map<String, KlineEntity>> klines = new HashMap<>(160);
     private Map<String, TickEntity> ticks = new HashMap<>();
     private Map<String, ChartEntity> charts = new HashMap<>();
 
-    public String getMdhis_more_data() {
+    public boolean getMdhis_more_data() {
         return mdhis_more_data;
     }
 
-    public void setMdhis_more_data(String mdhis_more_data) {
+    public void setMdhis_more_data(boolean mdhis_more_data) {
         this.mdhis_more_data = mdhis_more_data;
     }
 

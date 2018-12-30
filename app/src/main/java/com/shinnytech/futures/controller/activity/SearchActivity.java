@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivitySearchBinding;
+import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
@@ -30,9 +31,13 @@ import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.shinnytech.futures.model.adapter.SearchAdapter;
 import com.umeng.analytics.MobclickAgent;
 
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.ArrayList;
 import java.util.Map;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
+import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 
 /**
@@ -48,6 +53,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     private BroadcastReceiver mReceiver;
     private Context sContext;
     private ActivitySearchBinding mBinding;
+    private boolean mIsFromFutureInfoActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +64,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     }
 
     private void initData() {
+        mIsFromFutureInfoActivity = getIntent().getBooleanExtra("fromFutureInfoActivity", false);
         sContext = BaseApplication.getContext();
         mBinding.toolbarSearch.setTitle("");
         setSupportActionBar(mBinding.toolbarSearch);
@@ -83,9 +90,22 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
                 //如果用户点击了搜索到的合约信息，就把此条合约保存到搜索历史中
                 if (instrument_id != null && !instrument_id.isEmpty()){
                     LatestFileManager.getSearchEntitiesHistory().put(instrument_id, searchEntity);
-                    Intent intent = new Intent(SearchActivity.this, FutureInfoActivity.class);
-                    intent.putExtra("instrument_id", instrument_id);
-                    startActivity(intent);
+                    if (mIsFromFutureInfoActivity){
+                        IdEvent idEvent = new IdEvent();
+                        idEvent.setInstrument_id(instrument_id);
+                        EventBus.getDefault().post(idEvent);
+                    } else {
+                        Intent intent = new Intent(SearchActivity.this, FutureInfoActivity.class);
+                        intent.putExtra("instrument_id", instrument_id);
+                        startActivity(intent);
+                    }
+                    //关闭键盘后销毁
+                    View view = getCurrentFocus();
+                    if (view != null) {
+                        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        if (inputMethodManager != null)
+                            inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOT_ALWAYS);
+                    }
                     finish();
                 }
             }
@@ -98,14 +118,14 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
 
                 if (insList.containsKey(instrument_id)) {
                     insList.remove(instrument_id);
-                    LatestFileManager.saveInsListToFile(insList.keySet());
+                    LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
                     ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
                     ((ImageView) view).setImageResource(R.mipmap.ic_favorite_border_white_24dp);
                 } else {
                     QuoteEntity quoteEntity = new QuoteEntity();
                     quoteEntity.setInstrument_id(instrument_id);
                     insList.put(instrument_id, quoteEntity);
-                    LatestFileManager.saveInsListToFile(insList.keySet());
+                    LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
                     ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
                     ((ImageView) view).setImageResource(R.mipmap.ic_favorite_white_24dp);
                 }
@@ -187,7 +207,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
             mBinding.toolbarSearch.setBackgroundColor(ContextCompat.getColor(sContext, R.color.off_line));
             mBinding.titleToolbar.setVisibility(View.VISIBLE);
             mBinding.titleToolbar.setTextColor(Color.BLACK);
-            mBinding.titleToolbar.setText("交易、行情网络未连接！");
+            mBinding.titleToolbar.setText(OFFLINE);
         }
     }
 
@@ -206,7 +226,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
                         mBinding.toolbarSearch.setBackgroundColor(ContextCompat.getColor(context, R.color.off_line));
                         mBinding.titleToolbar.setVisibility(View.VISIBLE);
                         mBinding.titleToolbar.setTextColor(Color.BLACK);
-                        mBinding.titleToolbar.setText("交易、行情网络未连接！");
+                        mBinding.titleToolbar.setText(OFFLINE);
                         break;
                     case 1:
                         mBinding.toolbarSearch.setBackgroundColor(ContextCompat.getColor(context, R.color.black_dark));

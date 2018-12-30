@@ -1,28 +1,27 @@
 package com.shinnytech.futures.utils;
 
 import android.app.Activity;
+import android.content.Context;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.media.AudioManager;
 import android.os.Build;
 import android.text.Editable;
-import android.text.InputType;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-
-import java.lang.reflect.Method;
 
 import static android.content.Context.AUDIO_SERVICE;
 import static com.shinnytech.futures.constants.CommonConstants.COUNTERPARTY_PRICE;
@@ -44,10 +43,12 @@ public class KeyboardUtils {
     private KeyboardView mKeyboardView;
     private EditText mEditText;
     private String mInstrumentId;
+    private int mIdKeyboard;
 
     public KeyboardUtils(Activity activity, final int idKeyboard, final String instrument_id) {
         mActivity = (FutureInfoActivity) activity;
         mInstrumentId = instrument_id;
+        mIdKeyboard = idKeyboard;
         Keyboard mKeyboard = new Keyboard(mActivity, idKeyboard);
         mView = mActivity.findViewById(R.id.keyboard_layout);
         mKeyboardView = mView.findViewById(R.id.keyboard);
@@ -132,11 +133,11 @@ public class KeyboardUtils {
                                 break;
                             default:
                                 String data;
-                                if (idKeyboard == R.xml.future_price){
+                                if (idKeyboard == R.xml.future_price) {
                                     SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
-                                    String price_tick = searchEntity == null? "0" : searchEntity.getpTick();
+                                    String price_tick = searchEntity == null ? "0" : searchEntity.getpTick();
                                     data = MathUtils.add(editable.toString(), price_tick);
-                                }else {
+                                } else {
                                     data = MathUtils.add(editable.toString(), "1");
                                 }
                                 editable.clear();
@@ -177,21 +178,22 @@ public class KeyboardUtils {
                                 }
                                 break;
                             default:
-                                //添加负号功能
-                                if (mEditText.getSelectionStart() == 0) {
-                                    editable.insert(0, "-");
-                                } else {
-                                    String data;
-                                    if (idKeyboard == R.xml.future_price){
-                                        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
-                                        String price_tick = searchEntity == null? "0" : searchEntity.getpTick();
-                                        data = MathUtils.subtract(editable.toString(), price_tick);
+                                String data;
+                                if (idKeyboard == R.xml.future_price) {
+                                    //添加负号功能
+                                    if (mEditText.getSelectionStart() == 0 && mEditText.getSelectionEnd() == 0){
+                                        editable.insert(0, "-");
+                                        break;
                                     }else {
-                                        data = MathUtils.subtract(editable.toString(), "1");
+                                        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
+                                        String price_tick = searchEntity == null ? "0" : searchEntity.getpTick();
+                                        data = MathUtils.subtract(editable.toString(), price_tick);
                                     }
-                                    editable.clear();
-                                    editable.insert(0, data);
+                                } else {
+                                    data = MathUtils.subtract(editable.toString(), "1");
                                 }
+                                editable.clear();
+                                editable.insert(0, data);
                                 break;
                         }
                     } else {
@@ -248,35 +250,30 @@ public class KeyboardUtils {
         });
     }
 
-    public void refreshInstrumentId(String instrumentId){
+    public void refreshInstrumentId(String instrumentId) {
         mInstrumentId = instrumentId;
     }
 
     /**
      * 隐藏系统键盘
      */
-    private static void hideSystemSoftKeyboard(EditText editText) {
-        int sdkInt = Build.VERSION.SDK_INT;
-        if (sdkInt >= 11) {
-            try {
-                Class<EditText> cls = EditText.class;
-                Method setShowSoftInputOnFocus;
-                setShowSoftInputOnFocus = cls.getMethod("setShowSoftInputOnFocus", boolean.class);
-                setShowSoftInputOnFocus.setAccessible(true);
-                setShowSoftInputOnFocus.invoke(editText, false);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            editText.setInputType(InputType.TYPE_NULL);
+    private void hideSystemSoftKeyboard() {
+        View view = mActivity.findViewById(android.R.id.content);
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
 
     public void attachTo(EditText editText) {
         this.mEditText = editText;
-        this.mEditText.setSelectAllOnFocus(true);
-        hideSystemSoftKeyboard(this.mEditText);
+        this.mEditText.requestFocus();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            this.mEditText.setShowSoftInputOnFocus(false);
+        } else {
+            hideSystemSoftKeyboard();
+        }
+        this.mEditText.setSelection(0, mEditText.getText().length());
     }
 
     private void playClick(int keyCode) {

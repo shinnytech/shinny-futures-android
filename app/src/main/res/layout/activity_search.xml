@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <data></data>
+    <data/>
 
     <android.support.design.widget.CoordinatorLayout xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
@@ -38,7 +38,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:iconifiedByDefault="false"
-                    app:queryHint="@string/search_activity_hint"></android.support.v7.widget.SearchView>
+                    app:queryHint="@string/search_activity_hint"/>
 
             </android.support.v7.widget.Toolbar>
 
@@ -52,7 +52,7 @@
             android:fadeScrollbars="false"
             android:scrollbarSize="@dimen/scroll_bar_size_small"
             android:scrollbarThumbVertical="@color/text_gray_light"
-            android:scrollbars="vertical"></android.support.v7.widget.RecyclerView>
+            android:scrollbars="vertical"/>
 
     </android.support.design.widget.CoordinatorLayout>
 

@@ -9,8 +9,11 @@
     4.ring   環形
     -->
     <!-- 圓角，Layout佈局圓角幅度設定值 -->
-    <corners android:radius="10dp" />
+    <corners android:radius="4dp" />
     <!-- 外框，框線粗細，框線顏色 -->
+    <stroke
+        android:width="3dp"
+        android:color="@color/settlement_border" />
 
-    <solid android:color="@color/colorAccent"></solid>
+    <solid android:color="@color/colorLaunch"></solid>
 </shape>

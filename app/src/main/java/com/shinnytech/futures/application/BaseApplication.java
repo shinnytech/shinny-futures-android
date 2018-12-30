@@ -1,9 +1,10 @@
 package com.shinnytech.futures.application;
 
-import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,17 +12,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
-import android.util.Log;
 
 import com.baidu.mobstat.StatService;
 import com.lzy.okgo.OkGo;
@@ -31,7 +30,7 @@ import com.lzy.okgo.callback.FileCallback;
 import com.lzy.okgo.cookie.store.SPCookieStore;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
-import com.shinnytech.futures.BuildConfig;
+import com.shinnytech.futures.R;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.ConfirmActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
@@ -40,6 +39,7 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
+import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
@@ -48,23 +48,32 @@ import com.umeng.commonsdk.UMConfigure;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import okhttp3.OkHttpClient;
 
 import static com.shinnytech.futures.constants.CommonConstants.BACKGROUND;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_DAY_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_HOUR_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_MINUTE_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_SECOND_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOCK_PASSWORD;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.FOREGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.JSON_FILE_URL;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_1_DAY;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_1_HOUR;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_3_SECOND;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_5_MINUTE;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_1;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_2;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_3;
@@ -74,6 +83,7 @@ import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_6;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_7;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.MD_ONLINE;
+import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_INS_LIST;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_ONLINE;
@@ -130,6 +140,9 @@ public class BaseApplication extends Application implements ServiceConnection {
         //初始化行情服务器地址
         initTMDUrl();
 
+        //初始化默认配置
+        initDefaultConfig();
+
         //OkHttp网络框架初始化
         initOkGo();
 
@@ -141,6 +154,48 @@ public class BaseApplication extends Application implements ServiceConnection {
 
         //广播注册
         registerBroaderCast();
+
+    }
+
+    /**
+     * date: 2018/11/20
+     * author: chenli
+     * description: 初始化默认配置
+     */
+    private void initDefaultConfig() {
+        try {
+            BaseApplication.getContext().openFileInput(OPTIONAL_INS_LIST);
+        } catch (FileNotFoundException e) {
+            LatestFileManager.saveInsListToFile(new ArrayList<String>());
+        }
+
+        if (!SPUtils.contains(sContext, CONFIG_POSITION_LINE)) {
+            SPUtils.putAndApply(sContext, CONFIG_POSITION_LINE, true);
+        }
+
+        if (!SPUtils.contains(sContext, CONFIG_ORDER_LINE)) {
+            SPUtils.putAndApply(sContext, CONFIG_ORDER_LINE, true);
+        }
+
+        if (!SPUtils.contains(sContext, CONFIG_AVERAGE_LINE)) {
+            SPUtils.putAndApply(sContext, CONFIG_AVERAGE_LINE, true);
+        }
+
+        if (!SPUtils.contains(sContext, CONFIG_KLINE_DAY_TYPE)) {
+            SPUtils.putAndApply(sContext, CONFIG_KLINE_DAY_TYPE, KLINE_1_DAY);
+        }
+
+        if (!SPUtils.contains(sContext, CONFIG_KLINE_HOUR_TYPE)) {
+            SPUtils.putAndApply(sContext, CONFIG_KLINE_HOUR_TYPE, KLINE_1_HOUR);
+        }
+
+        if (!SPUtils.contains(sContext, CONFIG_KLINE_MINUTE_TYPE)) {
+            SPUtils.putAndApply(sContext, CONFIG_KLINE_MINUTE_TYPE, KLINE_5_MINUTE);
+        }
+
+        if (!SPUtils.contains(sContext, CONFIG_KLINE_SECOND_TYPE)) {
+            SPUtils.putAndApply(sContext, CONFIG_KLINE_SECOND_TYPE, KLINE_3_SECOND);
+        }
 
     }
 
@@ -372,6 +427,16 @@ public class BaseApplication extends Application implements ServiceConnection {
             mIsBackground = true;
             //后台
             EventBus.getDefault().post(BACKGROUND);
+//            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//            Notification notification = new NotificationCompat.Builder(this, "home")
+//                    .setContentTitle("快期小Q下单软件正在运行")
+//                    .setContentText("点击返回程序")
+//                    .setWhen(System.currentTimeMillis())
+//                    .setSmallIcon(R.mipmap.ic_launcher)
+//                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+//                    .setPriority(NotificationCompat.PRIORITY_MAX)
+//                    .build();
+//            notificationManager.notify(2, notification);
         }
     }
 
@@ -408,7 +473,8 @@ public class BaseApplication extends Application implements ServiceConnection {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case MD_ONLINE:
-                        ToastNotificationUtils.showToast(sContext, "行情服务器连接成功");
+                        //不给用户造成干扰，此条暂且不发
+//                        ToastNotificationUtils.showToast(sContext, "行情服务器连接成功");
                         break;
                     case MD_OFFLINE:
                         //断线重连
@@ -433,7 +499,8 @@ public class BaseApplication extends Application implements ServiceConnection {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case TD_ONLINE:
-                        ToastNotificationUtils.showToast(sContext, "交易服务器连接成功");
+                        //不给用户造成干扰，此条暂且不发
+//                        ToastNotificationUtils.showToast(sContext, "交易服务器连接成功");
                         break;
                     case TD_OFFLINE:
                         DataManager.getInstance().IS_LOGIN = false;

@@ -1,7 +1,9 @@
 package com.shinnytech.futures.controller.fragment;
 
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
@@ -16,6 +18,7 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -25,12 +28,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.FragmentQuoteBinding;
+import com.shinnytech.futures.model.adapter.DragDialogAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
@@ -39,6 +45,7 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.activity.SearchActivity;
@@ -56,6 +63,7 @@ import java.util.TreeMap;
 
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
+import static com.shinnytech.futures.constants.CommonConstants.DAZONG;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_SEARCH_ACTIVITY;
@@ -99,7 +107,9 @@ public class QuoteFragment extends LazyLoadFragment {
     private List<QuoteEntity> mOldData = new ArrayList<>();
     private Map<String, QuoteEntity> mNewData = new TreeMap<>();
     private FragmentQuoteBinding mBinding;
-
+    private Dialog mDialog;
+    private RecyclerView mRecyclerView;
+    private DragDialogAdapter mDragDialogAdapter;
     /**
      * date: 7/9/17
      * author: chenli
@@ -160,8 +170,27 @@ public class QuoteFragment extends LazyLoadFragment {
     //控制行情是否刷新
     @Subscribe
     public void onEvent(UpdateEvent updateEvent) {
-        if (mTitle.equals(mToolbarTitle.getText().toString()))
-            this.mIsUpdate = updateEvent.isUpdate();
+        if (mTitle.equals(mToolbarTitle.getText().toString())){
+            switch (updateEvent.getState()){
+                case 0:
+                    //防止首次打开app时导航栏先出来后行情不加载bug
+                    if (mAdapter.getData().isEmpty()){
+                        mIsUpdate = true;
+                        refreshUI(mToolbarTitle.getText().toString());
+                        mIsUpdate = false;
+                    }
+                    break;
+                case 1:
+                    mIsUpdate = true;
+                    break;
+                case 2:
+                    mIsUpdate = false;
+                    break;
+                default:
+                    break;
+            }
+
+        }
     }
 
     private void initData() {
@@ -393,6 +422,9 @@ public class QuoteFragment extends LazyLoadFragment {
                         //点击空白处popupWindow消失
                         popWindow.setBackgroundDrawable(new ColorDrawable(0x00000000));
                         TextView add = popUpView.findViewById(R.id.add_remove_quote);
+                        TextView drag = popUpView.findViewById(R.id.drag_quote);
+                        if (OPTIONAL.equals(mTitle))drag.setVisibility(View.VISIBLE);
+                        else drag.setVisibility(View.INVISIBLE);
                         if (isAdd) {
                             Drawable leftDrawable = ContextCompat.getDrawable(getActivity(), R.mipmap.ic_favorite_border_white_18dp);
                             if (leftDrawable != null)
@@ -411,6 +443,97 @@ public class QuoteFragment extends LazyLoadFragment {
                         getActivity().getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
                         popWindow.showAsDropDown(view, outMetrics.widthPixels / 4 * 3, 0);
 
+                        drag.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                popWindow.dismiss();
+                                if (mDragDialogAdapter != null)
+                                    mDragDialogAdapter.updateList(new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
+
+                                if (mDialog == null) {
+                                    //初始化自选合约弹出框
+                                    mDialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
+                                    View viewDialog = View.inflate(getActivity(), R.layout.view_dialog_optional_drag_quote, null);
+                                    Window dialogWindow = mDialog.getWindow();
+                                    if (dialogWindow != null) {
+                                        dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+                                        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+                                        dialogWindow.setGravity(Gravity.CENTER);
+                                        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                                        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                                        dialogWindow.setAttributes(lp);
+                                    }
+                                    mDialog.setContentView(viewDialog);
+                                    mDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                        @Override
+                                        public void onDismiss(DialogInterface dialog) {
+                                            update();
+                                        }
+                                    });
+                                    mDragDialogAdapter = new DragDialogAdapter(getActivity(), new ArrayList<>(insList.keySet()));
+                                    mRecyclerView = viewDialog.findViewById(R.id.dialog_rv);
+                                    viewDialog.findViewById(R.id.iv_close).setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            mDialog.dismiss();
+                                        }
+                                    });
+
+                                    mRecyclerView.setLayoutManager(
+                                            new LinearLayoutManager(getActivity()));
+                                    mRecyclerView.addItemDecoration(
+                                            new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
+                                    mRecyclerView.setAdapter(mDragDialogAdapter);
+                                    final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.Callback() {
+                                        @Override
+                                        public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                                            int swipeFlag=0;
+                                            int dragFlag = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+                                            return  makeMovementFlags(dragFlag,swipeFlag);
+                                        }
+
+
+                                        @Override
+                                        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                                            mDragDialogAdapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                                            return true;
+                                        }
+
+                                        @Override
+                                        public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
+                                            super.onSelectedChanged(viewHolder, actionState);
+                                            if (actionState == ItemTouchHelper.ACTION_STATE_DRAG){
+                                                Vibrator vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+                                                vibrator.vibrate(70);
+                                            }
+                                            if (actionState == ItemTouchHelper.ACTION_STATE_IDLE)
+                                                mDragDialogAdapter.saveOptionalList();
+                                        }
+
+                                        @Override
+                                        public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                                            //暂不处理
+                                        }
+
+                                        @Override
+                                        public boolean canDropOver(RecyclerView recyclerView, RecyclerView.ViewHolder current, RecyclerView.ViewHolder target) {
+                                            return true;
+                                        }
+
+                                        @Override
+                                        public boolean isLongPressDragEnabled() {
+                                            //return true后，可以实现长按拖动排序和拖动动画了
+                                            return true;
+                                        }
+                                    });
+                                    itemTouchHelper.attachToRecyclerView(mRecyclerView);
+                                    mDragDialogAdapter.setItemTouchHelper(itemTouchHelper);
+                                }
+
+                                if (!mDialog.isShowing()) mDialog.show();
+                            }
+                        });
+
                         add.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -418,17 +541,18 @@ public class QuoteFragment extends LazyLoadFragment {
                                     QuoteEntity quoteEntity = new QuoteEntity();
                                     quoteEntity.setInstrument_id(instrument_id);
                                     insList.put(instrument_id, quoteEntity);
-                                    LatestFileManager.saveInsListToFile(insList.keySet());
+                                    LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
                                             popWindow.dismiss();
-                                            ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
+                                            ToastNotificationUtils.showToast(BaseApplication.getContext(),
+                                                    "该合约已添加到自选列表");
                                         }
                                     });
                                 } else {
                                     insList.remove(instrument_id);
-                                    LatestFileManager.saveInsListToFile(insList.keySet());
+                                    LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
                                     if (mTitle.equals(OPTIONAL)) {
                                         update();
                                     }
@@ -436,10 +560,12 @@ public class QuoteFragment extends LazyLoadFragment {
                                         @Override
                                         public void run() {
                                             popWindow.dismiss();
-                                            ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
+                                            ToastNotificationUtils.showToast(BaseApplication.getContext(),
+                                                    "该合约已被移除自选列表");
                                         }
                                     });
                                 }
+
                             }
                         });
                     }
@@ -517,13 +643,13 @@ public class QuoteFragment extends LazyLoadFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.fragment_quote, menu);
+        menuInflater.inflate(R.menu.search, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.fragment_quote) {
+        if (id == R.id.search_quote) {
             mIns = mDataManager.getRtnData().getIns_list();
             Intent intent = new Intent(getActivity(), SearchActivity.class);
             startActivityForResult(intent, JUMP_TO_SEARCH_ACTIVITY);
@@ -539,7 +665,8 @@ public class QuoteFragment extends LazyLoadFragment {
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (OPTIONAL.equals(mToolbarTitle.getText().toString()) && mInsList.size() != LatestFileManager.getOptionalInsList().size())
+        if (OPTIONAL.equals(mToolbarTitle.getText().toString())
+                && mInsList.size() != LatestFileManager.getOptionalInsList().size())
             update();
         //三种情况:搜索页返回,合约详情页返回,搜索页点击进入合约详情页再返回
         if (BaseApplication.getWebSocketService() != null)

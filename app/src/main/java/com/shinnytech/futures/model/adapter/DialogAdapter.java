@@ -48,7 +48,7 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ItemViewHo
     }
 
     @Override
-    public void onBindViewHolder(ItemViewHolder holder, int position) {
+    public void onBindViewHolder(final ItemViewHolder holder, int position) {
         holder.update();
     }
 
@@ -75,15 +75,13 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ItemViewHo
         }
 
         public void update() {
-            if (mData != null && mData.size() != 0) {
-                instrumentId = mData.get(getLayoutPosition());
-                if (!instrumentId.isEmpty()) {
-                    SearchEntity insName = LatestFileManager.getSearchEntities().get(instrumentId);
-                    if (insName != null) mBinding.tvIdDialog.setText(insName.getInstrumentName());
-                    else mBinding.tvIdDialog.setText(instrumentId);
-                    itemView.setTag(instrumentId);
-                }
-            }
+            if (mData == null || mData.size() == 0) return;
+            instrumentId = mData.get(getLayoutPosition());
+            if (instrumentId.isEmpty()) return;
+            SearchEntity insName = LatestFileManager.getSearchEntities().get(instrumentId);
+            if (insName != null) mBinding.tvIdDialog.setText(insName.getInstrumentName());
+            else mBinding.tvIdDialog.setText(instrumentId);
+            itemView.setTag(instrumentId);
         }
 
     }

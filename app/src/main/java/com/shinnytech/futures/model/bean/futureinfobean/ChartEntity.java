@@ -36,4 +36,10 @@ public class ChartEntity {
     public void setRight_id(String right_id) {
         this.right_id = right_id;
     }
+
+    @Override
+    public String toString() {
+        return "left_id"+left_id+"\n"+"right_id"+right_id+"\n"+
+                "ins_list"+state.get("ins_list")+"\n"+"duration"+state.get("duration");
+    }
 }

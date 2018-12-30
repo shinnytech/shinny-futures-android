@@ -28,27 +28,51 @@ public final class CommonConstants {
     public static final String OPTIONAL = "自选合约";
     public static final String DOMINANT = "主力合约";
     public static final String SHANGHAI = "上海期货交易所";
-    public static final String NENGYUAN = "上海能源";
+    public static final String NENGYUAN = "上海能源交易中心";
+    public static final String DAZONG = "上海大宗商品交易中心";
     public static final String DALIAN = "大连商品交易所";
     public static final String ZHENGZHOU = "郑州商品交易所";
     public static final String ZHONGJIN = "中国金融期货交易所";
     public static final String DALIANZUHE = "大连组合";
     public static final String ZHENGZHOUZUHE = "郑州组合";
-    public static final String ACCOUNT = "资金账户";
-    public static final String DEAL = "成交记录";
+    public static final String LOGIN = "登录交易";
+    public static final String LOGOUT = "退出交易";
+    public static final String ACCOUNT = "资金详情";
+    public static final String PASSWORD = "修改密码";
+    public static final String POSITION = "持仓汇总";
+    public static final String TRADE = "成交记录";
     public static final String BANK = "银期转帐";
-    public static final String FEEDBACK = "反馈";
+    public static final String FEEDBACK = "问题反馈";
     public static final String ABOUT = "关于";
+    public static final String OFFLINE = "交易、行情网络未连接！";
+    public static final String BROKER_LIST = "期货公司";
 
     //行情图类型
-    public static final String CURRENT_DAY_FRAGMENT = "当日";
-    public static final String DAY_FRAGMENT = "日线";
-    public static final String HOUR_FRAGMENT = "小时线";
-    public static final String MINUTE_FRAGMENT = "5分钟线";
-    public static final String KLINE_MINUTE = "300000000000";
-    public static final String KLINE_HOUR = "3600000000000";
-    public static final String KLINE_DAY = "86400000000000";
+    public static final String CHART_ID = "CHART_ID";
+    public static final String CURRENT_DAY_FRAGMENT = "CURRENT_DAY_FRAGMENT";
+    public static final String DAY_FRAGMENT = "DAY_FRAGMENT";
+    public static final String HOUR_FRAGMENT = "HOUR_FRAGMENT";
+    public static final String MINUTE_FRAGMENT = "MINUTE_FRAGMENT";
+    public static final String SECOND_FRAGMENT = "SECOND_FRAGMENT";
     public static final String CURRENT_DAY = "60000000000";
+    public static final String KLINE_3_SECOND = "3000000000";
+    public static final String KLINE_5_SECOND = "5000000000";
+    public static final String KLINE_10_SECOND = "10000000000";
+    public static final String KLINE_15_SECOND = "15000000000";
+    public static final String KLINE_20_SECOND = "20000000000";
+    public static final String KLINE_30_SECOND = "30000000000";
+    public static final String KLINE_1_MINUTE = "60000000000";
+    public static final String KLINE_2_MINUTE = "120000000000";
+    public static final String KLINE_3_MINUTE = "180000000000";
+    public static final String KLINE_5_MINUTE = "300000000000";
+    public static final String KLINE_10_MINUTE = "600000000000";
+    public static final String KLINE_15_MINUTE = "900000000000";
+    public static final String KLINE_30_MINUTE = "1800000000000";
+    public static final String KLINE_1_HOUR = "3600000000000";
+    public static final String KLINE_2_HOUR = "7200000000000";
+    public static final String KLINE_4_HOUR = "14400000000000";
+    public static final String KLINE_1_DAY = "86400000000000";
+    public static final String KLINE_7_DAY = "604800000000000";
 
     //加载柱子个数
     public static final int VIEW_WIDTH = 200;
@@ -62,9 +86,15 @@ public final class CommonConstants {
     public static final int TRANSACTION_JUMP_TO_LOG_IN_ACTIVITY = 3;
     public static final int JUMP_TO_SEARCH_ACTIVITY = 4;
     public static final int JUMP_TO_FUTURE_INFO_ACTIVITY = 5;
+    public static final int LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY = 6;
+    public static final int POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY = 7;
 
     //app名称
     public static final String KUAI_QI_XIAO_Q = "快期小Q";
+
+    //本地自选合约文件名
+    public static final String OPTIONAL_INS_LIST = "optionalInsList";
+
 
     //EventBus通知
     public static final String LOG_OUT = "LOGOUT";
@@ -77,5 +107,20 @@ public final class CommonConstants {
     public static final String MARKET_PRICE = "市价";
     public static final String QUEUED_PRICE = "排队价";
     public static final String USER_PRICE = "用户设置价";
+
+    //默认配置
+    public static final String CONFIG_POSITION_LINE = "isPosition";
+    public static final String CONFIG_ORDER_LINE = "isPending";
+    public static final String CONFIG_AVERAGE_LINE = "isAverage";
+    public static final String CONFIG_LOCK_PASSWORD = "isLocked";
+    public static final String CONFIG_LOCK_ACCOUNT = "isLockedAccount";
+    public static final String CONFIG_PASSWORD = "password";
+    public static final String CONFIG_ACCOUNT = "phone";
+    public static final String CONFIG_BROKER = "brokerName";
+    public static final String CONFIG_KLINE_DAY_TYPE = "klineDay";
+    public static final String CONFIG_KLINE_HOUR_TYPE = "klineHour";
+    public static final String CONFIG_KLINE_MINUTE_TYPE = "klineMinute";
+    public static final String CONFIG_KLINE_SECOND_TYPE = "klineSecond";
+
 
 }

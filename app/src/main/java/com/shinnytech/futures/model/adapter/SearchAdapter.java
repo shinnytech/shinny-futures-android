@@ -11,8 +11,10 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ItemActivitySearchQuoteBinding;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.LogUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -73,8 +75,8 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ItemViewHo
                         || searchEntity.getInstrumentId().toLowerCase().contains(text)
                         || searchEntity.getExchangeName().toLowerCase().contains(text))
                     mData.add(searchEntity);
-
             }
+            Collections.sort(mData);
         }
         notifyDataSetChanged();
     }
@@ -124,25 +126,24 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ItemViewHo
         }
 
         public void update() {
-            if (mData != null && mData.size() != 0) {
-                searchEntity = mData.get(getLayoutPosition());
-                if (searchEntity != null) {
-                    instrument_id = searchEntity.getInstrumentId();
-                    mBinding.tvSearchInstrumentName.setText(searchEntity.getInstrumentName());
-                    if (instrument_id != null && instrument_id.contains("&"))
-                        mBinding.tvSearchInstrumentId.setText("");
-                    else {
-                        String name = "(" + instrument_id + ")";
-                        mBinding.tvSearchInstrumentId.setText(name);
-                    }
-                    mBinding.tvSearchExchangeName.setText(searchEntity.getExchangeName());
-                    if (LatestFileManager.getOptionalInsList().containsKey(instrument_id)) {
-                        mBinding.ivSearchCollect.setImageResource(R.mipmap.ic_favorite_white_24dp);
-                    } else {
-                        mBinding.ivSearchCollect.setImageResource(R.mipmap.ic_favorite_border_white_24dp);
-                    }
-                }
+            if (mData == null || mData.size() == 0) return;
+            searchEntity = mData.get(getLayoutPosition());
+            if (searchEntity == null) return;
+            instrument_id = searchEntity.getInstrumentId();
+            mBinding.tvSearchInstrumentName.setText(searchEntity.getInstrumentName());
+            if (instrument_id != null && instrument_id.contains("&"))
+                mBinding.tvSearchInstrumentId.setText("");
+            else {
+                String name = "(" + instrument_id + ")";
+                mBinding.tvSearchInstrumentId.setText(name);
             }
+            mBinding.tvSearchExchangeName.setText(searchEntity.getExchangeName());
+            if (LatestFileManager.getOptionalInsList().containsKey(instrument_id)) {
+                mBinding.ivSearchCollect.setImageResource(R.mipmap.ic_favorite_white_24dp);
+            } else {
+                mBinding.ivSearchCollect.setImageResource(R.mipmap.ic_favorite_border_white_24dp);
+            }
+
         }
 
     }

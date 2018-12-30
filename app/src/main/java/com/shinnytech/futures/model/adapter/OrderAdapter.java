@@ -94,51 +94,60 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemViewHold
         }
 
         public void update() {
-            if (mOrderData != null && mOrderData.size() != 0) {
-                orderEntity = mOrderData.get(getLayoutPosition());
-                if (orderEntity != null) {
-                    String instrument_id = orderEntity.getExchange_id() + "." + orderEntity.getInstrument_id();
-                    SearchEntity insName = LatestFileManager.getSearchEntities().get(instrument_id);
-                    mBinding.orderName.setText(insName == null ? instrument_id : insName.getInstrumentName());
-                    mBinding.orderStatus.setText(orderEntity.getLast_msg());
-                    switch (orderEntity.getOffset()) {
-                        case "OPEN":
-                            mBinding.orderOffset.setText("开仓");
-                            break;
-                        case "CLOSETODAY":
-                            mBinding.orderOffset.setText("平今");
-                            break;
-                        case "CLOSEHISTORY":
-                            mBinding.orderOffset.setText("平昨");
-                            break;
-                        case "CLOSE":
-                            mBinding.orderOffset.setText("平仓");
-                            break;
-                        case "FORCECLOSE":
-                            mBinding.orderOffset.setText("强平");
-                            break;
-                        default:
-                            mBinding.orderOffset.setText("");
-                            break;
-                    }
-                    switch (orderEntity.getDirection()) {
-                        case "BUY":
-                            mBinding.orderOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
-                            break;
-                        case "SELL":
-                            mBinding.orderOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
-                            break;
-                        default:
-                            mBinding.orderOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
-                            break;
-                    }
-                    mBinding.orderPrice.setText(LatestFileManager.saveScaleByPtick(orderEntity.getLimit_price(), instrument_id));
-                    String volume = MathUtils.subtract(orderEntity.getVolume_orign(), orderEntity.getVolume_left()) + "/" + orderEntity.getVolume_orign();
-                    mBinding.orderVolume.setText(volume);
-                    String date = DataManager.getInstance().getSimpleDateFormat().format(new Date(Long.valueOf(orderEntity.getInsert_date_time()) / 1000000));
+            if (mOrderData == null || mOrderData.size() == 0) return;
+            orderEntity = mOrderData.get(getLayoutPosition());
+            if (orderEntity == null) return;
+
+            try {
+                String instrument_id = orderEntity.getExchange_id() + "." + orderEntity.getInstrument_id();
+                SearchEntity insName = LatestFileManager.getSearchEntities().get(instrument_id);
+                mBinding.orderName.setText(insName == null ? instrument_id : insName.getInstrumentName());
+                mBinding.orderStatus.setText(orderEntity.getLast_msg());
+                switch (orderEntity.getOffset()) {
+                    case "OPEN":
+                        mBinding.orderOffset.setText("开仓");
+                        break;
+                    case "CLOSETODAY":
+                        mBinding.orderOffset.setText("平今");
+                        break;
+                    case "CLOSEHISTORY":
+                        mBinding.orderOffset.setText("平昨");
+                        break;
+                    case "CLOSE":
+                        mBinding.orderOffset.setText("平仓");
+                        break;
+                    case "FORCECLOSE":
+                        mBinding.orderOffset.setText("强平");
+                        break;
+                    default:
+                        mBinding.orderOffset.setText("");
+                        break;
+                }
+                switch (orderEntity.getDirection()) {
+                    case "BUY":
+                        mBinding.orderOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
+                        break;
+                    case "SELL":
+                        mBinding.orderOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
+                        break;
+                    default:
+                        mBinding.orderOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
+                        break;
+                }
+                mBinding.orderPrice.setText(LatestFileManager.saveScaleByPtick(orderEntity.getLimit_price(), instrument_id));
+                String volume = MathUtils.subtract(orderEntity.getVolume_orign(), orderEntity.getVolume_left()) + "/" + orderEntity.getVolume_orign();
+                mBinding.orderVolume.setText(volume);
+                long dateTime = Long.valueOf(orderEntity.getInsert_date_time()) / 1000000;
+                //错单时间为0
+                if (dateTime == 0) mBinding.orderTime.setText("--");
+                else {
+                    String date = DataManager.getInstance().getSimpleDateFormat().format(new Date(dateTime));
                     mBinding.orderTime.setText(date);
                 }
+            }catch (Exception e){
+                e.printStackTrace();
             }
+
         }
 
         private void updatePart(Bundle bundle) {

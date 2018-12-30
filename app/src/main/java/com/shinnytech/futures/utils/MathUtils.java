@@ -19,7 +19,7 @@ public class MathUtils {
             BigDecimal b2 = new BigDecimal(Double.toString(v2));
             return b1.add(b2).doubleValue();
         } catch (Exception e) {
-            return v1;
+            return 0.0;
         }
     }
 
@@ -29,7 +29,7 @@ public class MathUtils {
             BigDecimal b2 = new BigDecimal(v2);
             return b1.add(b2).toString();
         } catch (Exception e) {
-            return v1;
+            return "-";
         }
     }
 
@@ -39,7 +39,7 @@ public class MathUtils {
             BigDecimal b2 = new BigDecimal(Double.toString(v2));
             return b1.subtract(b2).doubleValue();
         } catch (Exception e) {
-            return v1;
+            return 0.0;
         }
     }
 
@@ -49,7 +49,7 @@ public class MathUtils {
             BigDecimal b2 = new BigDecimal(v2);
             return b1.subtract(b2).toString();
         } catch (Exception e) {
-            return v1;
+            return "-";
         }
     }
 
@@ -59,7 +59,7 @@ public class MathUtils {
             BigDecimal b2 = new BigDecimal(Double.toString(v2));
             return b1.multiply(b2).doubleValue();
         } catch (Exception e) {
-            return v1;
+            return 0.0;
         }
     }
 
@@ -69,7 +69,7 @@ public class MathUtils {
             BigDecimal b2 = new BigDecimal(v2);
             return b1.multiply(b2).toString();
         } catch (Exception e) {
-            return v1;
+            return "-";
         }
     }
 
@@ -87,7 +87,7 @@ public class MathUtils {
             BigDecimal b2 = new BigDecimal(Double.toString(v2));
             return b1.divide(b2, scale, round_mode).doubleValue();
         } catch (Exception e) {
-            return v1;
+            return 0.0;
         }
 
     }
@@ -96,7 +96,7 @@ public class MathUtils {
         try {
             return divide(v1, v2, DEFAULT_DIV_SCALE);
         } catch (Exception e) {
-            return v1;
+            return "-";
         }
     }
 
@@ -104,7 +104,7 @@ public class MathUtils {
         try {
             return divide(v1, v2, scale, BigDecimal.ROUND_HALF_EVEN);
         } catch (Exception e) {
-            return v1;
+            return "-";
         }
     }
 
@@ -114,7 +114,7 @@ public class MathUtils {
             BigDecimal b2 = new BigDecimal(v2);
             return b1.divide(b2, scale, round_mode).toString();
         } catch (Exception e) {
-            return v1;
+            return "-";
         }
     }
 
@@ -128,7 +128,7 @@ public class MathUtils {
             BigDecimal b = new BigDecimal(Double.toString(v));
             return b.setScale(scale, round_mode).doubleValue();
         } catch (Exception e) {
-            return v;
+            return 0.0;
         }
     }
 
@@ -136,7 +136,7 @@ public class MathUtils {
         try {
             return round(v, scale, BigDecimal.ROUND_HALF_EVEN);
         } catch (Exception e) {
-            return v;
+            return "-";
         }
 
     }
@@ -146,7 +146,7 @@ public class MathUtils {
             BigDecimal b = new BigDecimal(v);
             return b.setScale(scale, round_mode).toString();
         } catch (Exception e) {
-            return v;
+            return "-";
         }
     }
 

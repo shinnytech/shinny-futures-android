@@ -1,9 +1,18 @@
 package com.shinnytech.futures.model.service;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 
@@ -14,8 +23,10 @@ import com.neovisionaries.ws.client.WebSocketExtension;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
 import com.neovisionaries.ws.client.WebSocketState;
+import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.bean.accountinfobean.BrokerEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.ChartEntity;
 import com.shinnytech.futures.model.engine.DataManager;
@@ -32,17 +43,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static com.shinnytech.futures.constants.CommonConstants.BACKGROUND;
-import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY;
+import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
+import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.FOREGROUND;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_DAY;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_HOUR;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_MINUTE;
 import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
-import static com.shinnytech.futures.constants.CommonConstants.MD_ONLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
-import static com.shinnytech.futures.constants.CommonConstants.TD_ONLINE;
 import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
 
 /**
@@ -81,7 +88,6 @@ public class WebSocketService extends Service {
     private static final int TIMEOUT = 500;
     private final IBinder mBinder = new LocalBinder();
     private boolean mBackground = false;
-    private boolean mMDOnline = false;
     private WebSocket mWebSocketClientMD;
 
     private WebSocket mWebSocketClientTD;
@@ -105,6 +111,40 @@ public class WebSocketService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            String NOTIFICATION_CHANNEL_ID = "com.shinnytech.futures";
+            String channelName = "WebSocketService";
+            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+            chan.setLightColor(Color.BLUE);
+            chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            assert manager != null;
+            manager.createNotificationChannel(chan);
+            Intent intent = new Intent(this, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+            Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                    .setContentTitle("快期小Q下单软件正在运行")
+                    .setContentText("点击返回程序")
+                    .setWhen(System.currentTimeMillis())
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+                    .setContentIntent(pendingIntent)
+                    .build();
+            startForeground(1, notification);
+        } else{
+            Intent intent = new Intent(this, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+            Notification notification = new NotificationCompat.Builder(this, "service")
+                    .setContentTitle("快期小Q下单软件正在运行")
+                    .setContentText("点击返回程序")
+                    .setWhen(System.currentTimeMillis())
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+                    .setContentIntent(pendingIntent)
+                    .build();
+            startForeground(1, notification);
+        }
+
 
         Timer timer = new Timer();
         TimerTask timerTask = new TimerTask() {
@@ -112,16 +152,17 @@ public class WebSocketService extends Service {
             public void run() {
 
                 if ((System.currentTimeMillis() / 1000 - mMDLastPong) >= 20) {
-                    mMDOnline = false;
                     sendMessage(MD_OFFLINE, MD_BROADCAST);
+                } else {
+                    mWebSocketClientMD.sendPing();
                 }
 
                 if ((System.currentTimeMillis() / 1000 - mTDLastPong) >= 20) {
                     sendMessage(TD_OFFLINE, TD_BROADCAST);
+                } else {
+                    mWebSocketClientTD.sendPing();
                 }
 
-                mWebSocketClientMD.sendPing();
-                mWebSocketClientTD.sendPing();
             }
         };
         timer.schedule(timerTask, 15000, 15000);
@@ -189,6 +230,7 @@ public class WebSocketService extends Service {
                                 switch (aid) {
                                     case "rsp_login":
                                         //首次连接行情服务器与断开重连的行情订阅处理
+                                        mWebSocketClientMD.sendPing();
                                         String ins_list = sDataManager.getRtnData().getIns_list();
                                         if (ins_list != null) sendSubscribeQuote(ins_list);
                                         else
@@ -202,30 +244,15 @@ public class WebSocketService extends Service {
                                                 ChartEntity chartEntity = chartEntityMap.get(key);
                                                 String duration = chartEntity.getState().get("duration");
                                                 String ins = chartEntity.getState().get("ins_list");
-                                                switch (duration) {
-                                                    case CURRENT_DAY:
-                                                        sendSetChart(ins);
-                                                        break;
-                                                    case KLINE_DAY:
-                                                        sendSetChartDay(ins, VIEW_WIDTH);
-                                                        break;
-                                                    case KLINE_HOUR:
-                                                        sendSetChartHour(ins, VIEW_WIDTH);
-                                                        break;
-                                                    case KLINE_MINUTE:
-                                                        sendSetChartMin(ins, VIEW_WIDTH);
-                                                        break;
-                                                    default:
-                                                        break;
+                                                if (CURRENT_DAY_FRAGMENT.equals(key)){
+                                                    sendSetChart(ins);
+                                                }else {
+                                                    sendSetChartKline(ins, VIEW_WIDTH, duration);
                                                 }
                                             }
                                         }
                                         break;
                                     case "rtn_data":
-                                        if (!mMDOnline) {
-                                            sendMessage(MD_ONLINE, MD_BROADCAST);
-                                            mMDOnline = true;
-                                        }
                                         BaseApplication.setIndex(0);
                                         sDataManager.refreshFutureBean(jsonObject);
                                         break;
@@ -243,7 +270,7 @@ public class WebSocketService extends Service {
                         public void onPongFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
                             super.onPongFrame(websocket, frame);
                             mMDLastPong = System.currentTimeMillis() / 1000;
-                            LogUtils.e("onPongFrame", true);
+                            LogUtils.e("MDPong", true);
                         }
 
                     })
@@ -304,46 +331,28 @@ public class WebSocketService extends Service {
      */
     public void sendSetChart(String ins_list) {
         if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
-            String setChart = "{\"aid\":\"set_chart\",\"chart_id\":\"" + CURRENT_DAY + "\",\"ins_list\":\"" + ins_list + "\",\"duration\":\"60000000000\",\"trading_day_start\":\"0\",\"trading_day_count\":\"86400000000000\"}";
+            String duration = "60000000000";
+            String trading_day_start = "0";
+            String trading_day_count = "86400000000000";
+            String setChart = "{\"aid\":\"set_chart\",\"chart_id\":\"" + CHART_ID + "\"," +
+                    "\"ins_list\":\"" + ins_list + "\",\"duration\":" + duration + "," +
+                    "\"trading_day_start\":" + trading_day_start + "," +
+                    "\"trading_day_count\":" + trading_day_count + "}";
             LogUtils.e(setChart, true);
             mWebSocketClientMD.sendText(setChart);
         }
     }
 
     /**
-     * date: 7/9/17
+     * date: 2018/12/14
      * author: chenli
-     * description: 日线
+     * description: k线图
      */
-    public void sendSetChartDay(String ins_list, int view_width) {
+    public void sendSetChartKline(String ins_list, int view_width, String duration){
         if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
-            String setChart = "{\"aid\":\"set_chart\",\"chart_id\":\"" + KLINE_DAY + "\",\"ins_list\":\"" + ins_list + "\",\"duration\":\"86400000000000\",\"view_width\":\"" + view_width + "\"}";
-            LogUtils.e(setChart, true);
-            mWebSocketClientMD.sendText(setChart);
-        }
-    }
-
-    /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 小时线
-     */
-    public void sendSetChartHour(String ins_list, int view_width) {
-        if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
-            String setChart = "{\"aid\":\"set_chart\",\"chart_id\":\"" + KLINE_HOUR + "\",\"ins_list\":\"" + ins_list + "\",\"duration\":\"3600000000000\",\"view_width\":\"" + view_width + "\"}";
-            LogUtils.e(setChart, true);
-            mWebSocketClientMD.sendText(setChart);
-        }
-    }
-
-    /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 分钟线
-     */
-    public void sendSetChartMin(String ins_list, int view_width) {
-        if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
-            String setChart = "{\"aid\":\"set_chart\",\"chart_id\":\"" + CommonConstants.KLINE_MINUTE + "\",\"ins_list\":\"" + ins_list + "\",\"duration\":\"300000000000\",\"view_width\":\"" + view_width + "\"}";
+            String setChart = "{\"aid\":\"set_chart\",\"chart_id\":\"" + CHART_ID + "\"," +
+                    "\"ins_list\":\"" + ins_list + "\",\"duration\":" + duration + "," +
+                    "\"view_width\":" + view_width + "}";
             LogUtils.e(setChart, true);
             mWebSocketClientMD.sendText(setChart);
         }
@@ -370,10 +379,10 @@ public class WebSocketService extends Service {
                                 String aid = jsonObject.getString("aid");
                                 switch (aid) {
                                     case "rtn_brokers":
+                                        mWebSocketClientTD.sendPing();
                                         BrokerEntity brokerInfo = new Gson().fromJson(message, BrokerEntity.class);
                                         sDataManager.getBroker().setBrokers(brokerInfo.getBrokers());
                                         sendMessage(TD_MESSAGE_BROKER_INFO, TD_BROADCAST);
-                                        sendMessage(TD_ONLINE, TD_BROADCAST);
                                         break;
                                     case "rtn_data":
                                         sDataManager.refreshTradeBean(jsonObject);
@@ -392,7 +401,7 @@ public class WebSocketService extends Service {
                         public void onPongFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
                             super.onPongFrame(websocket, frame);
                             mTDLastPong = System.currentTimeMillis() / 1000;
-                            LogUtils.e("onPongFrame", true);
+                            LogUtils.e("TDPong", true);
                         }
 
                     })
@@ -436,7 +445,8 @@ public class WebSocketService extends Service {
      */
     public void sendReqLogin(String bid, String user_name, String password) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
-            String reqLogin = "{\"aid\":\"req_login\",\"bid\":\"" + bid + "\",\"user_name\":\"" + user_name + "\",\"password\":\"" + password + "\"}";
+            String reqLogin = "{\"aid\":\"req_login\",\"bid\":\"" + bid + "\",\"user_name\":\""
+                    + user_name + "\",\"password\":\"" + password + "\"}";
             LogUtils.e(reqLogin, true);
             mWebSocketClientTD.sendText(reqLogin);
         }
@@ -461,10 +471,15 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 下单
      */
-    public void sendReqInsertOrder(String exchange_id, String instrument_id, String direction, String offset, int volume, String price_type, double price) {
+    public void sendReqInsertOrder(String exchange_id, String instrument_id, String direction,
+                                   String offset, int volume, String price_type, double price) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
             String user_id = DataManager.getInstance().USER_ID;
-            String reqInsertOrder = "{\"aid\":\"insert_order\", \"user_id\":\"" + user_id + "\", \"order_id\":\"\",\"exchange_id\":\"" + exchange_id + "\",\"instrument_id\":\"" + instrument_id + "\",\"direction\":\"" + direction + "\",\"offset\":\"" + offset + "\",\"volume\":" + volume + ",\"price_type\":\"" + price_type + "\",\"limit_price\":" + price + ", \"volume_condition\":\"ANY\", \"time_condition\":\"GFD\"}";
+            String reqInsertOrder = "{\"aid\":\"insert_order\", \"user_id\":\"" + user_id + "\", " +
+                    "\"order_id\":\"\",\"exchange_id\":\"" + exchange_id + "\",\"instrument_id\":\""
+                    + instrument_id + "\",\"direction\":\"" + direction + "\",\"offset\":\"" + offset
+                    + "\",\"volume\":" + volume + ",\"price_type\":\"" + price_type + "\",\"limit_price\":"
+                    + price + ", \"volume_condition\":\"ANY\", \"time_condition\":\"GFD\"}";
             LogUtils.e(reqInsertOrder, true);
             mWebSocketClientTD.sendText(reqInsertOrder);
         }
@@ -478,7 +493,8 @@ public class WebSocketService extends Service {
     public void sendReqCancelOrder(String order_id) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
             String user_id = DataManager.getInstance().USER_ID;
-            String reqInsertOrder = "{\"aid\":\"cancel_order\", \"user_id\":\"" + user_id + "\",\"order_id\":\"" + order_id + "\"}";
+            String reqInsertOrder = "{\"aid\":\"cancel_order\", \"user_id\":\"" + user_id + "\"," +
+                    "\"order_id\":\"" + order_id + "\"}";
             LogUtils.e(reqInsertOrder, true);
             mWebSocketClientTD.sendText(reqInsertOrder);
         }
@@ -489,11 +505,24 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 银期转帐
      */
-    public void sendReqTransfer(String future_account, String future_password, String bank_id, String bank_password, String currency, float amount) {
+    public void sendReqTransfer(String future_account, String future_password, String bank_id,
+                                String bank_password, String currency, float amount) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
-            String reqTransfer = "{\"aid\":\"req_transfer\",\"future_account\":\"" + future_account + "\",\"future_password\":\"" + future_password + "\",\"bank_id\":\"" + bank_id + "\",\"bank_password\":\"" + bank_password + "\",\"currency\":\"" + currency + "\",\"amount\": " + amount + "}";
+            String reqTransfer = "{\"aid\":\"req_transfer\",\"future_account\":\"" + future_account
+                    + "\",\"future_password\":\"" + future_password + "\",\"bank_id\":\"" + bank_id
+                    + "\",\"bank_password\":\"" + bank_password + "\",\"currency\":\"" + currency +
+                    "\",\"amount\": " + amount + "}";
             LogUtils.e(reqTransfer, true);
             mWebSocketClientTD.sendText(reqTransfer);
+        }
+    }
+
+    public void sendReqPassword(String new_password, String old_password) {
+        if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
+            String reqPassword = "{\"aid\":\"change_password\",\"new_password\":\"" + new_password
+                    + "\",\"old_password\":\"" + old_password + "\"}";
+            LogUtils.e(reqPassword, true);
+            mWebSocketClientTD.sendText(reqPassword);
         }
     }
 
