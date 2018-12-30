@@ -2,31 +2,24 @@ package com.shinnytech.futures.controller;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.graphics.PointF;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Layout;
-import android.text.SpannableString;
-import android.text.style.AlignmentSpan;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,24 +27,25 @@ import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.controller.activity.AboutActivity;
+import com.shinnytech.futures.controller.activity.AccountActivity;
+import com.shinnytech.futures.controller.activity.BankTransferActivity;
+import com.shinnytech.futures.controller.activity.ChangePasswordActivity;
+import com.shinnytech.futures.controller.activity.FeedBackActivity;
+import com.shinnytech.futures.controller.activity.FutureInfoActivity;
+import com.shinnytech.futures.controller.activity.LoginActivity;
+import com.shinnytech.futures.controller.activity.MainActivity;
+import com.shinnytech.futures.controller.activity.TradeActivity;
+import com.shinnytech.futures.controller.fragment.QuoteFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
+import com.shinnytech.futures.model.adapter.QuoteNavAdapter;
+import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.utils.LogUtils;
+import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
-import com.shinnytech.futures.controller.activity.AccountActivity;
-import com.shinnytech.futures.controller.activity.BankTransferActivity;
-import com.shinnytech.futures.controller.activity.FeedBackActivity;
-import com.shinnytech.futures.controller.activity.FutureInfoActivity;
-import com.shinnytech.futures.controller.activity.MainActivity;
-import com.shinnytech.futures.controller.activity.TradeActivity;
-import com.shinnytech.futures.model.adapter.QuoteNavAdapter;
-import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
-import com.shinnytech.futures.controller.fragment.QuoteFragment;
-import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -60,18 +54,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
-import static com.shinnytech.futures.constants.CommonConstants.DAZONG;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
-import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.LOGIN;
+import static com.shinnytech.futures.constants.CommonConstants.LOGOUT;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
+import static com.shinnytech.futures.constants.CommonConstants.POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.SHANGHAI;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOU;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
-import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 
 /**
  * Created on 1/17/18.
@@ -88,14 +83,12 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
     private Toolbar mToolbar;
     private TextView mToolbarTitle;
     private QuoteNavAdapter mNavAdapter;
-    private String[] mMenuTitle = new String[]{"自选", "主力", "上海", "上期能源", "上海大宗", "大连", "郑州", "中金", "大连组合", "郑州组合", "账户", "持仓", "成交", "转账", "反馈", "关于"};
     private Map<String, String> mInsListNameNav = new TreeMap<>();
     private String mIns;
-    private BroadcastReceiver mReceiver;
     private int mCurItemId;
-    private String mTitle = "";
 
-    public MainActivityPresenter(MainActivity mainActivity, Context context, ActivityMainDrawerBinding binding, Toolbar toolbar, TextView toolbarTitle) {
+    public MainActivityPresenter(MainActivity mainActivity, Context context,
+                                 ActivityMainDrawerBinding binding, Toolbar toolbar, TextView toolbarTitle) {
         this.mBinding = binding;
         this.mMainActivity = mainActivity;
         this.mToolbar = toolbar;
@@ -104,7 +97,22 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
 
         //设置Drawer的开关
         ActionBarDrawerToggle mToggle = new ActionBarDrawerToggle(
-                mMainActivity, mBinding.drawerLayout, mToolbar, R.string.main_activity_openDrawer, R.string.main_activity_closeDrawer);
+                mMainActivity, mBinding.drawerLayout, mToolbar, R.string.main_activity_openDrawer,
+                R.string.main_activity_closeDrawer);
+        mToggle.setDrawerIndicatorEnabled(false);
+        Drawable drawable = ResourcesCompat.getDrawable(mMainActivity.getResources(),
+                R.mipmap.ic_folder_open_white_24dp, mMainActivity.getTheme());
+        mToggle.setHomeAsUpIndicator(drawable);
+        mToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mBinding.drawerLayout.isDrawerVisible(GravityCompat.START)) {
+                    mBinding.drawerLayout.closeDrawer(GravityCompat.START);
+                } else {
+                    mBinding.drawerLayout.openDrawer(GravityCompat.START);
+                }
+            }
+        });
         mBinding.drawerLayout.addDrawerListener(mToggle);
         mToggle.syncState();
 
@@ -119,7 +127,6 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
         fragmentList.add(QuoteFragment.newInstance(DOMINANT));
         fragmentList.add(QuoteFragment.newInstance(SHANGHAI));
         fragmentList.add(QuoteFragment.newInstance(NENGYUAN));
-        fragmentList.add(QuoteFragment.newInstance(DAZONG));
         fragmentList.add(QuoteFragment.newInstance(DALIAN));
         fragmentList.add(QuoteFragment.newInstance(ZHENGZHOU));
         fragmentList.add(QuoteFragment.newInstance(ZHONGJIN));
@@ -132,17 +139,15 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
         //保证lazyLoad的效用,每次加载一个fragment
         mBinding.vpContent.setOffscreenPageLimit(7);
 
-        //使侧滑菜单上的文字居中
-        for (int i = 0; i < mMenuTitle.length; i++) {
-            SpannableString s = new SpannableString(mMenuTitle[i]);
-            s.setSpan(new AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER), 0, s.length(), 0);
-            mBinding.nvMenu.getMenu().getItem(i).setTitle(s);
-        }
-
         // 设置导航菜单宽度
         ViewGroup.LayoutParams params = mBinding.nvMenu.getLayoutParams();
-        params.width = mMainActivity.getResources().getDisplayMetrics().widthPixels * 1 / 2;
+        params.width = mMainActivity.getResources().getDisplayMetrics().widthPixels * 6 / 10;
         mBinding.nvMenu.setLayoutParams(params);
+
+        ViewGroup.LayoutParams paramsR = mBinding.nvMenuRight.getLayoutParams();
+        paramsR.width = mMainActivity.getResources().getDisplayMetrics().widthPixels / 2;
+        mBinding.nvMenuRight.setLayoutParams(paramsR);
+
     }
 
     //使导航栏和viewPager页面匹配,重新初始化mCurItemId
@@ -181,8 +186,8 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                     }
                 });
             }
-        }catch (Exception e){
-           e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
@@ -215,6 +220,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
      */
     public void registerListeners() {
         mBinding.nvMenu.setNavigationItemSelectedListener(this);
+        mBinding.nvMenuRight.setNavigationItemSelectedListener(this);
         mBinding.drawerLayout.addDrawerListener(this);
         mBinding.vpContent.addOnPageChangeListener(this);
         //合约导航左右移动
@@ -232,48 +238,6 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
             public void onItemLongClick(View view, int position) {
             }
         }));
-    }
-
-    /**
-     * date: 7/7/17
-     * author: chenli
-     * description: 监听网络状态的广播
-     */
-    public void registerBroaderCast() {
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int networkStatus = intent.getIntExtra("networkStatus", 0);
-                switch (networkStatus) {
-                    case 0:
-                        if (!"交易、行情网络未连接！".equals(mToolbarTitle.getText().toString()))
-                            mTitle = mToolbarTitle.getText().toString();
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.off_line));
-                        mToolbarTitle.setTextColor(Color.BLACK);
-                        mToolbarTitle.setText("交易、行情网络未连接！");
-                        mToolbarTitle.setTextSize(20);
-                        break;
-                    case 1:
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.black_dark));
-                        mToolbarTitle.setTextColor(Color.WHITE);
-                        mToolbarTitle.setText(mTitle);
-                        mToolbarTitle.setTextSize(25);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-        mMainActivity.registerReceiver(mReceiver, new IntentFilter(NETWORK_STATE));
-    }
-
-    /**
-     * date: 7/7/17
-     * author: chenli
-     * description: 注销广播
-     */
-    public void unRegisterBroaderCast() {
-        if (mReceiver != null) mMainActivity.unregisterReceiver(mReceiver);
     }
 
     public String getPreSubscribedQuotes() {
@@ -320,40 +284,33 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                 break;
             case 4:
                 if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(DAZONG);
-
-                if (state == ViewPager.SCROLL_STATE_IDLE)
-                    refreshQuotesNavigation(DAZONG);
-                break;
-            case 5:
-                if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(DALIAN);
 
                 if (state == ViewPager.SCROLL_STATE_IDLE)
                     refreshQuotesNavigation(DALIAN);
                 break;
-            case 6:
+            case 5:
                 if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(ZHENGZHOU);
 
                 if (state == ViewPager.SCROLL_STATE_IDLE)
                     refreshQuotesNavigation(ZHENGZHOU);
                 break;
-            case 7:
+            case 6:
                 if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(ZHONGJIN);
 
                 if (state == ViewPager.SCROLL_STATE_IDLE)
                     refreshQuotesNavigation(ZHONGJIN);
                 break;
-            case 8:
+            case 7:
                 if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(DALIANZUHE);
 
                 if (state == ViewPager.SCROLL_STATE_IDLE)
                     refreshQuotesNavigation(DALIANZUHE);
                 break;
-            case 9:
+            case 8:
                 if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(ZHENGZHOUZUHE);
 
@@ -399,71 +356,99 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                 mBinding.vpContent.setCurrentItem(3, false);
                 refreshQuotesNavigation(NENGYUAN);
                 break;
-            case R.id.nav_dazong:
-                if (NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(DAZONG);
-                mBinding.vpContent.setCurrentItem(4, false);
-                refreshQuotesNavigation(DAZONG);
-                break;
             case R.id.nav_dalian:
                 if (NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(DALIAN);
-                mBinding.vpContent.setCurrentItem(5, false);
+                mBinding.vpContent.setCurrentItem(4, false);
                 refreshQuotesNavigation(DALIAN);
                 break;
             case R.id.nav_zhengzhou:
                 if (NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(ZHENGZHOU);
-                mBinding.vpContent.setCurrentItem(6, false);
+                mBinding.vpContent.setCurrentItem(5, false);
                 refreshQuotesNavigation(ZHENGZHOU);
                 break;
             case R.id.nav_zhongjin:
                 if (NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(ZHONGJIN);
-                mBinding.vpContent.setCurrentItem(7, false);
+                mBinding.vpContent.setCurrentItem(6, false);
                 refreshQuotesNavigation(ZHONGJIN);
                 break;
             case R.id.nav_dalian_zuhe:
                 if (NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(DALIANZUHE);
-                mBinding.vpContent.setCurrentItem(8, false);
+                mBinding.vpContent.setCurrentItem(7, false);
                 refreshQuotesNavigation(DALIANZUHE);
                 break;
             case R.id.nav_zhengzhou_zuhe:
                 if (NetworkUtils.isNetworkConnected(sContext))
                     mToolbarTitle.setText(ZHENGZHOUZUHE);
-                mBinding.vpContent.setCurrentItem(9, false);
+                mBinding.vpContent.setCurrentItem(8, false);
                 refreshQuotesNavigation(ZHENGZHOUZUHE);
                 break;
+            case R.id.nav_login:
+                this.mCurItemId = mBinding.vpContent.getCurrentItem();
+                MenuItem menuLogin = mBinding.nvMenuRight.getMenu().findItem(mCurItemId);
+                menuLogin.setChecked(false);
+                String title = menuLogin.getTitle().toString();
+                if (LOGIN.equals(title)) {
+                    Intent intentLogin = new Intent(mMainActivity, LoginActivity.class);
+                    intentLogin.putExtra(ACTIVITY_TYPE, "MainActivityLoginMenu");
+                    mMainActivity.startActivity(intentLogin);
+                }
+                if (LOGOUT.equals(title)){
+                    DataManager.getInstance().IS_LOGIN = false;
+                    menuLogin.setTitle(LOGIN);
+                    mBinding.nvMenuRight.getMenu().findItem(R.id.nav_password).setVisible(false);
+                }
+                break;
             case R.id.nav_account:
+                this.mCurItemId = mBinding.vpContent.getCurrentItem();
+                mBinding.nvMenuRight.getMenu().findItem(mCurItemId).setChecked(false);
                 Intent intentAcc = new Intent(mMainActivity, AccountActivity.class);
                 mMainActivity.startActivity(intentAcc);
                 break;
+            case R.id.nav_password:
+                this.mCurItemId = mBinding.vpContent.getCurrentItem();
+                mBinding.nvMenuRight.getMenu().findItem(mCurItemId).setChecked(false);
+                Intent intentChange = new Intent(mMainActivity, ChangePasswordActivity.class);
+                mMainActivity.startActivity(intentChange);
+                break;
             case R.id.nav_position:
+                this.mCurItemId = mBinding.vpContent.getCurrentItem();
+                mBinding.nvMenuRight.getMenu().findItem(mCurItemId).setChecked(false);
                 try {
                     mIns = DataManager.getInstance().getRtnData().getIns_list();
                     Intent intentPos = new Intent(mMainActivity, FutureInfoActivity.class);
                     intentPos.putExtra("nav_position", 1);
                     String instrument_id = new ArrayList<>(LatestFileManager.getMainInsList().keySet()).get(0);
                     intentPos.putExtra("instrument_id", instrument_id);
-                    mMainActivity.startActivityForResult(intentPos, JUMP_TO_FUTURE_INFO_ACTIVITY);
+                    mMainActivity.startActivityForResult(intentPos, POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 break;
-            case R.id.nav_deal:
+            case R.id.nav_trade:
+                this.mCurItemId = mBinding.vpContent.getCurrentItem();
+                mBinding.nvMenuRight.getMenu().findItem(mCurItemId).setChecked(false);
                 Intent intentDeal = new Intent(mMainActivity, TradeActivity.class);
                 mMainActivity.startActivity(intentDeal);
                 break;
             case R.id.nav_bank:
+                this.mCurItemId = mBinding.vpContent.getCurrentItem();
+                mBinding.nvMenuRight.getMenu().findItem(mCurItemId).setChecked(false);
                 Intent intentBank = new Intent(mMainActivity, BankTransferActivity.class);
                 mMainActivity.startActivity(intentBank);
                 break;
             case R.id.nav_feedback:
+                this.mCurItemId = mBinding.vpContent.getCurrentItem();
+                mBinding.nvMenuRight.getMenu().findItem(mCurItemId).setChecked(false);
                 Intent intentFeed = new Intent(mMainActivity, FeedBackActivity.class);
                 mMainActivity.startActivity(intentFeed);
                 break;
             case R.id.nav_about:
+                this.mCurItemId = mBinding.vpContent.getCurrentItem();
+                mBinding.nvMenuRight.getMenu().findItem(mCurItemId).setChecked(false);
                 Intent intentAbout = new Intent(mMainActivity, AboutActivity.class);
                 mMainActivity.startActivity(intentAbout);
                 break;
@@ -493,9 +478,6 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                 break;
             case NENGYUAN:
                 insListName = new ArrayList<>(LatestFileManager.getNengyuanInsList().keySet());
-                break;
-            case DAZONG:
-                insListName = new ArrayList<>(LatestFileManager.getsDazongInsList().keySet());
                 break;
             case DALIAN:
                 insListName = new ArrayList<>(LatestFileManager.getDalianInsList().keySet());
@@ -552,11 +534,6 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
             case NENGYUAN:
                 setNavVisiable();
                 mInsListNameNav = LatestFileManager.getNengyuanInsListNameNav();
-                mNavAdapter.updateList(mInsListNameNav);
-                break;
-            case DAZONG:
-                setNavVisiable();
-                mInsListNameNav = LatestFileManager.getsDazongInsListNameNav();
                 mNavAdapter.updateList(mInsListNameNav);
                 break;
             case DALIAN:

@@ -5,113 +5,69 @@
         android:checkableBehavior="single">
         <item
             android:id="@+id/nav_optional"
-            android:checked="true"
-            android:title="自选" />
+            android:title="自选合约" />
     </group>
     <group
         android:id="@+id/gp2"
         android:checkableBehavior="single">
         <item
             android:id="@+id/nav_dominant"
-            android:title="主力" />
+            android:checked="true"
+            android:title="主力合约" />
     </group>
     <group
         android:id="@+id/gp3"
         android:checkableBehavior="single">
         <item
             android:id="@+id/nav_shanghai"
-            android:title="上海" />
-    </group>
-    <group
-        android:id="@+id/gp31"
-        android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_nengyuan"
-            android:title="上期能源" />
-    </group>
-    <group
-        android:id="@+id/gp32"
-        android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_dazong"
-            android:title="上期大宗" />
+            android:title="上海期货交易所" />
     </group>
     <group
         android:id="@+id/gp4"
         android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_dalian"
-            android:title="大连" />
+            android:id="@+id/nav_nengyuan"
+            android:title="上海能源交易中心" />
     </group>
     <group
         android:id="@+id/gp5"
         android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_zhengzhou"
-            android:title="郑州" />
+            android:id="@+id/nav_dalian"
+            android:title="大连商品交易所" />
     </group>
     <group
         android:id="@+id/gp6"
         android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_zhongjin"
-            android:title="中金" />
+            android:id="@+id/nav_zhengzhou"
+            android:title="郑州商品交易所" />
     </group>
     <group
         android:id="@+id/gp7"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_zhongjin"
+            android:title="中国金融期货交易所" />
+    </group>
+    <group
+        android:id="@+id/gp8"
         android:checkableBehavior="single">
         <item
             android:id="@+id/nav_dalian_zuhe"
             android:title="大连组合" />
     </group>
     <group
-        android:id="@+id/gp8"
+        android:id="@+id/gp9"
         android:checkableBehavior="single">
         <item
             android:id="@+id/nav_zhengzhou_zuhe"
             android:title="郑州组合" />
     </group>
     <group
-        android:id="@+id/gp9"
         android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_account"
-            android:title="账户" />
-    </group>
-    <group
-        android:id="@+id/gp10"
-        android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_position"
-            android:title="持仓" />
-    </group>
-    <group
-        android:id="@+id/gp11"
-        android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_deal"
-            android:title="成交" />
-    </group>
-    <group
-        android:id="@+id/gp12"
-        android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_bank"
-            android:title="转账" />
-    </group>
-    <group
-        android:id="@+id/gp13"
-        android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_feedback"
-            android:title="反馈" />
+            android:title="" />
     </group>
 
-    <group
-        android:id="@+id/gp14"
-        android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_about"
-            android:title="关于" />
-    </group>
 </menu>

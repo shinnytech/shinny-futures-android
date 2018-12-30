@@ -15,6 +15,7 @@ import com.shinnytech.futures.databinding.ItemFragmentQuoteBinding;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 
 import java.util.List;
@@ -262,6 +263,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
          */
         public void setTextColor(TextView textView, String data) {
             textView.setText(data);
+            if (data == null || data.equals("-"))return;
             try{
                 float value = new Float(data);
                 if (value < 0) textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
@@ -280,6 +282,8 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
          */
         public void setLatestTextColor(TextView textView, String latest, String pre_settlement){
             textView.setText(latest);
+            if (latest == null || latest.equals("-"))return;
+            if (pre_settlement == null || pre_settlement.equals("-"))return;
             try{
                 float value = new Float(latest) - new Float(pre_settlement);
                 if (value < 0) textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));

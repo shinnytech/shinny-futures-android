@@ -106,6 +106,12 @@ public class DataManager {
     public String PRICE_TYPE = "对手价";
 
     /**
+     * date: 2018/12/13
+     * description: 持仓点击方向
+     */
+    public String POSITION_DIRECTION = "";
+
+    /**
      * date: 6/16/17
      * author: chenli
      * description: 获取实例
@@ -136,10 +142,12 @@ public class DataManager {
             JSONArray dataArray = rtnData.getJSONArray("data");
             DiffEntity diffEntity = RTN_DATA.getData();
             for (int i = 0; i < dataArray.length(); i++) {
+                if (dataArray.isNull(i))continue;
                 JSONObject dataObject = dataArray.getJSONObject(i);
                 Iterator<String> iterator = dataObject.keys();
                 while (iterator.hasNext()) {
                     String key0 = iterator.next();
+                    if (dataObject.isNull(key0))continue;
                     switch (key0) {
                         case "quotes":
                             parseQuotes(dataObject, diffEntity);
@@ -154,10 +162,10 @@ public class DataManager {
                             parseCharts(dataObject, diffEntity);
                             break;
                         case "ins_list":
-                            diffEntity.setIns_list(dataObject.getString(key0));
+                            diffEntity.setIns_list(dataObject.optString(key0));
                             break;
                         case "mdhis_more_data":
-                            diffEntity.setMdhis_more_data(dataObject.getString(key0));
+                            diffEntity.setMdhis_more_data(dataObject.optBoolean(key0));
                             break;
                         default:
                             break;
@@ -177,6 +185,7 @@ public class DataManager {
         Iterator<String> iterator = chartsObject.keys();
         while (iterator.hasNext()) {
             String key = iterator.next();
+            if (chartsObject.isNull(key))continue;
             JSONObject chartObject = chartsObject.getJSONObject(key);
             ChartEntity chartEntity = chartsEntities.get(key);
             if (chartEntity == null) chartEntity = new ChartEntity();
@@ -185,6 +194,7 @@ public class DataManager {
             Map<String, String> stateEntity = chartEntity.getState();
             while (iterator1.hasNext()) {
                 String key1 = iterator1.next();
+                if (chartObject.isNull(key1))continue;
                 if ("state".equals(key1)) {
                     JSONObject stateObject = chartObject.optJSONObject(key1);
                     Iterator<String> iterator511 = stateObject.keys();
@@ -196,12 +206,12 @@ public class DataManager {
                     try {
                         Field f = clChart.getDeclaredField(key1);
                         f.setAccessible(true);
-                        if (!chartObject.isNull(key1)) {
-                            f.set(chartEntity, chartObject.optString(key1));
-                        }
+                        f.set(chartEntity, chartObject.optString(key1));
                     } catch (NoSuchFieldException e) {
+                        e.printStackTrace();
                         continue;
                     } catch (IllegalAccessException e) {
+                        e.printStackTrace();
                         continue;
                     }
                 }
@@ -224,6 +234,7 @@ public class DataManager {
         Iterator<String> iterator = futureKlineObjects.keys();
         while (iterator.hasNext()) {
             String key = iterator.next(); //future "cu1601"
+            if (futureKlineObjects.isNull(key))continue;
             JSONObject futureKlineObject = futureKlineObjects.getJSONObject(key);
             Iterator<String> iterator1 = futureKlineObject.keys();
             Map<String, KlineEntity> futureKlineEntity = futureKlineEntities.get(key);
@@ -231,6 +242,7 @@ public class DataManager {
 
             while (iterator1.hasNext()) {
                 String key1 = iterator1.next(); //kline"M3"
+                if (futureKlineObject.isNull(key1))continue;
                 JSONObject klineObject = futureKlineObject.getJSONObject(key1);
                 KlineEntity klineEntity = futureKlineEntity.get(key1);
                 if (klineEntity == null) klineEntity = new KlineEntity();
@@ -239,6 +251,7 @@ public class DataManager {
                 Iterator<String> iterator2 = klineObject.keys();
                 while (iterator2.hasNext()) {
                     String key2 = iterator2.next();
+                    if (klineObject.isNull(key2))continue;
                     switch (key2) {
                         case "data":
                             JSONObject dataObjects = klineObject.getJSONObject(key2);
@@ -246,6 +259,7 @@ public class DataManager {
                             Map<String, KlineEntity.DataEntity> dataEntities = klineEntity.getData();
                             while (iterator3.hasNext()) {
                                 String key3 = iterator3.next();
+                                if (dataObjects.isNull(key3))continue;
                                 JSONObject dataObjectInner = dataObjects.getJSONObject(key3);
                                 KlineEntity.DataEntity dataEntity = dataEntities.get(key3);
                                 Iterator<String> iterator4 = dataObjectInner.keys();
@@ -254,14 +268,16 @@ public class DataManager {
                                 Class clData = dataEntity.getClass();
                                 while (iterator4.hasNext()) {
                                     String key4 = iterator4.next();
+                                    if (dataObjectInner.isNull(key4))continue;
                                     try {
                                         Field f = clData.getDeclaredField(key4);
                                         f.setAccessible(true);
-                                        if (!dataObjectInner.isNull(key4))
-                                            f.set(dataEntity, dataObjectInner.optString(key4));
+                                        f.set(dataEntity, dataObjectInner.optString(key4));
                                     } catch (NoSuchFieldException e) {
+                                        e.printStackTrace();
                                         continue;
                                     } catch (IllegalAccessException e) {
+                                        e.printStackTrace();
                                         continue;
                                     }
 
@@ -275,6 +291,7 @@ public class DataManager {
                             Map<String, KlineEntity.BindingEntity> bindingEntities = klineEntity.getBinding();
                             while (iterator5.hasNext()) {
                                 String key5 = iterator5.next();
+                                if (bindingObjects.isNull(key5))continue;
                                 JSONObject bindingObject = bindingObjects.getJSONObject(key5);
                                 KlineEntity.BindingEntity bindingEntity = bindingEntities.get(key5);
                                 Iterator<String> iterator6 = bindingObject.keys();
@@ -284,15 +301,16 @@ public class DataManager {
                                 Class clBinding = bindingEntity.getClass();
                                 while (iterator6.hasNext()) {
                                     String key6 = iterator6.next();
+                                    if (bindingObject.isNull(key6))continue;
                                     try {
                                         Field f = clBinding.getDeclaredField(key6);
                                         f.setAccessible(true);
-                                        if (!bindingObject.isNull(key6)) {
-                                            f.set(bindingEntity, bindingObject.optString(key6));
-                                        }
+                                        f.set(bindingEntity, bindingObject.optString(key6));
                                     } catch (NoSuchFieldException e) {
+                                        e.printStackTrace();
                                         continue;
                                     } catch (IllegalAccessException e) {
+                                        e.printStackTrace();
                                         continue;
                                     }
 
@@ -304,11 +322,12 @@ public class DataManager {
                             try {
                                 Field field = clKline.getDeclaredField(key2);
                                 field.setAccessible(true);
-                                if (!klineObject.isNull(key2))
-                                    field.set(klineEntity, klineObject.optString(key2));
+                                field.set(klineEntity, klineObject.optString(key2));
                             } catch (NoSuchFieldException e) {
+                                e.printStackTrace();
                                 continue;
                             } catch (IllegalAccessException e) {
+                                e.printStackTrace();
                                 continue;
                             }
                             break;
@@ -326,28 +345,28 @@ public class DataManager {
         Iterator<String> iterator = quoteObjects.keys();
         while (iterator.hasNext()) {
             String key = iterator.next();
-            if (!quoteObjects.isNull(key)) {
-                JSONObject quoteObject = quoteObjects.getJSONObject(key);
-                Iterator<String> iterator1 = quoteObject.keys();
-                QuoteEntity quoteEntity = quoteEntities.get(key);
-                if (quoteEntity == null) quoteEntity = new QuoteEntity();
-                Class clQuote = quoteEntity.getClass();
-                while (iterator1.hasNext()) {
-                    String key1 = iterator1.next();
-                    try {
-                        Field f = clQuote.getDeclaredField(key1);
-                        f.setAccessible(true);
-                        if (!quoteObject.isNull(key1))
-                            f.set(quoteEntity, quoteObject.optString(key1));
-                    } catch (NoSuchFieldException e) {
-                        continue;
-                    } catch (IllegalAccessException e) {
-                        continue;
-                    }
-
+            if (quoteObjects.isNull(key))continue;
+            JSONObject quoteObject = quoteObjects.getJSONObject(key);
+            Iterator<String> iterator1 = quoteObject.keys();
+            QuoteEntity quoteEntity = quoteEntities.get(key);
+            if (quoteEntity == null) quoteEntity = new QuoteEntity();
+            Class clQuote = quoteEntity.getClass();
+            while (iterator1.hasNext()) {
+                String key1 = iterator1.next();
+                if (quoteObject.isNull(key1))continue;
+                try {
+                    Field f = clQuote.getDeclaredField(key1);
+                    f.setAccessible(true);
+                    f.set(quoteEntity, quoteObject.optString(key1));
+                } catch (NoSuchFieldException e) {
+                    e.printStackTrace();
+                    continue;
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    continue;
                 }
-                quoteEntities.put(key, quoteEntity);
             }
+            quoteEntities.put(key, quoteEntity);
         }
 
     }
@@ -361,16 +380,19 @@ public class DataManager {
         try {
             JSONArray dataArray = accountBeanObject.getJSONArray("data");
             for (int i = 0; i < dataArray.length(); i++) {
+                if (dataArray.isNull(i))continue;
                 JSONObject dataObject = dataArray.getJSONObject(i);
                 Iterator<String> iterator = dataObject.keys();
                 while (iterator.hasNext()) {
                     String key = iterator.next();
+                    if (dataObject.isNull(key))continue;
                     JSONObject data = dataObject.getJSONObject(key);
                     switch (key) {
                         case "notify":
                             Iterator<String> notifyIterator = data.keys();
                             while (notifyIterator.hasNext()) {
                                 String notifyKey = notifyIterator.next();
+                                if (data.isNull(notifyKey))continue;
                                 JSONObject notify = data.getJSONObject(notifyKey);
                                 final String content = notify.optString("content");
                                 String type = notify.optString("type");
@@ -393,12 +415,14 @@ public class DataManager {
                             Iterator<String> tradeIterator = data.keys();
                             while (tradeIterator.hasNext()) {
                                 String userKey = tradeIterator.next();
+                                if (data.isNull(userKey))continue;
                                 JSONObject user = data.getJSONObject(userKey);
                                 UserEntity userEntity = userEntities.get(userKey);
                                 if (userEntity == null) userEntity = new UserEntity();
                                 Iterator<String> tradeDataIterator = user.keys();
                                 while (tradeDataIterator.hasNext()) {
                                     String tradeDataKey = tradeDataIterator.next();
+                                    if (user.isNull(tradeDataKey))continue;
                                     switch (tradeDataKey) {
                                         case "accounts":
                                             parseAccounts(user, userEntity);
@@ -451,6 +475,7 @@ public class DataManager {
             Iterator<String> transferIterator = transferData.keys();
             while (transferIterator.hasNext()) {
                 String key = transferIterator.next();
+                if (transferData.isNull(key))continue;
                 JSONObject transferObject = transferData.getJSONObject(key);
                 Iterator<String> iterator1 = transferObject.keys();
                 TransferEntity transferEntity = transferEntities.get(key);
@@ -458,16 +483,17 @@ public class DataManager {
                 Class clTransfer = transferEntity.getClass();
                 while (iterator1.hasNext()) {
                     String key1 = iterator1.next();
+                    if (transferObject.isNull(key1))continue;
                     try {
                         Field f = clTransfer.getDeclaredField(key1);
                         f.setAccessible(true);
-                        if (!transferObject.isNull(key1)) {
-                            String data = transferObject.optString(key1);
-                            f.set(transferEntity, data);
-                        }
+                        String data = transferObject.optString(key1);
+                        f.set(transferEntity, data);
                     } catch (NoSuchFieldException e) {
+                        e.printStackTrace();
                         continue;
                     } catch (IllegalAccessException e) {
+                        e.printStackTrace();
                         continue;
                     }
                 }
@@ -486,6 +512,7 @@ public class DataManager {
             Iterator<String> bankIterator = bankData.keys();
             while (bankIterator.hasNext()) {
                 String key = bankIterator.next();
+                if (bankData.isNull(key))continue;
                 JSONObject bankObject = bankData.getJSONObject(key);
                 Iterator<String> iterator1 = bankObject.keys();
                 BankEntity bankEntity = bankEntities.get(key);
@@ -493,16 +520,17 @@ public class DataManager {
                 Class clBank = bankEntity.getClass();
                 while (iterator1.hasNext()) {
                     String key1 = iterator1.next();
+                    if (bankObject.isNull(key1))continue;
                     try {
                         Field f = clBank.getDeclaredField(key1);
                         f.setAccessible(true);
-                        if (!bankObject.isNull(key1)) {
-                            String data = bankObject.optString(key1);
-                            f.set(bankEntity, data);
-                        }
+                        String data = bankObject.optString(key1);
+                        f.set(bankEntity, data);
                     } catch (NoSuchFieldException e) {
+                        e.printStackTrace();
                         continue;
                     } catch (IllegalAccessException e) {
+                        e.printStackTrace();
                         continue;
                     }
 
@@ -522,6 +550,7 @@ public class DataManager {
             Iterator<String> tradeIterator = tradeData.keys();
             while (tradeIterator.hasNext()) {
                 String key = tradeIterator.next();
+                if (tradeData.isNull(key))continue;
                 JSONObject tradeObject = tradeData.getJSONObject(key);
                 Iterator<String> iterator1 = tradeObject.keys();
                 TradeEntity tradeEntity = tradeEntities.get(key);
@@ -529,16 +558,17 @@ public class DataManager {
                 Class clTrade = tradeEntity.getClass();
                 while (iterator1.hasNext()) {
                     String key1 = iterator1.next();
+                    if (tradeObject.isNull(key1))continue;
                     try {
                         Field f = clTrade.getDeclaredField(key1);
                         f.setAccessible(true);
-                        if (!tradeObject.isNull(key1)) {
-                            String data = tradeObject.optString(key1);
-                            f.set(tradeEntity, data);
-                        }
+                        String data = tradeObject.optString(key1);
+                        f.set(tradeEntity, data);
                     } catch (NoSuchFieldException e) {
+                        e.printStackTrace();
                         continue;
                     } catch (IllegalAccessException e) {
+                        e.printStackTrace();
                         continue;
                     }
 
@@ -558,6 +588,7 @@ public class DataManager {
             Iterator<String> positionIterator = positionData.keys();
             while (positionIterator.hasNext()) {
                 String key = positionIterator.next();
+                if (positionData.isNull(key))continue;
                 JSONObject positionObject = positionData.getJSONObject(key);
                 Iterator<String> iterator1 = positionObject.keys();
                 PositionEntity positionEntity = positionEntities.get(key);
@@ -565,16 +596,17 @@ public class DataManager {
                 Class clPosition = positionEntity.getClass();
                 while (iterator1.hasNext()) {
                     String key1 = iterator1.next();
+                    if (positionObject.isNull(key1))continue;
                     try {
                         Field f = clPosition.getDeclaredField(key1);
                         f.setAccessible(true);
-                        if (!positionObject.isNull(key1)) {
-                            String data = positionObject.optString(key1);
-                            f.set(positionEntity, data);
-                        }
+                        String data = positionObject.optString(key1);
+                        f.set(positionEntity, data);
                     } catch (NoSuchFieldException e) {
+                        e.printStackTrace();
                         continue;
                     } catch (IllegalAccessException e) {
+                        e.printStackTrace();
                         continue;
                     }
 
@@ -595,6 +627,7 @@ public class DataManager {
             Iterator<String> orderIterator = orderData.keys();
             while (orderIterator.hasNext()) {
                 String key = orderIterator.next();
+                if (orderData.isNull(key))continue;
                 JSONObject orderObject = orderData.getJSONObject(key);
                 Iterator<String> iterator1 = orderObject.keys();
                 OrderEntity orderEntity = orderEntities.get(key);
@@ -602,16 +635,17 @@ public class DataManager {
                 Class clOrder = orderEntity.getClass();
                 while (iterator1.hasNext()) {
                     String key1 = iterator1.next();
+                    if (orderObject.isNull(key1))continue;
                     try {
                         Field f = clOrder.getDeclaredField(key1);
                         f.setAccessible(true);
-                        if (!orderObject.isNull(key1)) {
-                            String data = orderObject.optString(key1);
-                            f.set(orderEntity, data);
-                        }
+                        String data = orderObject.optString(key1);
+                        f.set(orderEntity, data);
                     } catch (NoSuchFieldException e) {
+                        e.printStackTrace();
                         continue;
                     } catch (IllegalAccessException e) {
+                        e.printStackTrace();
                         continue;
                     }
 
@@ -631,6 +665,7 @@ public class DataManager {
             Iterator<String> accountIterator = accountData.keys();
             while (accountIterator.hasNext()) {
                 String key = accountIterator.next();
+                if (accountData.isNull(key))continue;
                 JSONObject accountObject = accountData.getJSONObject(key);
                 AccountEntity accountEntity = accountEntities.get(key);
                 if (accountEntity == null) accountEntity = new AccountEntity();
@@ -638,14 +673,16 @@ public class DataManager {
                 Iterator<String> iterator1 = accountObject.keys();
                 while (iterator1.hasNext()) {
                     String key1 = iterator1.next();
+                    if (accountObject.isNull(key1))continue;
                     try {
                         Field f = clAccount.getDeclaredField(key1);
                         f.setAccessible(true);
-                        if (!accountObject.isNull(key1))
-                            f.set(accountEntity, accountObject.optString(key1));
+                        f.set(accountEntity, accountObject.optString(key1));
                     } catch (NoSuchFieldException e) {
+                        e.printStackTrace();
                         continue;
                     } catch (IllegalAccessException e) {
+                        e.printStackTrace();
                         continue;
                     }
 

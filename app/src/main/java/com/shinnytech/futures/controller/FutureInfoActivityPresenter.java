@@ -28,9 +28,11 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.activity.LoginActivity;
+import com.shinnytech.futures.controller.fragment.BaseChartFragment;
 import com.shinnytech.futures.controller.fragment.CurrentDayFragment;
 import com.shinnytech.futures.controller.fragment.HandicapFragment;
 import com.shinnytech.futures.controller.fragment.KlineFragment;
@@ -39,8 +41,10 @@ import com.shinnytech.futures.controller.fragment.PositionFragment;
 import com.shinnytech.futures.controller.fragment.TransactionFragment;
 import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
 import com.shinnytech.futures.model.adapter.DialogAdapter;
+import com.shinnytech.futures.model.adapter.DialogKlineAdapter;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.KlineEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
@@ -48,7 +52,6 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.KeyboardUtils;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
@@ -58,16 +61,41 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_DAY_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_HOUR_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_MINUTE_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_SECOND_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.DAY_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.HOUR_FRAGMENT;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_DAY;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_HOUR;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_MINUTE;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_10_MINUTE;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_10_SECOND;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_15_MINUTE;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_15_SECOND;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_1_DAY;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_1_HOUR;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_1_MINUTE;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_20_SECOND;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_2_HOUR;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_2_MINUTE;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_30_MINUTE;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_30_SECOND;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_3_MINUTE;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_3_SECOND;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_4_HOUR;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_5_MINUTE;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_5_SECOND;
+import static com.shinnytech.futures.constants.CommonConstants.KLINE_7_DAY;
 import static com.shinnytech.futures.constants.CommonConstants.MINUTE_FRAGMENT;
+import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.ORDER_JUMP_TO_LOG_IN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.POSITION_JUMP_TO_LOG_IN_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.SECOND_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_JUMP_TO_LOG_IN_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 
 /**
@@ -124,13 +152,21 @@ public class FutureInfoActivityPresenter {
     private Toolbar mToolbar;
     private TextView mToolbarTitle;
     private FragmentManager mFragmentManager;
-    private Fragment mCurFragment;
-    private Drawable mRightDrawable;
+    public Drawable mRightDrawable;
     private int mNav_position;
-    private Dialog mDialog;
-    private RecyclerView mRecyclerView;
-    private DialogAdapter mDialogAdapter;
-    private BroadcastReceiver mReceiver;
+    private Dialog mDialogOptional;
+    private RecyclerView mRecyclerViewOptional;
+    private DialogAdapter mDialogAdapterOptional;
+    private Dialog mDialogKline;
+    private RecyclerView mRecyclerViewKline;
+    private DialogKlineAdapter mDialogAdapterKline;
+    private String[] mKlineTypeTitle = new String[]{"3秒", "5秒", "10秒", "15秒", "20秒", "30秒", "1分", "2分", "3分",
+            "5分", "10分", "15分", "30分", "1时", "2时", "4时", "1日", "1周"};
+    private String[] mKlineDuration = new String[]{KLINE_3_SECOND, KLINE_5_SECOND, KLINE_10_SECOND,
+            KLINE_15_SECOND, KLINE_20_SECOND, KLINE_30_SECOND, KLINE_1_MINUTE, KLINE_2_MINUTE, KLINE_3_MINUTE,
+            KLINE_5_MINUTE, KLINE_10_MINUTE, KLINE_15_MINUTE, KLINE_30_MINUTE, KLINE_1_HOUR, KLINE_2_HOUR,
+            KLINE_4_HOUR, KLINE_1_DAY, KLINE_7_DAY};
+
 
     public FutureInfoActivityPresenter(FutureInfoActivity futureInfoActivity, Context context, ActivityFutureInfoBinding binding, Toolbar toolbar, TextView toolbarTitle) {
         this.mBinding = binding;
@@ -140,13 +176,10 @@ public class FutureInfoActivityPresenter {
         this.sContext = context;
 
         mFragmentManager = mFutureInfoActivity.getSupportFragmentManager();
-        if (mCurFragment == null) {
-            Fragment currentDayFragment = new CurrentDayFragment();
-            mFragmentManager.beginTransaction().
-                    setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).
-                    add(R.id.fl_content_up, currentDayFragment, CommonConstants.CURRENT_DAY_FRAGMENT).commit();
-            mCurFragment = currentDayFragment;
-        }
+        BaseChartFragment currentDayFragment = new CurrentDayFragment();
+        mFragmentManager.beginTransaction().
+                setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).
+                add(R.id.fl_content_up, currentDayFragment, CommonConstants.CURRENT_DAY_FRAGMENT).commit();
 
         Intent intent = mFutureInfoActivity.getIntent();
         mInstrumentId = intent.getStringExtra("instrument_id");
@@ -166,9 +199,19 @@ public class FutureInfoActivityPresenter {
             mRightDrawable.setBounds(0, 0, mRightDrawable.getMinimumWidth(), mRightDrawable.getMinimumHeight());
 
         //初始化开关状态
-        mIsPosition = (boolean) SPUtils.get(sContext, "isPosition", true);
-        mIsPending = (boolean) SPUtils.get(sContext, "isPending", true);
-        mIsAverage = (boolean) SPUtils.get(sContext, "isAverage", true);
+        mIsPosition = (boolean) SPUtils.get(sContext, CONFIG_POSITION_LINE, true);
+        mIsPending = (boolean) SPUtils.get(sContext, CONFIG_ORDER_LINE, true);
+        mIsAverage = (boolean) SPUtils.get(sContext, CONFIG_AVERAGE_LINE, true);
+
+        //初始化K线类型
+        String KlineDay = (String) SPUtils.get(sContext, CONFIG_KLINE_DAY_TYPE, KLINE_1_DAY);
+        mBinding.rbDayUp.setText(getDurationIndex(KlineDay));
+        String KlineHour = (String) SPUtils.get(sContext, CONFIG_KLINE_HOUR_TYPE, KLINE_1_HOUR);
+        mBinding.rbHourUp.setText(getDurationIndex(KlineHour));
+        String KlineMinute = (String) SPUtils.get(sContext, CONFIG_KLINE_MINUTE_TYPE, KLINE_5_MINUTE);
+        mBinding.rbMinuteUp.setText(getDurationIndex(KlineMinute));
+        String KlineSecond = (String) SPUtils.get(sContext, CONFIG_KLINE_SECOND_TYPE, KLINE_3_SECOND);
+        mBinding.rbSecondUp.setText(getDurationIndex(KlineSecond));
 
         //初始化盘口、持仓、挂单、交易切换容器，fragment实例保存，有生命周期的变化，默认情况下屏幕外初始化两个fragment
         List<Fragment> fragmentList = new ArrayList<>();
@@ -202,11 +245,11 @@ public class FutureInfoActivityPresenter {
         mToolbarTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mDialog == null) {
+                if (mDialogOptional == null) {
                     //初始化自选合约弹出框
-                    mDialog = new Dialog(mFutureInfoActivity, R.style.Theme_Light_Dialog);
+                    mDialogOptional = new Dialog(mFutureInfoActivity, R.style.Theme_Light_Dialog);
                     View viewDialog = View.inflate(mFutureInfoActivity, R.layout.view_dialog_optional_quote, null);
-                    Window dialogWindow = mDialog.getWindow();
+                    Window dialogWindow = mDialogOptional.getWindow();
                     if (dialogWindow != null) {
                         dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
                         WindowManager.LayoutParams lp = dialogWindow.getAttributes();
@@ -215,16 +258,19 @@ public class FutureInfoActivityPresenter {
                         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
                         dialogWindow.setAttributes(lp);
                     }
-                    mDialog.setContentView(viewDialog);
-                    mDialogAdapter = new DialogAdapter(mFutureInfoActivity, new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
-                    mRecyclerView = viewDialog.findViewById(R.id.dialog_rv);
-                    mRecyclerView.setLayoutManager(
+                    mDialogOptional.setContentView(viewDialog);
+                    mDialogAdapterOptional = new DialogAdapter(mFutureInfoActivity,
+                            new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
+                    mRecyclerViewOptional = viewDialog.findViewById(R.id.dialog_rv);
+                    mRecyclerViewOptional.setLayoutManager(
                             new GridLayoutManager(mFutureInfoActivity, 3));
-                    mRecyclerView.addItemDecoration(
+                    mRecyclerViewOptional.addItemDecoration(
                             new DividerGridItemDecorationUtils(mFutureInfoActivity));
-                    mRecyclerView.setAdapter(mDialogAdapter);
+                    mRecyclerViewOptional.setAdapter(mDialogAdapterOptional);
 
-                    mRecyclerView.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mRecyclerView, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
+                    mRecyclerViewOptional.addOnItemTouchListener(
+                            new SimpleRecyclerViewItemClickListener(mRecyclerViewOptional,
+                                    new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
                         @Override
                         public void onItemClick(View view, int position) {
                             String instrumentId = (String) view.getTag();
@@ -237,7 +283,7 @@ public class FutureInfoActivityPresenter {
                                     EventBus.getDefault().post(idEvent);
                                 }
                             }
-                            mDialog.dismiss();
+                            mDialogOptional.dismiss();
                         }
 
                         @Override
@@ -246,8 +292,9 @@ public class FutureInfoActivityPresenter {
                         }
                     }));
 
-                }
-                if (!mDialog.isShowing()) mDialog.show();
+                }else mDialogAdapterOptional.updateList(new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
+
+                if (!mDialogOptional.isShowing()) mDialogOptional.show();
             }
         });
 
@@ -268,9 +315,104 @@ public class FutureInfoActivityPresenter {
                     case R.id.rb_minute_up:
                         switchUpFragment(MINUTE_FRAGMENT);
                         break;
-                    default:
+                    case R.id.rb_second_up:
+                        switchUpFragment(SECOND_FRAGMENT);
                         break;
+                    default:
+                        return;
                 }
+            }
+        });
+
+        mBinding.rbKlineMore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mDialogKline == null) {
+                    //初始化自选合约弹出框
+                    mDialogKline = new Dialog(mFutureInfoActivity, R.style.Theme_Light_Dialog);
+                    View viewDialog = View.inflate(mFutureInfoActivity, R.layout.view_dialog_kline, null);
+                    Window dialogWindow = mDialogKline.getWindow();
+                    if (dialogWindow != null) {
+                        dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+                        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+                        dialogWindow.setGravity(Gravity.BOTTOM);
+                        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                        dialogWindow.setAttributes(lp);
+                    }
+                    mDialogKline.setContentView(viewDialog);
+                    mDialogAdapterKline = new DialogKlineAdapter(mFutureInfoActivity, mKlineTypeTitle);
+                    mRecyclerViewKline = viewDialog.findViewById(R.id.dialog_rv);
+                    mRecyclerViewKline.setLayoutManager(
+                            new GridLayoutManager(mFutureInfoActivity, 6));
+                    mRecyclerViewKline.addItemDecoration(
+                            new DividerGridItemDecorationUtils(mFutureInfoActivity));
+                    mRecyclerViewKline.setAdapter(mDialogAdapterKline);
+
+                    mRecyclerViewKline.addOnItemTouchListener(
+                            new SimpleRecyclerViewItemClickListener(mRecyclerViewKline,
+                                    new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
+                                        @Override
+                                        public void onItemClick(View view, int position) {
+                                            int index = (int) view.getTag();
+                                            String durationText = index < mKlineTypeTitle.length ? mKlineTypeTitle[index] : "";
+                                            String duration = index < mKlineDuration.length ? mKlineDuration[index] : "";
+                                            if (durationText != null && duration != null
+                                                    && !durationText.isEmpty() && !duration.isEmpty()) {
+                                                KlineEvent klineEvent = new KlineEvent();
+                                                if (durationText.contains("秒")) {
+                                                    SPUtils.putAndApply(sContext, CONFIG_KLINE_SECOND_TYPE, duration);
+                                                    mBinding.rbSecondUp.setText(durationText);
+                                                    if (mBinding.rgTabUp.getCheckedRadioButtonId() == R.id.rb_second_up){
+                                                        klineEvent.setFragmentType(SECOND_FRAGMENT);
+                                                        klineEvent.setKlineType(duration);
+                                                        EventBus.getDefault().post(klineEvent);
+                                                    }else {
+                                                        mBinding.rbSecondUp.setChecked(true);
+                                                    }
+                                                } else if (durationText.contains("分")) {
+                                                    SPUtils.putAndApply(sContext, CONFIG_KLINE_MINUTE_TYPE, duration);
+                                                    mBinding.rbMinuteUp.setText(durationText);
+                                                    if (mBinding.rgTabUp.getCheckedRadioButtonId() == R.id.rb_minute_up){
+                                                        klineEvent.setFragmentType(MINUTE_FRAGMENT);
+                                                        klineEvent.setKlineType(duration);
+                                                        EventBus.getDefault().post(klineEvent);
+                                                    }else {
+                                                        mBinding.rbMinuteUp.setChecked(true);
+                                                    }
+                                                } else if (durationText.contains("时")) {
+                                                    SPUtils.putAndApply(sContext, CONFIG_KLINE_HOUR_TYPE, duration);
+                                                    mBinding.rbHourUp.setText(durationText);
+                                                    if (mBinding.rgTabUp.getCheckedRadioButtonId() == R.id.rb_hour_up){
+                                                        klineEvent.setFragmentType(HOUR_FRAGMENT);
+                                                        klineEvent.setKlineType(duration);
+                                                        EventBus.getDefault().post(klineEvent);
+                                                    }else {
+                                                        mBinding.rbHourUp.setChecked(true);
+                                                    }
+                                                } else {
+                                                    SPUtils.putAndApply(sContext, CONFIG_KLINE_DAY_TYPE, duration);
+                                                    mBinding.rbDayUp.setText(durationText);
+                                                    if (mBinding.rgTabUp.getCheckedRadioButtonId() == R.id.rb_day_up){
+                                                        klineEvent.setFragmentType(DAY_FRAGMENT);
+                                                        klineEvent.setKlineType(duration);
+                                                        EventBus.getDefault().post(klineEvent);
+                                                    }else {
+                                                        mBinding.rbDayUp.setChecked(true);
+                                                    }
+                                                }
+                                            }
+                                            mDialogKline.dismiss();
+                                        }
+
+                                        @Override
+                                        public void onItemLongClick(View view, int position) {
+
+                                        }
+                                    }));
+
+                }
+                if (!mDialogKline.isShowing()) mDialogKline.show();
             }
         });
 
@@ -299,7 +441,7 @@ public class FutureInfoActivityPresenter {
                     mPosition.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                         @Override
                         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            SPUtils.putAndApply(sContext, "isPosition", isChecked);
+                            SPUtils.putAndApply(sContext, CONFIG_POSITION_LINE, isChecked);
                             mIsPosition = isChecked;
                             SetUpEvent setUpEvent = new SetUpEvent();
                             setUpEvent.setPosition(mIsPosition);
@@ -312,7 +454,7 @@ public class FutureInfoActivityPresenter {
                     mPending.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                         @Override
                         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            SPUtils.putAndApply(sContext, "isPending", isChecked);
+                            SPUtils.putAndApply(sContext, CONFIG_ORDER_LINE, isChecked);
                             mIsPending = isChecked;
                             SetUpEvent setUpEvent = new SetUpEvent();
                             setUpEvent.setPending(mIsPending);
@@ -325,7 +467,7 @@ public class FutureInfoActivityPresenter {
                     mAverage.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                         @Override
                         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            SPUtils.putAndApply(sContext, "isAverage", isChecked);
+                            SPUtils.putAndApply(sContext, CONFIG_AVERAGE_LINE, isChecked);
                             mIsAverage = isChecked;
                             SetUpEvent setUpEvent = new SetUpEvent();
                             setUpEvent.setAverage(mIsAverage);
@@ -437,65 +579,21 @@ public class FutureInfoActivityPresenter {
             mFutureInfoActivity.finish();
     }
 
-    /**
-     * date: 7/7/17
-     * author: chenli
-     * description: 注册网络状态广播监听器，检测手机网络状态，断网状态下在toolbar上提示用户网络已断开
-     */
-    public void registerBroaderCast() {
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int networkStatus = intent.getIntExtra("networkStatus", 0);
-                switch (networkStatus) {
-                    case 0:
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.off_line));
-                        mToolbarTitle.setTextColor(Color.BLACK);
-                        mToolbarTitle.setText("交易、行情网络未连接！");
-                        mToolbarTitle.setCompoundDrawables(null, null, null, null);
-                        mToolbarTitle.setBackgroundColor(ContextCompat.getColor(context, R.color.off_line));
-                        break;
-                    case 1:
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.black_dark));
-                        mToolbarTitle.setTextColor(Color.WHITE);
-                        setToolbarTitle();
-                        mToolbarTitle.setCompoundDrawables(null, null, mRightDrawable, null);
-                        mToolbarTitle.setBackgroundColor(ContextCompat.getColor(context, R.color.title));
-                        break;
-                }
-            }
-        };
-        mFutureInfoActivity.registerReceiver(mReceiver, new IntentFilter(NETWORK_STATE));
-    }
-
     public void setToolbarTitle() {
         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
-        if (searchEntity != null){
-            if (mInstrumentId.contains("KQ")){
+        if (searchEntity != null) {
+            if (mInstrumentId.contains("KQ")) {
                 String underlying_symbol = searchEntity.getUnderlying_symbol();
                 SearchEntity searchEntity1 = LatestFileManager.getSearchEntities().get(underlying_symbol);
 
                 if (searchEntity1 != null) mToolbarTitle.setText(searchEntity1.getInstrumentName());
                 else mToolbarTitle.setText(underlying_symbol);
-            }else {
+            } else {
                 String instrument_name = searchEntity.getInstrumentName();
                 mToolbarTitle.setText(instrument_name);
             }
 
         } else mToolbarTitle.setText(mInstrumentId);
-    }
-
-    /**
-     * date: 7/7/17
-     * author: chenli
-     * description: 注销广播
-     */
-    public void unRegisterBroaderCast() {
-        if (mReceiver != null) mFutureInfoActivity.unregisterReceiver(mReceiver);
-    }
-
-    public void refreshOptionalQuotesPopup(ArrayList arrayList) {
-        if (mDialogAdapter != null) mDialogAdapter.updateList(arrayList);
     }
 
     public boolean closeKeyboard() {
@@ -515,27 +613,6 @@ public class FutureInfoActivityPresenter {
             }
         }
         return false;
-    }
-
-    /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 检查网络状态，更新toolbar的显示
-     */
-    public void updateToolbarFromNetwork() {
-        if (NetworkUtils.isNetworkConnected(sContext)) {
-            mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.black_dark));
-            mToolbarTitle.setTextColor(Color.WHITE);
-            setToolbarTitle();
-            mToolbarTitle.setCompoundDrawables(null, null, mRightDrawable, null);
-            mToolbarTitle.setBackgroundColor(ContextCompat.getColor(sContext, R.color.title));
-        } else {
-            mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.off_line));
-            mToolbarTitle.setTextColor(Color.BLACK);
-            mToolbarTitle.setText("交易、行情网络未连接！");
-            mToolbarTitle.setCompoundDrawables(null, null, null, null);
-            mToolbarTitle.setBackgroundColor(ContextCompat.getColor(sContext, R.color.off_line));
-        }
     }
 
     public boolean isPosition() {
@@ -561,23 +638,14 @@ public class FutureInfoActivityPresenter {
     /**
      * date: 7/7/17
      * author: chenli
-     * description: 用于切换图表页，由于性能影响，不保存图表页实例
+     * description: 用于切换图表页，保存单例
      */
     private void switchUpFragment(String title) {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
-        Fragment fragment = mFragmentManager.findFragmentByTag(title);
-        if (fragment == null) {
-            transaction.hide(mCurFragment);
-            fragment = createFragmentByTitle(title);
-            transaction.add(R.id.fl_content_up, fragment, title);
-            mCurFragment = fragment;
-        } else if (fragment != mCurFragment) {
-            transaction.hide(mCurFragment).show(fragment);
-            mCurFragment = fragment;
-        }
+        BaseChartFragment fragment = createFragmentByTitle(title);
+        transaction.replace(R.id.fl_content_up, fragment, title);
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).
                 commit();
-
     }
 
     /**
@@ -585,18 +653,32 @@ public class FutureInfoActivityPresenter {
      * author: chenli
      * description: 根据title返回对应的fragment
      */
-    private Fragment createFragmentByTitle(String title) {
+    private BaseChartFragment createFragmentByTitle(String title) {
+        String klineType;
         switch (title) {
             case CURRENT_DAY_FRAGMENT:
                 return new CurrentDayFragment();
             case DAY_FRAGMENT:
-                return KlineFragment.newInstance("yy/MM/dd", KLINE_DAY);
+                klineType = (String) SPUtils.get(sContext, CONFIG_KLINE_DAY_TYPE, KLINE_1_DAY);
+                return KlineFragment.newInstance("yy/MM/dd", klineType, DAY_FRAGMENT);
             case HOUR_FRAGMENT:
-                return KlineFragment.newInstance("dd/HH:mm", KLINE_HOUR);
+                klineType = (String) SPUtils.get(sContext, CONFIG_KLINE_HOUR_TYPE, KLINE_1_HOUR);
+                return KlineFragment.newInstance("dd/HH:mm", klineType, HOUR_FRAGMENT);
             case MINUTE_FRAGMENT:
-                return KlineFragment.newInstance("dd/HH:mm", KLINE_MINUTE);
+                klineType = (String) SPUtils.get(sContext, CONFIG_KLINE_MINUTE_TYPE, KLINE_5_MINUTE);
+                return KlineFragment.newInstance("dd/HH:mm", klineType, MINUTE_FRAGMENT);
+            case SECOND_FRAGMENT:
+                klineType = (String) SPUtils.get(sContext, CONFIG_KLINE_SECOND_TYPE, KLINE_3_SECOND);
+                return KlineFragment.newInstance("HH:mm:ss", klineType, SECOND_FRAGMENT);
             default:
                 return null;
         }
+    }
+
+    private String getDurationIndex(String data){
+        for (int i = 0; i < mKlineDuration.length; i++){
+            if (mKlineDuration[i].equals(data))return mKlineTypeTitle[i];
+        }
+        return "";
     }
 }

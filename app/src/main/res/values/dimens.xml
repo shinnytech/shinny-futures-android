@@ -17,8 +17,8 @@
     <dimen name="margin_15dp">15dp</dimen>
     <dimen name="margin_16dp">16dp</dimen>
     <dimen name="margin_18dp">18dp</dimen>
-    <dimen name="margin_20dp">20dp</dimen>
     <dimen name="margin_26dp">26dp</dimen>
+    <dimen name="margin_20dp">20dp</dimen>
     <dimen name="margin_30dp">30dp</dimen>
     <dimen name="margin_32dp">32dp</dimen>
     <dimen name="margin_45dp">45dp</dimen>
@@ -33,6 +33,7 @@
     <dimen name="spinner_height">35dp</dimen>
     <dimen name="image_view_size">45dp</dimen>
 
+    <dimen name="layout_height_item_activity_broker">50dp</dimen>
     <dimen name="layout_height_item_activity_search_quote">35dp</dimen>
     <dimen name="layout_height_item_fragment_quote">40dp</dimen>
     <dimen name="layout_height_fragment_quote">30dp</dimen>

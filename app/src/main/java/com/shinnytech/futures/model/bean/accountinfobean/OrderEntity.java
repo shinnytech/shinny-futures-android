@@ -34,6 +34,16 @@ public class OrderEntity implements Comparable<OrderEntity>, Serializable {
     private String last_msg = "";
     private String volume_left = "";
 
+    private String seqno = "";
+
+    public String getSeqno() {
+        return seqno;
+    }
+
+    public void setSeqno(String seqno) {
+        this.seqno = seqno;
+    }
+
     public String getKey() {
         return key;
     }

@@ -5,76 +5,79 @@
 
     <data></data>
 
-    <android.support.design.widget.CoordinatorLayout
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
-        tools:context=".controller.activity.MainActivity">
+        tools:openDrawer="start">
 
-        <include layout="@layout/view_toolbar"></include>
-
-        <android.support.v4.widget.DrawerLayout
-            android:id="@+id/drawer_layout"
+        <android.support.design.widget.CoordinatorLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:openDrawer="start">
+            android:layout_height="match_parent">
+            <include layout="@layout/view_toolbar"/>
 
-            <android.support.design.widget.CoordinatorLayout
+            <android.support.v4.view.ViewPager
+                android:id="@+id/vp_content"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="?attr/actionBarSize">
+                android:layout_marginTop="?attr/actionBarSize"
+                android:layout_marginBottom="@dimen/margin_45dp"/>
 
-                <android.support.v4.view.ViewPager
-                    android:id="@+id/vp_content"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="@dimen/margin_45dp"></android.support.v4.view.ViewPager>
-
-                <ImageView
-                    android:id="@+id/quote_nav_left"
-                    android:layout_width="@dimen/image_view_size"
-                    android:layout_height="@dimen/image_view_size"
-                    android:layout_gravity="bottom|start"
-                    android:background="@color/black_light"
-                    android:contentDescription="left"
-                    android:gravity="center"
-                    android:src="@mipmap/ic_chevron_left_white_24dp" />
-
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/rv_quote_navigation"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/image_view_size"
-                    android:layout_gravity="bottom|center_horizontal"
-                    android:layout_marginEnd="@dimen/margin_45dp"
-                    android:layout_marginStart="@dimen/margin_45dp"
-                    android:background="@color/black_light"
-                    android:gravity="center" />
-
-                <ImageView
-                    android:id="@+id/quote_nav_right"
-                    android:layout_width="@dimen/image_view_size"
-                    android:layout_height="@dimen/image_view_size"
-                    android:layout_gravity="bottom|end"
-                    android:background="@color/black_light"
-                    android:contentDescription="right"
-                    android:gravity="center"
-                    android:src="@mipmap/ic_chevron_right_white_24dp" />
-
-            </android.support.design.widget.CoordinatorLayout>
-
-            <android.support.design.widget.NavigationView
-                android:id="@+id/nv_menu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
+            <ImageView
+                android:id="@+id/quote_nav_left"
+                android:layout_width="@dimen/image_view_size"
+                android:layout_height="@dimen/image_view_size"
+                android:layout_gravity="bottom|start"
                 android:background="@color/black_light"
-                app:headerLayout="@layout/view_drawer_header"
-                app:itemTextColor="@color/state_list"
-                app:menu="@menu/activity_main_drawer"
-                app:theme="@style/NavigationTheme"></android.support.design.widget.NavigationView>
+                android:contentDescription="left"
+                android:gravity="center"
+                android:src="@mipmap/ic_chevron_left_white_24dp" />
 
-        </android.support.v4.widget.DrawerLayout>
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_quote_navigation"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/image_view_size"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginStart="@dimen/margin_45dp"
+                android:layout_marginEnd="@dimen/margin_45dp"
+                android:background="@color/black_light"
+                android:gravity="center" />
 
-    </android.support.design.widget.CoordinatorLayout>
+            <ImageView
+                android:id="@+id/quote_nav_right"
+                android:layout_width="@dimen/image_view_size"
+                android:layout_height="@dimen/image_view_size"
+                android:layout_gravity="bottom|end"
+                android:background="@color/black_light"
+                android:contentDescription="right"
+                android:gravity="center"
+                android:src="@mipmap/ic_chevron_right_white_24dp" />
+
+        </android.support.design.widget.CoordinatorLayout>
+
+        <android.support.design.widget.NavigationView
+            android:id="@+id/nv_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:background="@color/black_light"
+            app:headerLayout="@layout/view_drawer_header"
+            app:itemTextColor="@color/menu_text_color"
+            app:menu="@menu/activity_main_drawer"
+            app:theme="@style/NavigationTheme"/>
+
+        <android.support.design.widget.NavigationView
+            android:id="@+id/nv_menu_right"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:background="@color/black_light"
+            app:itemIconTint="@color/white"
+            app:headerLayout="@layout/view_drawer_header_right"
+            app:itemTextColor="@color/menu_text_color"
+            app:menu="@menu/activity_main_drawer_right"
+            app:theme="@style/NavigationTheme"/>
+
+    </android.support.v4.widget.DrawerLayout>
 
 </layout>

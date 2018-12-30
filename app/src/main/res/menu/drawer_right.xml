@@ -4,10 +4,10 @@
     tools:context=".controller.activity.MainActivity">
 
     <item
-        android:id="@+id/fragment_quote"
-        android:icon="@mipmap/ic_search_white_24dp"
-        android:orderInCategory="100"
-        android:title="搜索"
+        android:id="@+id/right_navigation"
+        android:icon="@mipmap/ic_view_list_white_24dp"
+        android:orderInCategory="101"
+        android:title="right_navigation"
         app:showAsAction="always" />
 
 </menu>

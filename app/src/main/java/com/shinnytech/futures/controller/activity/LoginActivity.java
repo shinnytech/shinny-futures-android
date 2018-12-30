@@ -4,39 +4,38 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 
-import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityLoginBinding;
-import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.utils.AndroidBug5497Workaround;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
 import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.KUAI_QI_XIAO_Q;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOCK_ACCOUNT;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOCK_PASSWORD;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PASSWORD;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ACCOUNT;
+import static com.shinnytech.futures.constants.CommonConstants.LOGIN;
+import static com.shinnytech.futures.constants.CommonConstants.LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN;
-import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
@@ -48,125 +47,185 @@ import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST
  */
 
 public class LoginActivity extends BaseActivity {
-
-    /**
-     * date: 7/7/17
-     * description: 用户名输入框的下拉列表
-     */
-    private String[] mData = new String[]{""};
-    /**
-     * date: 7/7/17
-     * description: 网络监听广播
-     */
-    private BroadcastReceiver mReceiver;
     /**
      * date: 7/7/17
      * description: 用户登录监听广播
      */
     private BroadcastReceiver mReceiverLogin;
     private String mActivityType;
-    private DataManager sDataManager;
-    private Context sContext;
     private String mBrokerName;
     private String mPhoneNumber;
-    private ArrayAdapter<String> mSpinnerAdapter;
     private Handler mHandler;
     private ActivityLoginBinding mBinding;
     private String mPassword;
-    private boolean mIsLocked;
-
-    /**
-     * date: 6/1/18
-     * author: chenli
-     * description: 根据不同软件版本获取期货公司列表
-     */
-    private List<String> getBrokerIdFromBuildConfig(String[] brokerIdOrigin) {
-        List<String> brokerList = new ArrayList<>();
-        if (brokerIdOrigin != null) {
-            if (KUAI_QI_XIAO_Q.equals(BuildConfig.BROKER_ID)) {
-                brokerList.addAll(Arrays.asList(brokerIdOrigin));
-            } else {
-                for (int i = 0; i < brokerIdOrigin.length; i++) {
-                    if (brokerIdOrigin[i] != null && brokerIdOrigin[i].contains(BuildConfig.BROKER_ID)) {
-                        brokerList.add(brokerIdOrigin[i]);
-                    }
-                }
-            }
-        } else if (BaseApplication.getWebSocketService() != null) BaseApplication.getWebSocketService().reConnectTD();
-
-        return brokerList;
-    }
+    private boolean mRememberPassword;
+    private boolean mRememberAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mLayoutID = R.layout.activity_login;
-        mTitle = "登录";
+        mTitle = LOGIN;
         super.onCreate(savedInstanceState);
-        AndroidBug5497Workaround.assistActivity(this);
     }
 
     @Override
     protected void initData() {
-        sContext = BaseApplication.getContext();
-        sDataManager = DataManager.getInstance();
         mHandler = new MyHandler(this);
         mBinding = (ActivityLoginBinding) mViewDataBinding;
         mActivityType = getIntent().getStringExtra(ACTIVITY_TYPE);
-        List<String> brokerList = getBrokerIdFromBuildConfig(sDataManager.getBroker().getBrokers());
-        mSpinnerAdapter = new ArrayAdapter<>(this, R.layout.spinner_display_style, R.id.tv_Spinner, brokerList);
-        mSpinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown_style);
-        mBinding.spinner.setAdapter(mSpinnerAdapter);
+        String[] brokerList = sDataManager.getBroker().getBrokers();
 
         //获取用户登录成功后保存在sharedPreference里的期货公司
-        if (SPUtils.contains(sContext, "brokerName") && brokerList.size() > 1) {
-            String brokerName = (String) SPUtils.get(sContext, "brokerName", "");
-            if (brokerList.contains(brokerName)){
-                int brokerId = brokerList.indexOf(brokerName);
-                mBinding.spinner.setSelection(brokerId, true);
-            }
+        if (SPUtils.contains(sContext, CONFIG_BROKER)) {
+            String brokerName = (String) SPUtils.get(sContext, CONFIG_BROKER, "");
+            mBinding.broker.setText(brokerName);
+        }else if (brokerList.length != 0){
+            mBinding.broker.setText(brokerList[0]);
         }
 
         //获取用户登录成功后保存在sharedPreference里的用户名
-        if (SPUtils.contains(sContext, "phone")) {
-            mData[0] = (String) SPUtils.get(sContext, "phone", "");
-        }
-        //初始化用户名输入框，避免重复输入
-        mBinding.tvIdPhone.requestFocus();
-        mBinding.tvIdPhone.setText(mData[0]);
-        mBinding.tvIdPhone.setSelection(mData[0].length());
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, mData);
-        mBinding.tvIdPhone.setAdapter(adapter);
-
-        mIsLocked = (boolean) SPUtils.get(sContext, "isLocked", false);
-        if (mIsLocked){
-            mBinding.ivIdPasswordLock.setImageResource(R.mipmap.ic_lock_black_24dp);
-        }else {
-            mBinding.ivIdPasswordLock.setImageResource(R.mipmap.ic_lock_open_white_24dp);
+        if (SPUtils.contains(sContext, CONFIG_ACCOUNT)) {
+            String account = (String) SPUtils.get(sContext, CONFIG_ACCOUNT, "");
+            mBinding.account.setText(account);
+            mBinding.account.setSelection(account.length());
+            if (!account.isEmpty()) mBinding.deleteAccount.setVisibility(View.VISIBLE);
         }
 
-        if (SPUtils.contains(sContext, "password")) {
-            String password = (String) SPUtils.get(sContext, "password", "");
-            mBinding.etIdPassword.setText(password);
+        if (SPUtils.contains(sContext, CONFIG_PASSWORD)) {
+            String password = (String) SPUtils.get(sContext, CONFIG_PASSWORD, "");
+            mBinding.password.setText(password);
+            mBinding.password.setSelection(password.length());
+            if (!password.isEmpty())mBinding.deletePassword.setVisibility(View.VISIBLE);
+        }
+
+        if (SPUtils.contains(sContext, CONFIG_LOCK_ACCOUNT)){
+            mRememberAccount = (boolean) SPUtils.get(sContext, CONFIG_LOCK_ACCOUNT, false);
+            if (mRememberAccount){
+                mBinding.cbRememberAccount.setChecked(true);
+            }
+        }
+
+        if (SPUtils.contains(sContext, CONFIG_LOCK_PASSWORD)){
+            mRememberPassword = (boolean) SPUtils.get(sContext, CONFIG_LOCK_PASSWORD, false);
+            if (mRememberPassword){
+                mBinding.cbRememberPassword.setChecked(true);
+            }
         }
     }
 
     @Override
     protected void initEvent() {
 
-        //点击切换密码保存
-        mBinding.ivIdPasswordLock.setOnClickListener(new View.OnClickListener() {
+        mBinding.broker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mIsLocked){
-                    mBinding.ivIdPasswordLock.setImageResource(R.mipmap.ic_lock_open_white_24dp);
-                    mIsLocked = false;
-                    SPUtils.putAndApply(sContext, "isLocked", false);
-                    ToastNotificationUtils.showToast(sContext, "不保存密码");
+                Intent intentBroker = new Intent(LoginActivity.this, BrokerListActivity.class);
+                startActivityForResult(intentBroker, LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY);
+            }
+        });
+
+        mBinding.deleteAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBinding.account.getEditableText().clear();
+            }
+        });
+
+        mBinding.deletePassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBinding.password.getEditableText().clear();
+            }
+        });
+
+        mBinding.account.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() == 0){
+                    mBinding.deleteAccount.setVisibility(View.INVISIBLE);
                 }else {
-                    mBinding.ivIdPasswordLock.setImageResource(R.mipmap.ic_lock_black_24dp);
-                    mIsLocked = true;
-                    SPUtils.putAndApply(sContext, "isLocked", true);
-                    ToastNotificationUtils.showToast(sContext, "保存密码");
+                    mBinding.deleteAccount.setVisibility(View.VISIBLE);
+                }
+
+            }
+        });
+
+        mBinding.password.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() == 0){
+                    mBinding.deletePassword.setVisibility(View.INVISIBLE);
+                }else {
+                    mBinding.deletePassword.setVisibility(View.VISIBLE);
+                }
+
+            }
+        });
+
+        mBinding.account.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus){
+                    mBinding.llAccount.setBackgroundResource(R.drawable.rectangle_border_focused);
+                }else {
+                    mBinding.llAccount.setBackgroundResource(R.drawable.rectangle_border);
+                }
+            }
+        });
+
+        mBinding.password.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus){
+                    mBinding.llPassword.setBackgroundResource(R.drawable.rectangle_border_focused);
+                }else {
+                    mBinding.llPassword.setBackgroundResource(R.drawable.rectangle_border);
+                }
+            }
+        });
+
+        mBinding.cbRememberAccount.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
+                    mRememberAccount = true;
+                    SPUtils.putAndApply(sContext, CONFIG_LOCK_ACCOUNT, true);
+                }else {
+                    mRememberAccount = false;
+                    SPUtils.putAndApply(sContext, CONFIG_LOCK_ACCOUNT, false);
+                }
+            }
+        });
+
+        mBinding.cbRememberPassword.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
+                    mRememberPassword = true;
+                    SPUtils.putAndApply(sContext, CONFIG_LOCK_PASSWORD, true);
+                }else {
+                    mRememberPassword = false;
+                    SPUtils.putAndApply(sContext, CONFIG_LOCK_PASSWORD, false);
                 }
             }
         });
@@ -178,6 +237,11 @@ public class LoginActivity extends BaseActivity {
                 attemptLogin();
             }
         });
+
+    }
+
+    @Override
+    protected void refreshUI() {
 
     }
 
@@ -246,22 +310,9 @@ public class LoginActivity extends BaseActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        registerBroaderCast();
-        updateToolbarFromNetwork(sContext, "登录");
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(mReceiver);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLogin);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+        if (mReceiverLogin != null)LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLogin);
     }
 
     /**
@@ -271,28 +322,28 @@ public class LoginActivity extends BaseActivity {
      */
     private void attemptLogin() {
         // Reset errors.
-        mBinding.tvIdPhone.setError(null);
-        mBinding.etIdPassword.setError(null);
+        mBinding.password.setError(null);
+        mBinding.account.setError(null);
 
         // Store values at the time of the fragment_home attempt.
-        mBrokerName = (String) mBinding.spinner.getSelectedItem();
-        mPhoneNumber = mBinding.tvIdPhone.getText().toString();
-        mPassword = mBinding.etIdPassword.getText().toString();
+        mBrokerName = mBinding.broker.getText().toString();
+        mPhoneNumber = mBinding.account.getText().toString();
+        mPassword = mBinding.password.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
         if (TextUtils.isEmpty(mPassword)) {
-            mBinding.etIdPassword.setError(getString(R.string.login_activity_error_invalid_password));
-            focusView = mBinding.etIdPassword;
+            mBinding.password.setError(getString(R.string.login_activity_error_invalid_password));
+            focusView = mBinding.password;
             cancel = true;
         }
 
         // Check for a valid phone number.
         if (TextUtils.isEmpty(mPhoneNumber)) {
-            mBinding.tvIdPhone.setError(getString(R.string.login_activity_error_field_required));
-            focusView = mBinding.tvIdPhone;
+            mBinding.account.setError(getString(R.string.login_activity_error_field_required));
+            focusView = mBinding.account;
             cancel = true;
         }
 
@@ -322,29 +373,9 @@ public class LoginActivity extends BaseActivity {
      * author: chenli
      * description: 监控网络状态与登录状态
      */
-    private void registerBroaderCast() {
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int networkStatus = intent.getIntExtra("networkStatus", 0);
-                switch (networkStatus) {
-                    case 0:
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.off_line));
-                        mToolbarTitle.setTextColor(Color.BLACK);
-                        mToolbarTitle.setText("交易、行情网络未连接！");
-                        mToolbarTitle.setTextSize(20);
-                        break;
-                    case 1:
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.black_dark));
-                        mToolbarTitle.setTextColor(Color.WHITE);
-                        mToolbarTitle.setText("登录");
-                        mToolbarTitle.setTextSize(25);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
+    protected void registerBroaderCast() {
+
+        super.registerBroaderCast();
 
         mReceiverLogin = new BroadcastReceiver() {
             @Override
@@ -363,9 +394,31 @@ public class LoginActivity extends BaseActivity {
                 }
             }
         };
-        registerReceiver(mReceiver, new IntentFilter(NETWORK_STATE));
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverLogin, new IntentFilter(TD_BROADCAST_ACTION));
     }
+
+    /**
+     * date: 6/1/18
+     * author: chenli
+     * description: 根据不同软件版本获取期货公司列表
+     */
+//    private List<String> getBrokerIdFromBuildConfig(String[] brokerIdOrigin) {
+//        List<String> brokerList = new ArrayList<>();
+//        if (brokerIdOrigin != null) {
+//            if (KUAI_QI_XIAO_Q.equals(BuildConfig.BROKER_ID)) {
+//                brokerList.addAll(Arrays.asList(brokerIdOrigin));
+//            } else {
+//                for (int i = 0; i < brokerIdOrigin.length; i++) {
+//                    if (brokerIdOrigin[i] != null && brokerIdOrigin[i].contains(BuildConfig.BROKER_ID)) {
+//                        brokerList.add(brokerIdOrigin[i]);
+//                    }
+//                }
+//            }
+//        } else if (BaseApplication.getWebSocketService() != null)
+//            BaseApplication.getWebSocketService().reConnectTD();
+//
+//        return brokerList;
+//    }
 
     /**
      * date: 6/1/18
@@ -388,10 +441,11 @@ public class LoginActivity extends BaseActivity {
                 switch (msg.what) {
                     case 0:
                         activity.sDataManager.IS_LOGIN = true;
-                        SPUtils.putAndApply(activity.sContext, "phone", activity.mPhoneNumber);
-                        if (activity.mIsLocked)SPUtils.putAndApply(activity.sContext, "password", activity.mPassword);
-                        else SPUtils.putAndApply(activity.sContext, "password", "");
-                        SPUtils.putAndApply(activity.sContext, "brokerName", activity.mBinding.spinner.getSelectedItem());
+                        if (activity.mRememberAccount) SPUtils.putAndApply(activity.sContext, CONFIG_ACCOUNT, activity.mPhoneNumber);
+                        else SPUtils.putAndApply(activity.sContext, CONFIG_ACCOUNT, "");
+                        if (activity.mRememberPassword)SPUtils.putAndApply(activity.sContext, CONFIG_PASSWORD, activity.mPassword);
+                        else SPUtils.putAndApply(activity.sContext, CONFIG_PASSWORD, "");
+                        SPUtils.putAndApply(activity.sContext, CONFIG_BROKER, activity.mBinding.broker.getText().toString());
                         //关闭键盘
                         View view = activity.getWindow().getCurrentFocus();
                         if (view != null) {
@@ -408,16 +462,9 @@ public class LoginActivity extends BaseActivity {
                         activity.finish();
                         break;
                     case 1:
-                        activity.mSpinnerAdapter.clear();
-                        List<String> brokerList = activity.getBrokerIdFromBuildConfig(activity.sDataManager.getBroker().getBrokers());
-                        activity.mSpinnerAdapter.addAll(brokerList);
-                        //获取用户登录成功后保存在sharedPreference里的期货公司
-                        if (SPUtils.contains(activity.sContext, "brokerName") && brokerList.size() > 1) {
-                            String brokerName = (String) SPUtils.get(activity.sContext, "brokerName", "");
-                            if (brokerList.contains(brokerName)){
-                                int brokerId = brokerList.indexOf(brokerName);
-                                activity.mBinding.spinner.setSelection(brokerId, true);
-                            }
+                        String[] brokerList = activity.sDataManager.getBroker().getBrokers();
+                        if (activity.mBinding.broker.getText().toString().isEmpty() && brokerList.length != 0){
+                            activity.mBinding.broker.setText(brokerList[0]);
                         }
                         break;
                     default:
@@ -427,5 +474,24 @@ public class LoginActivity extends BaseActivity {
         }
     }
 
+    /**
+     * date: 6/21/17
+     * author: chenli
+     * description: 合约详情页返回,发送原来订阅合约
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK){
+            switch (requestCode){
+                case LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY:
+                    String broker = data.getStringExtra("broker");
+                    LogUtils.e("broker"+broker, true);
+                    mBinding.broker.setText(broker);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 }
 

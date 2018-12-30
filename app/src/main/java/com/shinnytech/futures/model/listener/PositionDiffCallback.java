@@ -131,13 +131,7 @@ public class PositionDiffCallback extends DiffUtil.Callback {
             e.printStackTrace();
         }
 
-        if (volume_long != 0 && volume_short != 0) {
-            bundle.putString("direction", "双向");
-            bundle.putString("volume", volume_long + "/" + volume_short);
-            bundle.putString("available", available_long + "/" + available_short);
-            bundle.putString("open_price", open_price_long + "/" + open_price_short);
-            bundle.putString("float_profit", float_profit_long + "/" + float_profit_short);
-        } else if (volume_long == 0 && volume_short != 0) {
+        if (volume_long == 0 && volume_short != 0) {
             bundle.putString("direction", "空");
             bundle.putString("volume", volume_short + "");
             bundle.putString("available", available_short + "");

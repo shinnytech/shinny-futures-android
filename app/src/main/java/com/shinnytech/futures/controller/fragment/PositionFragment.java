@@ -14,19 +14,20 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.databinding.FragmentPositionBinding;
+import com.shinnytech.futures.model.adapter.PositionAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.utils.CloneUtils;
-import com.shinnytech.futures.utils.DividerItemDecorationUtils;
-import com.shinnytech.futures.controller.activity.FutureInfoActivity;
-import com.shinnytech.futures.model.adapter.PositionAdapter;
 import com.shinnytech.futures.model.listener.PositionDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
+import com.shinnytech.futures.utils.CloneUtils;
+import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -75,19 +76,21 @@ public class PositionFragment extends LazyLoadFragment {
 
     protected void initEvent() {
         //recyclerView点击事件监听器，点击改变合约代码，并跳转到交易页
-        mBinding.rv.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rv, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
+        mBinding.rv.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rv,
+                new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if (mAdapter.getData().get(position) != null) {
-                    String instrument_id = mAdapter.getData().get(position).getExchange_id() + "." +
-                            mAdapter.getData().get(position).getInstrument_id();
-                    //添加判断，防止自选合约列表为空时产生无效的点击事件
-                    if (instrument_id != null) {
-                        IdEvent idEvent = new IdEvent();
-                        idEvent.setInstrument_id(instrument_id);
-                        EventBus.getDefault().post(idEvent);
-                        ((FutureInfoActivity) getActivity()).getViewPager().setCurrentItem(3, false);
-                    }
+                PositionEntity positionEntity = mAdapter.getData().get(position);
+                if (positionEntity == null)return;
+                sDataManager.POSITION_DIRECTION = ((TextView)view.findViewById(R.id.position_direction))
+                        .getText().toString();
+                String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
+                //添加判断，防止自选合约列表为空时产生无效的点击事件
+                if (instrument_id != null) {
+                    IdEvent idEvent = new IdEvent();
+                    idEvent.setInstrument_id(instrument_id);
+                    EventBus.getDefault().post(idEvent);
+                    ((FutureInfoActivity) getActivity()).getViewPager().setCurrentItem(3, false);
                 }
             }
 
@@ -126,9 +129,13 @@ public class PositionFragment extends LazyLoadFragment {
                     userEntity.getPositions().values()) {
                 int volume_long = Integer.parseInt(positionEntity.getVolume_long());
                 int volume_short = Integer.parseInt(positionEntity.getVolume_short());
-                if (volume_long != 0 || volume_short != 0) {
-                    PositionEntity p = CloneUtils.clone(positionEntity);
-                    mNewData.add(p);
+                if (volume_long != 0 && volume_short != 0) {
+                    PositionEntity positionEntityLong = positionEntity.cloneLong();
+                    PositionEntity positionEntityShort = positionEntity.cloneShort();
+                    mNewData.add(positionEntityLong);
+                    mNewData.add(positionEntityShort);
+                } else if (!(volume_long == 0 && volume_short == 0)) {
+                    mNewData.add(CloneUtils.clone(positionEntity));
                 }
             }
             Collections.sort(mNewData);
@@ -137,7 +144,7 @@ public class PositionFragment extends LazyLoadFragment {
             diffResult.dispatchUpdatesTo(mAdapter);
             mOldData.clear();
             mOldData.addAll(mNewData);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

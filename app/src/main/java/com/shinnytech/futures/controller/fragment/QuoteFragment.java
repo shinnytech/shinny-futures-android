@@ -55,7 +55,6 @@ import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -234,9 +233,6 @@ public class QuoteFragment extends LazyLoadFragment {
                 break;
             case NENGYUAN:
                 mNewData = LatestFileManager.getNengyuanInsList();
-                break;
-            case DAZONG:
-                mNewData = LatestFileManager.getsDazongInsList();
                 break;
             case DALIAN:
                 mNewData = LatestFileManager.getDalianInsList();
@@ -550,7 +546,8 @@ public class QuoteFragment extends LazyLoadFragment {
                                         @Override
                                         public void run() {
                                             popWindow.dismiss();
-                                            ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
+                                            ToastNotificationUtils.showToast(BaseApplication.getContext(),
+                                                    "该合约已添加到自选列表");
                                         }
                                     });
                                 } else {
@@ -563,7 +560,8 @@ public class QuoteFragment extends LazyLoadFragment {
                                         @Override
                                         public void run() {
                                             popWindow.dismiss();
-                                            ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
+                                            ToastNotificationUtils.showToast(BaseApplication.getContext(),
+                                                    "该合约已被移除自选列表");
                                         }
                                     });
                                 }
@@ -645,13 +643,13 @@ public class QuoteFragment extends LazyLoadFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.fragment_quote, menu);
+        menuInflater.inflate(R.menu.search, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.fragment_quote) {
+        if (id == R.id.search_quote) {
             mIns = mDataManager.getRtnData().getIns_list();
             Intent intent = new Intent(getActivity(), SearchActivity.class);
             startActivityForResult(intent, JUMP_TO_SEARCH_ACTIVITY);
@@ -667,7 +665,8 @@ public class QuoteFragment extends LazyLoadFragment {
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (OPTIONAL.equals(mToolbarTitle.getText().toString()) && mInsList.size() != LatestFileManager.getOptionalInsList().size())
+        if (OPTIONAL.equals(mToolbarTitle.getText().toString())
+                && mInsList.size() != LatestFileManager.getOptionalInsList().size())
             update();
         //三种情况:搜索页返回,合约详情页返回,搜索页点击进入合约详情页再返回
         if (BaseApplication.getWebSocketService() != null)

@@ -16,7 +16,6 @@ import android.widget.TextView;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.LegendEntry;
-import com.github.mikephil.charting.components.MarkerView;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.CombinedData;
@@ -33,6 +32,7 @@ import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
+import com.shinnytech.futures.model.bean.futureinfobean.ChartEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
@@ -57,7 +57,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
 import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY;
+import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY_FRAGMENT;
 import static java.lang.Float.NaN;
 
 /**
@@ -86,8 +88,9 @@ public class CurrentDayFragment extends BaseChartFragment {
     private Map<Integer, Float> mSumVolumeMap = new HashMap<>();
     private float mSumCV = 0.0f;
     private Map<Integer, Float> mSumCVMap = new HashMap<>();
-    private int mStartIndex = 0;
-    private int mEndIndex = 0;
+    private int mTradingDayStartIndex = 0;
+    private int mTradingDayEndIndex = 0;
+    private int mLastIndex = 0;
     private float preSettlement = 1.0f;
 
     @Nullable
@@ -115,8 +118,8 @@ public class CurrentDayFragment extends BaseChartFragment {
         mColorOneMinuteChart = ContextCompat.getColor(getActivity(), R.color.kline_one_minute);
         mColorAverageChart = ContextCompat.getColor(getActivity(), R.color.kline_average);
         mSimpleDateFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
+        mFragmentType = CURRENT_DAY_FRAGMENT;
         mKlineType = CURRENT_DAY;
-        mButtonId = R.id.rb_current_day_up;
     }
 
     @Override
@@ -215,96 +218,87 @@ public class CurrentDayFragment extends BaseChartFragment {
      * description: 载入数据
      */
     @Override
-    protected void refreshMarketing() {
-        if (((FutureInfoActivity) getActivity()).getTabsUp().getCheckedRadioButtonId() == mButtonId) {
-            try {
-                Map<String, KlineEntity> klineEntities = sDataManager.getRtnData().getKlines().get(instrument_id);
-                QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(instrument_id);
-                if (klineEntities == null || quoteEntity == null) return;
-                KlineEntity klineEntity = klineEntities.get(mKlineType);
-                if (klineEntity == null) return;
-                String last_id = klineEntity.getLast_id();
-                mDataEntities = klineEntity.getData();
-                try {
-                    preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if (last_id == null || "-1".equals(last_id) || mDataEntities.isEmpty())
-                    return;
-                int last_index = Integer.parseInt(last_id);
-                //开始加载数据
-                if (mChart.getData() != null && mChart.getData().getDataSetCount() > 0) {
-                    LineData lineData = mChart.getLineData();
-                    CombinedData combinedData = mChart.getCombinedData();
-                    List<ILineDataSet> dataSets = lineData.getDataSets();
-                    int itemCount = mDataEntities.size();
-                    int entryCount = dataSets.get(0).getEntryCount();
-                    if (last_index > mEndIndex) last_index = mEndIndex;
+    protected void refreshKline() {
+        try {
+            Map<String, KlineEntity> klineEntities = sDataManager.getRtnData().getKlines().get(instrument_id);
+            QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(instrument_id);
+            if (klineEntities == null || quoteEntity == null) return;
+            KlineEntity klineEntity = klineEntities.get(mKlineType);
+            if (klineEntity == null) return;
+            String last_id = klineEntity.getLast_id();
+            mDataEntities = klineEntity.getData();
+            preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
+            if (last_id == null || "-1".equals(last_id) || mDataEntities.isEmpty()) return;
 
-                    if (entryCount == itemCount) {
-                        LogUtils.e("分时图刷新", false);
-                        KlineEntity.DataEntity dataEntity = mDataEntities.get(last_id);
-                        if (dataEntity == null) return;
-                        lineData.removeEntry(last_index, 0);
-                        lineData.removeEntry(last_index, 1);
-                        mSumVolume -= mSumVolumeMap.get(last_index);
-                        mSumCV -= mSumCVMap.get(last_index);
-                        generateLineDataEntry(last_index, lineData, dataEntity);
-                    } else {
-                        LogUtils.e("分时图加载多个数据", false);
-                        int increase = itemCount - entryCount;
-                        int last_index_begin = last_index - increase + 1;
-                        for (int i = last_index_begin; i <= last_index; i++) {
-                            KlineEntity.DataEntity dataEntity = mDataEntities.get(i + "");
-                            if (dataEntity == null) continue;
-                            generateXAxisLabel(i, dataEntity);
-                            generateLineDataEntry(last_index, lineData, dataEntity);
-                        }
-                    }
-                    refreshYAxisRange(lineData.getDataSetByIndex(0));
-                    combinedData.notifyDataChanged();
-                    mChart.notifyDataSetChanged();
+            int last_index_t = Integer.parseInt(last_id);
+            //开始加载数据
+            if (mChart.getData() != null && mChart.getData().getDataSetCount() > 0) {
+                LineData lineData = mChart.getLineData();
+                CombinedData combinedData = mChart.getCombinedData();
+
+                if (last_index_t == mLastIndex) {
+                    LogUtils.e("分时图刷新", false);
+                    KlineEntity.DataEntity dataEntity = mDataEntities.get(last_id);
+                    if (dataEntity == null) return;
+                    lineData.removeEntry(last_index_t, 0);
+                    lineData.removeEntry(last_index_t, 1);
+                    mSumVolume -= mSumVolumeMap.get(last_index_t);
+                    mSumCV -= mSumCVMap.get(last_index_t);
+                    generateLineDataEntry(last_index_t, lineData, dataEntity);
                 } else {
-                    LogUtils.e("分时图初始化", true);
-                    String trading_day_start_id = klineEntity.getTrading_day_start_id();
-                    String trading_day_end_id = klineEntity.getTrading_day_end_id();
-                    if (trading_day_start_id == null || trading_day_end_id == null
-                            || "-1".equals(trading_day_start_id) || "-1".equals(trading_day_end_id))
-                        return;
-                    mStartIndex = Integer.parseInt(trading_day_start_id);
-                    mEndIndex = Integer.parseInt(trading_day_end_id);
-                    if (last_index > mEndIndex) last_index = mEndIndex;
-                    ((MyYAxis) mChart.getAxisLeft()).setBaseValue(preSettlement);
-                    ((MyYAxis) mChart.getAxisRight()).setBaseValue(preSettlement);
-                    List<Entry> oneMinuteChart = new ArrayList<>();
-                    List<Entry> averageChart = new ArrayList<>();
-                    CombinedData combinedData = new CombinedData();
-                    for (int index = mStartIndex; index <= last_index; index++) {
-                        KlineEntity.DataEntity dataEntity = mDataEntities.get(String.valueOf(index));
+                    LogUtils.e("分时图加载多个数据", false);
+                    for (int i = mLastIndex + 1; i <= last_index_t; i++) {
+                        KlineEntity.DataEntity dataEntity = mDataEntities.get(i + "");
                         if (dataEntity == null) continue;
-                        generateXAxisLabel(index, dataEntity);
-                        generateLineDataEntry(oneMinuteChart, averageChart, index, dataEntity);
+                        generateXAxisLabel(i, dataEntity);
+                        generateLineDataEntry(last_index_t, lineData, dataEntity);
                     }
-                    LineData lineData = generateMultiLineData(
-                            generateLineDataSet(oneMinuteChart, mColorOneMinuteChart, "oneMinuteChart"),
-                            generateLineDataSet(averageChart, mColorAverageChart, "averageChart"));
-
-                    combinedData.setData(lineData);
-                    mChart.setData(combinedData);//当前屏幕会显示所有的数据
-                    mChart.setVisibleXRangeMinimum(mEndIndex - mStartIndex);
-                    int height = (int) mChart.getViewPortHandler().contentHeight() - 80;
-                    int width = (int) (mChart.getViewPortHandler().contentWidth() / 5);
-                    ((CurrentDayMarkerView)mChart.getMarker()).resize(width, height);
+                    mLastIndex = last_index_t;
                 }
+                refreshYAxisRange(lineData.getDataSetByIndex(0));
+                combinedData.notifyDataChanged();
+                mChart.notifyDataSetChanged();
                 ((MyXAxis) mChart.getXAxis()).setXLabels(mStringSparseArray);
                 mChart.invalidate();
-            } catch (Exception ex) {
-                ByteArrayOutputStream error = new ByteArrayOutputStream();
-                ex.printStackTrace(new PrintStream(error));
-                String exception = error.toString();
-                LogUtils.e(exception, true);
+            } else {
+                LogUtils.e("分时图初始化", true);
+                String trading_day_start_id = klineEntity.getTrading_day_start_id();
+                String trading_day_end_id = klineEntity.getTrading_day_end_id();
+                if (trading_day_start_id == null || trading_day_end_id == null
+                        || "-1".equals(trading_day_start_id) || "-1".equals(trading_day_end_id))
+                    return;
+                mTradingDayStartIndex = Integer.parseInt(trading_day_start_id);
+                mTradingDayEndIndex = Integer.parseInt(trading_day_end_id);
+                mLastIndex = last_index_t;
+                ((MyYAxis) mChart.getAxisLeft()).setBaseValue(preSettlement);
+                ((MyYAxis) mChart.getAxisRight()).setBaseValue(preSettlement);
+                List<Entry> oneMinuteChart = new ArrayList<>();
+                List<Entry> averageChart = new ArrayList<>();
+                CombinedData combinedData = new CombinedData();
+                for (int index = mTradingDayStartIndex; index <= mLastIndex; index++) {
+                    KlineEntity.DataEntity dataEntity = mDataEntities.get(String.valueOf(index));
+                    if (dataEntity == null) continue;
+                    generateXAxisLabel(index, dataEntity);
+                    generateLineDataEntry(oneMinuteChart, averageChart, index, dataEntity);
+                }
+                LineData lineData = generateMultiLineData(
+                        generateLineDataSet(oneMinuteChart, mColorOneMinuteChart, "oneMinuteChart"),
+                        generateLineDataSet(averageChart, mColorAverageChart, "averageChart"));
+
+                combinedData.setData(lineData);
+                mChart.setData(combinedData);//当前屏幕会显示所有的数据
+                mChart.setVisibleXRangeMinimum(mTradingDayEndIndex - mTradingDayStartIndex);
+                ((MyXAxis) mChart.getXAxis()).setXLabels(mStringSparseArray);
+                mChart.invalidate();
+                int height = (int) mChart.getViewPortHandler().contentHeight();
+                int width = (int) (mChart.getViewPortHandler().contentWidth() / 5);
+                ((CurrentDayMarkerView)mChart.getMarker()).resize(width, height);
             }
+        } catch (Exception ex) {
+            ByteArrayOutputStream error = new ByteArrayOutputStream();
+            ex.printStackTrace(new PrintStream(error));
+            String exception = error.toString();
+            LogUtils.e(exception, true);
         }
     }
 
@@ -318,9 +312,9 @@ public class CurrentDayFragment extends BaseChartFragment {
         mCalendar.setTimeInMillis(dateTime);
         String time = mSimpleDateFormat.format(mCalendar.getTime());
         xVals.put(index, time);
-        if (index == mStartIndex) {
+        if (index == mTradingDayStartIndex) {
             mStringSparseArray.put(index, time);
-        } else if (index == mEndIndex) {
+        } else if (index == mTradingDayEndIndex) {
             mCalendar.setTimeInMillis(dateTime + 60000L);
             String timeLast = mSimpleDateFormat.format(mCalendar.getTime());
             mStringSparseArray.put(index, timeLast);
@@ -380,7 +374,7 @@ public class CurrentDayFragment extends BaseChartFragment {
     private LineDataSet generateLineDataSet(List<Entry> entries, int color, String label) {
         LineDataSet set = new LineDataSet(entries, label);
         set.setColor(color);
-        set.setLineWidth(1f);
+        set.setLineWidth(0.7f);
         set.setDrawCircles(false);
         set.setDrawCircleHole(false);
         set.setDrawValues(false);
@@ -399,7 +393,7 @@ public class CurrentDayFragment extends BaseChartFragment {
             dataSets.add(lineDataSets[i]);
             if (i == 0) {
                 refreshYAxisRange(lineDataSets[i]);
-                lineDataSets[i].setHighlightLineWidth(1f);
+                lineDataSets[i].setHighlightLineWidth(0.7f);
                 lineDataSets[i].setHighLightColor(ContextCompat.getColor(getActivity(), R.color.white));
             } else {
                 lineDataSets[i].setHighlightEnabled(false);
@@ -592,7 +586,7 @@ public class CurrentDayFragment extends BaseChartFragment {
             int x = (int) e.getX();
             int index = x - 1;
             KlineEntity.DataEntity dataEntity = mDataEntities.get(String.valueOf(x));
-            KlineEntity.DataEntity dataEntityPre = mDataEntities.get(String.valueOf(index >= mStartIndex ? index : mStartIndex));
+            KlineEntity.DataEntity dataEntityPre = mDataEntities.get(String.valueOf(index >= mTradingDayStartIndex ? index : mTradingDayStartIndex));
             if (dataEntity != null && dataEntityPre != null) {
                 calendar.setTimeInMillis(Long.valueOf(dataEntity.getDatetime()) / 1000000);
                 String time = simpleDateFormat.format(calendar.getTime());

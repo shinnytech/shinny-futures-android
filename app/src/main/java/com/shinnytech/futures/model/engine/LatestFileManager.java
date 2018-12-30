@@ -153,18 +153,6 @@ public class LatestFileManager {
     private static Map<String, String> sNengyuanInsListNameNav = new TreeMap<>(comparator);
 
     /**
-     * date: 2018/12/4
-     * description: 大宗商品合约列表
-     */
-    private static Map<String, QuoteEntity> sDazongInsList = new TreeMap<>(comparator);
-
-    /**
-     * date: 2018/12/4
-     * description: 大宗商品合约列表导航
-     */
-    private static Map<String, String> sDazongInsListNameNav = new TreeMap<>(comparator);
-
-    /**
      * date: 7/9/17
      * description: 大连组合列表
      */
@@ -284,12 +272,6 @@ public class LatestFileManager {
                                 sNengyuanInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("上海国际能源交易中心");
                             break;
-                        case "SSWE":
-                            if (!expired)sDazongInsList.put(instrument_id, quoteEntity);
-                            if (!sDazongInsListNameNav.containsValue(product_short_name))
-                                sDazongInsListNameNav.put(instrument_id, product_short_name);
-                            searchEntity.setExchangeName("上海大宗商品交易所");
-                            break;
                         default:
                             break;
                     }
@@ -371,10 +353,6 @@ public class LatestFileManager {
         return sNengyuanInsList;
     }
 
-    public static Map<String, QuoteEntity> getsDazongInsList() {
-        return sDazongInsList;
-    }
-
     public static Map<String, QuoteEntity> getDalianzuheInsList() {
         return sDalianzuheInsList;
     }
@@ -405,10 +383,6 @@ public class LatestFileManager {
 
     public static Map<String, String> getNengyuanInsListNameNav() {
         return sNengyuanInsListNameNav;
-    }
-
-    public static Map<String, String> getsDazongInsListNameNav() {
-        return sDazongInsListNameNav;
     }
 
     public static Map<String, String> getDalianzuheInsListNameNav() {

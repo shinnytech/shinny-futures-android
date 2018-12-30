@@ -37,6 +37,7 @@ import com.shinnytech.futures.utils.ToastNotificationUtils;
 import java.io.File;
 
 import static com.shinnytech.futures.constants.CommonConstants.FEEDBACK;
+import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 
 /**
@@ -81,8 +82,6 @@ public class FeedBackActivity extends BaseActivity {
      * description: 用于生成下载文件名称
      */
     private String mMimetype;
-    private Context sContext;
-    private BroadcastReceiver mReceiver;
     private ActivityFeedBackBinding mBinding;
 
     @Override
@@ -95,7 +94,6 @@ public class FeedBackActivity extends BaseActivity {
     @Override
     protected void initData() {
         mBinding = (ActivityFeedBackBinding) mViewDataBinding;
-        sContext = BaseApplication.getContext();
         WebSettings settings = mBinding.webView.getSettings();
         settings.setDomStorageEnabled(true);
         settings.setJavaScriptEnabled(true);  //设置WebView属性,运行执行js脚本
@@ -167,6 +165,11 @@ public class FeedBackActivity extends BaseActivity {
                 }
             }
         });
+    }
+
+    @Override
+    protected void refreshUI() {
+
     }
 
     /**
@@ -267,14 +270,11 @@ public class FeedBackActivity extends BaseActivity {
     @Override
     public void onResume() {
         super.onResume();
-        updateToolbarFromNetwork(sContext, "反馈");
-        registerBroaderCast();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -295,8 +295,7 @@ public class FeedBackActivity extends BaseActivity {
             case R.id.action_refresh:
                 mBinding.webView.reload();
                 break;
-            case android.R.id.home:
-                finish();
+            default:
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -323,38 +322,6 @@ public class FeedBackActivity extends BaseActivity {
             }
 
         }
-    }
-
-
-    /**
-     * date: 7/7/17
-     * author: chenli
-     * description: 监控网络状态与登录状态
-     */
-    private void registerBroaderCast() {
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int networkStatus = intent.getIntExtra("networkStatus", 0);
-                switch (networkStatus) {
-                    case 0:
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.off_line));
-                        mToolbarTitle.setTextColor(Color.BLACK);
-                        mToolbarTitle.setText("交易、行情网络未连接！");
-                        mToolbarTitle.setTextSize(20);
-                        break;
-                    case 1:
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.black_dark));
-                        mToolbarTitle.setTextColor(Color.WHITE);
-                        mToolbarTitle.setText("反馈");
-                        mToolbarTitle.setTextSize(25);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-        registerReceiver(mReceiver, new IntentFilter(NETWORK_STATE));
     }
 
 }

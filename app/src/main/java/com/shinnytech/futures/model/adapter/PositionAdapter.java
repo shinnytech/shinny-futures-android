@@ -122,17 +122,6 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                     mBinding.positionOpenPrice.setText(LatestFileManager.saveScaleByPtickA(positionEntity.getOpen_price_short(), instrument_id));
                     mBinding.positionProfit.setText(MathUtils.round(positionEntity.getFloat_profit_short(), 2));
                     profit = Float.valueOf(positionEntity.getFloat_profit_short());
-                } else if (volume_long != 0 && volume_short != 0) {
-                    mBinding.positionDirection.setText("双向");
-                    mBinding.positionDirection.setTextColor(ContextCompat.getColor(sContext, R.color.white));
-                    mBinding.positionAvailable.setText(available_long + "/" + available_short);
-                    mBinding.positionVolume.setText(available_long + "/" + volume_short);
-                    String price_long = LatestFileManager.saveScaleByPtickA(positionEntity.getOpen_price_long(), instrument_id);
-                    String price_short = LatestFileManager.saveScaleByPtickA(positionEntity.getOpen_price_short(), instrument_id);
-                    mBinding.positionOpenPrice.setText(price_long + "/" + price_short);
-                    mBinding.positionProfit.setText(MathUtils.round(positionEntity.getFloat_profit_long(), 2)
-                            + "/" + MathUtils.round(positionEntity.getFloat_profit_short(), 2));
-                    profit = Float.valueOf(positionEntity.getFloat_profit_long());
                 }
                 if (profit < 0)
                     mBinding.positionProfit.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
@@ -157,8 +146,6 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                             mBinding.positionDirection.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
                         } else if ("空".equals(value)) {
                             mBinding.positionDirection.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
-                        } else if ("双向".equals(value)) {
-                            mBinding.positionDirection.setTextColor(ContextCompat.getColor(sContext, R.color.white));
                         }
                         mBinding.positionDirection.setText(value);
                         break;
@@ -173,18 +160,14 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                         break;
                     case "float_profit":
                         mBinding.positionProfit.setText(value);
-                        if (value.contains("/")) {
-                            mBinding.positionProfit.setTextColor(ContextCompat.getColor(sContext, R.color.white));
-                        } else {
-                            try {
-                                float profit = Float.valueOf(mBinding.positionProfit.getText().toString());
-                                if (profit < 0)
-                                    mBinding.positionProfit.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
-                                else if (profit > 0)
-                                    mBinding.positionProfit.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
+                        try {
+                            float profit = Float.valueOf(mBinding.positionProfit.getText().toString());
+                            if (profit < 0)
+                                mBinding.positionProfit.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
+                            else if (profit > 0)
+                                mBinding.positionProfit.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                         break;
                     default:

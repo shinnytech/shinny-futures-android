@@ -1,8 +1,12 @@
 package com.shinnytech.futures.controller.activity;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,9 +17,10 @@ import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
-import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.controller.FutureInfoActivityPresenter;
+import com.shinnytech.futures.utils.LogUtils;
+import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -25,9 +30,11 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import static com.shinnytech.futures.constants.CommonConstants.LOG_OUT;
+import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.ORDER_JUMP_TO_LOG_IN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.POSITION_JUMP_TO_LOG_IN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_JUMP_TO_LOG_IN_ACTIVITY;
+import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 
 /**
  * date: 7/7/17
@@ -38,7 +45,6 @@ import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_JUMP_
  */
 public class FutureInfoActivity extends BaseActivity {
     private ActivityFutureInfoBinding mBinding;
-    private Context sContext;
     private MenuItem mMenuItem;
     private FutureInfoActivityPresenter mFutureInfoActivityPresenter;
     private String mInstrumentId;
@@ -53,7 +59,6 @@ public class FutureInfoActivity extends BaseActivity {
     @Override
     protected void initData() {
         mBinding = (ActivityFutureInfoBinding) mViewDataBinding;
-        sContext = BaseApplication.getContext();
         mFutureInfoActivityPresenter = new FutureInfoActivityPresenter(this, sContext, mBinding, mToolbar, mToolbarTitle);
         mInstrumentId = mFutureInfoActivityPresenter.getInstrumentId();
     }
@@ -64,19 +69,61 @@ public class FutureInfoActivity extends BaseActivity {
     }
 
     @Override
+    protected void refreshUI() {
+
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         mFutureInfoActivityPresenter.checkLoginState();
         if (BaseApplication.getWebSocketService() != null)
             BaseApplication.getWebSocketService().sendSubscribeQuote(mInstrumentId);
-        mFutureInfoActivityPresenter.updateToolbarFromNetwork();
-        mFutureInfoActivityPresenter.registerBroaderCast();
+    }
+
+    @Override
+    protected void updateToolbarFromNetwork(Context context, String title) {
+        if (NetworkUtils.isNetworkConnected(sContext)) {
+            mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.black_dark));
+            mToolbarTitle.setTextColor(Color.WHITE);
+            mFutureInfoActivityPresenter.setToolbarTitle();
+            mToolbarTitle.setCompoundDrawables(null, null, mFutureInfoActivityPresenter.mRightDrawable, null);
+        } else {
+            mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.off_line));
+            mToolbarTitle.setTextColor(Color.BLACK);
+            mToolbarTitle.setText(OFFLINE);
+            mToolbarTitle.setCompoundDrawables(null, null, null, null);
+        }
+    }
+
+    @Override
+    protected void registerBroaderCast() {
+        mReceiverNetwork = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int networkStatus = intent.getIntExtra("networkStatus", 0);
+                switch (networkStatus) {
+                    case 0:
+                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.off_line));
+                        mToolbarTitle.setTextColor(Color.BLACK);
+                        mToolbarTitle.setText(OFFLINE);
+                        mToolbarTitle.setCompoundDrawables(null, null, null, null);
+                        break;
+                    case 1:
+                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.black_dark));
+                        mToolbarTitle.setTextColor(Color.WHITE);
+                        mFutureInfoActivityPresenter.setToolbarTitle();
+                        mToolbarTitle.setCompoundDrawables(null, null, mFutureInfoActivityPresenter.mRightDrawable, null);
+                        break;
+                }
+            }
+        };
+        registerReceiver(mReceiverNetwork, new IntentFilter(NETWORK_STATE));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mFutureInfoActivityPresenter.unRegisterBroaderCast();
     }
 
     @Override
@@ -121,7 +168,6 @@ public class FutureInfoActivity extends BaseActivity {
                     LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
                     ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
                     mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
-                    mFutureInfoActivityPresenter.refreshOptionalQuotesPopup(new ArrayList<>(insList.keySet()));
                 } else {
                     QuoteEntity quoteEntity = new QuoteEntity();
                     quoteEntity.setInstrument_id(mInstrumentId);
@@ -129,17 +175,23 @@ public class FutureInfoActivity extends BaseActivity {
                     LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
                     ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
                     mMenuItem.setIcon(R.mipmap.ic_favorite_white_24dp);
-                    mFutureInfoActivityPresenter.refreshOptionalQuotesPopup(new ArrayList<>(insList.keySet()));
                 }
                 break;
             case android.R.id.home:
-                if (mFutureInfoActivityPresenter.closeKeyboard()) break;
+                if (mFutureInfoActivityPresenter.closeKeyboard())break;
                 Intent intent = new Intent();
                 setResult(RESULT_OK, intent);
                 finish();
                 break;
+            case R.id.search_quote:
+                Intent intentS = new Intent(this, SearchActivity.class);
+                intentS.putExtra("fromFutureInfoActivity", true);
+                startActivity(intentS);
+                return true;
+            default:
+                break;
         }
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 
     /**
@@ -183,7 +235,8 @@ public class FutureInfoActivity extends BaseActivity {
     /**
      * date: 7/7/17
      * author: chenli
-     * description: 通过EventBus框架实现fragment与activity之间的数据传递，这里接受本页和fragmentPosition/currentDayFragment/KlineFragment页发过来的合约代码数据；
+     * description: 通过EventBus框架实现fragment与activity之间的数据传递，
+     * 这里接受本页和fragmentPosition/currentDayFragment/KlineFragment页发过来的合约代码数据；
      * 在接受到数据后向服务器发送合约代码指令
      */
     @Subscribe
@@ -240,9 +293,5 @@ public class FutureInfoActivity extends BaseActivity {
 
     public RadioGroup getTabsInfo() {
         return mBinding.rgTabInfo;
-    }
-
-    public RadioGroup getTabsUp() {
-        return mBinding.rgTabUp;
     }
 }

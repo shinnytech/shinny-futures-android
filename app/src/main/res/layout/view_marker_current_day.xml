@@ -4,7 +4,7 @@
     android:id="@+id/kline_marker"
     android:layout_width="100dp"
     android:layout_height="wrap_content"
-    android:background="@drawable/rectangle_border_current_day"
+    android:background="@drawable/rectangle_border_marker_view"
     android:orientation="vertical">
 
 

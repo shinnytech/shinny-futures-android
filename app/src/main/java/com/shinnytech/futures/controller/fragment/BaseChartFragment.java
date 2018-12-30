@@ -19,6 +19,7 @@ import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.components.LimitLine;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
@@ -26,8 +27,6 @@ import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.controller.activity.FutureInfoActivity;
-import com.shinnytech.futures.utils.LogUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -36,10 +35,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_DAY;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_HOUR;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_MINUTE;
+import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
@@ -138,8 +134,8 @@ public class BaseChartFragment extends LazyLoadFragment {
     protected SparseArray<String> xVals;
     protected Map<String, KlineEntity.DataEntity> mDataEntities;
     protected int mLayoutId;
-    protected String mKlineType;
-    protected int mButtonId;
+    public String mFragmentType;
+    public String mKlineType;
     private ViewDataBinding mViewDataBinding;
     protected boolean mIsUpdate;
 
@@ -152,7 +148,7 @@ public class BaseChartFragment extends LazyLoadFragment {
         try {
             switch (mDataString) {
                 case MD_MESSAGE:
-                    if (mIsUpdate) refreshMarketing();
+                    if (mIsUpdate) refreshKline();
                     break;
                 case TD_MESSAGE:
                     refreshTrade();
@@ -237,7 +233,7 @@ public class BaseChartFragment extends LazyLoadFragment {
 
     @Override
     public void update() {
-        refreshMarketing();
+
     }
 
     /**
@@ -245,7 +241,7 @@ public class BaseChartFragment extends LazyLoadFragment {
      * author: chenli
      * description: 刷新行情信息
      */
-    protected void refreshMarketing() {
+    protected void refreshKline() {
     }
 
     /**
@@ -361,7 +357,7 @@ public class BaseChartFragment extends LazyLoadFragment {
      */
     private void generateLimitLine(float limit, String label, int color, String limitKey, Integer volume) {
         LimitLine limitLine = new LimitLine(limit, label);
-        limitLine.setLineWidth(1f);
+        limitLine.setLineWidth(0.7f);
         limitLine.enableDashedLine(10f, 10f, 0f);
         limitLine.setLineColor(color);
         limitLine.setLabelPosition(LimitLine.LimitLabelPosition.LEFT_BOTTOM);
@@ -477,7 +473,7 @@ public class BaseChartFragment extends LazyLoadFragment {
                     orderEntity.getInstrument_id() + "@" + limit_price + "/" + limit_volume + "手");
             mOrderLimitLines.put(key, limitLine);
             mOrderVolumes.put(key, limit_volume);
-            limitLine.setLineWidth(1f);
+            limitLine.setLineWidth(0.7f);
             limitLine.disableDashedLine();
             if ("BUY".equals(orderEntity.getDirection()))
                 limitLine.setLineColor(mColorBuy);
@@ -570,23 +566,12 @@ public class BaseChartFragment extends LazyLoadFragment {
     public void onResume() {
         super.onResume();
         registerBroaderCast();
-        if (BaseApplication.getWebSocketService() != null)
-            switch (mKlineType) {
-                case CURRENT_DAY:
-                    BaseApplication.getWebSocketService().sendSetChart(instrument_id);
-                    break;
-                case KLINE_DAY:
-                    BaseApplication.getWebSocketService().sendSetChartDay(instrument_id, VIEW_WIDTH);
-                    break;
-                case KLINE_HOUR:
-                    BaseApplication.getWebSocketService().sendSetChartHour(instrument_id, VIEW_WIDTH);
-                    break;
-                case KLINE_MINUTE:
-                    BaseApplication.getWebSocketService().sendSetChartMin(instrument_id, VIEW_WIDTH);
-                    break;
-                default:
-                    break;
-            }
+        if (BaseApplication.getWebSocketService() == null) return;
+        if (CURRENT_DAY_FRAGMENT.equals(mFragmentType)) {
+            BaseApplication.getWebSocketService().sendSetChart(instrument_id);
+        } else {
+            BaseApplication.getWebSocketService().sendSetChartKline(instrument_id, VIEW_WIDTH, mKlineType);
+        }
     }
 
     @Override
@@ -605,23 +590,6 @@ public class BaseChartFragment extends LazyLoadFragment {
     public void onDestroyView() {
         super.onDestroyView();
         EventBus.getDefault().unregister(this);
-        if (BaseApplication.getWebSocketService() != null)
-            switch (mKlineType) {
-                case CURRENT_DAY:
-                    BaseApplication.getWebSocketService().sendSetChart("");
-                    break;
-                case KLINE_DAY:
-                    BaseApplication.getWebSocketService().sendSetChartDay("", VIEW_WIDTH);
-                    break;
-                case KLINE_HOUR:
-                    BaseApplication.getWebSocketService().sendSetChartHour("", VIEW_WIDTH);
-                    break;
-                case KLINE_MINUTE:
-                    BaseApplication.getWebSocketService().sendSetChartMin("", VIEW_WIDTH);
-                    break;
-                default:
-                    break;
-            }
     }
 
     @Override
