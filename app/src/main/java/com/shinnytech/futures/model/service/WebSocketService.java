@@ -29,6 +29,16 @@ import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.bean.accountinfobean.BrokerEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.ChartEntity;
+import com.shinnytech.futures.model.bean.reqbean.ReqCancelOrderEntity;
+import com.shinnytech.futures.model.bean.reqbean.ReqConfirmSettlementEntity;
+import com.shinnytech.futures.model.bean.reqbean.ReqInsertOrderEntity;
+import com.shinnytech.futures.model.bean.reqbean.ReqLoginEntity;
+import com.shinnytech.futures.model.bean.reqbean.ReqPasswordEntity;
+import com.shinnytech.futures.model.bean.reqbean.ReqPeekMessageEntity;
+import com.shinnytech.futures.model.bean.reqbean.ReqSetChartEntity;
+import com.shinnytech.futures.model.bean.reqbean.ReqSetChartKlineEntity;
+import com.shinnytech.futures.model.bean.reqbean.ReqSubscribeQuoteEntity;
+import com.shinnytech.futures.model.bean.reqbean.ReqTransferEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.LogUtils;
@@ -305,9 +315,12 @@ public class WebSocketService extends Service {
      */
     public void sendSubscribeQuote(String insList) {
         if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
-            String subScribeQuote = "{\"aid\":\"subscribe_quote\",\"ins_list\":\"" + insList + "\"}";
-            LogUtils.e(subScribeQuote, true);
+            ReqSubscribeQuoteEntity reqSubscribeQuoteEntity = new ReqSubscribeQuoteEntity();
+            reqSubscribeQuoteEntity.setAid("subscribe_quote");
+            reqSubscribeQuoteEntity.setIns_list(insList);
+            String subScribeQuote = new Gson().toJson(reqSubscribeQuoteEntity);
             mWebSocketClientMD.sendText(subScribeQuote);
+            LogUtils.e(subScribeQuote, true);
         }
     }
 
@@ -318,7 +331,9 @@ public class WebSocketService extends Service {
      */
     public void sendPeekMessage() {
         if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
-            String peekMessage = "{\"aid\":\"peek_message\"}";
+            ReqPeekMessageEntity reqPeekMessageEntity = new ReqPeekMessageEntity();
+            reqPeekMessageEntity.setAid("peek_message");
+            String peekMessage = new Gson().toJson(reqPeekMessageEntity);
             mWebSocketClientMD.sendText(peekMessage);
             LogUtils.e(peekMessage, false);
         }
@@ -331,15 +346,16 @@ public class WebSocketService extends Service {
      */
     public void sendSetChart(String ins_list) {
         if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
-            String duration = "60000000000";
-            String trading_day_start = "0";
-            String trading_day_count = "86400000000000";
-            String setChart = "{\"aid\":\"set_chart\",\"chart_id\":\"" + CHART_ID + "\"," +
-                    "\"ins_list\":\"" + ins_list + "\",\"duration\":" + duration + "," +
-                    "\"trading_day_start\":" + trading_day_start + "," +
-                    "\"trading_day_count\":" + trading_day_count + "}";
-            LogUtils.e(setChart, true);
+            ReqSetChartEntity reqSetChartEntity = new ReqSetChartEntity();
+            reqSetChartEntity.setAid("set_chart");
+            reqSetChartEntity.setChart_id(CHART_ID);
+            reqSetChartEntity.setIns_list(ins_list);
+            reqSetChartEntity.setDuration(60000000000l);
+            reqSetChartEntity.setTrading_day_start(0);
+            reqSetChartEntity.setTrading_day_count(86400000000000l);
+            String setChart = new Gson().toJson(reqSetChartEntity);
             mWebSocketClientMD.sendText(setChart);
+            LogUtils.e(setChart, true);
         }
     }
 
@@ -350,11 +366,20 @@ public class WebSocketService extends Service {
      */
     public void sendSetChartKline(String ins_list, int view_width, String duration){
         if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
-            String setChart = "{\"aid\":\"set_chart\",\"chart_id\":\"" + CHART_ID + "\"," +
-                    "\"ins_list\":\"" + ins_list + "\",\"duration\":" + duration + "," +
-                    "\"view_width\":" + view_width + "}";
-            LogUtils.e(setChart, true);
-            mWebSocketClientMD.sendText(setChart);
+            try {
+                long duration_l = Long.parseLong(duration);
+                ReqSetChartKlineEntity reqSetChartKlineEntity = new ReqSetChartKlineEntity();
+                reqSetChartKlineEntity.setAid("set_chart");
+                reqSetChartKlineEntity.setChart_id(CHART_ID);
+                reqSetChartKlineEntity.setIns_list(ins_list);
+                reqSetChartKlineEntity.setView_width(view_width);
+                reqSetChartKlineEntity.setDuration(duration_l);
+                String setChart = new Gson().toJson(reqSetChartKlineEntity);
+                mWebSocketClientMD.sendText(setChart);
+                LogUtils.e(setChart, true);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -432,7 +457,9 @@ public class WebSocketService extends Service {
      */
     public void sendPeekMessageTransaction() {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
-            String peekMessage = "{\"aid\":\"peek_message\"}";
+            ReqPeekMessageEntity reqPeekMessageEntity = new ReqPeekMessageEntity();
+            reqPeekMessageEntity.setAid("peek_message");
+            String peekMessage = new Gson().toJson(reqPeekMessageEntity);
             mWebSocketClientTD.sendText(peekMessage);
             LogUtils.e(peekMessage, false);
         }
@@ -445,10 +472,14 @@ public class WebSocketService extends Service {
      */
     public void sendReqLogin(String bid, String user_name, String password) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
-            String reqLogin = "{\"aid\":\"req_login\",\"bid\":\"" + bid + "\",\"user_name\":\""
-                    + user_name + "\",\"password\":\"" + password + "\"}";
-            LogUtils.e(reqLogin, true);
+            ReqLoginEntity reqLoginEntity = new ReqLoginEntity();
+            reqLoginEntity.setAid("req_login");
+            reqLoginEntity.setBid(bid);
+            reqLoginEntity.setUser_name(user_name);
+            reqLoginEntity.setPassword(password);
+            String reqLogin = new Gson().toJson(reqLoginEntity);
             mWebSocketClientTD.sendText(reqLogin);
+            LogUtils.e(reqLogin, true);
         }
     }
 
@@ -459,9 +490,11 @@ public class WebSocketService extends Service {
      */
     public void sendReqConfirmSettlement() {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
-            String confirmSettlement = "{\"aid\":\"confirm_settlement\"}";
-            LogUtils.e(confirmSettlement, true);
+            ReqConfirmSettlementEntity reqConfirmSettlementEntity = new ReqConfirmSettlementEntity();
+            reqConfirmSettlementEntity.setAid("confirm_settlement");
+            String confirmSettlement = new Gson().toJson(reqConfirmSettlementEntity);
             mWebSocketClientTD.sendText(confirmSettlement);
+            LogUtils.e(confirmSettlement, true);
         }
     }
 
@@ -475,12 +508,20 @@ public class WebSocketService extends Service {
                                    String offset, int volume, String price_type, double price) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
             String user_id = DataManager.getInstance().USER_ID;
-            String reqInsertOrder = "{\"aid\":\"insert_order\", \"user_id\":\"" + user_id + "\", " +
-                    "\"order_id\":\"\",\"exchange_id\":\"" + exchange_id + "\",\"instrument_id\":\""
-                    + instrument_id + "\",\"direction\":\"" + direction + "\",\"offset\":\"" + offset
-                    + "\",\"volume\":" + volume + ",\"price_type\":\"" + price_type + "\",\"limit_price\":"
-                    + price + ", \"volume_condition\":\"ANY\", \"time_condition\":\"GFD\"}";
-            LogUtils.e(reqInsertOrder, true);
+            ReqInsertOrderEntity reqInsertOrderEntity = new ReqInsertOrderEntity();
+            reqInsertOrderEntity.setAid("insert_order");
+            reqInsertOrderEntity.setUser_id(user_id);
+            reqInsertOrderEntity.setOrder_id("");
+            reqInsertOrderEntity.setExchange_id(exchange_id);
+            reqInsertOrderEntity.setInstrument_id(instrument_id);
+            reqInsertOrderEntity.setDirection(direction);
+            reqInsertOrderEntity.setOffset(offset);
+            reqInsertOrderEntity.setVolume(volume);
+            reqInsertOrderEntity.setPrice_type(price_type);
+            reqInsertOrderEntity.setLimit_price(price);
+            reqInsertOrderEntity.setVolume_condition("ANY");
+            reqInsertOrderEntity.setTime_condition("GFD");
+            String reqInsertOrder = new Gson().toJson(reqInsertOrderEntity);
             mWebSocketClientTD.sendText(reqInsertOrder);
         }
     }
@@ -493,10 +534,13 @@ public class WebSocketService extends Service {
     public void sendReqCancelOrder(String order_id) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
             String user_id = DataManager.getInstance().USER_ID;
-            String reqInsertOrder = "{\"aid\":\"cancel_order\", \"user_id\":\"" + user_id + "\"," +
-                    "\"order_id\":\"" + order_id + "\"}";
-            LogUtils.e(reqInsertOrder, true);
+            ReqCancelOrderEntity reqCancelOrderEntity = new ReqCancelOrderEntity();
+            reqCancelOrderEntity.setAid("cancel_order");
+            reqCancelOrderEntity.setUser_id(user_id);
+            reqCancelOrderEntity.setOrder_id(order_id);
+            String reqInsertOrder = new Gson().toJson(reqCancelOrderEntity);
             mWebSocketClientTD.sendText(reqInsertOrder);
+            LogUtils.e(reqInsertOrder, true);
         }
     }
 
@@ -508,21 +552,34 @@ public class WebSocketService extends Service {
     public void sendReqTransfer(String future_account, String future_password, String bank_id,
                                 String bank_password, String currency, float amount) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
-            String reqTransfer = "{\"aid\":\"req_transfer\",\"future_account\":\"" + future_account
-                    + "\",\"future_password\":\"" + future_password + "\",\"bank_id\":\"" + bank_id
-                    + "\",\"bank_password\":\"" + bank_password + "\",\"currency\":\"" + currency +
-                    "\",\"amount\": " + amount + "}";
-            LogUtils.e(reqTransfer, true);
+            ReqTransferEntity reqTransferEntity = new ReqTransferEntity();
+            reqTransferEntity.setAid("req_transfer");
+            reqTransferEntity.setFuture_account(future_account);
+            reqTransferEntity.setFuture_password(future_password);
+            reqTransferEntity.setBank_id(bank_id);
+            reqTransferEntity.setBank_password(bank_password);
+            reqTransferEntity.setCurrency(currency);
+            reqTransferEntity.setAmount(amount);
+            String reqTransfer = new Gson().toJson(reqTransferEntity);
             mWebSocketClientTD.sendText(reqTransfer);
+            LogUtils.e(reqTransfer, true);
         }
     }
 
+    /**
+     * date: 2019/1/3
+     * author: chenli
+     * description: 修改密码
+     */
     public void sendReqPassword(String new_password, String old_password) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
-            String reqPassword = "{\"aid\":\"change_password\",\"new_password\":\"" + new_password
-                    + "\",\"old_password\":\"" + old_password + "\"}";
-            LogUtils.e(reqPassword, true);
+            ReqPasswordEntity reqPasswordEntity = new ReqPasswordEntity();
+            reqPasswordEntity.setAid("change_password");
+            reqPasswordEntity.setNew_password(new_password);
+            reqPasswordEntity.setOld_password(old_password);
+            String reqPassword = new Gson().toJson(reqPasswordEntity);
             mWebSocketClientTD.sendText(reqPassword);
+            LogUtils.e(reqPassword, true);
         }
     }
 
