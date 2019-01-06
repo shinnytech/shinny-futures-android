@@ -14,10 +14,12 @@ android {
     }
     signingConfigs {
         config {
-            storeFile file(System.properties['keyStore'])
-            storePassword System.properties['keyStorePassword']
-            keyAlias System.properties['keyAlias']
-            keyPassword System.properties['keyAliasPassword']
+            if (file(System.properties['keyStore']).exists()){
+                storeFile file(System.properties['keyStore'])
+                storePassword System.properties['keyStorePassword']
+                keyAlias System.properties['keyAlias']
+                keyPassword System.properties['keyAliasPassword']
+            }
         }
     }
     buildTypes {
