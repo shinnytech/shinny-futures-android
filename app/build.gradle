@@ -7,7 +7,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 26
         versionCode 28
-        versionName "1.7.27"
+        versionName "1.6.27"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         resValue("string", "app_name", "ShinnyFutures")
         flavorDimensions("shinny")
