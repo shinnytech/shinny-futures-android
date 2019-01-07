@@ -6,18 +6,20 @@ android {
         applicationId "com.shinnytech.futures"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 27
-        versionName "1.6.26"
+        versionCode 28
+        versionName "1.7.27"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         resValue("string", "app_name", "ShinnyFutures")
         flavorDimensions("shinny")
     }
     signingConfigs {
         config {
-            storeFile file(System.properties['keyStore'])
-            storePassword System.properties['keyStorePassword']
-            keyAlias System.properties['keyAlias']
-            keyPassword System.properties['keyAliasPassword']
+            if (file(System.properties['keyStore']).exists()){
+                storeFile file(System.properties['keyStore'])
+                storePassword System.properties['keyStorePassword']
+                keyAlias System.properties['keyAlias']
+                keyPassword System.properties['keyAliasPassword']
+            }
         }
     }
     buildTypes {

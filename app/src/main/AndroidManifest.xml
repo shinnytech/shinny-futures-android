@@ -81,7 +81,9 @@
             android:theme="@style/SearchActivityTheme"
             android:windowSoftInputMode="stateVisible" />
 
-        <receiver android:name=".model.receiver.NetworkReceiver">
+        <receiver
+            android:exported="false"
+            android:name=".model.receiver.NetworkReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
 

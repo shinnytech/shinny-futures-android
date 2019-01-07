@@ -834,24 +834,11 @@ public class KlineFragment extends BaseChartFragment {
             closeOiDelta = findViewById(R.id.close_oi_delta);
             markViewState = "right";
             simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
-            switch (mFragmentType) {
-                case DAY_FRAGMENT:
-                    xValue.setVisibility(GONE);
-                    break;
-                case HOUR_FRAGMENT:
-                    xValue.setVisibility(VISIBLE);
-                    simpleDateFormat1 = new SimpleDateFormat("HH:mm", Locale.CHINA);
-                    break;
-                case MINUTE_FRAGMENT:
-                    xValue.setVisibility(VISIBLE);
-                    simpleDateFormat1 = new SimpleDateFormat("HH:mm", Locale.CHINA);
-                    break;
-                case SECOND_FRAGMENT:
-                    xValue.setVisibility(VISIBLE);
-                    simpleDateFormat1 = new SimpleDateFormat("mm:ss", Locale.CHINA);
-                    break;
-                default:
-                    break;
+            if (DAY_FRAGMENT.equals(mFragmentType)){
+                xValue.setVisibility(GONE);
+            }else {
+                xValue.setVisibility(VISIBLE);
+                simpleDateFormat1 = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
             }
             calendar = Calendar.getInstance();
         }
