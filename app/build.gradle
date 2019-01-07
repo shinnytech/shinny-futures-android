@@ -14,7 +14,7 @@ android {
     }
     signingConfigs {
         config {
-            if (file(System.properties['keyStore']).exists()){
+            if (System.properties['keyStore'] != null){
                 storeFile file(System.properties['keyStore'])
                 storePassword System.properties['keyStorePassword']
                 keyAlias System.properties['keyAlias']
