@@ -15,8 +15,11 @@ import android.view.ViewGroup;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.FragmentHandicapBinding;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
+import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
+import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.CloneUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -43,7 +46,13 @@ public class HandicapFragment extends LazyLoadFragment {
      * description: 实时刷新盘口信息
      */
     private void refreshUI() {
-        mBinding.setHandicap(sDataManager.getRtnData().getQuotes().get(mInstrumentId));
+        QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
+        if (quoteEntity == null)return;
+        if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")){
+            quoteEntity = CloneUtils.clone(quoteEntity);
+            quoteEntity = LatestFileManager.calculateCombineQuoteFull(quoteEntity);
+        }
+        mBinding.setHandicap(quoteEntity);
     }
 
     @Override

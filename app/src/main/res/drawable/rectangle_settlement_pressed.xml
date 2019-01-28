@@ -15,5 +15,5 @@
         android:width="3dp"
         android:color="@color/settlement_border" />
 
-    <solid android:color="@color/colorLaunch"></solid>
+    <solid android:color="@color/launch"></solid>
 </shape>

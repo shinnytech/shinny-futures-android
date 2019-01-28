@@ -124,6 +124,14 @@ public class LoginActivity extends BaseActivity {
             }
         });
 
+        mBinding.selectBroker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intentBroker = new Intent(LoginActivity.this, BrokerListActivity.class);
+                startActivityForResult(intentBroker, LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY);
+            }
+        });
+
         mBinding.deleteAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

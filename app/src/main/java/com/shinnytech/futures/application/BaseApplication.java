@@ -64,8 +64,9 @@ import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_DAY_
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_HOUR_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_MINUTE_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_SECOND_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOCK_PASSWORD;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_CONFIRM;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PARA_MA;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.FOREGROUND;
@@ -167,6 +168,14 @@ public class BaseApplication extends Application implements ServiceConnection {
             BaseApplication.getContext().openFileInput(OPTIONAL_INS_LIST);
         } catch (FileNotFoundException e) {
             LatestFileManager.saveInsListToFile(new ArrayList<String>());
+        }
+
+        if (!SPUtils.contains(sContext, CONFIG_PARA_MA)) {
+            SPUtils.putAndApply(sContext, CONFIG_PARA_MA, CommonConstants.PARA_MA);
+        }
+
+        if (!SPUtils.contains(sContext, CONFIG_ORDER_CONFIRM)) {
+            SPUtils.putAndApply(sContext, CONFIG_ORDER_CONFIRM, true);
         }
 
         if (!SPUtils.contains(sContext, CONFIG_POSITION_LINE)) {

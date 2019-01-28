@@ -97,7 +97,7 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
             try {
                 String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
-                mBinding.positionName.setText(searchEntity == null ? instrument_id : searchEntity.getInstrumentName());
+                mBinding.positionName.setText(searchEntity == null ? positionEntity.getInstrument_id() : searchEntity.getInstrumentName());
 
                 String available_long = MathUtils.subtract(positionEntity.getVolume_long(),
                         MathUtils.add(positionEntity.getVolume_long_frozen_his(), positionEntity.getVolume_long_frozen_today()));

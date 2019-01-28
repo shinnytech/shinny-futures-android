@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -16,6 +17,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
@@ -26,6 +28,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.AboutActivity;
 import com.shinnytech.futures.controller.activity.AccountActivity;
 import com.shinnytech.futures.controller.activity.BankTransferActivity;
@@ -34,18 +37,22 @@ import com.shinnytech.futures.controller.activity.FeedBackActivity;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.activity.LoginActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
+import com.shinnytech.futures.controller.activity.SettingActivity;
 import com.shinnytech.futures.controller.activity.TradeActivity;
 import com.shinnytech.futures.controller.fragment.QuoteFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
+import com.shinnytech.futures.model.adapter.NavigationRightAdapter;
 import com.shinnytech.futures.model.adapter.QuoteNavAdapter;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
+import com.shinnytech.futures.model.bean.settingbean.NavigationRightEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -59,6 +66,7 @@ import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN;
+import static com.shinnytech.futures.constants.CommonConstants.LOGIN_JUMP_TO_LOG_IN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.LOGOUT;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
@@ -86,8 +94,9 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
     private Map<String, String> mInsListNameNav = new TreeMap<>();
     private String mIns;
     private int mCurItemId;
+    public final NavigationRightAdapter mNavigationRightAdapter;
 
-    public MainActivityPresenter(MainActivity mainActivity, Context context,
+    public MainActivityPresenter(final MainActivity mainActivity, Context context,
                                  ActivityMainDrawerBinding binding, Toolbar toolbar, TextView toolbarTitle) {
         this.mBinding = binding;
         this.mMainActivity = mainActivity;
@@ -135,7 +144,9 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
         //初始化适配器类
         mViewPagerFragmentAdapter = new ViewPagerFragmentAdapter(mMainActivity.getSupportFragmentManager(), fragmentList);
         mBinding.vpContent.setAdapter(mViewPagerFragmentAdapter);
-        mBinding.vpContent.setCurrentItem(1);
+        if (LatestFileManager.getOptionalInsList().isEmpty())
+            mBinding.vpContent.setCurrentItem(1);
+        else mBinding.vpContent.setCurrentItem(0);
         //保证lazyLoad的效用,每次加载一个fragment
         mBinding.vpContent.setOffscreenPageLimit(7);
 
@@ -148,6 +159,55 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
         paramsR.width = mMainActivity.getResources().getDisplayMetrics().widthPixels / 2;
         mBinding.nvMenuRight.setLayoutParams(paramsR);
 
+        mBinding.navigationRightRv.setLayoutManager(new LinearLayoutManager(mMainActivity));
+        mBinding.navigationRightRv.setItemAnimator(new DefaultItemAnimator());
+        NavigationRightEntity menu0 = new NavigationRightEntity();
+        menu0.setIcon(R.mipmap.ic_account_circle_white_18dp);
+        menu0.setContent(CommonConstants.LOGIN);
+        NavigationRightEntity menu1 = new NavigationRightEntity();
+        menu1.setIcon(R.mipmap.ic_settings_white_18dp);
+        menu1.setContent(CommonConstants.SETTING);
+        NavigationRightEntity menu2 = new NavigationRightEntity();
+        menu2.setIcon(R.mipmap.ic_assessment_white_18dp);
+        menu2.setContent(CommonConstants.ACCOUNT);
+//        NavigationRightEntity menu3 = new NavigationRightEntity();
+//        menu3.setIcon(R.mipmap.ic_assignment_turned_in_white_18dp);
+//        menu3.setContent(CommonConstants.PASSWORD);
+        NavigationRightEntity menu4 = new NavigationRightEntity();
+        menu4.setIcon(R.mipmap.ic_donut_large_white_18dp);
+        menu4.setContent(CommonConstants.POSITION);
+        NavigationRightEntity menu5 = new NavigationRightEntity();
+        menu5.setIcon(R.mipmap.ic_description_white_18dp);
+        menu5.setContent(CommonConstants.TRADE);
+        NavigationRightEntity menu6 = new NavigationRightEntity();
+        menu6.setIcon(R.mipmap.ic_account_balance_white_18dp);
+        menu6.setContent(CommonConstants.BANK);
+        NavigationRightEntity menu7 = new NavigationRightEntity();
+        menu7.setIcon(R.mipmap.ic_supervisor_account_white_18dp);
+        menu7.setContent(CommonConstants.OPEN_ACCOUNT);
+        NavigationRightEntity menu8 = new NavigationRightEntity();
+        menu8.setIcon(R.mipmap.ic_find_in_page_white_18dp);
+        menu8.setContent(CommonConstants.FEEDBACK);
+        NavigationRightEntity menu9 = new NavigationRightEntity();
+        menu9.setIcon(R.mipmap.ic_info_white_18dp);
+        menu9.setContent(CommonConstants.ABOUT);
+        List<NavigationRightEntity> list = new ArrayList<>();
+        list.add(menu0);
+        list.add(menu1);
+        list.add(menu2);
+//        list.add(menu3);
+        list.add(menu4);
+        list.add(menu5);
+        list.add(menu6);
+        list.add(menu7);
+        list.add(menu8);
+        list.add(menu9);
+        mNavigationRightAdapter = new NavigationRightAdapter(mainActivity, list);
+        mBinding.navigationRightRv.setAdapter(mNavigationRightAdapter);
+    }
+
+    public ViewPagerFragmentAdapter getmViewPagerFragmentAdapter() {
+        return mViewPagerFragmentAdapter;
     }
 
     //使导航栏和viewPager页面匹配,重新初始化mCurItemId
@@ -227,7 +287,8 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
         mBinding.quoteNavLeft.setOnClickListener(this);
         mBinding.quoteNavRight.setOnClickListener(this);
         //为底部合约导航栏添加监听事件
-        mBinding.rvQuoteNavigation.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rvQuoteNavigation, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
+        mBinding.rvQuoteNavigation.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(
+                mBinding.rvQuoteNavigation, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
                 String instrumentId = (String) view.getTag();
@@ -238,6 +299,84 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
             public void onItemLongClick(View view, int position) {
             }
         }));
+
+        mBinding.navigationRightRv.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(
+                mBinding.navigationRightRv, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                String title = (String) view.getTag();
+                switch (title) {
+                    case CommonConstants.LOGIN:
+                        Intent intentLogin = new Intent(mMainActivity, LoginActivity.class);
+                        intentLogin.putExtra(ACTIVITY_TYPE, "MainActivityLoginMenu");
+                        mMainActivity.startActivityForResult(intentLogin, LOGIN_JUMP_TO_LOG_IN_ACTIVITY);
+                        break;
+                    case CommonConstants.LOGOUT:
+                        DataManager.getInstance().IS_LOGIN = false;
+                        mNavigationRightAdapter.updateItem(position, CommonConstants.LOGIN);
+                        mNavigationRightAdapter.removeItem(3);
+                        break;
+                    case CommonConstants.SETTING:
+                        Intent intentSetting = new Intent(mMainActivity, SettingActivity.class);
+                        mMainActivity.startActivity(intentSetting);
+                        break;
+                    case CommonConstants.ACCOUNT:
+                        Intent intentAcc = new Intent(mMainActivity, AccountActivity.class);
+                        mMainActivity.startActivity(intentAcc);
+                        break;
+                    case CommonConstants.PASSWORD:
+                        Intent intentChange = new Intent(mMainActivity, ChangePasswordActivity.class);
+                        mMainActivity.startActivity(intentChange);
+                        break;
+                    case CommonConstants.POSITION:
+                        try {
+                            mIns = DataManager.getInstance().getRtnData().getIns_list();
+                            Intent intentPos = new Intent(mMainActivity, FutureInfoActivity.class);
+                            intentPos.putExtra("nav_position", 1);
+                            String instrument_id = new ArrayList<>(LatestFileManager.getMainInsList().keySet()).get(0);
+                            intentPos.putExtra("instrument_id", instrument_id);
+                            mMainActivity.startActivityForResult(intentPos, POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    case CommonConstants.TRADE:
+                        Intent intentDeal = new Intent(mMainActivity, TradeActivity.class);
+                        mMainActivity.startActivity(intentDeal);
+                        break;
+                    case CommonConstants.BANK:
+                        Intent intentBank = new Intent(mMainActivity, BankTransferActivity.class);
+                        mMainActivity.startActivity(intentBank);
+                        break;
+                    case CommonConstants.OPEN_ACCOUNT:
+                        //Intent intentOpenAccount = new Intent(mMainActivity, OpenAccountActivity.class);
+                        Intent intentOpenAccount = mMainActivity.getPackageManager().getLaunchIntentForPackage("com.cfmmc.app.sjkh");
+                        if (intentOpenAccount != null) mMainActivity.startActivity(intentOpenAccount);
+                        else {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://appficaos.cfmmc.com/apps/download.html"));
+                            mMainActivity.startActivity(browserIntent);
+                        }
+                        break;
+                    case CommonConstants.FEEDBACK:
+                        Intent intentFeed = new Intent(mMainActivity, FeedBackActivity.class);
+                        mMainActivity.startActivity(intentFeed);
+                        break;
+                    case CommonConstants.ABOUT:
+                        Intent intentAbout = new Intent(mMainActivity, AboutActivity.class);
+                        mMainActivity.startActivity(intentAbout);
+                        break;
+                    default:
+                        break;
+
+                }
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+
+            }
+        }
+        ));
     }
 
     public String getPreSubscribedQuotes() {
@@ -386,75 +525,8 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                 mBinding.vpContent.setCurrentItem(8, false);
                 refreshQuotesNavigation(ZHENGZHOUZUHE);
                 break;
-            case R.id.nav_login:
-                this.mCurItemId = mBinding.vpContent.getCurrentItem();
-                MenuItem menuLogin = mBinding.nvMenuRight.getMenu().findItem(mCurItemId);
-                menuLogin.setChecked(false);
-                String title = menuLogin.getTitle().toString();
-                if (LOGIN.equals(title)) {
-                    Intent intentLogin = new Intent(mMainActivity, LoginActivity.class);
-                    intentLogin.putExtra(ACTIVITY_TYPE, "MainActivityLoginMenu");
-                    mMainActivity.startActivity(intentLogin);
-                }
-                if (LOGOUT.equals(title)){
-                    DataManager.getInstance().IS_LOGIN = false;
-                    menuLogin.setTitle(LOGIN);
-                    mBinding.nvMenuRight.getMenu().findItem(R.id.nav_password).setVisible(false);
-                }
-                break;
-            case R.id.nav_account:
-                this.mCurItemId = mBinding.vpContent.getCurrentItem();
-                mBinding.nvMenuRight.getMenu().findItem(mCurItemId).setChecked(false);
-                Intent intentAcc = new Intent(mMainActivity, AccountActivity.class);
-                mMainActivity.startActivity(intentAcc);
-                break;
-            case R.id.nav_password:
-                this.mCurItemId = mBinding.vpContent.getCurrentItem();
-                mBinding.nvMenuRight.getMenu().findItem(mCurItemId).setChecked(false);
-                Intent intentChange = new Intent(mMainActivity, ChangePasswordActivity.class);
-                mMainActivity.startActivity(intentChange);
-                break;
-            case R.id.nav_position:
-                this.mCurItemId = mBinding.vpContent.getCurrentItem();
-                mBinding.nvMenuRight.getMenu().findItem(mCurItemId).setChecked(false);
-                try {
-                    mIns = DataManager.getInstance().getRtnData().getIns_list();
-                    Intent intentPos = new Intent(mMainActivity, FutureInfoActivity.class);
-                    intentPos.putExtra("nav_position", 1);
-                    String instrument_id = new ArrayList<>(LatestFileManager.getMainInsList().keySet()).get(0);
-                    intentPos.putExtra("instrument_id", instrument_id);
-                    mMainActivity.startActivityForResult(intentPos, POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            case R.id.nav_trade:
-                this.mCurItemId = mBinding.vpContent.getCurrentItem();
-                mBinding.nvMenuRight.getMenu().findItem(mCurItemId).setChecked(false);
-                Intent intentDeal = new Intent(mMainActivity, TradeActivity.class);
-                mMainActivity.startActivity(intentDeal);
-                break;
-            case R.id.nav_bank:
-                this.mCurItemId = mBinding.vpContent.getCurrentItem();
-                mBinding.nvMenuRight.getMenu().findItem(mCurItemId).setChecked(false);
-                Intent intentBank = new Intent(mMainActivity, BankTransferActivity.class);
-                mMainActivity.startActivity(intentBank);
-                break;
-            case R.id.nav_feedback:
-                this.mCurItemId = mBinding.vpContent.getCurrentItem();
-                mBinding.nvMenuRight.getMenu().findItem(mCurItemId).setChecked(false);
-                Intent intentFeed = new Intent(mMainActivity, FeedBackActivity.class);
-                mMainActivity.startActivity(intentFeed);
-                break;
-            case R.id.nav_about:
-                this.mCurItemId = mBinding.vpContent.getCurrentItem();
-                mBinding.nvMenuRight.getMenu().findItem(mCurItemId).setChecked(false);
-                Intent intentAbout = new Intent(mMainActivity, AboutActivity.class);
-                mMainActivity.startActivity(intentAbout);
-                break;
             default:
                 break;
-
         }
     }
 
@@ -650,7 +722,6 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
         UpdateEvent updateEvent = new UpdateEvent();
         updateEvent.setState(newState);
         EventBus.getDefault().post(updateEvent);
-
     }
 
 

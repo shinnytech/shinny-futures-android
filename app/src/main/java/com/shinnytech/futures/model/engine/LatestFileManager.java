@@ -3,6 +3,7 @@ package com.shinnytech.futures.model.engine;
 import android.content.Context;
 
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.utils.LogUtils;
@@ -25,9 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_INS_LIST;
 
@@ -200,10 +199,12 @@ public class LatestFileManager {
                 JSONObject subObject = jsonObject.getJSONObject(instrument_id);
                 String classN = subObject.optString("class");
                 if (!"FUTURE_CONT".equals(classN) && !"FUTURE".equals(classN) &&
-                        !"FUTURE_COMBINE".equals(classN) && !"SPOT".equals(classN)) {
+                        !"FUTURE_COMBINE".equals(classN) && !"FUTURE_OPTION".equals(classN)) {
                     continue;
                 }
                 String ins_name = subObject.optString("ins_name");
+                String ins_id = subObject.optString("ins_id");
+                String product_id = subObject.optString("product_id");
                 String exchange_id = subObject.optString("exchange_id");
                 String price_tick = subObject.optString("price_tick");
                 String price_decs = subObject.optString("price_decs");
@@ -211,10 +212,11 @@ public class LatestFileManager {
                 String sort_key = subObject.optString("sort_key");
                 String product_short_name = subObject.optString("product_short_name");
                 String py = subObject.optString("py");
-                String margin = subObject.optString("margin");
                 boolean expired = subObject.optBoolean("expired");
                 int pre_volume = subObject.optInt("pre_volume");
                 SearchEntity searchEntity = new SearchEntity();
+                searchEntity.setIns_id(ins_id);
+                searchEntity.setProduct_id(product_id);
                 searchEntity.setpTick(price_tick);
                 searchEntity.setpTick_decs(price_decs);
                 searchEntity.setInstrumentId(instrument_id);
@@ -223,7 +225,6 @@ public class LatestFileManager {
                 searchEntity.setExchangeId(exchange_id);
                 searchEntity.setSort_key(sort_key);
                 searchEntity.setPy(py);
-                searchEntity.setMargin(margin);
                 searchEntity.setExpired(expired);
                 searchEntity.setPre_volume(pre_volume);
                 QuoteEntity quoteEntity = new QuoteEntity();
@@ -235,12 +236,18 @@ public class LatestFileManager {
                     searchEntity.setUnderlying_symbol(underlying_symbol);
                     JSONObject subObjectFuture = jsonObject.optJSONObject(underlying_symbol);
                     int pre_volume_f = subObjectFuture.optInt("pre_volume");
+                    String product_id_f = subObjectFuture.optString("product_id");
+                    String ins_id_f = subObjectFuture.optString("ins_id");
                     searchEntity.setPre_volume(pre_volume_f);
-                    sMainInsList.put(instrument_id, quoteEntity);
-                    sMainInsListNameNav.put(instrument_id, ins_name.replace("主连", ""));
+                    searchEntity.setProduct_id(product_id_f);
+                    searchEntity.setIns_id(ins_id_f);
+                    //主力合约页直接显示标的合约
+                    quoteEntity.setInstrument_id(underlying_symbol);
+                    sMainInsList.put(underlying_symbol, quoteEntity);
+                    sMainInsListNameNav.put(underlying_symbol, ins_name.replace("主连", ""));
                 }
 
-                if ("FUTURE".equals(classN) || "SPOT".equals(classN)) {
+                if ("FUTURE".equals(classN)) {
                     switch (exchange_id) {
                         case "SHFE"://上期所
                             if (!expired)sShangqiInsList.put(instrument_id, quoteEntity);
@@ -279,6 +286,9 @@ public class LatestFileManager {
 
                 if ("FUTURE_COMBINE".equals(classN)) {
                     String leg1_symbol = subObject.optString("leg1_symbol");
+                    String leg2_symbol = subObject.optString("leg2_symbol");
+                    searchEntity.setLeg1_symbol(leg1_symbol);
+                    searchEntity.setLeg2_symbol(leg2_symbol);
                     JSONObject subObjectFuture = jsonObject.optJSONObject(leg1_symbol);
                     String product_short_name_leg = subObjectFuture.optString("product_short_name");
                     String py_leg = subObjectFuture.optString("py");
@@ -453,6 +463,160 @@ public class LatestFileManager {
             e.printStackTrace();
             return MathUtils.round(data, 2);
         }
+    }
+
+    /**
+     * date: 2019/1/10
+     * author: chenli
+     * description: 计算组合部分行情
+     */
+    public static QuoteEntity calculateCombineQuotePart(QuoteEntity quoteEntity){
+        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(quoteEntity.getInstrument_id());
+        if (searchEntity == null) return quoteEntity;
+        String leg1_symbol = searchEntity.getLeg1_symbol();
+        String leg2_symbol = searchEntity.getLeg2_symbol();
+        QuoteEntity quoteEntity_leg1 = DataManager.getInstance().getRtnData().getQuotes().get(leg1_symbol);
+        QuoteEntity quoteEntity_leg2 = DataManager.getInstance().getRtnData().getQuotes().get(leg2_symbol);
+        String last_leg1 = quoteEntity_leg1.getLast_price();
+        String last_leg2 = quoteEntity_leg2.getLast_price();
+        String ask_price_leg1 = quoteEntity_leg1.getAsk_price1();
+        String ask_price_leg2 = quoteEntity_leg2.getAsk_price1();
+        String ask_volume_leg1 = quoteEntity_leg1.getAsk_volume1();
+        String ask_volume_leg2 = quoteEntity_leg2.getAsk_volume1();
+        String bid_price_leg1 = quoteEntity_leg1.getBid_price1();
+        String bid_price_leg2 = quoteEntity_leg2.getBid_price1();
+        String bid_volume_leg1 = quoteEntity_leg1.getBid_volume1();
+        String bid_volume_leg2 = quoteEntity_leg2.getBid_volume1();
+        String pre_settlement_leg1 = quoteEntity_leg1.getPre_settlement();
+        String pre_settlement_leg2 = quoteEntity_leg2.getPre_settlement();
+        String last = MathUtils.subtract(last_leg1, last_leg2);
+        String ask_price = MathUtils.subtract(ask_price_leg1, bid_price_leg2);
+        String ask_volume = MathUtils.min(ask_volume_leg1, bid_volume_leg2);
+        String bid_price = MathUtils.subtract(bid_price_leg1, ask_price_leg2);
+        String bid_volume = MathUtils.min(bid_volume_leg1, ask_volume_leg2);
+        String pre_settlement = MathUtils.subtract(pre_settlement_leg1, pre_settlement_leg2);
+        quoteEntity.setLast_price(last);
+        quoteEntity.setAsk_price1(ask_price);
+        quoteEntity.setBid_price1(bid_price);
+        quoteEntity.setAsk_volume1(ask_volume);
+        quoteEntity.setBid_volume1(bid_volume);
+        quoteEntity.setPre_settlement(pre_settlement);
+        return quoteEntity;
+    }
+
+    /**
+     * date: 2019/1/10
+     * author: chenli
+     * description: 计算组合完整行情
+     */
+    public static QuoteEntity calculateCombineQuoteFull(QuoteEntity quoteEntity){
+        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(quoteEntity.getInstrument_id());
+        if (searchEntity == null) return quoteEntity;
+        String leg1_symbol = searchEntity.getLeg1_symbol();
+        String leg2_symbol = searchEntity.getLeg2_symbol();
+        QuoteEntity quoteEntity_leg1 = DataManager.getInstance().getRtnData().getQuotes().get(leg1_symbol);
+        QuoteEntity quoteEntity_leg2 = DataManager.getInstance().getRtnData().getQuotes().get(leg2_symbol);
+        String last_leg1 = quoteEntity_leg1.getLast_price();
+        String last_leg2 = quoteEntity_leg2.getLast_price();
+        String ask_price_leg1 = quoteEntity_leg1.getAsk_price1();
+        String ask_price_leg2 = quoteEntity_leg2.getAsk_price1();
+        String ask_volume_leg1 = quoteEntity_leg1.getAsk_volume1();
+        String ask_volume_leg2 = quoteEntity_leg2.getAsk_volume1();
+        String bid_price_leg1 = quoteEntity_leg1.getBid_price1();
+        String bid_price_leg2 = quoteEntity_leg2.getBid_price1();
+        String bid_volume_leg1 = quoteEntity_leg1.getBid_volume1();
+        String bid_volume_leg2 = quoteEntity_leg2.getBid_volume1();
+        String open_leg1 = quoteEntity_leg1.getOpen();
+        String open_leg2 = quoteEntity_leg2.getOpen();
+        String high_leg1 = quoteEntity_leg1.getHighest();
+        String high_leg2 = quoteEntity_leg2.getHighest();
+        String low_leg1 = quoteEntity_leg1.getLowest();
+        String low_leg2 = quoteEntity_leg2.getLowest();
+        String average_leg1 = quoteEntity_leg1.getAverage();
+        String average_leg2 = quoteEntity_leg2.getAverage();
+        String pre_close_leg1 = quoteEntity_leg1.getPre_close();
+        String pre_close_leg2 = quoteEntity_leg2.getPre_close();
+        String pre_settlement_leg1 = quoteEntity_leg1.getPre_settlement();
+        String pre_settlement_leg2 = quoteEntity_leg2.getPre_settlement();
+        String settlement_leg1 = quoteEntity_leg1.getSettlement();
+        String settlement_leg2 = quoteEntity_leg2.getSettlement();
+        String last = MathUtils.subtract(last_leg1, last_leg2);
+        String ask_price = MathUtils.subtract(ask_price_leg1, bid_price_leg2);
+        String ask_volume = MathUtils.min(ask_volume_leg1, bid_volume_leg2);
+        String bid_price = MathUtils.subtract(bid_price_leg1, ask_price_leg2);
+        String bid_volume = MathUtils.min(bid_volume_leg1, ask_volume_leg2);
+        String open = MathUtils.subtract(open_leg1, open_leg2);
+        String high = MathUtils.subtract(high_leg1, high_leg2);
+        String low = MathUtils.subtract(low_leg1, low_leg2);
+        String average = MathUtils.subtract(average_leg1, average_leg2);
+        String pre_close = MathUtils.subtract(pre_close_leg1, pre_close_leg2);
+        String pre_settlement = MathUtils.subtract(pre_settlement_leg1, pre_settlement_leg2);
+        String settlement = MathUtils.subtract(settlement_leg1, settlement_leg2);
+        quoteEntity.setLast_price(last);
+        quoteEntity.setAsk_price1(ask_price);
+        quoteEntity.setBid_price1(bid_price);
+        quoteEntity.setAsk_volume1(ask_volume);
+        quoteEntity.setBid_volume1(bid_volume);
+        quoteEntity.setOpen(open);
+        quoteEntity.setHighest(high);
+        quoteEntity.setLowest(low);
+        quoteEntity.setAverage(average);
+        quoteEntity.setPre_close(pre_close);
+        quoteEntity.setSettlement(settlement);
+        quoteEntity.setPre_settlement(pre_settlement);
+        return quoteEntity;
+    }
+
+    public static Map<String, KlineEntity> getCombineLeg1KLines(String ins){
+        Map<String, KlineEntity> klineEntities = new HashMap<>();
+        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(ins);
+        if (searchEntity == null) return klineEntities;
+        String leg1_symbol = searchEntity.getLeg1_symbol();
+        Map<String, KlineEntity> klineEntities_leg1 = DataManager.getInstance().getRtnData().getKlines().get(leg1_symbol);
+        if (klineEntities_leg1 == null)return klineEntities;
+        return klineEntities_leg1;
+    }
+
+    public static Map<String, KlineEntity.DataEntity> calculateCombineKLineData(String ins, String klineType){
+        Map<String, KlineEntity.DataEntity> dataEntities = new HashMap<>();
+        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(ins);
+        if (searchEntity == null) return dataEntities;
+        String leg1_symbol = searchEntity.getLeg1_symbol();
+        String leg2_symbol = searchEntity.getLeg2_symbol();
+        Map<String, KlineEntity> klineEntities_leg1 = DataManager.getInstance().getRtnData().getKlines().get(leg1_symbol);
+        Map<String, KlineEntity> klineEntities_leg2 = DataManager.getInstance().getRtnData().getKlines().get(leg2_symbol);
+        if (klineEntities_leg1 == null || klineEntities_leg2 == null)return dataEntities;
+        KlineEntity klineEntity_leg1 = klineEntities_leg1.get(klineType);
+        KlineEntity klineEntity_leg2 = klineEntities_leg2.get(klineType);
+        if (klineEntity_leg1 == null || klineEntity_leg2 == null)return dataEntities;
+        Map<String, KlineEntity.DataEntity> dataEntities_leg1 = klineEntity_leg1.getData();
+        Map<String, KlineEntity.DataEntity> dataEntities_leg2 = klineEntity_leg2.getData();
+        if (dataEntities_leg1.isEmpty() || dataEntities_leg2.isEmpty())return dataEntities;
+        KlineEntity.BindingEntity bindingEntity = klineEntity_leg1.getBinding().get(leg2_symbol);
+        if (bindingEntity == null)return dataEntities;
+        Map<String, String> bindingData = bindingEntity.getBindingData();
+        if (bindingData.isEmpty())return dataEntities;
+        for (Map.Entry<String, KlineEntity.DataEntity> entry : dataEntities_leg1.entrySet()){
+            String key_leg1 = entry.getKey();
+            String key_leg2 = bindingData.get(key_leg1);
+            KlineEntity.DataEntity dataEntity_leg2 = dataEntities_leg2.get(key_leg2);
+            KlineEntity.DataEntity dataEntity_leg1 = entry.getValue();
+            KlineEntity.DataEntity dataEntity = new KlineEntity.DataEntity();
+            String datetime = dataEntity_leg1.getDatetime();
+            String open = MathUtils.subtract(dataEntity_leg1.getOpen(), dataEntity_leg2.getOpen());
+            String high = MathUtils.subtract(dataEntity_leg1.getHigh(), dataEntity_leg2.getHigh());
+            String low = MathUtils.subtract(dataEntity_leg1.getLow(), dataEntity_leg2.getLow());
+            String close = MathUtils.subtract(dataEntity_leg1.getClose(), dataEntity_leg2.getClose());
+            String volume = MathUtils.min(dataEntity_leg1.getVolume(), dataEntity_leg2.getVolume());
+            dataEntity.setDatetime(datetime);
+            dataEntity.setOpen(open);
+            dataEntity.setHigh(high);
+            dataEntity.setLow(low);
+            dataEntity.setClose(close);
+            dataEntity.setVolume(volume);
+            dataEntities.put(key_leg1, dataEntity);
+        }
+        return dataEntities;
     }
 
     /**

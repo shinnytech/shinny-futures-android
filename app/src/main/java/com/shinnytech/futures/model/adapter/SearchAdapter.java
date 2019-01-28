@@ -15,7 +15,9 @@ import com.shinnytech.futures.utils.LogUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -36,7 +38,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ItemViewHo
         this.sContext = context;
         this.mData = new ArrayList<>(LatestFileManager.getSearchEntitiesHistory().values());
         this.mDataCopy = new ArrayList<>(LatestFileManager.getSearchEntitiesHistory().values());
-        this.mDataOriginal = new ArrayList<>(LatestFileManager.getSearchEntities().values());
+        this.mDataOriginal = new ArrayList(LatestFileManager.getSearchEntities().values());
     }
 
     public void setOnItemClickListener(OnItemClickListener mOnItemClickListener) {
@@ -69,14 +71,43 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ItemViewHo
             mData.addAll(mDataCopy);
         } else {
             text = text.toLowerCase();
+            List<SearchEntity> data0 = new ArrayList<>();
+            List<SearchEntity> data1 = new ArrayList<>();
+            List<SearchEntity> data2 = new ArrayList<>();
+            List<SearchEntity> data3 = new ArrayList<>();
+            List<SearchEntity> data4 = new ArrayList<>();
             for (SearchEntity searchEntity : mDataOriginal) {
-                if (searchEntity.getPy().toLowerCase().contains(text)
-                        || searchEntity.getInstrumentName().toLowerCase().contains(text)
-                        || searchEntity.getInstrumentId().toLowerCase().contains(text)
-                        || searchEntity.getExchangeName().toLowerCase().contains(text))
-                    mData.add(searchEntity);
+                if (searchEntity.getIns_id().toLowerCase().contains(text)){
+                    data0.add(searchEntity);
+                    continue;
+                }
+                if (searchEntity.getPy().toLowerCase().contains(text)){
+                    data1.add(searchEntity);
+                    continue;
+                }
+                if (searchEntity.getInstrumentName().toLowerCase().contains(text)){
+                    data2.add(searchEntity);
+                    continue;
+                }
+                if (searchEntity.getExchangeId().toLowerCase().contains(text)){
+                    data3.add(searchEntity);
+                    continue;
+                }
+                if (searchEntity.getExchangeName().toLowerCase().contains(text)){
+                    data4.add(searchEntity);
+                    continue;
+                }
             }
-            Collections.sort(mData);
+            Collections.sort(data0);
+            Collections.sort(data1);
+            Collections.sort(data2);
+            Collections.sort(data3);
+            Collections.sort(data4);
+            mData.addAll(data0);
+            mData.addAll(data1);
+            mData.addAll(data2);
+            mData.addAll(data3);
+            mData.addAll(data4);
         }
         notifyDataSetChanged();
     }
@@ -130,11 +161,12 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ItemViewHo
             searchEntity = mData.get(getLayoutPosition());
             if (searchEntity == null) return;
             instrument_id = searchEntity.getInstrumentId();
+            String ins_id = searchEntity.getIns_id();
             mBinding.tvSearchInstrumentName.setText(searchEntity.getInstrumentName());
-            if (instrument_id != null && instrument_id.contains("&"))
+            if (ins_id.contains("&"))
                 mBinding.tvSearchInstrumentId.setText("");
             else {
-                String name = "(" + instrument_id + ")";
+                String name = "(" + ins_id + ")";
                 mBinding.tvSearchInstrumentId.setText(name);
             }
             mBinding.tvSearchExchangeName.setText(searchEntity.getExchangeName());

@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.PopupMenu;
 import android.text.Editable;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.databinding.FragmentTransactionBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
@@ -34,9 +36,10 @@ import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.KeyboardUtils;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
+import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -67,6 +70,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     private String mDirection;
 
     private DataManager sDataManager = DataManager.getInstance();
+    private Context sContext = BaseApplication.getContext();
     private BroadcastReceiver mReceiverAccount;
     private BroadcastReceiver mReceiverPrice;
     /**
@@ -86,6 +90,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     private boolean mIsClosePriceShow = false;
     private boolean mIsRefreshPosition = true;
     private FragmentTransactionBinding mBinding;
+    private boolean mIsShowDialog;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -96,6 +101,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             mInstrumentIdTransaction = searchEntity.getUnderlying_symbol();
         else mInstrumentIdTransaction = mInstrumentId;
         mExchangeId = mInstrumentIdTransaction.split("\\.")[0];
+        mIsShowDialog = (boolean) SPUtils.get(sContext, CommonConstants.CONFIG_ORDER_CONFIRM, true);
     }
 
     @Nullable
@@ -397,14 +403,45 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     }
 
     /**
+     * date: 2019/1/11
+     * author: chenli
+     * description: 设置价格颜色
+     */
+    private void setPriceColor(QuoteEntity quoteEntity){
+        String pre_settlement = LatestFileManager.saveScaleByPtick(quoteEntity.getPre_settlement(),
+                quoteEntity.getInstrument_id());
+        setTextViewColor(mBinding.tvIdTransactionLastPrice, pre_settlement);
+        setTextViewColor(mBinding.tvIdTransactionAskPrice1, pre_settlement);
+        setTextViewColor(mBinding.tvIdTransactionBidPrice1, pre_settlement);
+    }
+
+    private void setTextViewColor(TextView textView, String pre_settlement){
+        try{
+            String data = textView.getText().toString();
+            if ("".equals(data))return;
+            float value = Float.parseFloat(data) - Float.parseFloat(pre_settlement);
+            if (value < 0) textView.setTextColor(ContextCompat.getColor(sContext, R.color.ask));
+            else if (value > 0 )textView.setTextColor(ContextCompat.getColor(sContext, R.color.bid));
+            else textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * date: 7/9/17
      * author: chenli
      * description: 刷新价格信息
      */
     private void refreshPrice() {
         QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
-        if (quoteEntity == null) return;
+        if (quoteEntity == null)return;
+        if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")){
+            quoteEntity = CloneUtils.clone(quoteEntity);
+            quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
+        }
         mBinding.setQuote(quoteEntity);
+        setPriceColor(quoteEntity);
         //控制下单板的显示模式
         switch (sDataManager.PRICE_TYPE) {
             case QUEUED_PRICE:
@@ -472,13 +509,6 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
         if (accountEntity == null) return;
         mBinding.setAccount(accountEntity);
-        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentIdTransaction);
-        if (searchEntity == null) return;
-        String margin = searchEntity.getMargin();
-        if (margin.isEmpty()) mBinding.maxVolume.setText("0");
-        else
-            mBinding.maxVolume.setText(MathUtils.round(MathUtils.divide(accountEntity.getAvailable(), margin), 0));
-
     }
 
     private void registerBroaderCast() {
@@ -901,63 +931,73 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                             String direction_title, String direction_title1, final String direction,
                             final String offset, final String offset1, final int volume, final int volume1,
                             final String price_type, final double price) {
-        mIsRefreshPosition = false;
-        final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
-        View view = View.inflate(getActivity(), R.layout.view_dialog_insert_order, null);
-        Window dialogWindow = dialog.getWindow();
-        if (dialogWindow != null) {
-            dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
-            WindowManager.LayoutParams lp = dialogWindow.getAttributes();
-            dialogWindow.setGravity(Gravity.CENTER);
-            lp.width = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_width1);
-            lp.height = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_height1);
-            dialogWindow.setAttributes(lp);
-        }
-        dialog.setContentView(view);
-        dialog.setCancelable(false);
-        TextView tv_instrument_id = view.findViewById(R.id.order_instrument_id);
-        TextView tv_price = view.findViewById(R.id.order_price);
-        TextView tv_direction = view.findViewById(R.id.order_direction);
-        TextView tv_volume = view.findViewById(R.id.order_volume);
-        TextView ok = view.findViewById(R.id.order_ok);
-        TextView cancel = view.findViewById(R.id.order_cancel);
-        TextView tv_comma1 = view.findViewById(R.id.order_comma1);
-        tv_comma1.setVisibility(View.VISIBLE);
-        TextView tv_comma2 = view.findViewById(R.id.order_comma2);
-        tv_comma2.setVisibility(View.VISIBLE);
-        TextView tv_direction1 = view.findViewById(R.id.order_direction1);
-        tv_direction1.setVisibility(View.VISIBLE);
-        TextView tv_volume1 = view.findViewById(R.id.order_volume1);
-        tv_volume1.setVisibility(View.VISIBLE);
-        TextView tv_unit = view.findViewById(R.id.order_unit);
-        tv_unit.setVisibility(View.VISIBLE);
-        tv_instrument_id.setText(instrument_id);
-        tv_price.setText(price + "");
-        tv_direction.setText(direction_title);
-        tv_direction1.setText(direction_title1);
-        tv_volume.setText(volume + "");
-        tv_volume1.setText(volume1 + "");
-        ok.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (BaseApplication.getWebSocketService() != null) {
-                    BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
-                    BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, price);
+        if (mIsShowDialog){
+            mIsRefreshPosition = false;
+            final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
+            View view = View.inflate(getActivity(), R.layout.view_dialog_insert_order, null);
+            Window dialogWindow = dialog.getWindow();
+            if (dialogWindow != null) {
+                dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+                WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+                dialogWindow.setGravity(Gravity.CENTER);
+                lp.width = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_width1);
+                lp.height = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_height1);
+                dialogWindow.setAttributes(lp);
+            }
+            dialog.setContentView(view);
+            dialog.setCancelable(false);
+            TextView tv_instrument_id = view.findViewById(R.id.order_instrument_id);
+            TextView tv_price = view.findViewById(R.id.order_price);
+            TextView tv_direction = view.findViewById(R.id.order_direction);
+            TextView tv_volume = view.findViewById(R.id.order_volume);
+            TextView ok = view.findViewById(R.id.order_ok);
+            TextView cancel = view.findViewById(R.id.order_cancel);
+            TextView tv_comma1 = view.findViewById(R.id.order_comma1);
+            tv_comma1.setVisibility(View.VISIBLE);
+            TextView tv_comma2 = view.findViewById(R.id.order_comma2);
+            tv_comma2.setVisibility(View.VISIBLE);
+            TextView tv_direction1 = view.findViewById(R.id.order_direction1);
+            tv_direction1.setVisibility(View.VISIBLE);
+            TextView tv_volume1 = view.findViewById(R.id.order_volume1);
+            tv_volume1.setVisibility(View.VISIBLE);
+            TextView tv_unit = view.findViewById(R.id.order_unit);
+            tv_unit.setVisibility(View.VISIBLE);
+            tv_instrument_id.setText(instrument_id);
+            tv_price.setText(price + "");
+            tv_direction.setText(direction_title);
+            tv_direction1.setText(direction_title1);
+            tv_volume.setText(volume + "");
+            tv_volume1.setText(volume1 + "");
+            ok.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (BaseApplication.getWebSocketService() != null) {
+                        BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
+                        BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, price);
+                    }
+                    refreshPosition();
+                    dialog.dismiss();
+                    mIsRefreshPosition = true;
                 }
-                refreshPosition();
-                dialog.dismiss();
-                mIsRefreshPosition = true;
+            });
+            cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    refreshPosition();
+                    dialog.dismiss();
+                    mIsRefreshPosition = true;
+                }
+            });
+            dialog.show();
+        }else {
+            if (BaseApplication.getWebSocketService() != null) {
+                BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
+                BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, price);
             }
-        });
-        cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                refreshPosition();
-                dialog.dismiss();
-                mIsRefreshPosition = true;
-            }
-        });
-        dialog.show();
+            refreshPosition();
+            mIsRefreshPosition = true;
+        }
+
     }
 
     /**
@@ -968,49 +1008,57 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     private void initDialog(final String exchange_id, final String instrument_id,
                             String direction_title, final String direction, final String offset, final int volume,
                             final String price_type, final double price) {
-        mIsRefreshPosition = false;
-        final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
-        View view = View.inflate(getActivity(), R.layout.view_dialog_insert_order, null);
-        Window dialogWindow = dialog.getWindow();
-        if (dialogWindow != null) {
-            dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
-            WindowManager.LayoutParams lp = dialogWindow.getAttributes();
-            dialogWindow.setGravity(Gravity.CENTER);
-            lp.width = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_width);
-            lp.height = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_height);
-            dialogWindow.setAttributes(lp);
+        if (mIsShowDialog){
+            mIsRefreshPosition = false;
+            final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
+            View view = View.inflate(getActivity(), R.layout.view_dialog_insert_order, null);
+            Window dialogWindow = dialog.getWindow();
+            if (dialogWindow != null) {
+                dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+                WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+                dialogWindow.setGravity(Gravity.CENTER);
+                lp.width = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_width);
+                lp.height = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_height);
+                dialogWindow.setAttributes(lp);
+            }
+            dialog.setContentView(view);
+            dialog.setCancelable(false);
+            TextView tv_instrument_id = view.findViewById(R.id.order_instrument_id);
+            TextView tv_price = view.findViewById(R.id.order_price);
+            TextView tv_direction = view.findViewById(R.id.order_direction);
+            TextView tv_volume = view.findViewById(R.id.order_volume);
+            TextView ok = view.findViewById(R.id.order_ok);
+            TextView cancel = view.findViewById(R.id.order_cancel);
+            tv_instrument_id.setText(instrument_id);
+            tv_price.setText(price + "");
+            tv_direction.setText(direction_title);
+            tv_volume.setText(volume + "");
+            ok.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (BaseApplication.getWebSocketService() != null)
+                        BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
+                    refreshPosition();
+                    dialog.dismiss();
+                    mIsRefreshPosition = true;
+                }
+            });
+            cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    refreshPosition();
+                    dialog.dismiss();
+                    mIsRefreshPosition = true;
+                }
+            });
+            dialog.show();
+        }else {
+            if (BaseApplication.getWebSocketService() != null)
+                BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
+            refreshPosition();
+            mIsRefreshPosition = true;
         }
-        dialog.setContentView(view);
-        dialog.setCancelable(false);
-        TextView tv_instrument_id = view.findViewById(R.id.order_instrument_id);
-        TextView tv_price = view.findViewById(R.id.order_price);
-        TextView tv_direction = view.findViewById(R.id.order_direction);
-        TextView tv_volume = view.findViewById(R.id.order_volume);
-        TextView ok = view.findViewById(R.id.order_ok);
-        TextView cancel = view.findViewById(R.id.order_cancel);
-        tv_instrument_id.setText(instrument_id);
-        tv_price.setText(price + "");
-        tv_direction.setText(direction_title);
-        tv_volume.setText(volume + "");
-        ok.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (BaseApplication.getWebSocketService() != null)
-                    BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
-                refreshPosition();
-                dialog.dismiss();
-                mIsRefreshPosition = true;
-            }
-        });
-        cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                refreshPosition();
-                dialog.dismiss();
-                mIsRefreshPosition = true;
-            }
-        });
-        dialog.show();
+
     }
 
     public KeyboardUtils getKeyboardUtilsPrice() {

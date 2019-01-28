@@ -101,7 +101,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemViewHold
             try {
                 String instrument_id = orderEntity.getExchange_id() + "." + orderEntity.getInstrument_id();
                 SearchEntity insName = LatestFileManager.getSearchEntities().get(instrument_id);
-                mBinding.orderName.setText(insName == null ? instrument_id : insName.getInstrumentName());
+                mBinding.orderName.setText(insName == null ? orderEntity.getInstrument_id() : insName.getInstrumentName());
                 mBinding.orderStatus.setText(orderEntity.getLast_msg());
                 switch (orderEntity.getOffset()) {
                     case "OPEN":

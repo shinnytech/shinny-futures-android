@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black_light"
+        android:orientation="vertical">
+
+        <include layout="@layout/view_toolbar"></include>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ScrollView
+                android:background="@color/para_nav"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent">
+                <RadioGroup
+                    android:id="@+id/para_nav"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                    <RadioButton
+                        android:id="@+id/para_ma"
+                        android:checked="true"
+                        android:background="@drawable/bgcolor_setting_nav"
+                        android:textColor="@color/white"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:text="MA"
+                        android:button="@null"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp" />
+
+                    <!--<RadioButton-->
+                        <!--android:id="@+id/para_expma"-->
+                        <!--android:background="@drawable/bgcolor_setting_nav"-->
+                        <!--android:textColor="@color/white"-->
+                        <!--android:layout_gravity="center"-->
+                        <!--android:gravity="center"-->
+                        <!--android:text="EXPMA"-->
+                        <!--android:button="@null"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="40dp" />-->
+
+                    <!--<RadioButton-->
+                        <!--android:id="@+id/para_sar"-->
+                        <!--android:background="@drawable/bgcolor_setting_nav"-->
+                        <!--android:textColor="@color/white"-->
+                        <!--android:layout_gravity="center"-->
+                        <!--android:gravity="center"-->
+                        <!--android:text="SAR"-->
+                        <!--android:button="@null"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="40dp" />-->
+
+                </RadioGroup>
+            </ScrollView>
+
+            <LinearLayout
+                android:background="@color/para_content"
+                android:orientation="vertical"
+                android:layout_weight="3"
+                android:layout_width="@dimen/padding_0dp"
+                android:layout_height="match_parent">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/content_rv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:id="@+id/para_save"
+                    android:textSize="@dimen/font_size_normal"
+                    android:textColor="@color/white"
+                    android:background="@drawable/para_selector"
+                    android:layout_margin="@dimen/margin_5dp"
+                    android:gravity="center"
+                    android:layout_gravity="center"
+                    android:text="保存修改"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp" />
+
+                <TextView
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:id="@+id/para_reset"
+                    android:textSize="@dimen/font_size_normal"
+                    android:textColor="@color/white"
+                    android:background="@drawable/para_selector"
+                    android:layout_margin="@dimen/margin_5dp"
+                    android:gravity="center"
+                    android:layout_gravity="center"
+                    android:text="恢复默认"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp" />
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+</layout>

@@ -14,12 +14,12 @@ import android.widget.RadioGroup;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.controller.FutureInfoActivityPresenter;
 import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
+import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.controller.FutureInfoActivityPresenter;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
@@ -77,8 +77,7 @@ public class FutureInfoActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         mFutureInfoActivityPresenter.checkLoginState();
-        if (BaseApplication.getWebSocketService() != null)
-            BaseApplication.getWebSocketService().sendSubscribeQuote(mInstrumentId);
+        sendSubscribeQuote(mInstrumentId);
     }
 
     @Override
@@ -178,7 +177,7 @@ public class FutureInfoActivity extends BaseActivity {
                 }
                 break;
             case android.R.id.home:
-                if (mFutureInfoActivityPresenter.closeKeyboard())break;
+                if (mFutureInfoActivityPresenter.closeKeyboard()) break;
                 Intent intent = new Intent();
                 setResult(RESULT_OK, intent);
                 finish();
@@ -245,8 +244,7 @@ public class FutureInfoActivity extends BaseActivity {
         String instrument_id_new = data.getInstrument_id();
         if (!mInstrumentId.equals(instrument_id_new)) {
             mInstrumentId = instrument_id_new;
-            if (BaseApplication.getWebSocketService() != null)
-                BaseApplication.getWebSocketService().sendSubscribeQuote(mInstrumentId);
+            sendSubscribeQuote(instrument_id_new);
             mFutureInfoActivityPresenter.setInstrumentId(mInstrumentId);
             mFutureInfoActivityPresenter.setToolbarTitle();
             if (LatestFileManager.getOptionalInsList().containsKey(mInstrumentId)) {
@@ -255,6 +253,24 @@ public class FutureInfoActivity extends BaseActivity {
                 mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
             }
         }
+    }
+
+    /**
+     * date: 2019/1/10
+     * author: chenli
+     * description: 订阅合约行情
+     */
+    private void sendSubscribeQuote(String ins){
+        if (ins.contains("&") && ins.contains(" ")) {
+            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(ins);
+            if (searchEntity != null){
+                String leg1_symbol = searchEntity.getLeg1_symbol();
+                String leg2_symbol = searchEntity.getLeg2_symbol();
+                ins = ins + "," + leg1_symbol + "," + leg2_symbol;
+            }
+        }
+        if (BaseApplication.getWebSocketService() != null)
+            BaseApplication.getWebSocketService().sendSubscribeQuote(ins);
     }
 
     //交易服务器断开连接后发送一条信息，使信息页显示

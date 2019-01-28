@@ -24,6 +24,7 @@ import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.FragmentOrderBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
@@ -34,6 +35,7 @@ import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.model.adapter.OrderAdapter;
 import com.shinnytech.futures.model.listener.OrderDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
+import com.shinnytech.futures.utils.SPUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,6 +61,7 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
     private List<OrderEntity> mNewData = new ArrayList<>();
     private FragmentOrderBinding mBinding;
     private boolean mIsUpdate;
+    private boolean mIsShowDialog;
 
     /**
      * date: 7/14/17
@@ -123,6 +126,7 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
                 new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
         mAdapter = new OrderAdapter(getActivity(), mOldData);
         mBinding.rv.setAdapter(mAdapter);
+        mIsShowDialog = (boolean) SPUtils.get(BaseApplication.getContext(), CommonConstants.CONFIG_ORDER_CONFIRM, true);
     }
 
     protected void initEvent() {
@@ -153,11 +157,15 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
                 if (orderEntity != null) {
                     if (("ALIVE").equals(orderEntity.getStatus())) {
                         String order_id = orderEntity.getOrder_id();
-                        String instrument_id = orderEntity.getInstrument_id();
-                        String direction_title = ((TextView) view.findViewById(R.id.order_offset)).getText().toString();
-                        String volume = orderEntity.getVolume_left();
-                        String price = ((TextView) view.findViewById(R.id.order_price)).getText().toString();
-                        initDialog(order_id, instrument_id, direction_title, volume, price);
+                        if (mIsShowDialog){
+                            String instrument_id = orderEntity.getInstrument_id();
+                            String direction_title = ((TextView) view.findViewById(R.id.order_offset)).getText().toString();
+                            String volume = orderEntity.getVolume_left();
+                            String price = ((TextView) view.findViewById(R.id.order_price)).getText().toString();
+                            initDialog(order_id, instrument_id, direction_title, volume, price);
+                        }else {
+                            BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
+                        }
                     }
                 }
             }

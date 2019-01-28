@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@drawable/complex_border_checked_setting_nav" android:state_checked="true"></item>
+
+    <item android:drawable="@drawable/complex_border_normal_setting_nav"></item>
+
+</selector>

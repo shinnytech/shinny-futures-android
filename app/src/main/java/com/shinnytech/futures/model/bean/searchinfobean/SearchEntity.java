@@ -2,6 +2,8 @@ package com.shinnytech.futures.model.bean.searchinfobean;
 
 import android.support.annotation.NonNull;
 
+import com.shinnytech.futures.utils.LogUtils;
+
 /**
  * Created on 6/20/17.
  * Created by chenli.
@@ -22,6 +24,26 @@ public class SearchEntity implements Comparable<SearchEntity>{
     private String underlying_symbol = "";
     private boolean expired = false;
     private int pre_volume = 0;
+    private String leg1_symbol;
+    private String leg2_symbol;
+    private String product_id;
+    private String ins_id;
+
+    public String getLeg1_symbol() {
+        return leg1_symbol;
+    }
+
+    public void setLeg1_symbol(String leg1_symbol) {
+        this.leg1_symbol = leg1_symbol;
+    }
+
+    public String getLeg2_symbol() {
+        return leg2_symbol;
+    }
+
+    public void setLeg2_symbol(String leg2_symbol) {
+        this.leg2_symbol = leg2_symbol;
+    }
 
     public String getpTick_decs() {
         return pTick_decs;
@@ -127,13 +149,44 @@ public class SearchEntity implements Comparable<SearchEntity>{
         this.pre_volume = pre_volume;
     }
 
+    public String getProduct_id() {
+        return product_id;
+    }
+
+    public void setProduct_id(String product_id) {
+        this.product_id = product_id;
+    }
+
+    public String getIns_id() {
+        return ins_id;
+    }
+
+    public void setIns_id(String ins_id) {
+        this.ins_id = ins_id;
+    }
+
     @Override
     public int compareTo(@NonNull SearchEntity o) {
-        String instrument_id1 = this.instrumentId;
-        String instrument_id2 = o.instrumentId;
-        int pre_volume1 = this.pre_volume;
-        int pre_volume2 = o.pre_volume;
-        if (pre_volume1 != pre_volume2) return pre_volume2 - pre_volume1;
-        else return - instrument_id1.compareTo(instrument_id2);
+        String product_id1 = this.product_id;
+        String product_id2 = o.product_id;
+        if (product_id1.length() != product_id2.length()){
+            if (product_id1.isEmpty())return 1;
+            else if (product_id2.isEmpty())return -1;
+            return product_id1.length() - product_id2.length();
+        }else {
+            int key1 = product_id1.compareTo(product_id2);
+            if (key1 == 0){
+                int pre_volume1 = this.pre_volume;
+                int pre_volume2 = o.pre_volume;
+                int key2 = pre_volume2 - pre_volume1;
+                if (key2 == 0){
+                    String ins_id1 = this.ins_id;
+                    String ins_id2 = o.ins_id;
+                    return -ins_id1.compareTo(ins_id2);
+                }
+                return key2;
+            }
+            return key1;
+        }
     }
 }

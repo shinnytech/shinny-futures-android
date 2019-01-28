@@ -58,6 +58,7 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
     public Object getChangePayload(int oldItemPosition, int newItemPosition) {
         Bundle bundle = new Bundle();
         String instrumentId = mOldData.get(oldItemPosition).getInstrument_id();
+
         String latest_old = LatestFileManager.saveScaleByPtick(
                 mOldData.get(oldItemPosition).getLast_price(), instrumentId);
         String change_old = LatestFileManager.saveScaleByPtick(
@@ -67,10 +68,6 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
         String volume_old = mOldData.get(oldItemPosition).getVolume();
         String open_interest_old = mOldData.get(oldItemPosition).getOpen_interest();
 
-        String upper_limit_old = LatestFileManager.saveScaleByPtick(
-                mOldData.get(oldItemPosition).getUpper_limit(), instrumentId);
-        String lower_limit_old = LatestFileManager.saveScaleByPtick(
-                mOldData.get(oldItemPosition).getLower_limit(), instrumentId);
         String ask_price1_old = LatestFileManager.saveScaleByPtick(
                 mOldData.get(oldItemPosition).getAsk_price1(), instrumentId);
         String ask_volume1_old = mOldData.get(oldItemPosition).getAsk_volume1();
@@ -87,16 +84,15 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
         String volume_new = mNewData.get(newItemPosition).getVolume();
         String open_interest_new = mNewData.get(newItemPosition).getOpen_interest();
 
-        String upper_limit_new = LatestFileManager.saveScaleByPtick(
-                mNewData.get(newItemPosition).getUpper_limit(), instrumentId);
-        String lower_limit_new = LatestFileManager.saveScaleByPtick(
-                mNewData.get(newItemPosition).getLower_limit(), instrumentId);
         String ask_price1_new = LatestFileManager.saveScaleByPtick(
                 mNewData.get(newItemPosition).getAsk_price1(), instrumentId);
         String ask_volume1_new = mNewData.get(newItemPosition).getAsk_volume1();
         String bid_price1_new = LatestFileManager.saveScaleByPtick(
                 mNewData.get(newItemPosition).getBid_price1(), instrumentId);
         String bid_volume1_new = mNewData.get(newItemPosition).getBid_volume1();
+
+        String pre_settlement_new = LatestFileManager.saveScaleByPtick(mNewData.get(newItemPosition).getPre_settlement(), instrumentId);
+        bundle.putString("pre_settlement", pre_settlement_new);
 
         if (latest_old != null && latest_new != null) {
             if (!latest_old.equals(latest_new)) bundle.putString("latest", latest_new);
@@ -128,20 +124,6 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
                 bundle.putString("open_interest", open_interest_new);
         } else if (open_interest_old == null && open_interest_new != null) {
             bundle.putString("open_interest", open_interest_new);
-        }
-
-        if (upper_limit_old != null && upper_limit_new != null) {
-            if (!upper_limit_old.equals(upper_limit_new))
-                bundle.putString("upper_limit", upper_limit_new);
-        } else if (upper_limit_old == null && upper_limit_new != null) {
-            bundle.putString("upper_limit", upper_limit_new);
-        }
-
-        if (lower_limit_old != null && lower_limit_new != null) {
-            if (!lower_limit_old.equals(lower_limit_new))
-                bundle.putString("lower_limit", lower_limit_new);
-        } else if (lower_limit_old == null && lower_limit_new != null) {
-            bundle.putString("lower_limit", lower_limit_new);
         }
 
         if (ask_price1_old != null && ask_price1_new != null) {

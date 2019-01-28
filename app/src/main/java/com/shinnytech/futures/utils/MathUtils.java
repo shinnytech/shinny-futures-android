@@ -150,6 +150,16 @@ public class MathUtils {
         }
     }
 
+    public static String min(String v1, String v2) {
+        try {
+            BigDecimal a = new BigDecimal(v1);
+            BigDecimal b = new BigDecimal(v2);
+            return a.min(b).toString();
+        } catch (Exception e) {
+            return "-";
+        }
+    }
+
     /**
      * 使用java正则表达式去掉多余的.与0
      */

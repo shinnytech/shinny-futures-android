@@ -12,5 +12,5 @@
     <corners android:radius="10dp" />
     <!-- 外框，框線粗細，框線顏色 -->
 
-    <solid android:color="@color/colorLaunch"></solid>
+    <solid android:color="@color/launch"></solid>
 </shape>

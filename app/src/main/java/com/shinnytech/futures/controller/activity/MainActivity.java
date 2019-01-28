@@ -15,9 +15,14 @@ import android.view.MenuItem;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.controller.fragment.QuoteFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
 import com.shinnytech.futures.controller.MainActivityPresenter;
+import com.shinnytech.futures.model.bean.settingbean.NavigationRightEntity;
 import com.shinnytech.futures.model.engine.DataManager;
+import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -25,8 +30,10 @@ import org.greenrobot.eventbus.Subscribe;
 
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN;
+import static com.shinnytech.futures.constants.CommonConstants.LOGIN_JUMP_TO_LOG_IN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.LOGOUT;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
+import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
@@ -53,7 +60,9 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mLayoutID = R.layout.activity_main_drawer;
-        mTitle = DOMINANT;
+        if (LatestFileManager.getOptionalInsList().isEmpty())
+            mTitle = DOMINANT;
+        else mTitle = OPTIONAL;
         super.onCreate(savedInstanceState);
         EventBus.getDefault().register(this);
     }
@@ -80,7 +89,11 @@ public class MainActivity extends BaseActivity {
     //开机合约列表解析完毕刷新主力导航
     @Subscribe
     public void onEvent(String msg) {
-        if (DOMINANT.equals(msg)) mMainActivityPresenter.refreshQuotesNavigation(DOMINANT);
+        if (DOMINANT.equals(msg)) {
+            if (LatestFileManager.getOptionalInsList().isEmpty())
+                mMainActivityPresenter.refreshQuotesNavigation(DOMINANT);
+            else mMainActivityPresenter.refreshQuotesNavigation(OPTIONAL);
+        }
     }
 
     @Override
@@ -89,11 +102,11 @@ public class MainActivity extends BaseActivity {
         mMainActivityPresenter.resetNavigationItem();
         //合约详情页登录切回主页刷新右导航栏
         if (sDataManager.IS_LOGIN){
-            mBinding.nvMenuRight.getMenu().findItem(R.id.nav_login).setTitle(LOGOUT);
-            mBinding.nvMenuRight.getMenu().findItem(R.id.nav_password).setVisible(true);
+            mMainActivityPresenter.mNavigationRightAdapter.updateItem(0, CommonConstants.LOGOUT);
+            mMainActivityPresenter.mNavigationRightAdapter.addItem(3);
         }else {
-            mBinding.nvMenuRight.getMenu().findItem(R.id.nav_login).setTitle(LOGIN);
-            mBinding.nvMenuRight.getMenu().findItem(R.id.nav_password).setVisible(false);
+            mMainActivityPresenter.mNavigationRightAdapter.updateItem(0, CommonConstants.LOGIN);
+            mMainActivityPresenter.mNavigationRightAdapter.removeItem(3);
         }
     }
 
@@ -138,9 +151,8 @@ public class MainActivity extends BaseActivity {
     //断线刷新右导航
     private void refreshMenu() {
         DataManager.getInstance().IS_LOGIN = false;
-        MenuItem menuLogin = mBinding.nvMenuRight.getMenu().findItem(R.id.nav_login);
-        menuLogin.setTitle(LOGIN);
-        mBinding.nvMenuRight.getMenu().findItem(R.id.nav_password).setVisible(false);
+        mMainActivityPresenter.mNavigationRightAdapter.updateItem(0, CommonConstants.LOGIN);
+        mMainActivityPresenter.mNavigationRightAdapter.removeItem(3);
     }
 
     @Override

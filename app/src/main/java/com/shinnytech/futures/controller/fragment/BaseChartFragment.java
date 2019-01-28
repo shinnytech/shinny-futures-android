@@ -132,12 +132,12 @@ public class BaseChartFragment extends LazyLoadFragment {
     protected Calendar mCalendar;
     protected SimpleDateFormat mSimpleDateFormat;
     protected SparseArray<String> xVals;
-    protected Map<String, KlineEntity.DataEntity> mDataEntities;
     protected int mLayoutId;
     public String mFragmentType;
     public String mKlineType;
     private ViewDataBinding mViewDataBinding;
     protected boolean mIsUpdate;
+    protected boolean mFollowKLine;
 
     /**
      * date: 7/9/17
@@ -567,11 +567,29 @@ public class BaseChartFragment extends LazyLoadFragment {
         super.onResume();
         registerBroaderCast();
         if (BaseApplication.getWebSocketService() == null) return;
+//        String ins = getIns(instrument_id);
         if (CURRENT_DAY_FRAGMENT.equals(mFragmentType)) {
             BaseApplication.getWebSocketService().sendSetChart(instrument_id);
         } else {
             BaseApplication.getWebSocketService().sendSetChartKline(instrument_id, VIEW_WIDTH, mKlineType);
         }
+    }
+
+    /**
+     * date: 2019/1/10
+     * author: chenli
+     * description: 获取组合两腿
+     */
+    private String getIns(String ins){
+        if (ins.contains("&") && ins.contains(" ")) {
+            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(ins);
+            if (searchEntity != null){
+                String leg1_symbol = searchEntity.getLeg1_symbol();
+                String leg2_symbol = searchEntity.getLeg2_symbol();
+                ins = leg1_symbol + "," + leg2_symbol;
+            }
+        }
+        return ins;
     }
 
     @Override

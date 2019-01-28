@@ -13,14 +13,12 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.umeng.analytics.MobclickAgent;
 
@@ -106,12 +104,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         sDataManager = DataManager.getInstance();
         initData();
         initEvent();
+        updateToolbarFromNetwork(sContext, mTitle);
     }
 
     protected void onResume() {
         super.onResume();
         MobclickAgent.onResume(this);
-        updateToolbarFromNetwork(sContext, mTitle);
         refreshUI();
         registerBroaderCast();
     }

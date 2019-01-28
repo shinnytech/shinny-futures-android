@@ -2,6 +2,7 @@ package com.shinnytech.futures.model.engine;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.Toast;
 
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
@@ -298,22 +299,10 @@ public class DataManager {
                                 if (bindingEntity == null) {
                                     bindingEntity = new KlineEntity.BindingEntity();
                                 }
-                                Class clBinding = bindingEntity.getClass();
                                 while (iterator6.hasNext()) {
                                     String key6 = iterator6.next();
                                     if (bindingObject.isNull(key6))continue;
-                                    try {
-                                        Field f = clBinding.getDeclaredField(key6);
-                                        f.setAccessible(true);
-                                        f.set(bindingEntity, bindingObject.optString(key6));
-                                    } catch (NoSuchFieldException e) {
-                                        e.printStackTrace();
-                                        continue;
-                                    } catch (IllegalAccessException e) {
-                                        e.printStackTrace();
-                                        continue;
-                                    }
-
+                                    bindingEntity.getBindingData().put(key6, bindingObject.optString(key6));
                                 }
                                 bindingEntities.put(key5, bindingEntity);
                             }

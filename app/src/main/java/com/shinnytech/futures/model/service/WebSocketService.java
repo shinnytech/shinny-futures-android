@@ -29,6 +29,7 @@ import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.bean.accountinfobean.BrokerEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.ChartEntity;
+import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqCancelOrderEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqConfirmSettlementEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqInsertOrderEntity;
@@ -243,9 +244,15 @@ public class WebSocketService extends Service {
                                         mWebSocketClientMD.sendPing();
                                         String ins_list = sDataManager.getRtnData().getIns_list();
                                         if (ins_list != null) sendSubscribeQuote(ins_list);
-                                        else
+                                        else if (LatestFileManager.getOptionalInsList().isEmpty())
                                             sendSubscribeQuote(TextUtils.join(",",
                                                     new ArrayList(LatestFileManager.getMainInsList().keySet()).subList(0, LOAD_QUOTE_NUM)));
+                                        else {
+                                            Map<String, QuoteEntity> list = LatestFileManager.getOptionalInsList();
+                                            if (list.size() < LOAD_QUOTE_NUM) sendSubscribeQuote(TextUtils.join(",", new ArrayList(list.keySet())));
+                                            else sendSubscribeQuote(TextUtils.join(",",
+                                                    new ArrayList(list.keySet()).subList(0, LOAD_QUOTE_NUM)));
+                                        }
 
                                         Map<String, ChartEntity> chartEntityMap = sDataManager.getRtnData().getCharts();
                                         if (chartEntityMap.size() != 0) {

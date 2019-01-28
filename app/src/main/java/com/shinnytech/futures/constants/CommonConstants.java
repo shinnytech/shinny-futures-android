@@ -37,11 +37,13 @@ public final class CommonConstants {
     public static final String ZHENGZHOUZUHE = "郑州组合";
     public static final String LOGIN = "登录交易";
     public static final String LOGOUT = "退出交易";
+    public static final String SETTING = "选项设置";
     public static final String ACCOUNT = "资金详情";
     public static final String PASSWORD = "修改密码";
     public static final String POSITION = "持仓汇总";
     public static final String TRADE = "成交记录";
     public static final String BANK = "银期转帐";
+    public static final String OPEN_ACCOUNT = "在线开户";
     public static final String FEEDBACK = "问题反馈";
     public static final String ABOUT = "关于";
     public static final String OFFLINE = "交易、行情网络未连接！";
@@ -81,6 +83,7 @@ public final class CommonConstants {
 
     //页面跳转标志
     public static final String ACTIVITY_TYPE = "activity_type";
+    public static final int LOGIN_JUMP_TO_LOG_IN_ACTIVITY = 8;
     public static final int POSITION_JUMP_TO_LOG_IN_ACTIVITY = 1;
     public static final int ORDER_JUMP_TO_LOG_IN_ACTIVITY = 2;
     public static final int TRANSACTION_JUMP_TO_LOG_IN_ACTIVITY = 3;
@@ -109,6 +112,8 @@ public final class CommonConstants {
     public static final String USER_PRICE = "用户设置价";
 
     //默认配置
+    public static final String CONFIG_PARA_MA = "ma";
+    public static final String CONFIG_ORDER_CONFIRM = "orderConfirm";
     public static final String CONFIG_POSITION_LINE = "isPosition";
     public static final String CONFIG_ORDER_LINE = "isPending";
     public static final String CONFIG_AVERAGE_LINE = "isAverage";
@@ -122,5 +127,11 @@ public final class CommonConstants {
     public static final String CONFIG_KLINE_MINUTE_TYPE = "klineMinute";
     public static final String CONFIG_KLINE_SECOND_TYPE = "klineSecond";
 
+    //设置页信息
+    public static final String PARA_CHANGE = "指标参数修改";
+    public static final String CHART_SETTING = "图表设置";
+    public static final String TRANSACTION_SETTING = "交易设置";
+    public static final String ORDER_CONFIRM = "下单、撤单确认";
+    public static final String PARA_MA = "5,10,20,60,0,0";
 
 }

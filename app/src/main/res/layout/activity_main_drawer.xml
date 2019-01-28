@@ -71,13 +71,25 @@
             android:id="@+id/nv_menu_right"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_gravity="end"
-            android:background="@color/black_light"
-            app:itemIconTint="@color/white"
-            app:headerLayout="@layout/view_drawer_header_right"
-            app:itemTextColor="@color/menu_text_color"
-            app:menu="@menu/activity_main_drawer_right"
-            app:theme="@style/NavigationTheme"/>
+            android:layout_gravity="end">
+
+            <RelativeLayout
+                android:background="@color/black_light"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <include
+                    android:id="@+id/navigation_drawer_header_include"
+                    layout="@layout/view_drawer_header_right" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/navigation_right_rv"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/navigation_drawer_header_include"/>
+
+            </RelativeLayout>
+        </android.support.design.widget.NavigationView>
 
     </android.support.v4.widget.DrawerLayout>
 

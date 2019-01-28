@@ -1,5 +1,6 @@
 package com.shinnytech.futures.controller.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.LegendEntry;
+import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.CombinedData;
@@ -23,16 +25,16 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.highlight.ChartHighlighter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
+import com.github.mikephil.charting.listener.OnDrawLineChartTouchListener;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
-import com.shinnytech.futures.model.bean.futureinfobean.ChartEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
@@ -57,7 +59,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
 import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY;
 import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY_FRAGMENT;
 import static java.lang.Float.NaN;
@@ -92,6 +93,7 @@ public class CurrentDayFragment extends BaseChartFragment {
     private int mTradingDayEndIndex = 0;
     private int mLastIndex = 0;
     private float preSettlement = 1.0f;
+    private KlineEntity mKlineEntity;
 
     @Nullable
     @Override
@@ -122,6 +124,7 @@ public class CurrentDayFragment extends BaseChartFragment {
         mKlineType = CURRENT_DAY;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void initChart() {
         super.initChart();
@@ -130,6 +133,7 @@ public class CurrentDayFragment extends BaseChartFragment {
         CurrentDayMarkerView marker = new CurrentDayMarkerView(getActivity());
         marker.setChartView(mChart);
         mChart.setMarker(marker);
+//        mChart.setHighlightFullBarEnabled(true);
 
         MyXAxis xAxis = (MyXAxis) mChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -172,6 +176,25 @@ public class CurrentDayFragment extends BaseChartFragment {
         legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
         legend.setTextColor(Color.WHITE);
 
+        mChart.setOnTouchListener(new OnDrawLineChartTouchListener(){
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        float x = event.getX();
+                        float y = event.getY();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        break;
+                    default:
+                        break;
+                }
+                return super.onTouch(v, event);
+            }
+        });
+
         mChart.setOnChartGestureListener(new OnChartGestureListener() {
             @Override
             public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
@@ -191,6 +214,14 @@ public class CurrentDayFragment extends BaseChartFragment {
                 float tappedY = me.getY();
                 Highlight highlight = mChart.getHighlightByTouchPoint(tappedX, tappedY);
                 mChart.highlightValue(highlight, false);
+//                if (mFollowKLine){
+//                    Highlight highlight = mChart.getHighlightByTouchPoint(tappedX, tappedY);
+//                    mChart.highlightValue(highlight, false);
+//                }else {
+//                    Entry entry = mChart.getEntryByTouchPoint(tappedX, tappedY);
+//                    entry.setY(tappedY);
+//                }
+
             }
 
             @Override
@@ -212,6 +243,20 @@ public class CurrentDayFragment extends BaseChartFragment {
         });
     }
 
+    private void generateHorizontalLine(float x) {
+        try {
+            Map<String, KlineEntity.DataEntity> dataEntities = mKlineEntity.getData();
+            KlineEntity.DataEntity dataEntity = dataEntities.get(String.valueOf(x));
+            LimitLine limitLine = new LimitLine(Float.parseFloat(dataEntity.getClose()), "horizontal line");
+            limitLine.setLineWidth(0.7f);
+            limitLine.setLineColor(ContextCompat.getColor(getActivity(), R.color.text_red));
+            mChart.getAxisLeft().addLimitLine(limitLine);
+            mChart.invalidate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * date: 7/9/17
      * author: chenli
@@ -220,25 +265,17 @@ public class CurrentDayFragment extends BaseChartFragment {
     @Override
     protected void refreshKline() {
         try {
-            Map<String, KlineEntity> klineEntities = sDataManager.getRtnData().getKlines().get(instrument_id);
-            QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(instrument_id);
-            if (klineEntities == null || quoteEntity == null) return;
-            KlineEntity klineEntity = klineEntities.get(mKlineType);
-            if (klineEntity == null) return;
-            String last_id = klineEntity.getLast_id();
-            mDataEntities = klineEntity.getData();
-            preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
-            if (last_id == null || "-1".equals(last_id) || mDataEntities.isEmpty()) return;
-
-            int last_index_t = Integer.parseInt(last_id);
             //开始加载数据
             if (mChart.getData() != null && mChart.getData().getDataSetCount() > 0) {
                 LineData lineData = mChart.getLineData();
                 CombinedData combinedData = mChart.getCombinedData();
+                String last_id = mKlineEntity.getLast_id();
+                int last_index_t = Integer.parseInt(last_id);
+                Map<String, KlineEntity.DataEntity> dataEntities = mKlineEntity.getData();
 
                 if (last_index_t == mLastIndex) {
                     LogUtils.e("分时图刷新", false);
-                    KlineEntity.DataEntity dataEntity = mDataEntities.get(last_id);
+                    KlineEntity.DataEntity dataEntity = dataEntities.get(last_id);
                     if (dataEntity == null) return;
                     lineData.removeEntry(last_index_t, 0);
                     lineData.removeEntry(last_index_t, 1);
@@ -248,7 +285,7 @@ public class CurrentDayFragment extends BaseChartFragment {
                 } else {
                     LogUtils.e("分时图加载多个数据", false);
                     for (int i = mLastIndex + 1; i <= last_index_t; i++) {
-                        KlineEntity.DataEntity dataEntity = mDataEntities.get(i + "");
+                        KlineEntity.DataEntity dataEntity = dataEntities.get(i + "");
                         if (dataEntity == null) continue;
                         generateXAxisLabel(i, dataEntity);
                         generateLineDataEntry(last_index_t, lineData, dataEntity);
@@ -262,8 +299,26 @@ public class CurrentDayFragment extends BaseChartFragment {
                 mChart.invalidate();
             } else {
                 LogUtils.e("分时图初始化", true);
-                String trading_day_start_id = klineEntity.getTrading_day_start_id();
-                String trading_day_end_id = klineEntity.getTrading_day_end_id();
+                Map<String, KlineEntity> klineEntities = sDataManager.getRtnData().getKlines().get(instrument_id);
+                QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(instrument_id);
+//                if (instrument_id.contains("&") && instrument_id.contains(" ")) {
+//                    klineEntities = LatestFileManager.getCombineLeg1KLines(instrument_id);
+//                    quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
+//                }
+                if (klineEntities == null) return;
+                mKlineEntity = klineEntities.get(mKlineType);
+                if (mKlineEntity == null) return;
+                String last_id = mKlineEntity.getLast_id();
+                Map<String, KlineEntity.DataEntity> dataEntities = mKlineEntity.getData();
+//                if (instrument_id.contains("&") && instrument_id.contains(" ")) {
+//                    dataEntities = LatestFileManager.calculateCombineKLineData(instrument_id, mKlineType);
+//                }
+                if (last_id == null || "-1".equals(last_id) || dataEntities.isEmpty()) return;
+                int last_index_t = Integer.parseInt(last_id);
+                if (!"-".equals(quoteEntity.getPre_settlement()))
+                    preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
+                String trading_day_start_id = mKlineEntity.getTrading_day_start_id();
+                String trading_day_end_id = mKlineEntity.getTrading_day_end_id();
                 if (trading_day_start_id == null || trading_day_end_id == null
                         || "-1".equals(trading_day_start_id) || "-1".equals(trading_day_end_id))
                     return;
@@ -276,7 +331,7 @@ public class CurrentDayFragment extends BaseChartFragment {
                 List<Entry> averageChart = new ArrayList<>();
                 CombinedData combinedData = new CombinedData();
                 for (int index = mTradingDayStartIndex; index <= mLastIndex; index++) {
-                    KlineEntity.DataEntity dataEntity = mDataEntities.get(String.valueOf(index));
+                    KlineEntity.DataEntity dataEntity = dataEntities.get(String.valueOf(index));
                     if (dataEntity == null) continue;
                     generateXAxisLabel(index, dataEntity);
                     generateLineDataEntry(oneMinuteChart, averageChart, index, dataEntity);
@@ -290,8 +345,8 @@ public class CurrentDayFragment extends BaseChartFragment {
                 mChart.setVisibleXRangeMinimum(mTradingDayEndIndex - mTradingDayStartIndex);
                 ((MyXAxis) mChart.getXAxis()).setXLabels(mStringSparseArray);
                 mChart.invalidate();
-                int height = (int) mChart.getViewPortHandler().contentHeight();
-                int width = (int) (mChart.getViewPortHandler().contentWidth() / 5);
+                int height = (int) (mChart.getViewPortHandler().contentHeight() * 0.9);
+                int width = (int) (mChart.getViewPortHandler().contentWidth() / 6);
                 ((CurrentDayMarkerView)mChart.getMarker()).resize(width, height);
             }
         } catch (Exception ex) {
@@ -577,7 +632,7 @@ public class CurrentDayFragment extends BaseChartFragment {
             closeOi = findViewById(R.id.close_oi);
             deltaOi = findViewById(R.id.delta_oi);
             markViewState = "right";
-            simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+            simpleDateFormat = new SimpleDateFormat("yyyyMMdd", Locale.CHINA);
             calendar = Calendar.getInstance();
         }
 
@@ -585,8 +640,9 @@ public class CurrentDayFragment extends BaseChartFragment {
         public void refreshContent(Entry e, Highlight highlight) {
             int x = (int) e.getX();
             int index = x - 1;
-            KlineEntity.DataEntity dataEntity = mDataEntities.get(String.valueOf(x));
-            KlineEntity.DataEntity dataEntityPre = mDataEntities.get(String.valueOf(index >= mTradingDayStartIndex ? index : mTradingDayStartIndex));
+            Map<String, KlineEntity.DataEntity> dataEntities = mKlineEntity.getData();
+            KlineEntity.DataEntity dataEntity = dataEntities.get(String.valueOf(x));
+            KlineEntity.DataEntity dataEntityPre = dataEntities.get(String.valueOf(index >= mTradingDayStartIndex ? index : mTradingDayStartIndex));
             if (dataEntity != null && dataEntityPre != null) {
                 calendar.setTimeInMillis(Long.valueOf(dataEntity.getDatetime()) / 1000000);
                 String time = simpleDateFormat.format(calendar.getTime());
@@ -612,16 +668,19 @@ public class CurrentDayFragment extends BaseChartFragment {
                 this.changePercent.setText(changePercent);
                 this.volume.setText(volume);
                 this.volumeDelta.setText(volumeDelta);
-                if (volumeDelta.contains("-"))
-                    this.volumeDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_green));
-                else
-                    this.volumeDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_red));
                 this.closeOi.setText(closeOi);
                 this.deltaOi.setText(deltaOi);
-                if (deltaOi.contains("-"))
-                    this.deltaOi.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_green));
-                else
-                    this.deltaOi.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_red));
+                try {
+                    int volume_delta = Integer.parseInt(volumeDelta);
+                    if (volume_delta < 0)this.volumeDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_green));
+                    else this.volumeDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_red));
+
+                    int oi_delta = Integer.parseInt(deltaOi);
+                    if (oi_delta < 0)this.deltaOi.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_green));
+                    else this.deltaOi.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_red));
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
             }
             super.refreshContent(e, highlight);
         }

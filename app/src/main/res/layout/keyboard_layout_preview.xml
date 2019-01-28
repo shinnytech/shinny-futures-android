@@ -2,7 +2,7 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorAccent"
+    android:background="@color/launch"
     android:gravity="center"
     android:textSize="@dimen/font_size_large_high"
-    android:textStyle="bold"></TextView>
+    android:textStyle="bold"/>

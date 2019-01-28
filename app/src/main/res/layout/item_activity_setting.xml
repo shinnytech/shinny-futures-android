@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data></data>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical"
+            android:paddingStart="@dimen/margin_5dp"
+            android:paddingEnd="@dimen/margin_5dp"
+            android:id="@+id/title"
+            android:text="图表设置"
+            android:textColor="@color/bg_gray_light"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/setting_header"/>
+
+        <LinearLayout
+            android:id="@+id/setting_item"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingStart="@dimen/margin_5dp"
+            android:paddingEnd="@dimen/margin_5dp"
+            android:background="@drawable/setting_item_touch_bg"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:scaleType="center"
+                android:layout_gravity="center_vertical"
+                android:id="@+id/icon"
+                android:layout_width="40dp"
+                android:layout_height="40dp" />
+            <TextView
+                android:textColor="@color/white"
+                android:textSize="17sp"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:id="@+id/content"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="40dp" />
+            <ImageView
+                android:scaleType="center"
+                android:src="@mipmap/ic_chevron_right_white_24dp"
+                android:layout_gravity="center_vertical"
+                android:id="@+id/setting_jump"
+                android:layout_width="40dp"
+                android:layout_height="40dp" />
+            <ToggleButton
+                android:clickable="true"
+                android:focusable="true"
+                android:id="@+id/setting_toggle"
+                android:backgroundTint="@color/launch"
+                android:buttonTint="@color/launch"
+                android:textOff="否"
+                android:textOn="是"
+                android:layout_width="40dp"
+                android:layout_height="40dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</layout>

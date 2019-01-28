@@ -73,6 +73,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
+                    android:layout_gravity="center_vertical"
                     android:text="资金账号"
                     android:padding="@dimen/padding_10dp"
                     android:textColor="@color/gray"
@@ -117,6 +118,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
+                    android:layout_gravity="center_vertical"
                     android:text="登录密码"
                     android:padding="@dimen/padding_10dp"
                     android:textColor="@color/gray"
@@ -169,7 +171,7 @@
                 android:layout_height="30dp">
 
                 <CheckBox
-                    android:buttonTint="@color/colorLaunch"
+                    android:buttonTint="@color/launch"
                     android:layout_toStartOf="@id/tv_remember_account"
                     android:id="@+id/cb_remember_account"
                     android:layout_width="wrap_content"
@@ -194,7 +196,7 @@
                     android:layout_height="@dimen/margin_1dp"/>
 
                 <CheckBox
-                    android:buttonTint="@color/colorLaunch"
+                    android:buttonTint="@color/launch"
                     android:layout_marginStart="@dimen/margin_30dp"
                     android:layout_toRightOf="@id/baseline"
                     android:id="@+id/cb_remember_password"

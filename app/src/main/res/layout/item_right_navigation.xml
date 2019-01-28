@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data></data>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/setting_item"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingStart="@dimen/margin_5dp"
+            android:paddingEnd="@dimen/margin_5dp"
+            android:background="@drawable/setting_item_touch_bg"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:scaleType="center"
+                android:layout_gravity="center_vertical"
+                android:id="@+id/icon"
+                android:layout_width="40dp"
+                android:layout_height="40dp" />
+            <TextView
+                android:textStyle="bold"
+                android:layout_marginStart="@dimen/margin_10dp"
+                android:textColor="@color/white"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:id="@+id/content"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="40dp" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="@color/navigation_divider"/>
+
+    </LinearLayout>
+
+</layout>
