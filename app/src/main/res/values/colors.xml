@@ -132,4 +132,7 @@
     <!--参数修改页-->
     <color name="para_nav">#444444</color>
     <color name="para_content">#696969</color>
+
+    <!--k线周期设置页-->
+    <color name="kline_duration_button">#333333</color>
 </resources>

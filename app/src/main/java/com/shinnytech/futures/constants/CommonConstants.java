@@ -128,8 +128,9 @@ public final class CommonConstants {
     public static final String CONFIG_KLINE_SECOND_TYPE = "klineSecond";
 
     //设置页信息
-    public static final String PARA_CHANGE = "指标参数修改";
     public static final String CHART_SETTING = "图表设置";
+    public static final String PARA_CHANGE = "指标参数修改";
+    public static final String KLINE_DURATION = "K线周期设置";
     public static final String TRANSACTION_SETTING = "交易设置";
     public static final String ORDER_CONFIRM = "下单、撤单确认";
     public static final String PARA_MA = "5,10,20,60,0,0";

@@ -59,7 +59,7 @@ public class SettingAdapter extends RecyclerView.Adapter<SettingAdapter.ItemView
     }
 
     public interface SettingItemClickListener {
-        void onJump();
+        void onJump(String content);
     }
 
     class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -126,13 +126,13 @@ public class SettingAdapter extends RecyclerView.Adapter<SettingAdapter.ItemView
                         saveSettingConfig();
                     }else {
                         if (mSettingItemClickListener != null){
-                            mSettingItemClickListener.onJump();
+                            mSettingItemClickListener.onJump(mBinding.content.getText().toString());
                         }
                     }
                     break;
                 case R.id.setting_jump:
                     if (mSettingItemClickListener != null){
-                        mSettingItemClickListener.onJump();
+                        mSettingItemClickListener.onJump(mBinding.content.getText().toString());
                     }
                     break;
                 case R.id.setting_toggle:

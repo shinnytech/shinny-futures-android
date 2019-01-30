@@ -186,10 +186,6 @@ public class QuoteFragment extends LazyLoadFragment {
         }
     }
 
-    public QuoteAdapter getmAdapter() {
-        return mAdapter;
-    }
-
     private void initData() {
         mToolbarTitle = getActivity().findViewById(R.id.title_toolbar);
 
@@ -481,8 +477,6 @@ public class QuoteFragment extends LazyLoadFragment {
 
                                     mRecyclerView.setLayoutManager(
                                             new LinearLayoutManager(getActivity()));
-                                    mRecyclerView.addItemDecoration(
-                                            new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
                                     mRecyclerView.setAdapter(mDragDialogAdapter);
                                     final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.Callback() {
                                         @Override

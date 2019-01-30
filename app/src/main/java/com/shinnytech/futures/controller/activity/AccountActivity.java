@@ -1,29 +1,15 @@
 package com.shinnytech.futures.controller.activity;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.view.MenuItem;
-import android.view.View;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityAccountBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
-import com.shinnytech.futures.model.engine.DataManager;
 
 import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
-import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
-import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 7/7/17

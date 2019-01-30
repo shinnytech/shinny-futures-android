@@ -64,6 +64,12 @@
                 android:layout_height="40dp" />
         </LinearLayout>
 
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="@color/navigation_divider"/>
+
     </LinearLayout>
 
 </layout>

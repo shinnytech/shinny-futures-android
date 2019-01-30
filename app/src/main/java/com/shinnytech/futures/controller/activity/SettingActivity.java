@@ -33,8 +33,6 @@ public class SettingActivity extends BaseActivity {
     protected void initData() {
         mBinding = (ActivitySettingBinding) mViewDataBinding;
         mBinding.settingRv.setLayoutManager(new LinearLayoutManager(this));
-        mBinding.settingRv.addItemDecoration(
-                new DividerItemDecorationUtils(this, DividerItemDecorationUtils.VERTICAL_LIST));
         mBinding.settingRv.setItemAnimator(new DefaultItemAnimator());
         List<SettingEntity> settingEntities = new ArrayList<>();
         SettingEntity settingEntity = new SettingEntity();
@@ -44,13 +42,20 @@ public class SettingActivity extends BaseActivity {
         settingEntity.setJump(true);
 
         SettingEntity settingEntity1 = new SettingEntity();
-        settingEntity1.setTitle(CommonConstants.TRANSACTION_SETTING);
-        settingEntity1.setIcon(R.mipmap.ic_speaker_notes_white_24dp);
-        settingEntity1.setContent(CommonConstants.ORDER_CONFIRM);
-        settingEntity1.setJump(false);
+        settingEntity1.setTitle("");
+        settingEntity1.setIcon(R.mipmap.ic_watch_later_white_24dp);
+        settingEntity1.setContent(CommonConstants.KLINE_DURATION);
+        settingEntity1.setJump(true);
+
+        SettingEntity settingEntity2 = new SettingEntity();
+        settingEntity2.setTitle(CommonConstants.TRANSACTION_SETTING);
+        settingEntity2.setIcon(R.mipmap.ic_speaker_notes_white_24dp);
+        settingEntity2.setContent(CommonConstants.ORDER_CONFIRM);
+        settingEntity2.setJump(false);
 
         settingEntities.add(settingEntity);
         settingEntities.add(settingEntity1);
+        settingEntities.add(settingEntity2);
         mSettingAdapter = new SettingAdapter(this, settingEntities);
         mBinding.settingRv.setAdapter(mSettingAdapter);
     }
@@ -59,9 +64,20 @@ public class SettingActivity extends BaseActivity {
     protected void initEvent() {
         mSettingAdapter.setSettingItemClickListener(new SettingAdapter.SettingItemClickListener() {
             @Override
-            public void onJump() {
-                Intent paraIntent = new Intent(SettingActivity.this, ParaChangeActivity.class);
-                startActivity(paraIntent);
+            public void onJump(String content) {
+                switch (content){
+                    case CommonConstants.PARA_CHANGE:
+                        Intent paraIntent = new Intent(SettingActivity.this, ParaChangeActivity.class);
+                        startActivity(paraIntent);
+                        break;
+                    case CommonConstants.KLINE_DURATION:
+                        Intent klineIntent = new Intent(SettingActivity.this, KlineDurationActivity.class);
+                        startActivity(klineIntent);
+                        break;
+                    default:
+                        break;
+                }
+
             }
         });
     }
