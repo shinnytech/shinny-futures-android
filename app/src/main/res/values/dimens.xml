@@ -29,6 +29,7 @@
     <dimen name="line_width">1dp</dimen>
     <dimen name="line_width_half">0.5dp</dimen>
     <dimen name="radio_group_height">30dp</dimen>
+    <dimen name="radio_group_height_down">40dp</dimen>
     <dimen name="radio_group_height_small">20dp</dimen>
     <dimen name="spinner_height">35dp</dimen>
     <dimen name="image_view_size">45dp</dimen>

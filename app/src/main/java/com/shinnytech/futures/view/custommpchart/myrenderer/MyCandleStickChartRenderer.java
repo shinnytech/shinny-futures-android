@@ -2,9 +2,12 @@ package com.shinnytech.futures.view.custommpchart.myrenderer;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 
 import com.github.mikephil.charting.animation.ChartAnimator;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.CandleData;
 import com.github.mikephil.charting.data.CandleEntry;
 import com.github.mikephil.charting.data.Entry;
@@ -378,14 +381,28 @@ public class MyCandleStickChartRenderer extends CandleStickChartRenderer {
             if (!isInBoundsX(e, set))
                 continue;
 
-            float y = e.getClose() * mAnimator.getPhaseY();
 
-            MPPointD pix = mChart.getTransformer(set.getAxisDependency()).getPixelForValues(e.getX(), y);
+            float lowValue = e.getLow() * mAnimator.getPhaseY();
+            float highValue = e.getHigh() * mAnimator.getPhaseY();
+            MPPointD pix = mChart.getTransformer(set.getAxisDependency())
+                    .getPixelForValues(e.getX(), (lowValue + highValue) / 2f);
+            float xp = (float) pix.x;
 
-            high.setDraw((float) pix.x, (float) pix.y);
+            mHighlightPaint.setColor(set.getHighLightColor());
+            mHighlightPaint.setStrokeWidth(set.getHighlightLineWidth());
 
-            // draw the lines
-            drawHighlightLines(c, (float) pix.x, (float) pix.y, set);
+            float xMax = mViewPortHandler.contentRight();
+            float contentBottom = mViewPortHandler.contentBottom();
+            //绘制竖线
+            c.drawLine(xp, 40, xp, mChart.getHeight(), mHighlightPaint);
+
+            //判断是否画横线
+            float y = high.getDrawY();
+            if (y >= 0 && y <= contentBottom) {//在区域内即绘制横线
+                //绘制横线
+                c.drawLine(0, y, xMax, y, mHighlightPaint);
+            }
         }
     }
+
 }

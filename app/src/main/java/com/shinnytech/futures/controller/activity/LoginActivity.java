@@ -79,7 +79,7 @@ public class LoginActivity extends BaseActivity {
         if (SPUtils.contains(sContext, CONFIG_BROKER)) {
             String brokerName = (String) SPUtils.get(sContext, CONFIG_BROKER, "");
             mBinding.broker.setText(brokerName);
-        }else if (brokerList.length != 0){
+        }else if (brokerList != null && brokerList.length != 0){
             mBinding.broker.setText(brokerList[0]);
         }
 
@@ -471,7 +471,8 @@ public class LoginActivity extends BaseActivity {
                         break;
                     case 1:
                         String[] brokerList = activity.sDataManager.getBroker().getBrokers();
-                        if (activity.mBinding.broker.getText().toString().isEmpty() && brokerList.length != 0){
+                        if (activity.mBinding.broker.getText().toString().isEmpty()
+                                && brokerList != null && brokerList.length != 0){
                             activity.mBinding.broker.setText(brokerList[0]);
                         }
                         break;
@@ -493,7 +494,6 @@ public class LoginActivity extends BaseActivity {
             switch (requestCode){
                 case LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY:
                     String broker = data.getStringExtra("broker");
-                    LogUtils.e("broker"+broker, true);
                     mBinding.broker.setText(broker);
                     break;
                 default:

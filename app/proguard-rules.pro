@@ -211,3 +211,8 @@ public static final int *;
 
 #baidu
 -keep class com.baidu.mobstat.** { *; }
+
+#OSS
+-keep class com.alibaba.sdk.android.oss.** { *; }
+-dontwarn okio.**
+-dontwarn org.apache.commons.codec.binary.**

@@ -5,41 +5,37 @@
     <data></data>
 
     <LinearLayout
+        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="@dimen/layout_height_popup_fragment_quote"
-        android:background="@drawable/popup_item_touch_bg"
-        android:clickable="false"
-        android:focusable="false"
-        android:gravity="center"
         android:orientation="vertical">
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <TextView
+            <ImageView
                 android:id="@+id/tv_cut_dialog"
-                android:layout_width="@dimen/item_dialog_optional_drag_width"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="match_parent"
-                android:background="@drawable/popup_item_touch_bg"
                 android:clickable="true"
                 android:focusable="true"
+                android:background="@drawable/popup_item_touch_bg"
                 android:gravity="center"
-                android:drawableStart="@mipmap/ic_content_cut_black_18dp"
-                android:layout_marginEnd="@dimen/margin_20dp"
-                android:layout_marginStart="@dimen/margin_20dp"
-                android:padding="@dimen/padding_10dp" />
+                android:scaleType="center"
+                android:src="@mipmap/ic_content_cut_black_18dp" />
 
 
             <TextView
                 android:id="@+id/tv_id_dialog"
                 android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_weight="3"
                 android:layout_height="match_parent"
-                android:background="@drawable/popup_item_touch_bg"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
+                android:background="@color/dialog_optional"
                 android:maxLines="1"
                 app:autoSizeTextType="uniform"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal_high"
@@ -49,31 +45,29 @@
                 android:textColor="@color/dialog_optional_text"
                 android:textSize="@dimen/font_size_normal_high" />
 
-            <TextView
+            <ImageView
                 android:id="@+id/tv_top_dialog"
-                android:layout_width="@dimen/item_dialog_optional_drag_width"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:background="@drawable/popup_item_touch_bg"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:drawableStart="@mipmap/ic_vertical_align_top_black_18dp"
-                android:layout_marginEnd="@dimen/margin_5dp"
-                android:layout_marginStart="@dimen/margin_20dp"
-                android:padding="@dimen/padding_10dp" />
+                android:scaleType="center"
+                android:src="@mipmap/ic_vertical_align_top_black_18dp" />
 
-            <TextView
+            <ImageView
                 android:id="@+id/tv_drag_dialog"
-                android:layout_width="@dimen/item_dialog_optional_drag_width"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="match_parent"
-                android:background="@drawable/popup_item_touch_bg"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:drawableStart="@mipmap/ic_format_line_spacing_black_18dp"
-                android:layout_marginEnd="@dimen/margin_20dp"
-                android:layout_marginStart="@dimen/margin_5dp"
-                android:padding="@dimen/padding_10dp" />
+                android:background="@drawable/popup_item_touch_bg"
+                android:scaleType="center"
+                android:src="@mipmap/ic_format_line_spacing_black_18dp"/>
         </LinearLayout>
 
    <View

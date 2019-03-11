@@ -7,9 +7,11 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.RadioGroup;
 
 import com.shinnytech.futures.R;
@@ -20,7 +22,10 @@ import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.CloneUtils;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
+import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -29,12 +34,15 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.Map;
 
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
 import static com.shinnytech.futures.constants.CommonConstants.LOG_OUT;
+import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.ORDER_JUMP_TO_LOG_IN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.POSITION_JUMP_TO_LOG_IN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_JUMP_TO_LOG_IN_ACTIVITY;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
+import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
 
 /**
  * date: 7/7/17
@@ -48,6 +56,7 @@ public class FutureInfoActivity extends BaseActivity {
     private MenuItem mMenuItem;
     private FutureInfoActivityPresenter mFutureInfoActivityPresenter;
     private String mInstrumentId;
+    private BroadcastReceiver mReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +79,19 @@ public class FutureInfoActivity extends BaseActivity {
 
     @Override
     protected void refreshUI() {
+
+    }
+
+    private void refreshMD(){
+        if (mInstrumentId.contains("SHFE") || mInstrumentId.contains("INE")){
+            QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
+            if (quoteEntity == null)return;
+            if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")){
+                quoteEntity = CloneUtils.clone(quoteEntity);
+                quoteEntity = LatestFileManager.calculateCombineQuoteFull(quoteEntity);
+            }
+            mBinding.setQuote(quoteEntity);
+        }
 
     }
 
@@ -118,11 +140,28 @@ public class FutureInfoActivity extends BaseActivity {
             }
         };
         registerReceiver(mReceiverNetwork, new IntentFilter(NETWORK_STATE));
+
+        mReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String mDataString = intent.getStringExtra("msg");
+                switch (mDataString) {
+                    case MD_MESSAGE:
+                        refreshMD();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter(MD_BROADCAST_ACTION));
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -252,6 +291,11 @@ public class FutureInfoActivity extends BaseActivity {
             } else {
                 mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
             }
+            boolean mIsMD5 = (boolean) SPUtils.get(sContext, CONFIG_MD5, true);
+            if (!mInstrumentId.contains("SHFE")
+                    && !mInstrumentId.contains("INE"))mBinding.md.setVisibility(View.GONE);
+            else if (mIsMD5) mBinding.md.setVisibility(View.VISIBLE);
+            else mBinding.md.setVisibility(View.GONE);
         }
     }
 

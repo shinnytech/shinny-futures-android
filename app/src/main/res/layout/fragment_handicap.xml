@@ -12,11 +12,13 @@
             type="com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity"></variable>
     </data>
 
-    <LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    <LinearLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/content_future_info"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingTop="@dimen/padding_5dp"
         android:background="@color/down_fragment"
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
@@ -46,7 +48,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.ask_price1, handicap.instrument_id)}"
-                android:textColor="@color/white" />
+                android:textColor="@{LatestFileManager.setTextViewColor(handicap.ask_price1, handicap.pre_settlement)}" />
 
 
             <View
@@ -102,7 +104,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.bid_price1, handicap.instrument_id)}"
-                android:textColor="@color/white" />
+                android:textColor="@{LatestFileManager.setTextViewColor(handicap.bid_price1, handicap.pre_settlement)}" />
 
             <View
                 android:layout_width="1dp"
@@ -133,11 +135,6 @@
 
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/handicap_cross"></View>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -162,7 +159,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.last_price, handicap.instrument_id)}"
-                android:textColor="@color/white" />
+                android:textColor="@{LatestFileManager.setTextViewColor(handicap.last_price, handicap.pre_settlement)}" />
 
             <View
                 android:layout_width="1dp"
@@ -217,7 +214,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.open, handicap.instrument_id)}"
-                android:textColor="@color/white" />
+                android:textColor="@{LatestFileManager.setTextViewColor(handicap.open, handicap.pre_settlement)}" />
 
             <View
                 android:layout_width="1dp"
@@ -272,7 +269,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.highest, handicap.instrument_id)}"
-                android:textColor="@color/white" />
+                android:textColor="@{LatestFileManager.setTextViewColor(handicap.highest, handicap.pre_settlement)}" />
 
             <View
                 android:layout_width="1dp"
@@ -327,7 +324,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.lowest, handicap.instrument_id)}"
-                android:textColor="@color/white" />
+                android:textColor="@{LatestFileManager.setTextViewColor(handicap.lowest, handicap.pre_settlement)}" />
 
             <View
                 android:layout_width="1dp"

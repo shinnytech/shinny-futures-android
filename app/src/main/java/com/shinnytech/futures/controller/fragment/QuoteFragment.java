@@ -258,28 +258,15 @@ public class QuoteFragment extends LazyLoadFragment {
     private void sendSubscribeQuotes(List<String> insList) {
         if (BaseApplication.getWebSocketService() == null) return;
 
-        if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
+        if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle) || OPTIONAL.equals(mTitle)) {
             BaseApplication.getWebSocketService().
-                    sendSubscribeQuote(TextUtils.join(",", getCombineInsList(insList)));
+                    sendSubscribeQuote(TextUtils.join(",", LatestFileManager.getCombineInsList(insList)));
         } else {
             BaseApplication.getWebSocketService().
                     sendSubscribeQuote(TextUtils.join(",", insList));
         }
     }
 
-    private List<String> getCombineInsList(List<String> data) {
-        List<String> insList = new ArrayList<>();
-        for (String ins : data) {
-            insList.add(ins);
-            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(ins);
-            if (searchEntity == null) continue;
-            String leg1_symbol = searchEntity.getLeg1_symbol();
-            String leg2_symbol = searchEntity.getLeg2_symbol();
-            insList.add(leg1_symbol);
-            insList.add(leg2_symbol);
-        }
-        return insList;
-    }
 
     protected void initEvent() {
 
@@ -598,8 +585,9 @@ public class QuoteFragment extends LazyLoadFragment {
                 //防止合约页切换时,前一页的数据加载
                 if (mNewData.containsKey(ins)) {
                     QuoteEntity quoteEntity = CloneUtils.clone(mDataManager.getRtnData().getQuotes().get(ins));
-                    if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)){
-                        quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
+                    if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle) || OPTIONAL.equals(mTitle)){
+                        if (ins.contains("&") && ins.contains(" "))
+                            quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
                     }
                     mNewData.put(ins, quoteEntity);
                 }

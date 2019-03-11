@@ -1,7 +1,10 @@
 package com.shinnytech.futures.model.engine;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
+import android.widget.TextView;
 
+import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
@@ -14,6 +17,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
@@ -28,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static android.content.Context.MODE_PRIVATE;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_INS_LIST;
 
 /**
@@ -189,7 +194,7 @@ public class LatestFileManager {
      */
     public static void initInsList(File latestFile) {
         LogUtils.e("合约列表解析开始", true);
-        String latest = readLatestFile(latestFile.getName());
+        String latest = readFile(latestFile.getName());
         if (latest == null) return;
         try {
             jsonObject = new JSONObject(latest);
@@ -465,6 +470,41 @@ public class LatestFileManager {
         }
     }
 
+    public static int setTextViewColor(String data, String pre_settlement){
+        try{
+            float value = Float.parseFloat(data) - Float.parseFloat(pre_settlement);
+            if (value < 0) return ContextCompat.getColor(BaseApplication.getContext(), R.color.ask);
+            else if (value > 0 )return ContextCompat.getColor(BaseApplication.getContext(), R.color.bid);
+            else return ContextCompat.getColor(BaseApplication.getContext(), R.color.white);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ContextCompat.getColor(BaseApplication.getContext(), R.color.white);
+        }
+    }
+
+
+    /**
+     * date: 2019/2/27
+     * author: chenli
+     * description: 获取组合两腿行情
+     */
+    public static List<String> getCombineInsList(List<String> data) {
+        List<String> insList = new ArrayList<>();
+        for (String ins : data) {
+            insList.add(ins);
+            if (ins.contains("&") && ins.contains(" ")){
+                SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(ins);
+                if (searchEntity == null) continue;
+                String leg1_symbol = searchEntity.getLeg1_symbol();
+                String leg2_symbol = searchEntity.getLeg2_symbol();
+                insList.add(leg1_symbol);
+                insList.add(leg2_symbol);
+            }
+        }
+        return insList;
+    }
+
+
     /**
      * date: 2019/1/10
      * author: chenli
@@ -477,6 +517,7 @@ public class LatestFileManager {
         String leg2_symbol = searchEntity.getLeg2_symbol();
         QuoteEntity quoteEntity_leg1 = DataManager.getInstance().getRtnData().getQuotes().get(leg1_symbol);
         QuoteEntity quoteEntity_leg2 = DataManager.getInstance().getRtnData().getQuotes().get(leg2_symbol);
+        if (quoteEntity_leg1 == null || quoteEntity_leg2 == null)return quoteEntity;
         String last_leg1 = quoteEntity_leg1.getLast_price();
         String last_leg2 = quoteEntity_leg2.getLast_price();
         String ask_price_leg1 = quoteEntity_leg1.getAsk_price1();
@@ -489,18 +530,26 @@ public class LatestFileManager {
         String bid_volume_leg2 = quoteEntity_leg2.getBid_volume1();
         String pre_settlement_leg1 = quoteEntity_leg1.getPre_settlement();
         String pre_settlement_leg2 = quoteEntity_leg2.getPre_settlement();
+        String volume_leg1 = quoteEntity_leg1.getVolume();
+        String volume_leg2 = quoteEntity_leg2.getVolume();
+        String open_interest_leg1 = quoteEntity_leg1.getOpen_interest();
+        String open_interest_leg2 = quoteEntity_leg2.getOpen_interest();
         String last = MathUtils.subtract(last_leg1, last_leg2);
         String ask_price = MathUtils.subtract(ask_price_leg1, bid_price_leg2);
         String ask_volume = MathUtils.min(ask_volume_leg1, bid_volume_leg2);
         String bid_price = MathUtils.subtract(bid_price_leg1, ask_price_leg2);
         String bid_volume = MathUtils.min(bid_volume_leg1, ask_volume_leg2);
         String pre_settlement = MathUtils.subtract(pre_settlement_leg1, pre_settlement_leg2);
+        String volume = MathUtils.min(volume_leg1, volume_leg2);
+        String open_interest = MathUtils.min(open_interest_leg1, open_interest_leg2);
         quoteEntity.setLast_price(last);
         quoteEntity.setAsk_price1(ask_price);
         quoteEntity.setBid_price1(bid_price);
         quoteEntity.setAsk_volume1(ask_volume);
         quoteEntity.setBid_volume1(bid_volume);
         quoteEntity.setPre_settlement(pre_settlement);
+        quoteEntity.setVolume(volume);
+        quoteEntity.setOpen_interest(open_interest);
         return quoteEntity;
     }
 
@@ -516,6 +565,7 @@ public class LatestFileManager {
         String leg2_symbol = searchEntity.getLeg2_symbol();
         QuoteEntity quoteEntity_leg1 = DataManager.getInstance().getRtnData().getQuotes().get(leg1_symbol);
         QuoteEntity quoteEntity_leg2 = DataManager.getInstance().getRtnData().getQuotes().get(leg2_symbol);
+        if (quoteEntity_leg1 == null || quoteEntity_leg2 == null)return quoteEntity;
         String last_leg1 = quoteEntity_leg1.getLast_price();
         String last_leg2 = quoteEntity_leg2.getLast_price();
         String ask_price_leg1 = quoteEntity_leg1.getAsk_price1();
@@ -540,6 +590,10 @@ public class LatestFileManager {
         String pre_settlement_leg2 = quoteEntity_leg2.getPre_settlement();
         String settlement_leg1 = quoteEntity_leg1.getSettlement();
         String settlement_leg2 = quoteEntity_leg2.getSettlement();
+        String volume_leg1 = quoteEntity_leg1.getVolume();
+        String volume_leg2 = quoteEntity_leg2.getVolume();
+        String open_interest_leg1 = quoteEntity_leg1.getOpen_interest();
+        String open_interest_leg2 = quoteEntity_leg2.getOpen_interest();
         String last = MathUtils.subtract(last_leg1, last_leg2);
         String ask_price = MathUtils.subtract(ask_price_leg1, bid_price_leg2);
         String ask_volume = MathUtils.min(ask_volume_leg1, bid_volume_leg2);
@@ -552,6 +606,8 @@ public class LatestFileManager {
         String pre_close = MathUtils.subtract(pre_close_leg1, pre_close_leg2);
         String pre_settlement = MathUtils.subtract(pre_settlement_leg1, pre_settlement_leg2);
         String settlement = MathUtils.subtract(settlement_leg1, settlement_leg2);
+        String volume = MathUtils.min(volume_leg1, volume_leg2);
+        String open_interest = MathUtils.min(open_interest_leg1, open_interest_leg2);
         quoteEntity.setLast_price(last);
         quoteEntity.setAsk_price1(ask_price);
         quoteEntity.setBid_price1(bid_price);
@@ -564,6 +620,8 @@ public class LatestFileManager {
         quoteEntity.setPre_close(pre_close);
         quoteEntity.setSettlement(settlement);
         quoteEntity.setPre_settlement(pre_settlement);
+        quoteEntity.setVolume(volume);
+        quoteEntity.setOpen_interest(open_interest);
         return quoteEntity;
     }
 
@@ -624,7 +682,7 @@ public class LatestFileManager {
      */
     public static void saveInsListToFile(List<String> insList) {
         try {
-            ObjectOutputStream out = new ObjectOutputStream(BaseApplication.getContext().openFileOutput(OPTIONAL_INS_LIST, Context.MODE_PRIVATE));
+            ObjectOutputStream out = new ObjectOutputStream(BaseApplication.getContext().openFileOutput(OPTIONAL_INS_LIST, MODE_PRIVATE));
             out.writeObject(insList);
             out.close();
         } catch (IOException e) {
@@ -655,7 +713,7 @@ public class LatestFileManager {
      * 读取本地文件
      */
 
-    private static String readLatestFile(String fileName) {
+    public static String readFile(String fileName) {
         StringBuilder sb = new StringBuilder("");
         try {
             //打开文件输入流
@@ -671,6 +729,24 @@ public class LatestFileManager {
             e.printStackTrace();
         }
         return sb.toString();
+    }
+
+    //写数据
+    public static void writeFile(String fileName, String data){
+        try{
+
+            FileOutputStream fout = BaseApplication.getContext().openFileOutput(fileName, Context.MODE_APPEND);
+
+            byte [] bytes = data.getBytes();
+
+            fout.write(bytes);
+
+            fout.close();
+        }
+
+        catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

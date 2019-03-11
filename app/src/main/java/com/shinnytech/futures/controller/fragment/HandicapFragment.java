@@ -7,12 +7,15 @@ import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.FragmentHandicapBinding;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
@@ -20,6 +23,7 @@ import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.CloneUtils;
+import com.shinnytech.futures.utils.LogUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -39,6 +43,7 @@ public class HandicapFragment extends LazyLoadFragment {
     private BroadcastReceiver mReceiver;
     private String mInstrumentId;
     private FragmentHandicapBinding mBinding;
+    private Context sContext = BaseApplication.getContext();
 
     /**
      * date: 7/9/17
@@ -53,6 +58,17 @@ public class HandicapFragment extends LazyLoadFragment {
             quoteEntity = LatestFileManager.calculateCombineQuoteFull(quoteEntity);
         }
         mBinding.setHandicap(quoteEntity);
+        setPriceColor(quoteEntity);
+    }
+
+    /**
+     * date: 2019/1/11
+     * author: chenli
+     * description: 设置价格颜色
+     */
+    private void setPriceColor(QuoteEntity quoteEntity){
+        String pre_settlement = LatestFileManager.saveScaleByPtick(quoteEntity.getPre_settlement(),
+                quoteEntity.getInstrument_id());
     }
 
     @Override

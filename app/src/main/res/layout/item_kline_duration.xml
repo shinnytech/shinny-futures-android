@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data></data>
+
+    <LinearLayout
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:scaleType="center"
+                android:src="@mipmap/ic_content_cut_white_24dp"
+                android:id="@+id/iv_cut"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center" />
+
+            <TextView
+                android:id="@+id/tv_id_dialog"
+                android:layout_width="0dp"
+                android:layout_weight="3"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="17sp" />
+
+            <ImageView
+                android:scaleType="center"
+                android:src="@mipmap/ic_vertical_align_top_white_24dp"
+                android:id="@+id/iv_top"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center" />
+
+            <ImageView
+                android:scaleType="center"
+                android:src="@mipmap/ic_format_line_spacing_white_24dp"
+                android:id="@+id/iv_drag"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center" />
+        </LinearLayout>
+
+   <View
+       android:background="@color/kline_duration"
+       android:layout_width="match_parent"
+       android:layout_height="0.5dp"/>
+
+    </LinearLayout>
+</layout>

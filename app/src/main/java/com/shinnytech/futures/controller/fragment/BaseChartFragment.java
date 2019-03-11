@@ -23,12 +23,13 @@ import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
-import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
+import com.shinnytech.futures.model.bean.eventbusbean.VisibilityEvent;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -49,13 +50,15 @@ import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST
  * version:
  * state:
  */
-public class BaseChartFragment extends LazyLoadFragment {
+public class BaseChartFragment extends LazyLoadFragment{
 
     /**
      * date: 7/9/17
      * description: 组合图
      */
-    protected CombinedChart mChart;
+    protected CombinedChart mTopChartViewBase;
+    protected CombinedChart mMiddleChartViewBase;
+    protected CombinedChart mBottomChartViewBase;
 
     /**
      * date: 7/9/17
@@ -136,8 +139,7 @@ public class BaseChartFragment extends LazyLoadFragment {
     public String mFragmentType;
     public String mKlineType;
     private ViewDataBinding mViewDataBinding;
-    protected boolean mIsUpdate;
-    protected boolean mFollowKLine;
+    public boolean mIsUpdate;
 
     /**
      * date: 7/9/17
@@ -165,7 +167,9 @@ public class BaseChartFragment extends LazyLoadFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mViewDataBinding = DataBindingUtil.inflate(inflater, mLayoutId, container, false);
-        mChart = mViewDataBinding.getRoot().findViewById(R.id.chart);
+        mTopChartViewBase = mViewDataBinding.getRoot().findViewById(R.id.chart);
+        mMiddleChartViewBase = mViewDataBinding.getRoot().findViewById(R.id.middleChart);
+        mBottomChartViewBase = mViewDataBinding.getRoot().findViewById(R.id.bottomChart);
         //注册EventBus
         EventBus.getDefault().register(this);
         initData();
@@ -189,7 +193,7 @@ public class BaseChartFragment extends LazyLoadFragment {
         else instrument_id_transaction = instrument_id;
 
         mIsAverage = ((FutureInfoActivity) getActivity()).isAverage();
-        if (!mIsAverage) mChart.getLegend().setEnabled(false);
+        if (!mIsAverage) mTopChartViewBase.getLegend().setEnabled(false);
         mIsPosition = ((FutureInfoActivity) getActivity()).isPosition();
         mIsPending = ((FutureInfoActivity) getActivity()).isPending();
         if (sDataManager.IS_LOGIN) {
@@ -217,17 +221,57 @@ public class BaseChartFragment extends LazyLoadFragment {
     }
 
     protected void initChart() {
-        mChart.getDescription().setEnabled(false);
-        mChart.setDrawGridBackground(true);
-        mChart.setBackgroundColor(mColorHomeBg);
-        mChart.setGridBackgroundColor(mColorHomeBg);
-        mChart.setDrawValueAboveBar(false);
-        mChart.setNoDataText(" ");
-        mChart.setAutoScaleMinMaxEnabled(true);
-        mChart.setDragEnabled(true);
-        mChart.setViewPortOffsets(0, 40, 0, 40);
-        mChart.setDoubleTapToZoomEnabled(false);
-        mChart.setHighlightPerTapEnabled(false);
+        mTopChartViewBase.getDescription().setEnabled(false);
+        mTopChartViewBase.setDrawGridBackground(true);
+        mTopChartViewBase.setBackgroundColor(mColorHomeBg);
+        mTopChartViewBase.setGridBackgroundColor(mColorHomeBg);
+        mTopChartViewBase.setDrawValueAboveBar(false);
+        mTopChartViewBase.setBorderWidth(1f);
+        mTopChartViewBase.setDrawBorders(true);
+        mTopChartViewBase.setNoDataText("暂无数据");
+        mTopChartViewBase.setAutoScaleMinMaxEnabled(true);
+        mTopChartViewBase.setDragEnabled(true);
+        mTopChartViewBase.setViewPortOffsets(0, 40, 0, 1);
+        mTopChartViewBase.setDoubleTapToZoomEnabled(false);
+        mTopChartViewBase.setHighlightPerTapEnabled(false);
+        mTopChartViewBase.setHighlightPerDragEnabled(false);
+
+        mMiddleChartViewBase.getDescription().setEnabled(false);
+        mMiddleChartViewBase.setDrawGridBackground(true);
+        mMiddleChartViewBase.setBackgroundColor(mColorHomeBg);
+        mMiddleChartViewBase.setGridBackgroundColor(mColorHomeBg);
+        mMiddleChartViewBase.setDrawValueAboveBar(false);
+        mMiddleChartViewBase.setNoDataText("暂无数据");
+        mMiddleChartViewBase.setAutoScaleMinMaxEnabled(true);
+        mMiddleChartViewBase.setDragEnabled(true);
+        mMiddleChartViewBase.setDrawBorders(false);
+        mMiddleChartViewBase.setViewPortOffsets(0, 0, 0, 40);
+        mMiddleChartViewBase.setDoubleTapToZoomEnabled(false);
+        mMiddleChartViewBase.setHighlightPerTapEnabled(false);
+        mMiddleChartViewBase.setHighlightPerDragEnabled(false);
+
+        mBottomChartViewBase.getDescription().setEnabled(false);
+        mBottomChartViewBase.setDrawGridBackground(true);
+        mBottomChartViewBase.setBackgroundColor(mColorHomeBg);
+        mBottomChartViewBase.setGridBackgroundColor(mColorHomeBg);
+        mBottomChartViewBase.setDrawValueAboveBar(false);
+        mBottomChartViewBase.setNoDataText("暂无数据");
+        mBottomChartViewBase.setAutoScaleMinMaxEnabled(true);
+        mBottomChartViewBase.setDragEnabled(true);
+        mBottomChartViewBase.setDrawBorders(false);
+        mBottomChartViewBase.setViewPortOffsets(0, 0, 0, 1);
+        mBottomChartViewBase.setDoubleTapToZoomEnabled(false);
+        mBottomChartViewBase.setHighlightPerTapEnabled(false);
+        mBottomChartViewBase.setHighlightPerDragEnabled(false);
+
+        //切换周期时控制图表显示
+        if (sDataManager.IS_SHOW_VP_CONTENT){
+            mMiddleChartViewBase.setVisibility(View.GONE);
+//            mBottomChartViewBase.setVisibility(View.GONE);
+        }else {
+            mMiddleChartViewBase.setVisibility(View.VISIBLE);
+//            mBottomChartViewBase.setVisibility(View.VISIBLE);
+        }
 
     }
 
@@ -365,7 +409,7 @@ public class BaseChartFragment extends LazyLoadFragment {
         limitLine.setTextColor(mColorText);
         mPositionLimitLines.put(limitKey, limitLine);
         mPositionVolumes.put(limitKey, volume);
-        mChart.getAxisLeft().addLimitLine(limitLine);
+        mTopChartViewBase.getAxisLeft().addLimitLine(limitLine);
     }
 
     /**
@@ -390,13 +434,13 @@ public class BaseChartFragment extends LazyLoadFragment {
                 int volume_long_l = mPositionVolumes.get(limitKey);
                 if (limitLine.getLimit() != limit_long || volume_long_l != volume_long) {
                     String label_long = positionEntity.getInstrument_id() + "@" + limit_long_S + "/" + volume_long + "手";
-                    mChart.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
+                    mTopChartViewBase.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
                     mPositionLimitLines.remove(limitKey);
                     mPositionVolumes.remove(limitKey);
                     generateLimitLine(limit_long, label_long, mColorBuy, limitKey, volume_long);
                 }
             } else {
-                mChart.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
+                mTopChartViewBase.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
                 mPositionLimitLines.remove(limitKey);
                 mPositionVolumes.remove(limitKey);
             }
@@ -428,13 +472,13 @@ public class BaseChartFragment extends LazyLoadFragment {
                 int volume_short_l = mPositionVolumes.get(limitKey);
                 if (limitLine.getLimit() != limit_short || volume_short_l != volume_short) {
                     String label_short = positionEntity.getInstrument_id() + "@" + limit_short_S + "/" + volume_short + "手";
-                    mChart.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
+                    mTopChartViewBase.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
                     mPositionLimitLines.remove(limitKey);
                     mPositionVolumes.remove(limitKey);
                     generateLimitLine(limit_short, label_short, mColorSell, limitKey, volume_short);
                 }
             } else {
-                mChart.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
+                mTopChartViewBase.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
                 mPositionLimitLines.remove(limitKey);
                 mPositionVolumes.remove(limitKey);
             }
@@ -452,7 +496,7 @@ public class BaseChartFragment extends LazyLoadFragment {
         if (!mPositionLimitLines.isEmpty()) {
             for (LimitLine limitLine :
                     mPositionLimitLines.values()) {
-                mChart.getAxisLeft().removeLimitLine(limitLine);
+                mTopChartViewBase.getAxisLeft().removeLimitLine(limitLine);
             }
         }
         mPositionLimitLines.clear();
@@ -481,7 +525,7 @@ public class BaseChartFragment extends LazyLoadFragment {
             limitLine.setLabelPosition(LimitLine.LimitLabelPosition.LEFT_BOTTOM);
             limitLine.setTextSize(10f);
             limitLine.setTextColor(mColorText);
-            mChart.getAxisLeft().addLimitLine(limitLine);
+            mTopChartViewBase.getAxisLeft().addLimitLine(limitLine);
         } catch (NumberFormatException ex) {
             ex.printStackTrace();
         }
@@ -494,7 +538,7 @@ public class BaseChartFragment extends LazyLoadFragment {
      * description: 移除一条挂单线
      */
     private void removeOneOrderLimitLine(String key) {
-        mChart.getAxisLeft().removeLimitLine(mOrderLimitLines.get(key));
+        mTopChartViewBase.getAxisLeft().removeLimitLine(mOrderLimitLines.get(key));
         mOrderLimitLines.remove(key);
         mOrderVolumes.remove(key);
     }
@@ -525,7 +569,7 @@ public class BaseChartFragment extends LazyLoadFragment {
         if (!mOrderLimitLines.isEmpty()) {
             for (LimitLine limitLine :
                     mOrderLimitLines.values()) {
-                mChart.getAxisLeft().removeLimitLine(limitLine);
+                mTopChartViewBase.getAxisLeft().removeLimitLine(limitLine);
             }
         }
         mOrderLimitLines.clear();
@@ -613,6 +657,23 @@ public class BaseChartFragment extends LazyLoadFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+
+    /**
+     * date: 2019/2/20
+     * author: chenli
+     * description: 控制中间和底部的图表显示
+     */
+    @Subscribe
+    public void onEventBase(VisibilityEvent data) {
+        if (data.isVisible()){
+            mMiddleChartViewBase.setVisibility(View.VISIBLE);
+//            mBottomChartViewBase.setVisibility(View.VISIBLE);
+        }else {
+            mMiddleChartViewBase.setVisibility(View.GONE);
+//            mBottomChartViewBase.setVisibility(View.GONE);
+        }
     }
 
 }

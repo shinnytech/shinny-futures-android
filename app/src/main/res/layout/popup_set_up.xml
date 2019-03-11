@@ -93,4 +93,31 @@
         android:layout_height="@dimen/line_width"
         android:background="@drawable/divider_quote" />
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_5dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_2_5dp"
+            android:text="@string/future_info_activity_md_set_up"
+            android:textColor="@color/white" />
+
+        <Switch
+            android:checked="true"
+            android:id="@+id/md"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_2_5dp" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/line_width"
+        android:background="@drawable/divider_quote" />
+
 </LinearLayout>

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/kline_marker"
-    android:layout_width="100dp"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/rectangle_border_marker_view"
     android:orientation="vertical">
@@ -13,27 +12,32 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:gravity="center"
+        android:gravity="left"
         android:layout_marginLeft="@dimen/margin_2dp"
         android:layout_marginRight="@dimen/margin_2dp"
         android:textColor="@color/marker_yellow"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal" />
+
+    <TextView
+        android:id="@+id/datetime"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="left"
+        android:layout_marginLeft="@dimen/margin_2dp"
+        android:layout_marginRight="@dimen/margin_2dp"
+        android:textColor="@color/marker_yellow"
+        android:textSize="@dimen/font_size_small" />
 
     <TextView
         android:id="@+id/x_value"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:gravity="center"
+        android:gravity="left"
         android:layout_marginLeft="@dimen/margin_2dp"
         android:layout_marginRight="@dimen/margin_2dp"
         android:textColor="@color/marker_yellow"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal"  />
 
 
@@ -46,9 +50,6 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text="开盘"
         android:textColor="@color/white"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal"  />
 
     <TextView
@@ -59,9 +60,6 @@
         android:gravity="start"
         android:layout_marginLeft="@dimen/margin_2dp"
         android:layout_marginRight="@dimen/margin_2dp"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal"  />
 
 
@@ -74,9 +72,6 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text="最高"
         android:textColor="@color/white"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal"  />
 
     <TextView
@@ -87,9 +82,6 @@
         android:gravity="start"
         android:layout_marginLeft="@dimen/margin_2dp"
         android:layout_marginRight="@dimen/margin_2dp"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal"  />
 
     <TextView
@@ -101,9 +93,6 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text="最低"
         android:textColor="@color/white"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal"  />
 
     <TextView
@@ -114,9 +103,6 @@
         android:gravity="start"
         android:layout_marginLeft="@dimen/margin_2dp"
         android:layout_marginRight="@dimen/margin_2dp"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal"  />
 
     <TextView
@@ -128,9 +114,6 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text="收盘"
         android:textColor="@color/white"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal"  />
 
     <TextView
@@ -141,9 +124,6 @@
         android:gravity="start"
         android:layout_marginLeft="@dimen/margin_2dp"
         android:layout_marginRight="@dimen/margin_2dp"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal" />
 
     <TextView
@@ -154,9 +134,6 @@
         android:gravity="start"
         android:layout_marginLeft="@dimen/margin_2dp"
         android:layout_marginRight="@dimen/margin_2dp"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal"  />
 
     <TextView
@@ -167,9 +144,6 @@
         android:gravity="start"
         android:layout_marginLeft="@dimen/margin_2dp"
         android:layout_marginRight="@dimen/margin_2dp"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal"  />
 
     <TextView
@@ -181,9 +155,6 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text="成交量"
         android:textColor="@color/white"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal"  />
 
     <TextView
@@ -195,9 +166,6 @@
         android:layout_marginLeft="@dimen/margin_2dp"
         android:layout_marginRight="@dimen/margin_2dp"
         android:textColor="@color/marker_yellow"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal"  />
 
     <TextView
@@ -209,9 +177,6 @@
         android:layout_marginRight="@dimen/margin_2dp"
         android:text="持仓量"
         android:textColor="@color/white"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal"  />
 
     <TextView
@@ -223,9 +188,6 @@
         android:layout_marginLeft="@dimen/margin_2dp"
         android:layout_marginRight="@dimen/margin_2dp"
         android:textColor="@color/marker_yellow"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal"  />
 
     <TextView
@@ -236,9 +198,6 @@
         android:gravity="start"
         android:layout_marginLeft="@dimen/margin_2dp"
         android:layout_marginRight="@dimen/margin_2dp"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-        app:autoSizeMaxTextSize="@dimen/font_size_normal"
         android:textSize="@dimen/font_size_normal"  />
 
 </LinearLayout>

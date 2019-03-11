@@ -43,7 +43,7 @@ public class CombinedChartKlineRenderer extends CombinedChartRenderer {
             switch (order) {
                 case BAR:
                     if (chart.getBarData() != null)
-                        mRenderers.add(new BarChartRenderer(chart, mAnimator, mViewPortHandler));
+                        mRenderers.add(new MyBarChartRenderer(chart, mAnimator, mViewPortHandler));
                     break;
                 case BUBBLE:
                     if (chart.getBubbleData() != null)
@@ -51,7 +51,7 @@ public class CombinedChartKlineRenderer extends CombinedChartRenderer {
                     break;
                 case LINE:
                     if (chart.getLineData() != null)
-                        mRenderers.add(new LineChartRenderer(chart, mAnimator, mViewPortHandler));
+                        mRenderers.add(new MyLineChartRenderer(chart, mAnimator, mViewPortHandler));
                     break;
                 case CANDLE:
                     if (chart.getCandleData() != null) {

@@ -97,7 +97,6 @@ public class CombinedChartKline extends CombinedChart {
         }
 
         if (mDrawBorders) {
-            mBorderPaint.setStrokeWidth(1f);
             c.drawLine(0, mViewPortHandler.offsetTop(), mViewPortHandler.getChartWidth(), mViewPortHandler.offsetTop(), mBorderPaint);
         }
     }
@@ -129,8 +128,8 @@ public class CombinedChartKline extends CombinedChart {
             float[] pos = getMarkerPosition(highlight);
 
             // check bounds
-            if (!mViewPortHandler.isInBounds(pos[0], pos[1]))
-                continue;
+//            if (!mViewPortHandler.isInBounds(pos[0], pos[1]))
+//                continue;
 
             // callbacks to update the content
             mMarker.refreshContent(e, highlight);

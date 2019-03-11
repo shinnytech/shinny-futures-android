@@ -3,8 +3,6 @@ package com.shinnytech.futures.application;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,16 +10,29 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
+import com.alibaba.sdk.android.oss.ClientConfiguration;
+import com.alibaba.sdk.android.oss.ClientException;
+import com.alibaba.sdk.android.oss.OSS;
+import com.alibaba.sdk.android.oss.OSSClient;
+import com.alibaba.sdk.android.oss.ServiceException;
+import com.alibaba.sdk.android.oss.callback.OSSCompletedCallback;
+import com.alibaba.sdk.android.oss.common.OSSLog;
+import com.alibaba.sdk.android.oss.common.auth.OSSAuthCredentialsProvider;
+import com.alibaba.sdk.android.oss.common.auth.OSSCredentialProvider;
+import com.alibaba.sdk.android.oss.common.auth.OSSStsTokenCredentialProvider;
+import com.alibaba.sdk.android.oss.internal.OSSAsyncTask;
+import com.alibaba.sdk.android.oss.model.CannedAccessControlList;
+import com.alibaba.sdk.android.oss.model.CreateBucketRequest;
+import com.alibaba.sdk.android.oss.model.CreateBucketResult;
 import com.baidu.mobstat.StatService;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheEntity;
@@ -30,7 +41,6 @@ import com.lzy.okgo.callback.FileCallback;
 import com.lzy.okgo.cookie.store.SPCookieStore;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
-import com.shinnytech.futures.R;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.ConfirmActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
@@ -60,10 +70,8 @@ import okhttp3.OkHttpClient;
 
 import static com.shinnytech.futures.constants.CommonConstants.BACKGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_DAY_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_HOUR_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_MINUTE_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_SECOND_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_DURATION_DEFAULT;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_CONFIRM;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PARA_MA;
@@ -71,10 +79,6 @@ import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_L
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.FOREGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.JSON_FILE_URL;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_1_DAY;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_1_HOUR;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_3_SECOND;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_5_MINUTE;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_1;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_2;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_3;
@@ -112,6 +116,7 @@ public class BaseApplication extends Application implements ServiceConnection {
     private BroadcastReceiver mReceiverScreen;
     private boolean mIsBackground = false;
     private MyHandler mMyHandler = new MyHandler();
+    private static OSS ossClient;
 
     public static int getIndex() {
         return index;
@@ -124,6 +129,8 @@ public class BaseApplication extends Application implements ServiceConnection {
     public static Context getContext() {
         return sContext;
     }
+
+    public static OSS getOssClient(){return ossClient;}
 
     @NonNull
     public static WebSocketService getWebSocketService() {
@@ -156,6 +163,44 @@ public class BaseApplication extends Application implements ServiceConnection {
         //广播注册
         registerBroaderCast();
 
+        //配置OSS
+        initConfigOSS();
+
+        //配置交易日志
+        initTradeLog();
+    }
+
+    /**
+     * date: 2019/3/7
+     * author: chenli
+     * description:
+     */
+    private void initTradeLog(){
+        File file = new File(CommonConstants.TRADE_FILE_NAME);
+        if (!file.exists()) LogUtils.w2f("交易日志");
+    }
+
+    /**
+     * date: 2019/3/6
+     * author: chenli
+     * description: 初始化OSS
+     */
+    private void initConfigOSS() {
+        String endpoint = "http://oss-cn-shanghai.aliyuncs.com";
+        String stsServer = "https://sts.aliyuncs.com";
+        // 推荐使用OSSAuthCredentialsProvider。token过期可以及时更新
+        OSSCredentialProvider credentialProvider = new OSSAuthCredentialsProvider(stsServer);
+
+        //该配置类如果不设置，会有默认配置，具体可看该类
+        ClientConfiguration conf = new ClientConfiguration();
+        conf.setConnectionTimeout(15 * 1000); // 连接超时，默认15秒
+        conf.setSocketTimeout(15 * 1000); // socket超时，默认15秒
+        conf.setMaxConcurrentRequest(5); // 最大并发请求数，默认5个
+        conf.setMaxErrorRetry(2); // 失败后最大重试次数，默认2次
+        OSSLog.enableLog(); //这个开启会支持写入手机sd卡中的一份日志文件位置在SDCard_path\OSSLog\logs.csv
+
+        ossClient = new OSSClient(getApplicationContext(), endpoint, credentialProvider, conf);
+
     }
 
     /**
@@ -168,6 +213,10 @@ public class BaseApplication extends Application implements ServiceConnection {
             BaseApplication.getContext().openFileInput(OPTIONAL_INS_LIST);
         } catch (FileNotFoundException e) {
             LatestFileManager.saveInsListToFile(new ArrayList<String>());
+        }
+
+        if (!SPUtils.contains(sContext, CONFIG_KLINE_DURATION_DEFAULT)) {
+            SPUtils.putAndApply(sContext, CONFIG_KLINE_DURATION_DEFAULT, CommonConstants.KLINE_DURATION_DEFAULT);
         }
 
         if (!SPUtils.contains(sContext, CONFIG_PARA_MA)) {
@@ -190,20 +239,8 @@ public class BaseApplication extends Application implements ServiceConnection {
             SPUtils.putAndApply(sContext, CONFIG_AVERAGE_LINE, true);
         }
 
-        if (!SPUtils.contains(sContext, CONFIG_KLINE_DAY_TYPE)) {
-            SPUtils.putAndApply(sContext, CONFIG_KLINE_DAY_TYPE, KLINE_1_DAY);
-        }
-
-        if (!SPUtils.contains(sContext, CONFIG_KLINE_HOUR_TYPE)) {
-            SPUtils.putAndApply(sContext, CONFIG_KLINE_HOUR_TYPE, KLINE_1_HOUR);
-        }
-
-        if (!SPUtils.contains(sContext, CONFIG_KLINE_MINUTE_TYPE)) {
-            SPUtils.putAndApply(sContext, CONFIG_KLINE_MINUTE_TYPE, KLINE_5_MINUTE);
-        }
-
-        if (!SPUtils.contains(sContext, CONFIG_KLINE_SECOND_TYPE)) {
-            SPUtils.putAndApply(sContext, CONFIG_KLINE_SECOND_TYPE, KLINE_3_SECOND);
+        if (!SPUtils.contains(sContext, CONFIG_MD5)) {
+            SPUtils.putAndApply(sContext, CONFIG_MD5, true);
         }
 
     }

@@ -143,7 +143,7 @@ public class XAxisRendererCurrentDay extends XAxisRenderer {
         }
 
         //首尾标签不画
-        for (int i = 1; i <= count; i++) {
+        for (int i = 1; i < count; i++) {
 
             int ix = mXAxis.getXLabels().keyAt(i);
 

@@ -24,6 +24,12 @@ public class TimeUtils {
         return formatter.format(curDate);
     }
 
+    public static String getNowTimeSecond() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy年MM月dd日HH:mm:ss", Locale.getDefault());
+        Date curDate = new Date(System.currentTimeMillis());//获取当前时间
+        return formatter.format(curDate);
+    }
+
     public static boolean isBetw2124(String insert_time) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date(Long.valueOf(insert_time) / 1000000));

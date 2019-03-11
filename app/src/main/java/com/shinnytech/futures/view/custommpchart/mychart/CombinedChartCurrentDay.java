@@ -11,9 +11,12 @@ import com.github.mikephil.charting.data.ChartData;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IDataSet;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyLegend;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyXAxis;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyYAxis;
+import com.shinnytech.futures.view.custommpchart.myrenderer.CombinedChartCurrentDayRenderer;
+import com.shinnytech.futures.view.custommpchart.myrenderer.CombinedChartKlineRenderer;
 import com.shinnytech.futures.view.custommpchart.myrenderer.MyLegendRenderer;
 import com.shinnytech.futures.view.custommpchart.myrenderer.XAxisRendererCurrentDay;
 import com.shinnytech.futures.view.custommpchart.myrenderer.YAxisRendererCurrentDay;
@@ -56,6 +59,8 @@ public class CombinedChartCurrentDay extends CombinedChart {
 
         mLegend = new MyLegend();
         mLegendRenderer = new MyLegendRenderer(mViewPortHandler, (MyLegend) mLegend);
+
+        mRenderer = new CombinedChartCurrentDayRenderer(this, mAnimator, mViewPortHandler);
     }
 
     /*返回转型后的左右轴*/
@@ -101,15 +106,17 @@ public class CombinedChartCurrentDay extends CombinedChart {
 
             float[] pos = getMarkerPosition(highlight);
 
+            //注释掉，在三图范围内，保持marker始终出现
             // check bounds
-            if (!mViewPortHandler.isInBounds(pos[0], pos[1]))
-                continue;
+//            if (!mViewPortHandler.isInBoundsX(pos[0]))
+//                continue;
 
             // callbacks to update the content
             mMarker.refreshContent(e, highlight);
 
             // draw the marker
             mMarker.draw(canvas, pos[0], pos[1]);
+
         }
     }
 

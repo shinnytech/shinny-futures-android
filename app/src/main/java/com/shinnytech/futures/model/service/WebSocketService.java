@@ -48,7 +48,9 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -248,10 +250,11 @@ public class WebSocketService extends Service {
                                             sendSubscribeQuote(TextUtils.join(",",
                                                     new ArrayList(LatestFileManager.getMainInsList().keySet()).subList(0, LOAD_QUOTE_NUM)));
                                         else {
-                                            Map<String, QuoteEntity> list = LatestFileManager.getOptionalInsList();
-                                            if (list.size() < LOAD_QUOTE_NUM) sendSubscribeQuote(TextUtils.join(",", new ArrayList(list.keySet())));
-                                            else sendSubscribeQuote(TextUtils.join(",",
-                                                    new ArrayList(list.keySet()).subList(0, LOAD_QUOTE_NUM)));
+                                            List<String> list = LatestFileManager.getCombineInsList(
+                                                    new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
+
+                                            if (list.size() < LOAD_QUOTE_NUM) sendSubscribeQuote(TextUtils.join(",", list));
+                                            else sendSubscribeQuote(TextUtils.join(",", list.subList(0, LOAD_QUOTE_NUM)));
                                         }
 
                                         Map<String, ChartEntity> chartEntityMap = sDataManager.getRtnData().getCharts();
@@ -406,6 +409,8 @@ public class WebSocketService extends Service {
                         // A text message arrived from the server.
                         public void onTextMessage(final WebSocket websocket, String message) {
                             LogUtils.e(message, false);
+//                            LatestFileManager.writeFile("TDData", message);
+
                             try {
                                 JSONObject jsonObject = new JSONObject(message);
                                 String aid = jsonObject.getString("aid");
@@ -502,6 +507,7 @@ public class WebSocketService extends Service {
             String confirmSettlement = new Gson().toJson(reqConfirmSettlementEntity);
             mWebSocketClientTD.sendText(confirmSettlement);
             LogUtils.e(confirmSettlement, true);
+            LogUtils.w2f(confirmSettlement);
         }
     }
 
@@ -530,6 +536,7 @@ public class WebSocketService extends Service {
             reqInsertOrderEntity.setTime_condition("GFD");
             String reqInsertOrder = new Gson().toJson(reqInsertOrderEntity);
             mWebSocketClientTD.sendText(reqInsertOrder);
+            LogUtils.w2f(reqInsertOrder);
         }
     }
 
@@ -548,6 +555,7 @@ public class WebSocketService extends Service {
             String reqInsertOrder = new Gson().toJson(reqCancelOrderEntity);
             mWebSocketClientTD.sendText(reqInsertOrder);
             LogUtils.e(reqInsertOrder, true);
+            LogUtils.w2f(reqInsertOrder);
         }
     }
 
@@ -570,6 +578,7 @@ public class WebSocketService extends Service {
             String reqTransfer = new Gson().toJson(reqTransferEntity);
             mWebSocketClientTD.sendText(reqTransfer);
             LogUtils.e(reqTransfer, true);
+            LogUtils.w2f(reqTransfer);
         }
     }
 
@@ -587,6 +596,7 @@ public class WebSocketService extends Service {
             String reqPassword = new Gson().toJson(reqPasswordEntity);
             mWebSocketClientTD.sendText(reqPassword);
             LogUtils.e(reqPassword, true);
+            LogUtils.w2f(reqPassword);
         }
     }
 

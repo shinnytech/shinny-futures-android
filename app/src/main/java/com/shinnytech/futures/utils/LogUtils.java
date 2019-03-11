@@ -2,6 +2,9 @@ package com.shinnytech.futures.utils;
 
 import android.util.Log;
 
+import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.model.engine.LatestFileManager;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
@@ -155,17 +158,14 @@ public class LogUtils {
     }
 
     /**
-     * warn警告日志
+     * 写日志
      *
      * @param message   日志信息
-     * @param isShowLog isShowLog
      */
-    public static void w(String message, boolean isShowLog) {
-
-        if ("debug".equals(com.shinnytech.futures.BuildConfig.BUILD_TYPE) && isShowLog) {
-            String[] output = getTagAndDetailMessage(message);
-            Log.w(output[0], output[1]);
-        }
+    public static void w2f(String message) {
+        String date = TimeUtils.getNowTimeSecond();
+        String data = date + ": " + message + "\n";
+        LatestFileManager.writeFile(CommonConstants.TRADE_FILE_NAME, data);
     }
 
     /**

@@ -299,7 +299,7 @@ public class KeyboardUtils {
         View tab = mActivity.findViewById(R.id.rg_tab_up);
         tab.setVisibility(View.VISIBLE);
         tab.startAnimation(mShowAction);
-        View content = mActivity.findViewById(R.id.fl_content_up);
+        View content = mActivity.findViewById(R.id.kline_content);
         content.setVisibility(View.VISIBLE);
         content.startAnimation(mShowAction);
         mView.setVisibility(View.GONE);
@@ -310,7 +310,7 @@ public class KeyboardUtils {
         Animation mShowAction = AnimationUtils.loadAnimation(BaseApplication.getContext(), R.anim.keyboard_in);
         View tab = mActivity.findViewById(R.id.rg_tab_up);
         tab.setVisibility(View.GONE);
-        View content = mActivity.findViewById(R.id.fl_content_up);
+        View content = mActivity.findViewById(R.id.kline_content);
         content.setVisibility(View.GONE);
         mView.setVisibility(View.VISIBLE);
         mView.startAnimation(mShowAction);

@@ -1,0 +1,73 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/black_light_more"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_marginStart="@dimen/margin_10dp"
+        android:layout_marginEnd="@dimen/margin_10dp"
+        android:layout_marginTop="@dimen/margin_10dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="取值范围："
+            android:textColor="@color/white"
+            android:textSize="@dimen/font_size_normal" />
+
+        <TextView
+            android:textColor="@color/white"
+            android:text="1-1140"
+            android:id="@+id/duration_range"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="@dimen/margin_5dp"
+        android:layout_marginBottom="@dimen/margin_10dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="30dp">
+        <EditText
+            android:id="@+id/input_duration"
+            android:inputType="number"
+            android:layout_marginStart="@dimen/margin_5dp"
+            android:paddingStart="@dimen/padding_5dp"
+            android:background="@drawable/rectangle_border_add_duration"
+            android:hint="自定义周期"
+            android:textColorHint="@color/white"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:maxLength="4"
+            android:layout_height="match_parent"
+            android:textColor="@color/white"
+            android:textSize="@dimen/font_size_normal" />
+
+        <Button
+            android:id="@+id/select_duration"
+            android:background="@color/add_duration_select"
+            android:layout_marginStart="@dimen/margin_5dp"
+            android:text="秒⇲"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+        <Button
+            android:id="@+id/add_duration"
+            android:background="@color/add_duration_add"
+            android:layout_marginStart="@dimen/margin_5dp"
+            android:layout_marginEnd="@dimen/margin_5dp"
+            android:text="添加"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+</LinearLayout>

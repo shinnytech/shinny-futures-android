@@ -7,6 +7,7 @@
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#FF4081</color>
     <color name="launch">#BE000F</color>
+    <color name="launch_light">#66BE000F</color>
     <!--状态栏颜色-->
     <color name="black">#000000</color>
     <!--标题栏颜色-->
@@ -134,5 +135,7 @@
     <color name="para_content">#696969</color>
 
     <!--k线周期设置页-->
-    <color name="kline_duration_button">#333333</color>
+    <color name="kline_duration">#333333</color>
+    <color name="add_duration_select">#cdcdcd</color>
+    <color name="add_duration_add">#999999</color>
 </resources>

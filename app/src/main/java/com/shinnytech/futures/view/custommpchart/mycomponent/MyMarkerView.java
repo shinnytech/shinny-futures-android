@@ -60,7 +60,7 @@ public class MyMarkerView extends RelativeLayout implements IMarker {
 
     public void resize(int width, int height){
         linearLayout.getLayoutParams().height = height;
-        linearLayout.getLayoutParams().width = width;
+//        linearLayout.getLayoutParams().width = width;
         linearLayout.requestLayout();
     }
 

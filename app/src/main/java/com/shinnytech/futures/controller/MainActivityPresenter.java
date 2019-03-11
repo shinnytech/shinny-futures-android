@@ -28,6 +28,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.AboutActivity;
 import com.shinnytech.futures.controller.activity.AccountActivity;
@@ -313,6 +314,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                         break;
                     case CommonConstants.LOGOUT:
                         DataManager.getInstance().IS_LOGIN = false;
+                        BaseApplication.getWebSocketService().reConnectTD();
                         mNavigationRightAdapter.updateItem(position, CommonConstants.LOGIN);
                         mNavigationRightAdapter.removeItem(3);
                         break;

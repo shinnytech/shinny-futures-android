@@ -11,7 +11,7 @@ public final class CommonConstants {
     public static final String MARKET_URL_7 = "ws://106.15.219.160/t/md/front/mobile";
     public static String TRANSACTION_URL = "ws://opentd.shinnytech.com/trade/user0";
     public static String JSON_FILE_URL = "http://openmd.shinnytech.com/t/md/symbols/latest.json";
-    public static final String FEED_BACK_URL = "http://ask.shinnytech.com/src/indexm.html";
+    public static final String FEED_BACK_URL = "https://ask.shinnytech.com/src/indexm.html";
 
     //广播信息类型
     public static final String MD_ONLINE = "MD_ONLINE";
@@ -75,7 +75,10 @@ public final class CommonConstants {
     public static final String KLINE_4_HOUR = "14400000000000";
     public static final String KLINE_1_DAY = "86400000000000";
     public static final String KLINE_7_DAY = "604800000000000";
+    public static final String KLINE_28_DAY = "2419200000000000";
 
+    //缩放大小
+    public static final String SCALE_X = "mScaleX";
     //加载柱子个数
     public static final int VIEW_WIDTH = 200;
     //订阅合约数
@@ -83,7 +86,6 @@ public final class CommonConstants {
 
     //页面跳转标志
     public static final String ACTIVITY_TYPE = "activity_type";
-    public static final int LOGIN_JUMP_TO_LOG_IN_ACTIVITY = 8;
     public static final int POSITION_JUMP_TO_LOG_IN_ACTIVITY = 1;
     public static final int ORDER_JUMP_TO_LOG_IN_ACTIVITY = 2;
     public static final int TRANSACTION_JUMP_TO_LOG_IN_ACTIVITY = 3;
@@ -91,6 +93,8 @@ public final class CommonConstants {
     public static final int JUMP_TO_FUTURE_INFO_ACTIVITY = 5;
     public static final int LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY = 6;
     public static final int POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY = 7;
+    public static final int LOGIN_JUMP_TO_LOG_IN_ACTIVITY = 8;
+    public static final int KLINE_DURATION_ACYIVITY_TO_ADD_DURATION_ACTIVITY = 9;
 
     //app名称
     public static final String KUAI_QI_XIAO_Q = "快期小Q";
@@ -112,27 +116,35 @@ public final class CommonConstants {
     public static final String USER_PRICE = "用户设置价";
 
     //默认配置
+    public static final String CONFIG_KLINE_DURATION_DEFAULT = "klineDurationDefault";
     public static final String CONFIG_PARA_MA = "ma";
     public static final String CONFIG_ORDER_CONFIRM = "orderConfirm";
     public static final String CONFIG_POSITION_LINE = "isPosition";
     public static final String CONFIG_ORDER_LINE = "isPending";
     public static final String CONFIG_AVERAGE_LINE = "isAverage";
+    public static final String CONFIG_MD5 = "isMD5";
     public static final String CONFIG_LOCK_PASSWORD = "isLocked";
     public static final String CONFIG_LOCK_ACCOUNT = "isLockedAccount";
     public static final String CONFIG_PASSWORD = "password";
     public static final String CONFIG_ACCOUNT = "phone";
     public static final String CONFIG_BROKER = "brokerName";
-    public static final String CONFIG_KLINE_DAY_TYPE = "klineDay";
-    public static final String CONFIG_KLINE_HOUR_TYPE = "klineHour";
-    public static final String CONFIG_KLINE_MINUTE_TYPE = "klineMinute";
-    public static final String CONFIG_KLINE_SECOND_TYPE = "klineSecond";
 
     //设置页信息
     public static final String CHART_SETTING = "图表设置";
     public static final String PARA_CHANGE = "指标参数修改";
-    public static final String KLINE_DURATION = "K线周期设置";
+    public static final String KLINE_DURATION_SETTING = "K线周期设置";
+    public static final String KLINE_DURATION_ADD = "添加常用周期";
     public static final String TRANSACTION_SETTING = "交易设置";
     public static final String ORDER_CONFIRM = "下单、撤单确认";
+    public static final String SYSTEM_SETTING = "系统设置";
+    public static final String UPLOAD_LOG = "上传运行日志";
     public static final String PARA_MA = "5,10,20,60,0,0";
+    public static final String KLINE_DURATION_DEFAULT = "3秒,5秒,10秒,15秒,1分钟," +
+            "3分钟,5分钟,10分钟,15分钟,30分钟,1小时,4小时,1日,1周,4周";
+    public static final String KLINE_DURATION_ALL = "3秒,5秒,10秒,15秒,20秒,30秒,1分钟,2分钟," +
+            "3分钟,5分钟,10分钟,15分钟,30分钟,1小时,2小时,4小时,1日,1周,4周";
 
+    //OSS
+    public static final String BUCKET_NAME = "kuaiqi-xiaoq";
+    public static final String TRADE_FILE_NAME = "TradeLogFile";
 }

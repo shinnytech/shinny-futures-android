@@ -13,7 +13,7 @@
         android:layout_weight="1"
         android:gravity="start|center_vertical"
         android:drawableStart="@mipmap/ic_share_white_18dp"
-        android:text="拖拽"
+        android:text="管理"
         android:padding="@dimen/padding_5dp"
         android:textColor="@color/white"
         android:textSize="@dimen/font_size_normal" />

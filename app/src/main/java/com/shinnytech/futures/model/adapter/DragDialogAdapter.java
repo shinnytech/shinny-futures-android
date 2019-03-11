@@ -4,6 +4,7 @@ import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -14,6 +15,7 @@ import com.shinnytech.futures.databinding.ItemDialogOptionalDragBinding;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.ItemTouchHelperListener;
+import com.shinnytech.futures.utils.LogUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,11 +51,13 @@ public class DragDialogAdapter extends RecyclerView.Adapter<DragDialogAdapter.It
 
     public void saveOptionalList() {
         LatestFileManager.saveInsListToFile(mData);
+        LogUtils.e(TextUtils.join(",", mData), true);
     }
 
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
-        Collections.swap(mData, fromPosition, toPosition);
+        String ins = mData.remove(fromPosition);
+        mData.add(toPosition, ins);
         notifyItemMoved(fromPosition, toPosition);
     }
 

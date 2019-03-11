@@ -1,10 +1,10 @@
 package com.shinnytech.futures.utils;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.LayoutManager;
@@ -21,13 +21,10 @@ import android.view.View;
  */
 public class DividerGridItemDecorationUtils extends RecyclerView.ItemDecoration {
 
-    private static final int[] ATTRS = new int[]{android.R.attr.listDivider};
     private Drawable mDivider;
 
-    public DividerGridItemDecorationUtils(Context context) {
-        final TypedArray a = context.obtainStyledAttributes(ATTRS);
-        mDivider = a.getDrawable(0);
-        a.recycle();
+    public DividerGridItemDecorationUtils(Context context, int id) {
+        mDivider = ContextCompat.getDrawable(context, id);
     }
 
     @Override

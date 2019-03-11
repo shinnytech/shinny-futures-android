@@ -112,6 +112,8 @@ public class DataManager {
      */
     public String POSITION_DIRECTION = "";
 
+    public boolean IS_SHOW_VP_CONTENT = false;
+
     /**
      * date: 6/16/17
      * author: chenli

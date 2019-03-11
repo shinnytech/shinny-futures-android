@@ -17,6 +17,26 @@ public class QuoteEntity implements Serializable {
     private String bid_price1;//
     private String bid_volume1;//
 
+    private String ask_price2;//
+    private String ask_volume2;//
+    private String bid_price2;//
+    private String bid_volume2;//
+
+    private String ask_price3;//
+    private String ask_volume3;//
+    private String bid_price3;//
+    private String bid_volume3;//
+
+    private String ask_price4;//
+    private String ask_volume4;//
+    private String bid_price4;//
+    private String bid_volume4;//
+
+    private String ask_price5;//
+    private String ask_volume5;//
+    private String bid_price5;//
+    private String bid_volume5;//
+
     private String last_price;//
 
     private String highest;//
@@ -216,6 +236,138 @@ public class QuoteEntity implements Serializable {
         this.status = status;
     }
 
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public String getAsk_price2() {
+        return ask_price2;
+    }
+
+    public void setAsk_price2(String ask_price2) {
+        this.ask_price2 = ask_price2;
+    }
+
+    public String getAsk_volume2() {
+        return ask_volume2;
+    }
+
+    public void setAsk_volume2(String ask_volume2) {
+        this.ask_volume2 = ask_volume2;
+    }
+
+    public String getBid_price2() {
+        return bid_price2;
+    }
+
+    public void setBid_price2(String bid_price2) {
+        this.bid_price2 = bid_price2;
+    }
+
+    public String getBid_volume2() {
+        return bid_volume2;
+    }
+
+    public void setBid_volume2(String bid_volume2) {
+        this.bid_volume2 = bid_volume2;
+    }
+
+    public String getAsk_price3() {
+        return ask_price3;
+    }
+
+    public void setAsk_price3(String ask_price3) {
+        this.ask_price3 = ask_price3;
+    }
+
+    public String getAsk_volume3() {
+        return ask_volume3;
+    }
+
+    public void setAsk_volume3(String ask_volume3) {
+        this.ask_volume3 = ask_volume3;
+    }
+
+    public String getBid_price3() {
+        return bid_price3;
+    }
+
+    public void setBid_price3(String bid_price3) {
+        this.bid_price3 = bid_price3;
+    }
+
+    public String getBid_volume3() {
+        return bid_volume3;
+    }
+
+    public void setBid_volume3(String bid_volume3) {
+        this.bid_volume3 = bid_volume3;
+    }
+
+    public String getAsk_price4() {
+        return ask_price4;
+    }
+
+    public void setAsk_price4(String ask_price4) {
+        this.ask_price4 = ask_price4;
+    }
+
+    public String getAsk_volume4() {
+        return ask_volume4;
+    }
+
+    public void setAsk_volume4(String ask_volume4) {
+        this.ask_volume4 = ask_volume4;
+    }
+
+    public String getBid_price4() {
+        return bid_price4;
+    }
+
+    public void setBid_price4(String bid_price4) {
+        this.bid_price4 = bid_price4;
+    }
+
+    public String getBid_volume4() {
+        return bid_volume4;
+    }
+
+    public void setBid_volume4(String bid_volume4) {
+        this.bid_volume4 = bid_volume4;
+    }
+
+    public String getAsk_price5() {
+        return ask_price5;
+    }
+
+    public void setAsk_price5(String ask_price5) {
+        this.ask_price5 = ask_price5;
+    }
+
+    public String getAsk_volume5() {
+        return ask_volume5;
+    }
+
+    public void setAsk_volume5(String ask_volume5) {
+        this.ask_volume5 = ask_volume5;
+    }
+
+    public String getBid_price5() {
+        return bid_price5;
+    }
+
+    public void setBid_price5(String bid_price5) {
+        this.bid_price5 = bid_price5;
+    }
+
+    public String getBid_volume5() {
+        return bid_volume5;
+    }
+
+    public void setBid_volume5(String bid_volume5) {
+        this.bid_volume5 = bid_volume5;
+    }
+
     @Override
     public boolean equals(Object obj) {
 
@@ -230,6 +382,22 @@ public class QuoteEntity implements Serializable {
                     && this.bid_price1 == null && quoteEntity.bid_price1 == null
                     && this.ask_volume1 == null && quoteEntity.ask_volume1 == null
                     && this.bid_volume1 == null && quoteEntity.bid_volume1 == null
+                    && this.ask_price2 == null && quoteEntity.ask_price2 == null
+                    && this.bid_price2 == null && quoteEntity.bid_price2 == null
+                    && this.ask_volume2 == null && quoteEntity.ask_volume2 == null
+                    && this.bid_volume2 == null && quoteEntity.bid_volume2 == null
+                    && this.ask_price3 == null && quoteEntity.ask_price3 == null
+                    && this.bid_price3 == null && quoteEntity.bid_price3 == null
+                    && this.ask_volume3 == null && quoteEntity.ask_volume3 == null
+                    && this.bid_volume3 == null && quoteEntity.bid_volume3 == null
+                    && this.ask_price4 == null && quoteEntity.ask_price4 == null
+                    && this.bid_price4 == null && quoteEntity.bid_price4 == null
+                    && this.ask_volume4 == null && quoteEntity.ask_volume4 == null
+                    && this.bid_volume4 == null && quoteEntity.bid_volume4 == null
+                    && this.ask_price5 == null && quoteEntity.ask_price5 == null
+                    && this.bid_price5 == null && quoteEntity.bid_price5 == null
+                    && this.ask_volume5 == null && quoteEntity.ask_volume5 == null
+                    && this.bid_volume5 == null && quoteEntity.bid_volume5 == null
                     && this.open_interest == null && quoteEntity.open_interest == null) return true;
             else if (this.last_price != null && quoteEntity.last_price != null
                     && this.pre_settlement != null && quoteEntity.pre_settlement != null
@@ -240,6 +408,22 @@ public class QuoteEntity implements Serializable {
                     && this.bid_price1 != null && quoteEntity.bid_price1 != null
                     && this.ask_volume1 != null && quoteEntity.ask_volume1 != null
                     && this.bid_volume1 != null && quoteEntity.bid_volume1 != null
+                    && this.ask_price2 != null && quoteEntity.ask_price2 != null
+                    && this.bid_price2 != null && quoteEntity.bid_price2 != null
+                    && this.ask_volume2 != null && quoteEntity.ask_volume2 != null
+                    && this.bid_volume2 != null && quoteEntity.bid_volume2 != null
+                    && this.ask_price3 != null && quoteEntity.ask_price3 != null
+                    && this.bid_price3 != null && quoteEntity.bid_price3 != null
+                    && this.ask_volume3 != null && quoteEntity.ask_volume3 != null
+                    && this.bid_volume3 != null && quoteEntity.bid_volume3 != null
+                    && this.ask_price4 != null && quoteEntity.ask_price4 != null
+                    && this.bid_price4 != null && quoteEntity.bid_price4 != null
+                    && this.ask_volume4 != null && quoteEntity.ask_volume4 != null
+                    && this.bid_volume4 != null && quoteEntity.bid_volume4 != null
+                    && this.ask_price5 != null && quoteEntity.ask_price5 != null
+                    && this.bid_price5 != null && quoteEntity.bid_price5 != null
+                    && this.ask_volume5 != null && quoteEntity.ask_volume5 != null
+                    && this.bid_volume5 != null && quoteEntity.bid_volume5 != null
                     && this.open_interest != null && quoteEntity.open_interest != null) {
                 if (this.last_price.equals(quoteEntity.last_price)
                         && this.pre_settlement.equals(quoteEntity.pre_settlement)
@@ -250,6 +434,22 @@ public class QuoteEntity implements Serializable {
                         && this.bid_volume1.equals(quoteEntity.bid_volume1)
                         && this.ask_price1.equals(quoteEntity.ask_price1)
                         && this.bid_price1.equals(quoteEntity.bid_price1)
+                        && this.ask_volume2.equals(quoteEntity.ask_volume2)
+                        && this.bid_volume2.equals(quoteEntity.bid_volume2)
+                        && this.ask_price2.equals(quoteEntity.ask_price2)
+                        && this.bid_price2.equals(quoteEntity.bid_price2)
+                        && this.ask_volume3.equals(quoteEntity.ask_volume3)
+                        && this.bid_volume3.equals(quoteEntity.bid_volume3)
+                        && this.ask_price3.equals(quoteEntity.ask_price3)
+                        && this.bid_price3.equals(quoteEntity.bid_price3)
+                        && this.ask_volume4.equals(quoteEntity.ask_volume4)
+                        && this.bid_volume4.equals(quoteEntity.bid_volume4)
+                        && this.ask_price4.equals(quoteEntity.ask_price4)
+                        && this.bid_price4.equals(quoteEntity.bid_price4)
+                        && this.ask_volume5.equals(quoteEntity.ask_volume5)
+                        && this.bid_volume5.equals(quoteEntity.bid_volume5)
+                        && this.ask_price5.equals(quoteEntity.ask_price5)
+                        && this.bid_price5.equals(quoteEntity.bid_price5)
                         && this.open_interest.equals(quoteEntity.open_interest)) return true;
             }
         }

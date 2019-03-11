@@ -13,6 +13,7 @@ import com.github.mikephil.charting.utils.Utils;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyYAxis;
 
 import java.util.List;
@@ -28,9 +29,12 @@ public class YAxisRendererCurrentDay extends YAxisRenderer {
 
     @Override
     protected void computeAxisValues(float min, float max) {
-        /*折线图左边没有baseValue，则调用系统*/
         if (Float.isNaN(mYAxis.getBaseValue())) {
-            super.computeAxisValues(min, max);
+            int labelCount = mYAxis.getLabelCount();
+            float interval = (max - min) / labelCount;
+            mYAxis.mEntryCount = 1;
+            mYAxis.mEntries = new float[1];
+            mYAxis.mEntries[0] = max - interval;
             return;
         }
         float base = mYAxis.getBaseValue();
@@ -156,7 +160,7 @@ public class YAxisRendererCurrentDay extends YAxisRenderer {
             for (int i = 0; i < positions.length; i += 2) {
 
                 // draw a path because lines don't support dashing on lower android versions
-                if (i == 0 || i == positions.length - 2 || i == (positions.length - 1) / 2)
+                if (positions.length != 2 && (i == 0 || i == positions.length - 2 || i == (positions.length - 1) / 2))
                     mGridPaint.setPathEffect(null);
                 else mGridPaint.setPathEffect(mYAxis.getGridDashPathEffect());
                 c.drawPath(linePath(gridLinePath, i, positions), mGridPaint);
