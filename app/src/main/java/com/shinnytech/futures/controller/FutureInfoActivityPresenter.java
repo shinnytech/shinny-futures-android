@@ -50,7 +50,6 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.KeyboardUtils;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -200,22 +199,14 @@ public class FutureInfoActivityPresenter {
         if (mRightDrawable != null)
             mRightDrawable.setBounds(0, 0, mRightDrawable.getMinimumWidth(), mRightDrawable.getMinimumHeight());
 
-        //判断有无五档行情
-        QuoteEntity quoteEntity = DataManager.getInstance().getRtnData().getQuotes().get(mInstrumentId);
-        if (quoteEntity != null && quoteEntity.getAsk_price5() == null){
-            SPUtils.putAndApply(sContext, CONFIG_MD5, false);
-        }
+
         //初始化开关状态
         mIsPosition = (boolean) SPUtils.get(sContext, CONFIG_POSITION_LINE, true);
         mIsPending = (boolean) SPUtils.get(sContext, CONFIG_ORDER_LINE, true);
         mIsAverage = (boolean) SPUtils.get(sContext, CONFIG_AVERAGE_LINE, true);
-        mIsMD5 = (boolean) SPUtils.get(sContext, CONFIG_MD5, true);
 
-        //显示五档行情
-        if (!mInstrumentId.contains("SHFE") && !mInstrumentId.contains("INE"))
-            mBinding.md.setVisibility(View.GONE);
-        else if (mIsMD5) mBinding.md.setVisibility(View.VISIBLE);
-        else mBinding.md.setVisibility(View.GONE);
+        //初始化五档行情控制
+        initMD5ViewVisibility();
 
         //控制图表显示
         if (DataManager.getInstance().IS_SHOW_VP_CONTENT){
@@ -275,6 +266,43 @@ public class FutureInfoActivityPresenter {
         //持仓页改变合约代码时会直接跳转到交易页，这个过程和活动更新合约代码同时发生，所以交易页通过初始化可能得不到最新合约代码， 必须
         //通过eventBus实时监控才行，所以要保持页面实例从而可以调用onEvent()方法
         mBinding.vpInfoContent.setOffscreenPageLimit(3);
+    }
+
+    /**
+     * date: 2019/3/14
+     * author: chenli
+     * description: 初始化五档行情
+     */
+    public void initMD5ViewVisibility(){
+        //显示五档行情
+        if (!mInstrumentId.contains("SHFE") && !mInstrumentId.contains("INE"))
+            mBinding.md.setVisibility(View.GONE);
+        else {
+            //判断有无五档行情
+            QuoteEntity quoteEntity = DataManager.getInstance().getRtnData().getQuotes().get(mInstrumentId);
+            if (quoteEntity != null && quoteEntity.getAsk_price5() == null){
+                SPUtils.putAndApply(sContext, CONFIG_MD5, false);
+            }
+            mIsMD5 = (boolean) SPUtils.get(sContext, CONFIG_MD5, true);
+            if (mIsMD5) mBinding.md.setVisibility(View.VISIBLE);
+            else mBinding.md.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * date: 2019/3/14
+     * author: chenli
+     * description: 切换合约更新五档行情
+     */
+    public void updateMD5ViewVisibility(){
+        //显示五档行情
+        if (!mInstrumentId.contains("SHFE") && !mInstrumentId.contains("INE"))
+            mBinding.md.setVisibility(View.GONE);
+        else {
+            mIsMD5 = (boolean) SPUtils.get(sContext, CONFIG_MD5, true);
+            if (mIsMD5) mBinding.md.setVisibility(View.VISIBLE);
+            else mBinding.md.setVisibility(View.GONE);
+        }
     }
 
     public void registerListeners() {
@@ -428,10 +456,7 @@ public class FutureInfoActivityPresenter {
                         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                             SPUtils.putAndApply(sContext, CONFIG_MD5, isChecked);
                             mIsMD5 = isChecked;
-                            if (mInstrumentId.contains("SHFE") || mInstrumentId.contains("INE")){
-                                if (mIsMD5) mBinding.md.setVisibility(View.VISIBLE);
-                                else mBinding.md.setVisibility(View.GONE);
-                            }
+                            updateMD5ViewVisibility();
                         }
                     });
                 }

@@ -149,7 +149,7 @@ public class BankTransferActivity extends BaseActivity {
             Intent intent = new Intent(this, LoginActivity.class);
             //判断从哪个页面跳到登录页，登录页的销毁方式不一样
             intent.putExtra(ACTIVITY_TYPE, "MainActivity");
-            startActivity(intent);
+            startActivityForResult(intent, 0);
         }
     }
 
@@ -202,6 +202,17 @@ public class BankTransferActivity extends BaseActivity {
             e.printStackTrace();
         }
 
+    }
+
+    /**
+     * date: 2019/3/15
+     * author: chenli
+     * description: 进入登录页如果不登陆返回，则退出本页
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        finish();
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
 }

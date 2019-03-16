@@ -11,7 +11,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.RadioGroup;
 
 import com.shinnytech.futures.R;
@@ -25,7 +24,6 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
-import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -34,7 +32,6 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
 import static com.shinnytech.futures.constants.CommonConstants.LOG_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
@@ -291,11 +288,7 @@ public class FutureInfoActivity extends BaseActivity {
             } else {
                 mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
             }
-            boolean mIsMD5 = (boolean) SPUtils.get(sContext, CONFIG_MD5, true);
-            if (!mInstrumentId.contains("SHFE")
-                    && !mInstrumentId.contains("INE"))mBinding.md.setVisibility(View.GONE);
-            else if (mIsMD5) mBinding.md.setVisibility(View.VISIBLE);
-            else mBinding.md.setVisibility(View.GONE);
+            mFutureInfoActivityPresenter.updateMD5ViewVisibility();
         }
     }
 

@@ -105,8 +105,6 @@ public final class CommonConstants {
 
     //EventBus通知
     public static final String LOG_OUT = "LOGOUT";
-    public static final String BACKGROUND = "BACKGROUND";
-    public static final String FOREGROUND = "FOREGROUND";
 
     //下单版价格类型
     public static final String LATEST_PRICE = "最新价";

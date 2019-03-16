@@ -3,7 +3,7 @@
     <dimen xmlns:tools="http://schemas.android.com/tools" name="design_navigation_separator_vertical_padding" tools:override="true">
         0dp
     </dimen>
-    <dimen name="order_dialog_width">220dp</dimen>
+    <dimen name="order_dialog_width">240dp</dimen>
     <dimen name="order_dialog_width1">270dp</dimen>
     <dimen name="order_dialog_height">115dp</dimen>
     <dimen name="order_dialog_height1">120dp</dimen>

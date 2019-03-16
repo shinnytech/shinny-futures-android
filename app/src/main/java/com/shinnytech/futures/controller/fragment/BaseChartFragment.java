@@ -27,6 +27,7 @@ import com.shinnytech.futures.model.bean.eventbusbean.VisibilityEvent;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.LogUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -228,7 +229,7 @@ public class BaseChartFragment extends LazyLoadFragment{
         mTopChartViewBase.setDrawValueAboveBar(false);
         mTopChartViewBase.setBorderWidth(1f);
         mTopChartViewBase.setDrawBorders(true);
-        mTopChartViewBase.setNoDataText("暂无数据");
+        mTopChartViewBase.setNoDataText("数据申请中");
         mTopChartViewBase.setAutoScaleMinMaxEnabled(true);
         mTopChartViewBase.setDragEnabled(true);
         mTopChartViewBase.setViewPortOffsets(0, 40, 0, 1);
@@ -241,7 +242,7 @@ public class BaseChartFragment extends LazyLoadFragment{
         mMiddleChartViewBase.setBackgroundColor(mColorHomeBg);
         mMiddleChartViewBase.setGridBackgroundColor(mColorHomeBg);
         mMiddleChartViewBase.setDrawValueAboveBar(false);
-        mMiddleChartViewBase.setNoDataText("暂无数据");
+        mMiddleChartViewBase.setNoDataText("数据申请中");
         mMiddleChartViewBase.setAutoScaleMinMaxEnabled(true);
         mMiddleChartViewBase.setDragEnabled(true);
         mMiddleChartViewBase.setDrawBorders(false);
@@ -255,7 +256,7 @@ public class BaseChartFragment extends LazyLoadFragment{
         mBottomChartViewBase.setBackgroundColor(mColorHomeBg);
         mBottomChartViewBase.setGridBackgroundColor(mColorHomeBg);
         mBottomChartViewBase.setDrawValueAboveBar(false);
-        mBottomChartViewBase.setNoDataText("暂无数据");
+        mBottomChartViewBase.setNoDataText("数据申请中");
         mBottomChartViewBase.setAutoScaleMinMaxEnabled(true);
         mBottomChartViewBase.setDragEnabled(true);
         mBottomChartViewBase.setDrawBorders(false);
@@ -611,7 +612,7 @@ public class BaseChartFragment extends LazyLoadFragment{
         super.onResume();
         registerBroaderCast();
         if (BaseApplication.getWebSocketService() == null) return;
-//        String ins = getIns(instrument_id);
+
         if (CURRENT_DAY_FRAGMENT.equals(mFragmentType)) {
             BaseApplication.getWebSocketService().sendSetChart(instrument_id);
         } else {

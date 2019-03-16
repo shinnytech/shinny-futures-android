@@ -17,22 +17,13 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import com.alibaba.sdk.android.oss.ClientConfiguration;
-import com.alibaba.sdk.android.oss.ClientException;
 import com.alibaba.sdk.android.oss.OSS;
 import com.alibaba.sdk.android.oss.OSSClient;
-import com.alibaba.sdk.android.oss.ServiceException;
-import com.alibaba.sdk.android.oss.callback.OSSCompletedCallback;
 import com.alibaba.sdk.android.oss.common.OSSLog;
 import com.alibaba.sdk.android.oss.common.auth.OSSAuthCredentialsProvider;
 import com.alibaba.sdk.android.oss.common.auth.OSSCredentialProvider;
-import com.alibaba.sdk.android.oss.common.auth.OSSStsTokenCredentialProvider;
-import com.alibaba.sdk.android.oss.internal.OSSAsyncTask;
-import com.alibaba.sdk.android.oss.model.CannedAccessControlList;
-import com.alibaba.sdk.android.oss.model.CreateBucketRequest;
-import com.alibaba.sdk.android.oss.model.CreateBucketResult;
 import com.baidu.mobstat.StatService;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheEntity;
@@ -68,7 +59,6 @@ import java.util.logging.Level;
 
 import okhttp3.OkHttpClient;
 
-import static com.shinnytech.futures.constants.CommonConstants.BACKGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_DURATION_DEFAULT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
@@ -77,7 +67,6 @@ import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PARA_MA;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
-import static com.shinnytech.futures.constants.CommonConstants.FOREGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.JSON_FILE_URL;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_1;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_2;
@@ -110,11 +99,11 @@ public class BaseApplication extends Application implements ServiceConnection {
     private static List<String> sMDURLs = new ArrayList<>();
     private static int index = 0;
     private boolean mServiceBound = false;
+    private boolean mBackGround = false;
     private BroadcastReceiver mReceiverMarket;
     private BroadcastReceiver mReceiverTransaction;
     private BroadcastReceiver mReceiverNetwork;
     private BroadcastReceiver mReceiverScreen;
-    private boolean mIsBackground = false;
     private MyHandler mMyHandler = new MyHandler();
     private static OSS ossClient;
 
@@ -456,10 +445,11 @@ public class BaseApplication extends Application implements ServiceConnection {
      * description: 前台任务--连接服务器
      */
     private void notifyForeground() {
-        if (mIsBackground) {
-            mIsBackground = false;
-            //前台
-            EventBus.getDefault().post(FOREGROUND);
+        //前台
+        if (mServiceBound && mBackGround){
+            mBackGround = false;
+            sWebSocketService.connectTD();
+            sWebSocketService.connectMD(sMDURLs.get(index));
         }
     }
 
@@ -469,21 +459,10 @@ public class BaseApplication extends Application implements ServiceConnection {
      * description: 后台任务--关闭服务器
      */
     private void notifyBackground() {
-        if (!mIsBackground) {
-            mIsBackground = true;
-            //后台
-            EventBus.getDefault().post(BACKGROUND);
-//            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//            Notification notification = new NotificationCompat.Builder(this, "home")
-//                    .setContentTitle("快期小Q下单软件正在运行")
-//                    .setContentText("点击返回程序")
-//                    .setWhen(System.currentTimeMillis())
-//                    .setSmallIcon(R.mipmap.ic_launcher)
-//                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-//                    .setPriority(NotificationCompat.PRIORITY_MAX)
-//                    .build();
-//            notificationManager.notify(2, notification);
-        }
+        //后台
+        sWebSocketService.disConnectTD();
+        sWebSocketService.disConnectMD();
+        mBackGround = true;
     }
 
     /**

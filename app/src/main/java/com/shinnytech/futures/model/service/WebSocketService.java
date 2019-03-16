@@ -29,7 +29,6 @@ import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.bean.accountinfobean.BrokerEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.ChartEntity;
-import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqCancelOrderEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqConfirmSettlementEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqInsertOrderEntity;
@@ -44,21 +43,16 @@ import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.LogUtils;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.shinnytech.futures.constants.CommonConstants.BACKGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
 import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY_FRAGMENT;
-import static com.shinnytech.futures.constants.CommonConstants.FOREGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
@@ -100,7 +94,6 @@ public class WebSocketService extends Service {
 
     private static final int TIMEOUT = 500;
     private final IBinder mBinder = new LocalBinder();
-    private boolean mBackground = false;
     private WebSocket mWebSocketClientMD;
 
     private WebSocket mWebSocketClientTD;
@@ -167,26 +160,23 @@ public class WebSocketService extends Service {
                 if ((System.currentTimeMillis() / 1000 - mMDLastPong) >= 20) {
                     sendMessage(MD_OFFLINE, MD_BROADCAST);
                 } else {
-                    mWebSocketClientMD.sendPing();
+                    if (mWebSocketClientMD != null)mWebSocketClientMD.sendPing();
                 }
 
                 if ((System.currentTimeMillis() / 1000 - mTDLastPong) >= 20) {
                     sendMessage(TD_OFFLINE, TD_BROADCAST);
                 } else {
-                    mWebSocketClientTD.sendPing();
+                    if (mWebSocketClientTD != null)mWebSocketClientTD.sendPing();
                 }
 
             }
         };
         timer.schedule(timerTask, 15000, 15000);
-
-        EventBus.getDefault().register(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -208,18 +198,6 @@ public class WebSocketService extends Service {
                 break;
         }
 
-    }
-
-    @Subscribe
-    public void onEvent(String msg) {
-        if (BACKGROUND.equals(msg)) {
-            mBackground = true;
-        }
-
-        if (FOREGROUND.equals(msg)) {
-            mBackground = false;
-            sendPeekMessage();
-        }
     }
 
     /**
@@ -280,7 +258,7 @@ public class WebSocketService extends Service {
                                         sendMessage(MD_OFFLINE, MD_BROADCAST);
                                         return;
                                 }
-                                if (!mBackground) sendPeekMessage();
+                                sendPeekMessage();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -428,7 +406,7 @@ public class WebSocketService extends Service {
                                         sendMessage(TD_OFFLINE, TD_BROADCAST);
                                         return;
                                 }
-                                if (!mBackground) sendPeekMessageTransaction();
+                                sendPeekMessageTransaction();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }

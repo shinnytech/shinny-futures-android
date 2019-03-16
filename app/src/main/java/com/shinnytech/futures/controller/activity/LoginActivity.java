@@ -20,7 +20,6 @@ import android.widget.CompoundButton;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityLoginBinding;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
 import java.lang.ref.WeakReference;
@@ -272,9 +271,9 @@ public class LoginActivity extends BaseActivity {
                 }
                 switch (mActivityType) {
                     case "MainActivity":
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        break;
+//                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+//                        startActivity(intent);
+//                        break;
                     case "FutureInfoActivity":
                         //返回未登录信息给合约详情页，使盘口页显示，涉及登录页的fragment隐藏
                         Intent intent1 = new Intent();
@@ -302,9 +301,9 @@ public class LoginActivity extends BaseActivity {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
             switch (mActivityType) {
                 case "MainActivity":
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    break;
+//                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+//                    startActivity(intent);
+//                    break;
                 case "FutureInfoActivity":
                     //返回未登录信息给合约详情页，使盘口页显示，涉及登录页的fragment隐藏
                     Intent intent1 = new Intent();

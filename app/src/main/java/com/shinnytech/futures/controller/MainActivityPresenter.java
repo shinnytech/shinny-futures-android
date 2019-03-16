@@ -8,10 +8,13 @@ import android.content.Intent;
 import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
@@ -27,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
@@ -51,12 +55,20 @@ import com.shinnytech.futures.model.bean.settingbean.NavigationRightEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -351,7 +363,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                         mMainActivity.startActivity(intentBank);
                         break;
                     case CommonConstants.OPEN_ACCOUNT:
-                        //Intent intentOpenAccount = new Intent(mMainActivity, OpenAccountActivity.class);
+//                        Intent intentOpenAccount = new Intent(mMainActivity, OpenAccountActivity.class);
                         Intent intentOpenAccount = mMainActivity.getPackageManager().getLaunchIntentForPackage("com.cfmmc.app.sjkh");
                         if (intentOpenAccount != null) mMainActivity.startActivity(intentOpenAccount);
                         else {
@@ -379,6 +391,27 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
             }
         }
         ));
+    }
+
+    /**
+     * date: 2019/3/15
+     * author: chenli
+     * description: 安装apk文件
+     */
+    private void installApk(File file) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+            LogUtils.e("版本大于 N ，开始使用 fileProvider 进行安装", true);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Uri contentUri = FileProvider.getUriForFile(sContext, BuildConfig.APPLICATION_ID+".fileProvider", file);
+            intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
+        } else {
+            LogUtils.e("正常进行安装", true);
+            intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
+        }
+        mMainActivity.startActivity(intent);
     }
 
     public String getPreSubscribedQuotes() {

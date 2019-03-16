@@ -7,6 +7,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ActivityAccountBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
+import com.shinnytech.futures.utils.LogUtils;
 
 import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
@@ -52,7 +53,18 @@ public class AccountActivity extends BaseActivity {
             Intent intent = new Intent(this, LoginActivity.class);
             //判断从哪个页面跳到登录页，登录页的销毁方式不一样
             intent.putExtra(ACTIVITY_TYPE, "MainActivity");
-            startActivity(intent);
+            startActivityForResult(intent, 0);
         }
+    }
+
+    /**
+     * date: 2019/3/15
+     * author: chenli
+     * description: 进入登录页如果不登陆返回，则退出本页
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        finish();
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

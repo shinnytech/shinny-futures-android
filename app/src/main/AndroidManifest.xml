@@ -29,6 +29,9 @@
     <!-- 前台服务 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+    <!--应用内安装apk权限-->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+
     <application
         android:name=".application.BaseApplication"
         android:allowBackup="true"
@@ -54,7 +57,6 @@
         <activity
             android:name=".controller.activity.MainActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/MainActivityTheme">
             <intent-filter>
