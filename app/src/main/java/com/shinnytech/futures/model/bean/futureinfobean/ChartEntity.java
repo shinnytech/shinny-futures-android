@@ -40,6 +40,7 @@ public class ChartEntity {
     @Override
     public String toString() {
         return "left_id"+left_id+"\n"+"right_id"+right_id+"\n"+
-                "ins_list"+state.get("ins_list")+"\n"+"duration"+state.get("duration");
+                "ins_list"+state.get("ins_list")+"\n"+"duration"+state.get("duration")+
+                "trading_day_count"+state.get("trading_day_count")+"\n"+"duration"+state.get("duration");
     }
 }

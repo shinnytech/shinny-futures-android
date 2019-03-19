@@ -21,6 +21,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityLoginBinding;
 import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.TimeUtils;
 
 import java.lang.ref.WeakReference;
 
@@ -29,6 +30,7 @@ import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOCK_ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOCK_PASSWORD;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PASSWORD;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN;
@@ -57,8 +59,6 @@ public class LoginActivity extends BaseActivity {
     private Handler mHandler;
     private ActivityLoginBinding mBinding;
     private String mPassword;
-    private boolean mRememberPassword;
-    private boolean mRememberAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,20 +82,8 @@ public class LoginActivity extends BaseActivity {
             mBinding.broker.setText(brokerList[0]);
         }
 
-        //获取用户登录成功后保存在sharedPreference里的用户名
-        if (SPUtils.contains(sContext, CONFIG_ACCOUNT)) {
-            String account = (String) SPUtils.get(sContext, CONFIG_ACCOUNT, "");
-            mBinding.account.setText(account);
-            mBinding.account.setSelection(account.length());
-            if (!account.isEmpty()) mBinding.deleteAccount.setVisibility(View.VISIBLE);
-        }
-
-        if (SPUtils.contains(sContext, CONFIG_PASSWORD)) {
-            String password = (String) SPUtils.get(sContext, CONFIG_PASSWORD, "");
-            mBinding.password.setText(password);
-            mBinding.password.setSelection(password.length());
-            if (!password.isEmpty())mBinding.deletePassword.setVisibility(View.VISIBLE);
-        }
+        boolean mRememberPassword = false;
+        boolean mRememberAccount = false;
 
         if (SPUtils.contains(sContext, CONFIG_LOCK_ACCOUNT)){
             mRememberAccount = (boolean) SPUtils.get(sContext, CONFIG_LOCK_ACCOUNT, false);
@@ -109,6 +97,25 @@ public class LoginActivity extends BaseActivity {
             if (mRememberPassword){
                 mBinding.cbRememberPassword.setChecked(true);
             }
+        }
+
+        //获取用户登录成功后保存在sharedPreference里的用户名
+        if (SPUtils.contains(sContext, CONFIG_ACCOUNT)) {
+            String account;
+            if (mRememberAccount) account = (String) SPUtils.get(sContext, CONFIG_ACCOUNT, "");
+            else account = "";
+            mBinding.account.setText(account);
+            mBinding.account.setSelection(account.length());
+            if (!account.isEmpty()) mBinding.deleteAccount.setVisibility(View.VISIBLE);
+        }
+
+        if (SPUtils.contains(sContext, CONFIG_PASSWORD)) {
+            String password ;
+            if (mRememberPassword) password = (String) SPUtils.get(sContext, CONFIG_PASSWORD, "");
+            else password = "";
+            mBinding.password.setText(password);
+            mBinding.password.setSelection(password.length());
+            if (!password.isEmpty())mBinding.deletePassword.setVisibility(View.VISIBLE);
         }
     }
 
@@ -215,10 +222,8 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked){
-                    mRememberAccount = true;
                     SPUtils.putAndApply(sContext, CONFIG_LOCK_ACCOUNT, true);
                 }else {
-                    mRememberAccount = false;
                     SPUtils.putAndApply(sContext, CONFIG_LOCK_ACCOUNT, false);
                 }
             }
@@ -228,10 +233,8 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked){
-                    mRememberPassword = true;
                     SPUtils.putAndApply(sContext, CONFIG_LOCK_PASSWORD, true);
                 }else {
-                    mRememberPassword = false;
                     SPUtils.putAndApply(sContext, CONFIG_LOCK_PASSWORD, false);
                 }
             }
@@ -447,11 +450,9 @@ public class LoginActivity extends BaseActivity {
             if (activity != null) {
                 switch (msg.what) {
                     case 0:
-                        activity.sDataManager.IS_LOGIN = true;
-                        if (activity.mRememberAccount) SPUtils.putAndApply(activity.sContext, CONFIG_ACCOUNT, activity.mPhoneNumber);
-                        else SPUtils.putAndApply(activity.sContext, CONFIG_ACCOUNT, "");
-                        if (activity.mRememberPassword)SPUtils.putAndApply(activity.sContext, CONFIG_PASSWORD, activity.mPassword);
-                        else SPUtils.putAndApply(activity.sContext, CONFIG_PASSWORD, "");
+                        SPUtils.putAndApply(activity.sContext, CONFIG_LOGIN_DATE, TimeUtils.getNowTime());
+                        SPUtils.putAndApply(activity.sContext, CONFIG_ACCOUNT, activity.mPhoneNumber);
+                        SPUtils.putAndApply(activity.sContext, CONFIG_PASSWORD, activity.mPassword);
                         SPUtils.putAndApply(activity.sContext, CONFIG_BROKER, activity.mBinding.broker.getText().toString());
                         //关闭键盘
                         View view = activity.getWindow().getCurrentFocus();

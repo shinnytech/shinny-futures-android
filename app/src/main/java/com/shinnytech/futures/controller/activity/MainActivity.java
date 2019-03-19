@@ -35,6 +35,8 @@ import static com.shinnytech.futures.constants.CommonConstants.LOGOUT;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
@@ -56,6 +58,7 @@ public class MainActivity extends BaseActivity {
     private long mExitTime = 0;
     private ActivityMainDrawerBinding mBinding;
     private MainActivityPresenter mMainActivityPresenter;
+    private BroadcastReceiver mReceiverLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,17 +145,47 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String msg = intent.getStringExtra("msg");
-                if (TD_OFFLINE.equals(msg))refreshMenu();
+                if (TD_OFFLINE.equals(msg))refreshMenu(false);
             }
         };
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverLocal, new IntentFilter(TD_BROADCAST_ACTION));
+
+        mReceiverLogin = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String msg = intent.getStringExtra("msg");
+                switch (msg) {
+                    case TD_MESSAGE_LOGIN:refreshMenu(true);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverLogin, new IntentFilter(TD_BROADCAST_ACTION));
     }
 
-    //断线刷新右导航
-    private void refreshMenu() {
-        DataManager.getInstance().IS_LOGIN = false;
-        mMainActivityPresenter.mNavigationRightAdapter.updateItem(0, CommonConstants.LOGIN);
-        mMainActivityPresenter.mNavigationRightAdapter.removeItem(3);
+    /**
+     * date: 2019/3/17
+     * author: chenli
+     * description: 断线刷新右导航
+     */
+    private void refreshMenu(boolean isLogin) {
+        DataManager.getInstance().IS_LOGIN = isLogin;
+        if (!isLogin){
+            mMainActivityPresenter.mNavigationRightAdapter.updateItem(0, CommonConstants.LOGIN);
+            mMainActivityPresenter.mNavigationRightAdapter.removeItem(3);
+        }else {
+            mMainActivityPresenter.mNavigationRightAdapter.updateItem(0, CommonConstants.LOGOUT);
+            mMainActivityPresenter.mNavigationRightAdapter.addItem(3);
+        }
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mReceiverLogin != null)LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLogin);
     }
 
     @Override

@@ -112,7 +112,18 @@ public class DataManager {
      */
     public String POSITION_DIRECTION = "";
 
+    /**
+     * date: 2019/3/18
+     * description: 是否显示副图判断
+     */
     public boolean IS_SHOW_VP_CONTENT = false;
+
+    /**
+     * date: 2019/3/18
+     * description: 用户最后一次发送的订阅请求
+     */
+    public String QUOTES = "";
+    public String CHARTS = "";
 
     /**
      * date: 6/16/17
@@ -437,7 +448,8 @@ public class DataManager {
                                             String userId = user.getJSONObject("session").optString("user_id");
                                             USER_ID = userId;
                                             userEntity.setUser_id(userId);
-                                            if (BaseApplication.getWebSocketService() != null && !IS_LOGIN )
+                                            IS_LOGIN = true;
+                                            if (BaseApplication.getWebSocketService() != null)
                                                 BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_LOGIN, TD_BROADCAST);
                                             break;
                                         default:

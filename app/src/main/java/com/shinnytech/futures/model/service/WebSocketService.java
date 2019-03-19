@@ -42,6 +42,8 @@ import com.shinnytech.futures.model.bean.reqbean.ReqTransferEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.LogUtils;
+import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.TimeUtils;
 
 import org.json.JSONObject;
 
@@ -220,35 +222,8 @@ public class WebSocketService extends Service {
                                 String aid = jsonObject.getString("aid");
                                 switch (aid) {
                                     case "rsp_login":
-                                        //首次连接行情服务器与断开重连的行情订阅处理
                                         mWebSocketClientMD.sendPing();
-                                        String ins_list = sDataManager.getRtnData().getIns_list();
-                                        if (ins_list != null) sendSubscribeQuote(ins_list);
-                                        else if (LatestFileManager.getOptionalInsList().isEmpty())
-                                            sendSubscribeQuote(TextUtils.join(",",
-                                                    new ArrayList(LatestFileManager.getMainInsList().keySet()).subList(0, LOAD_QUOTE_NUM)));
-                                        else {
-                                            List<String> list = LatestFileManager.getCombineInsList(
-                                                    new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
-
-                                            if (list.size() < LOAD_QUOTE_NUM) sendSubscribeQuote(TextUtils.join(",", list));
-                                            else sendSubscribeQuote(TextUtils.join(",", list.subList(0, LOAD_QUOTE_NUM)));
-                                        }
-
-                                        Map<String, ChartEntity> chartEntityMap = sDataManager.getRtnData().getCharts();
-                                        if (chartEntityMap.size() != 0) {
-                                            for (String key :
-                                                    chartEntityMap.keySet()) {
-                                                ChartEntity chartEntity = chartEntityMap.get(key);
-                                                String duration = chartEntity.getState().get("duration");
-                                                String ins = chartEntity.getState().get("ins_list");
-                                                if (CURRENT_DAY_FRAGMENT.equals(key)){
-                                                    sendSetChart(ins);
-                                                }else {
-                                                    sendSetChartKline(ins, VIEW_WIDTH, duration);
-                                                }
-                                            }
-                                        }
+                                        sendSubscribeAfterConnect();
                                         break;
                                     case "rtn_data":
                                         BaseApplication.setIndex(0);
@@ -284,6 +259,33 @@ public class WebSocketService extends Service {
 
     }
 
+    /**
+     * date: 2019/3/17
+     * author: chenli
+     * description: 首次连接行情服务器与断开重连的行情订阅处理
+     */
+    private void sendSubscribeAfterConnect() {
+        if (!sDataManager.QUOTES.isEmpty() && mWebSocketClientMD != null){
+            mWebSocketClientMD.sendText(sDataManager.QUOTES);
+            LogUtils.e(sDataManager.QUOTES, true);
+        }
+        else if (LatestFileManager.getOptionalInsList().isEmpty())
+            sendSubscribeQuote(TextUtils.join(",",
+                    new ArrayList(LatestFileManager.getMainInsList().keySet()).subList(0, LOAD_QUOTE_NUM)));
+        else {
+            List<String> list = LatestFileManager.getCombineInsList(
+                    new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
+
+            if (list.size() < LOAD_QUOTE_NUM) sendSubscribeQuote(TextUtils.join(",", list));
+            else sendSubscribeQuote(TextUtils.join(",", list.subList(0, LOAD_QUOTE_NUM)));
+        }
+
+        if (!sDataManager.CHARTS.isEmpty() && mWebSocketClientMD != null){
+            mWebSocketClientMD.sendText(sDataManager.CHARTS);
+            LogUtils.e(sDataManager.CHARTS, true);
+        }
+    }
+
     public void reConnectMD(String url) {
         disConnectMD();
         connectMD(url);
@@ -308,6 +310,7 @@ public class WebSocketService extends Service {
             reqSubscribeQuoteEntity.setIns_list(insList);
             String subScribeQuote = new Gson().toJson(reqSubscribeQuoteEntity);
             mWebSocketClientMD.sendText(subScribeQuote);
+            sDataManager.QUOTES = subScribeQuote;
             LogUtils.e(subScribeQuote, true);
         }
     }
@@ -342,6 +345,7 @@ public class WebSocketService extends Service {
             reqSetChartEntity.setTrading_day_start(0);
             reqSetChartEntity.setTrading_day_count(86400000000000l);
             String setChart = new Gson().toJson(reqSetChartEntity);
+            sDataManager.CHARTS = setChart;
             mWebSocketClientMD.sendText(setChart);
             LogUtils.e(setChart, true);
         }
@@ -363,6 +367,7 @@ public class WebSocketService extends Service {
                 reqSetChartKlineEntity.setView_width(view_width);
                 reqSetChartKlineEntity.setDuration(duration_l);
                 String setChart = new Gson().toJson(reqSetChartKlineEntity);
+                sDataManager.CHARTS = setChart;
                 mWebSocketClientMD.sendText(setChart);
                 LogUtils.e(setChart, true);
             }catch (Exception e){
@@ -395,9 +400,7 @@ public class WebSocketService extends Service {
                                 switch (aid) {
                                     case "rtn_brokers":
                                         mWebSocketClientTD.sendPing();
-                                        BrokerEntity brokerInfo = new Gson().fromJson(message, BrokerEntity.class);
-                                        sDataManager.getBroker().setBrokers(brokerInfo.getBrokers());
-                                        sendMessage(TD_MESSAGE_BROKER_INFO, TD_BROADCAST);
+                                        loginConfig(message);
                                         break;
                                     case "rtn_data":
                                         sDataManager.refreshTradeBean(jsonObject);
@@ -427,6 +430,28 @@ public class WebSocketService extends Service {
             e.printStackTrace();
         }
 
+    }
+
+    /**
+     * date: 2019/3/17
+     * author: chenli
+     * description: 登录设置，自动登录
+     */
+    private void loginConfig(String message){
+        BrokerEntity brokerInfo = new Gson().fromJson(message, BrokerEntity.class);
+        sDataManager.getBroker().setBrokers(brokerInfo.getBrokers());
+        sendMessage(TD_MESSAGE_BROKER_INFO, TD_BROADCAST);
+
+        Context context = BaseApplication.getContext();
+        if (SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)){
+            String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
+            if (TimeUtils.getNowTime().equals(date)){
+                String name = (String) SPUtils.get(context, CommonConstants.CONFIG_ACCOUNT, "");
+                String password = (String) SPUtils.get(context, CommonConstants.CONFIG_PASSWORD, "");
+                String broker = (String) SPUtils.get(context, CommonConstants.CONFIG_BROKER, "");
+                sendReqLogin(broker, name, password);
+            }
+        }
     }
 
     public void reConnectTD() {

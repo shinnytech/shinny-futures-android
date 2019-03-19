@@ -6,6 +6,7 @@
     <data></data>
 
     <android.support.v4.widget.DrawerLayout
+        android:keepScreenOn="true"
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

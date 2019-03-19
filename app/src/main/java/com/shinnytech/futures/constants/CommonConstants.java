@@ -126,6 +126,7 @@ public final class CommonConstants {
     public static final String CONFIG_PASSWORD = "password";
     public static final String CONFIG_ACCOUNT = "phone";
     public static final String CONFIG_BROKER = "brokerName";
+    public static final String CONFIG_LOGIN_DATE = "loginDate";
 
     //设置页信息
     public static final String CHART_SETTING = "图表设置";

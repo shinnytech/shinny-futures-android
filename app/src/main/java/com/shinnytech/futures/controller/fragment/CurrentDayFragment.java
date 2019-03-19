@@ -389,7 +389,7 @@ public class CurrentDayFragment extends BaseChartFragment {
                     topLineData.addEntry(entries.get(1), 1);
                     middleLineData.addEntry(entries.get(2), 0);
                     middleBarData.addEntry(entries.get(3), 0);
-                } else {
+                } else if (last_index_t > mLastIndex){
                     LogUtils.e("分时图加载多个数据", false);
                     for (int i = mLastIndex + 1; i <= last_index_t; i++) {
                         KlineEntity.DataEntity dataEntity = dataEntities.get(i + "");
@@ -401,7 +401,6 @@ public class CurrentDayFragment extends BaseChartFragment {
                         middleLineData.addEntry(entries.get(2), 0);
                         middleBarData.addEntry(entries.get(3), 0);
                     }
-                    LogUtils.e(topLineData.getDataSetByIndex(0).getEntryCount()+"", true);
                     mLastIndex = last_index_t;
                 }
                 refreshYAxisRange(topLineData.getDataSetByIndex(0));

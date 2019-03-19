@@ -636,4 +636,5 @@ dependencies {
     implementation 'com.umeng.umsdk:common:1.5.4'
     implementation 'com.baidu.mobstat:mtj-sdk:latest.integration'
     implementation 'com.aliyun.dpa:oss-android-sdk:+'
+    implementation 'com.amplitude:android-sdk:2.16.0'
 }

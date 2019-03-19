@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -157,6 +158,7 @@ public class BaseApplication extends Application implements ServiceConnection {
 
         //配置交易日志
         initTradeLog();
+
     }
 
     /**
