@@ -20,10 +20,12 @@ import android.widget.CompoundButton;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityLoginBinding;
+import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
 import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
@@ -72,14 +74,15 @@ public class LoginActivity extends BaseActivity {
         mHandler = new MyHandler(this);
         mBinding = (ActivityLoginBinding) mViewDataBinding;
         mActivityType = getIntent().getStringExtra(ACTIVITY_TYPE);
-        String[] brokerList = sDataManager.getBroker().getBrokers();
+        List<String> brokerList = LatestFileManager.
+                getBrokerIdFromBuildConfig(sDataManager.getBroker().getBrokers());
 
         //获取用户登录成功后保存在sharedPreference里的期货公司
         if (SPUtils.contains(sContext, CONFIG_BROKER)) {
             String brokerName = (String) SPUtils.get(sContext, CONFIG_BROKER, "");
             mBinding.broker.setText(brokerName);
-        }else if (brokerList != null && brokerList.length != 0){
-            mBinding.broker.setText(brokerList[0]);
+        }else if (brokerList != null && brokerList.size() != 0){
+            mBinding.broker.setText(brokerList.get(0));
         }
 
         boolean mRememberPassword = false;
@@ -410,29 +413,6 @@ public class LoginActivity extends BaseActivity {
     /**
      * date: 6/1/18
      * author: chenli
-     * description: 根据不同软件版本获取期货公司列表
-     */
-//    private List<String> getBrokerIdFromBuildConfig(String[] brokerIdOrigin) {
-//        List<String> brokerList = new ArrayList<>();
-//        if (brokerIdOrigin != null) {
-//            if (KUAI_QI_XIAO_Q.equals(BuildConfig.BROKER_ID)) {
-//                brokerList.addAll(Arrays.asList(brokerIdOrigin));
-//            } else {
-//                for (int i = 0; i < brokerIdOrigin.length; i++) {
-//                    if (brokerIdOrigin[i] != null && brokerIdOrigin[i].contains(BuildConfig.BROKER_ID)) {
-//                        brokerList.add(brokerIdOrigin[i]);
-//                    }
-//                }
-//            }
-//        } else if (BaseApplication.getWebSocketService() != null)
-//            BaseApplication.getWebSocketService().reConnectTD();
-//
-//        return brokerList;
-//    }
-
-    /**
-     * date: 6/1/18
-     * author: chenli
      * description: 点击登录后服务器返回处理
      * version:
      * state:
@@ -470,10 +450,11 @@ public class LoginActivity extends BaseActivity {
                         activity.finish();
                         break;
                     case 1:
-                        String[] brokerList = activity.sDataManager.getBroker().getBrokers();
+                        List<String> brokerList = LatestFileManager
+                                .getBrokerIdFromBuildConfig(activity.sDataManager.getBroker().getBrokers());
                         if (activity.mBinding.broker.getText().toString().isEmpty()
-                                && brokerList != null && brokerList.length != 0){
-                            activity.mBinding.broker.setText(brokerList[0]);
+                                && brokerList != null && brokerList.size() != 0){
+                            activity.mBinding.broker.setText(brokerList.get(0));
                         }
                         break;
                     default:

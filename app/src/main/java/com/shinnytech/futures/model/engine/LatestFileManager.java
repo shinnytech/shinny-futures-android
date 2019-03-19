@@ -4,8 +4,10 @@ import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.widget.TextView;
 
+import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
@@ -24,6 +26,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -747,6 +750,29 @@ public class LatestFileManager {
         catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    /**
+     * date: 6/1/18
+     * author: chenli
+     * description: 根据不同软件版本获取期货公司列表
+     */
+    public static List<String> getBrokerIdFromBuildConfig(String[] brokerIdOrigin) {
+        List<String> brokerList = new ArrayList<>();
+        if (brokerIdOrigin != null) {
+            if (CommonConstants.KUAI_QI_XIAO_Q.equals(BuildConfig.BROKER_ID)) {
+                brokerList.addAll(Arrays.asList(brokerIdOrigin));
+            } else {
+                for (int i = 0; i < brokerIdOrigin.length; i++) {
+                    if (brokerIdOrigin[i] != null && brokerIdOrigin[i].contains(BuildConfig.BROKER_ID)) {
+                        brokerList.add(brokerIdOrigin[i]);
+                    }
+                }
+            }
+        } else if (BaseApplication.getWebSocketService() != null)
+            BaseApplication.getWebSocketService().reConnectTD();
+
+        return brokerList;
     }
 
 }

@@ -9,8 +9,11 @@ import android.view.View;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ActivityBrokerListBinding;
 import com.shinnytech.futures.model.adapter.BrokerAdapter;
+import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
+
+import java.util.List;
 
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_LIST;
 
@@ -33,7 +36,8 @@ public class BrokerListActivity extends BaseActivity {
                 new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         mBinding.rv.addItemDecoration(
                 new DividerItemDecorationUtils(this, DividerItemDecorationUtils.VERTICAL_LIST));
-        String[] brokers = sDataManager.getBroker().getBrokers();
+        List<String> brokers = LatestFileManager
+                .getBrokerIdFromBuildConfig(sDataManager.getBroker().getBrokers());
         mBrokerAdapter = new BrokerAdapter(this, brokers);
         mBinding.rv.setAdapter(mBrokerAdapter);
     }
@@ -44,7 +48,7 @@ public class BrokerListActivity extends BaseActivity {
                 new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        String broker = mBrokerAdapter.getData()[position];
+                        String broker = mBrokerAdapter.getData().get(position);
                         Intent intent = new Intent();
                         intent.putExtra("broker", broker);
                         setResult(RESULT_OK, intent);

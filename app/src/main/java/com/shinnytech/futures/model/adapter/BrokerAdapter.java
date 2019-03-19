@@ -27,14 +27,14 @@ import java.util.List;
  */
 public class BrokerAdapter extends RecyclerView.Adapter<BrokerAdapter.ItemViewHolder> {
     private Context sContext;
-    private String[] mData;
+    private List<String> mData;
 
-    public BrokerAdapter(Context context, String[] data) {
+    public BrokerAdapter(Context context, List<String> data) {
         this.sContext = context;
         this.mData = data;
     }
 
-    public String[] getData() {
+    public List<String> getData() {
         return mData;
     }
 
@@ -54,7 +54,7 @@ public class BrokerAdapter extends RecyclerView.Adapter<BrokerAdapter.ItemViewHo
 
     @Override
     public int getItemCount() {
-        return mData == null ? 0 : mData.length;
+        return mData == null ? 0 : mData.size();
     }
 
     public class ItemViewHolder extends RecyclerView.ViewHolder {
@@ -74,8 +74,8 @@ public class BrokerAdapter extends RecyclerView.Adapter<BrokerAdapter.ItemViewHo
         }
 
         public void update() {
-            if (mData == null || mData.length == 0) return;
-            String data = mData[getLayoutPosition()];
+            if (mData == null || mData.size() == 0) return;
+            String data = mData.get(getLayoutPosition());
             mBinding.broker.setText(data);
         }
 
