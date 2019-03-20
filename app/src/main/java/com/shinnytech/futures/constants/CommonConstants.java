@@ -138,10 +138,11 @@ public final class CommonConstants {
     public static final String SYSTEM_SETTING = "系统设置";
     public static final String UPLOAD_LOG = "上传运行日志";
     public static final String PARA_MA = "5,10,20,60,0,0";
-    public static final String KLINE_DURATION_DEFAULT = "3秒,5秒,10秒,15秒,1分钟," +
-            "3分钟,5分钟,10分钟,15分钟,30分钟,1小时,4小时,1日,1周,4周";
-    public static final String KLINE_DURATION_ALL = "3秒,5秒,10秒,15秒,20秒,30秒,1分钟,2分钟," +
-            "3分钟,5分钟,10分钟,15分钟,30分钟,1小时,2小时,4小时,1日,1周,4周";
+    public static final String KLINE_DURATION_DEFAULT = "3秒,5秒,10秒,15秒,1分," +
+            "3分,5分,10分,15分,30分,1时,4时,1日,1周,4周";
+    public static final String KLINE_DURATION_ALL = "3秒,5秒,10秒,15秒,20秒,30秒,1分,2分," +
+            "3分,5分,10分,15分,30分,1时,2时,4时,1日,1周,4周";
+    public static final String KLINE_DURATION_DAY = "分时";
 
     //OSS
     public static final String BUCKET_NAME = "kuaiqi-xiaoq";

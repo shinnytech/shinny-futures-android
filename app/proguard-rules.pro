@@ -216,3 +216,7 @@ public static final int *;
 -keep class com.alibaba.sdk.android.oss.** { *; }
 -dontwarn okio.**
 -dontwarn org.apache.commons.codec.binary.**
+
+#Amp
+-keep class com.google.android.gms.ads.** { *; }
+-dontwarn okio.**

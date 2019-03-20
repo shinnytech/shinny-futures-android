@@ -326,6 +326,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                         break;
                     case CommonConstants.LOGOUT:
                         DataManager.getInstance().IS_LOGIN = false;
+                        SPUtils.putAndApply(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
                         BaseApplication.getWebSocketService().reConnectTD();
                         mNavigationRightAdapter.updateItem(position, CommonConstants.LOGIN);
                         mNavigationRightAdapter.removeItem(3);

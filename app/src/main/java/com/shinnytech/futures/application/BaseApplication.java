@@ -36,6 +36,7 @@ import com.lzy.okgo.model.HttpHeaders;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.ConfirmActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
+import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.service.WebSocketService;
@@ -355,6 +356,7 @@ public class BaseApplication extends Application implements ServiceConnection {
             String BUGLY_KEY = (String) cl.getMethod("getBuglyKey").invoke(null);
             String UMENG_KEY = (String) cl.getMethod("getUmengKey").invoke(null);
             String BAIDU_KEY = (String) cl.getMethod("getBaiduKey").invoke(null);
+//            String AMP_KEY = (String) cl.getMethod("getAmpKey").invoke(null);
             sMDURLs.add(MARKET_URL_8);
             TRANSACTION_URL = TRANSACTION_URL_L;
             JSON_FILE_URL = JSON_FILE_URL_L;
@@ -362,6 +364,7 @@ public class BaseApplication extends Application implements ServiceConnection {
             UMConfigure.init(sContext, UMENG_KEY, "ShinnyTech", UMConfigure.DEVICE_TYPE_PHONE, "");
             StatService.setAppKey(BAIDU_KEY);
             StatService.start(this);
+//            Amplitude.getInstance().initialize(this, AMP_KEY).enableForegroundTracking(this);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             sMDURLs.add(MARKET_URL_1);

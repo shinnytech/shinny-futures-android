@@ -7,7 +7,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 26
         versionCode 29
-        versionName "1.8.28"
+        versionName "1.9.29"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         resValue("string", "app_name", "ShinnyFutures")
         flavorDimensions("shinny")
@@ -636,5 +636,4 @@ dependencies {
     implementation 'com.umeng.umsdk:common:1.5.4'
     implementation 'com.baidu.mobstat:mtj-sdk:latest.integration'
     implementation 'com.aliyun.dpa:oss-android-sdk:+'
-    implementation 'com.amplitude:android-sdk:2.16.0'
 }

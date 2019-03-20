@@ -161,8 +161,7 @@ public class FutureInfoActivityPresenter {
     private Dialog mDialogOptional;
     private RecyclerView mRecyclerViewOptional;
     private DialogAdapter mDialogAdapterOptional;
-    private String[] mKlineTitle = new String[]{"3秒", "5秒", "10秒", "15秒", "20秒", "30秒", "1分钟", "2分钟", "3分钟",
-            "5分钟", "10分钟", "15分钟", "30分钟", "1小时", "2小时", "4小时", "1日", "1周", "4周"};
+    private String[] mKlineTitle = CommonConstants.KLINE_DURATION_ALL.split(",");
     private String[] mKlineDuration = new String[]{KLINE_3_SECOND, KLINE_5_SECOND, KLINE_10_SECOND,
             KLINE_15_SECOND, KLINE_20_SECOND, KLINE_30_SECOND, KLINE_1_MINUTE, KLINE_2_MINUTE, KLINE_3_MINUTE,
             KLINE_5_MINUTE, KLINE_10_MINUTE, KLINE_15_MINUTE, KLINE_30_MINUTE, KLINE_1_HOUR, KLINE_2_HOUR,
@@ -227,7 +226,7 @@ public class FutureInfoActivityPresenter {
         String durationPre = (String) SPUtils.get(BaseApplication.getContext(), CommonConstants.CONFIG_KLINE_DURATION_DEFAULT, "");
         String[] durations = durationPre.split(",");
         List<String> list = new ArrayList<>();
-        list.add("分时图");
+        list.add(CommonConstants.KLINE_DURATION_DAY);
         for (String data: durations) {
             list.add(data);
         }
@@ -666,7 +665,7 @@ public class FutureInfoActivityPresenter {
 
     private void switchDuration(String durationTitle) {
 
-        if ("分时图".equals(durationTitle))switchUpFragment(CURRENT_DAY_FRAGMENT, "");
+        if (CommonConstants.KLINE_DURATION_DAY.equals(durationTitle))switchUpFragment(CURRENT_DAY_FRAGMENT, "");
         else{
             String duration = getDuration(durationTitle);
             if (durationTitle.contains("秒")){
