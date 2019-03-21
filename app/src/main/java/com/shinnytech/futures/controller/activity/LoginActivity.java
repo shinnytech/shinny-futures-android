@@ -19,6 +19,7 @@ import android.widget.CompoundButton;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ActivityLoginBinding;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.SPUtils;
@@ -37,8 +38,10 @@ import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PASSWORD;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_WEAK_PASSWORD;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
@@ -402,6 +405,10 @@ public class LoginActivity extends BaseActivity {
                         //如果客户端打开后期货公司列表信息还没有解析完毕，服务器发送brokerId后更新期货公司列表
                         mHandler.sendEmptyMessage(1);
                         break;
+                    case TD_MESSAGE_WEAK_PASSWORD:
+                        //弱密码
+                        mHandler.sendEmptyMessageDelayed(2, 2000);
+                        break;
                     default:
                         break;
                 }
@@ -457,6 +464,10 @@ public class LoginActivity extends BaseActivity {
                             activity.mBinding.broker.setText(brokerList.get(0));
                         }
                         break;
+                    case 2:
+                        Intent intent = new Intent(activity, ChangePasswordActivity.class);
+                        activity.startActivityForResult(intent, LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY);
+                        break;
                     default:
                         break;
                 }
@@ -476,6 +487,9 @@ public class LoginActivity extends BaseActivity {
                 case LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY:
                     String broker = data.getStringExtra("broker");
                     mBinding.broker.setText(broker);
+                    break;
+                case LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY:
+                    mBinding.password.setText("");
                     break;
                 default:
                     break;

@@ -1,6 +1,13 @@
 package com.shinnytech.futures.controller.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -10,11 +17,16 @@ import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityChangePasswordBinding;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
+import java.lang.ref.WeakReference;
 import static com.shinnytech.futures.constants.CommonConstants.PASSWORD;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_CHANGE_SUCCESS;
+import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 public class ChangePasswordActivity extends BaseActivity {
 
     private ActivityChangePasswordBinding mBinding;
+    private BroadcastReceiver mReceiverChange;
+    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,8 +36,15 @@ public class ChangePasswordActivity extends BaseActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (mReceiverChange != null)LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverChange);
+    }
+
+    @Override
     protected void initData() {
         mBinding = (ActivityChangePasswordBinding) mViewDataBinding;
+        mHandler = new MyHandler(this);
     }
 
     @Override
@@ -192,5 +211,63 @@ public class ChangePasswordActivity extends BaseActivity {
     protected void refreshUI() {
 
     }
+
+    /**
+     * date: 2019/3/21
+     * author: chenli
+     * description: 修改密码成功检测
+     */
+    protected void registerBroaderCast() {
+
+        super.registerBroaderCast();
+
+        mReceiverChange = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String msg = intent.getStringExtra("msg");
+                switch (msg) {
+                    case TD_MESSAGE_CHANGE_SUCCESS:
+                        mHandler.sendEmptyMessageDelayed(0, 2000);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverChange, new IntentFilter(TD_BROADCAST_ACTION));
+    }
+
+
+    /**
+     * date: 6/1/18
+     * author: chenli
+     * description: 点击登录后服务器返回处理
+     * version:
+     * state:
+     */
+    static class MyHandler extends Handler {
+        WeakReference<ChangePasswordActivity> mActivityReference;
+
+        MyHandler(ChangePasswordActivity activity) {
+            mActivityReference = new WeakReference<>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final ChangePasswordActivity activity = mActivityReference.get();
+            if (activity != null) {
+                switch (msg.what) {
+                    case 0:
+                        Intent intent = new Intent();
+                        activity.setResult(RESULT_OK, intent);
+                        activity.finish();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
 
 }

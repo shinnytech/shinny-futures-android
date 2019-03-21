@@ -35,9 +35,11 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_CHANGE_SUCCESS;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_WEAK_PASSWORD;
 import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST;
 
@@ -398,6 +400,16 @@ public class DataManager {
                                 JSONObject notify = data.getJSONObject(notifyKey);
                                 final String content = notify.optString("content");
                                 String type = notify.optString("type");
+                                int code = notify.optInt("code");
+                                LogUtils.e(notify.toString(), true);
+                                if (content.equals("修改密码成功")){
+                                    if (BaseApplication.getWebSocketService() != null)
+                                        BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_CHANGE_SUCCESS, TD_BROADCAST);
+                                }
+                                if ((code == 140) || (code == 131)){
+                                    if (BaseApplication.getWebSocketService() != null)
+                                        BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_WEAK_PASSWORD, TD_BROADCAST);
+                                }
                                 if ("SETTLEMENT".equals(type)){
                                     BROKER.setSettlement(content);
                                     if (BaseApplication.getWebSocketService() != null)

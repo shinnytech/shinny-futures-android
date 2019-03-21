@@ -21,8 +21,10 @@ public final class CommonConstants {
     public static final String TD_OFFLINE = "TD_OFFLINE";
     public static final String TD_MESSAGE = "TD_MESSAGE";
     public static final String TD_MESSAGE_LOGIN = "TD_MESSAGE_LOGIN";
+    public static final String TD_MESSAGE_WEAK_PASSWORD = "TD_MESSAGE_WEAK_PASSWORD";
     public static final String TD_MESSAGE_SETTLEMENT = "TD_MESSAGE_SETTLEMENT";
     public static final String TD_MESSAGE_BROKER_INFO = "TD_MESSAGE_BROKER_INFO";
+    public static final String TD_MESSAGE_CHANGE_SUCCESS = "TD_MESSAGE_CHANGE_SUCCESS";
 
     //导航栏
     public static final String OPTIONAL = "自选合约";
@@ -95,6 +97,7 @@ public final class CommonConstants {
     public static final int POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY = 7;
     public static final int LOGIN_JUMP_TO_LOG_IN_ACTIVITY = 8;
     public static final int KLINE_DURATION_ACYIVITY_TO_ADD_DURATION_ACTIVITY = 9;
+    public static final int LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY = 10;
 
     //app名称
     public static final String KUAI_QI_XIAO_Q = "快期小Q";
