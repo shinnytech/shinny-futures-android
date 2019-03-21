@@ -32,6 +32,7 @@ import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.VisibilityEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
@@ -920,6 +921,20 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         if (sDataManager.POSITION_DIRECTION.isEmpty())update();
         if (mKeyboardUtilsPrice != null) mKeyboardUtilsPrice.refreshInstrumentId(mInstrumentId);
         if (mKeyboardUtilsVolume != null) mKeyboardUtilsVolume.refreshInstrumentId(mInstrumentId);
+    }
+
+
+    /**
+     * date: 2019/2/20
+     * author: chenli
+     * description: 当用户弹出软键盘后，想直接隐藏底部信息页时，需要隐藏软键盘
+     */
+    @Subscribe
+    public void onEventBase(VisibilityEvent data) {
+        if (data.isVisible()){
+            if (mKeyboardUtilsPrice != null && mKeyboardUtilsPrice.isVisible()) mKeyboardUtilsPrice.hideKeyboard();
+            if (mKeyboardUtilsVolume != null && mKeyboardUtilsVolume.isVisible()) mKeyboardUtilsVolume.hideKeyboard();
+        }
     }
 
     /**
