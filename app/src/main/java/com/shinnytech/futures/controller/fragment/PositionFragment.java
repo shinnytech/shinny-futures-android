@@ -78,26 +78,26 @@ public class PositionFragment extends LazyLoadFragment {
         //recyclerView点击事件监听器，点击改变合约代码，并跳转到交易页
         mBinding.rv.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rv,
                 new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                PositionEntity positionEntity = mAdapter.getData().get(position);
-                if (positionEntity == null)return;
-                sDataManager.POSITION_DIRECTION = ((TextView)view.findViewById(R.id.position_direction))
-                        .getText().toString();
-                String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
-                //添加判断，防止自选合约列表为空时产生无效的点击事件
-                if (instrument_id != null) {
-                    IdEvent idEvent = new IdEvent();
-                    idEvent.setInstrument_id(instrument_id);
-                    EventBus.getDefault().post(idEvent);
-                    ((FutureInfoActivity) getActivity()).getViewPager().setCurrentItem(3, false);
-                }
-            }
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        PositionEntity positionEntity = mAdapter.getData().get(position);
+                        if (positionEntity == null) return;
+                        sDataManager.POSITION_DIRECTION = ((TextView) view.findViewById(R.id.position_direction))
+                                .getText().toString();
+                        String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
+                        //添加判断，防止自选合约列表为空时产生无效的点击事件
+                        if (instrument_id != null) {
+                            IdEvent idEvent = new IdEvent();
+                            idEvent.setInstrument_id(instrument_id);
+                            EventBus.getDefault().post(idEvent);
+                            ((FutureInfoActivity) getActivity()).getViewPager().setCurrentItem(3, false);
+                        }
+                    }
 
-            @Override
-            public void onItemLongClick(View view, int position) {
-            }
-        }));
+                    @Override
+                    public void onItemLongClick(View view, int position) {
+                    }
+                }));
 
 
         mBinding.rv.addOnScrollListener(new RecyclerView.OnScrollListener() {

@@ -27,7 +27,7 @@ public class SPUtils {
      * 保存数据的方法，我们需要拿到保存数据的具体类型，然后根据类型调用不同的保存方法
      */
     public static void putAndApply(Context context, String key, Object o) {
-        if (o == null)return;
+        if (o == null) return;
 
         SharedPreferences sp = context.getSharedPreferences(getSpName(context), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();

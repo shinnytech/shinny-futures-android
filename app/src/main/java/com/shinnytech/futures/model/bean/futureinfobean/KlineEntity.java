@@ -56,6 +56,12 @@ public class KlineEntity {
         this.binding = binding;
     }
 
+    @Override
+    public String toString() {
+        return "last_id" + last_id + "\n" + "trading_day_start_id" + trading_day_start_id + "\n" +
+                "trading_day_end_id" + trading_day_end_id;
+    }
+
     public static class DataEntity implements Comparable<DataEntity> {
         private String datetime;
         private String open;
@@ -146,11 +152,5 @@ public class KlineEntity {
         public void setBindingData(Map<String, String> bindingData) {
             this.bindingData = bindingData;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "last_id"+last_id+"\n"+"trading_day_start_id"+trading_day_start_id+"\n"+
-                "trading_day_end_id"+trading_day_end_id;
     }
 }

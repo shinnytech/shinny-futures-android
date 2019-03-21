@@ -4,7 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- *  <h1>Revenue</h1>
+ * <h1>Revenue</h1>
  * Revenue objects are a wrapper for revenue events and revenue properties. This should be used
  * in conjunction with {@code AmplitudeClient.logRevenueV2()} to record in-app transactions.
  * Each set method returns the same Revenue object, allowing
@@ -22,7 +22,7 @@ import org.json.JSONObject;
  * the object.
  *
  * @see <a href="https://github.com/amplitude/Amplitude-Android#tracking-revenue">
- *     Android SDK README</a> for more information on logging revenue.
+ * Android SDK README</a> for more information on logging revenue.
  */
 public class Revenue {
 
@@ -30,7 +30,7 @@ public class Revenue {
      * The class identifier tag used in logging. TAG = {@code "com.amplitude.api.Revenue"}
      */
     public static final String TAG = "com.amplitude.api.Revenue";
-    private static AmplitudeLog logger =  AmplitudeLog.getLogger();
+    private static AmplitudeLog logger = AmplitudeLog.getLogger();
 
     /**
      * The Product ID field.
@@ -154,7 +154,7 @@ public class Revenue {
      * @param eventProperties the event properties
      * @return the same Revenue object
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-event-properties">
-     *     Event Properties</a> for more information about logging event properties.
+     * Event Properties</a> for more information about logging event properties.
      */
     public Revenue setEventProperties(JSONObject eventProperties) {
         this.properties = Utils.cloneJSONObject(eventProperties);
@@ -177,7 +177,7 @@ public class Revenue {
             obj.put(Constants.AMP_REVENUE_RECEIPT_SIG, receiptSig);
         } catch (JSONException e) {
             logger.e(
-                TAG, String.format("Failed to convert revenue object to JSON: %s", e.toString())
+                    TAG, String.format("Failed to convert revenue object to JSON: %s", e.toString())
             );
         }
 
@@ -208,7 +208,7 @@ public class Revenue {
             return false;
         if (receiptSig != null ? !receiptSig.equals(revenue.receiptSig) : revenue.receiptSig != null)
             return false;
-        return !(properties != null ? !Utils.compareJSONObjects(properties, revenue.properties): revenue.properties != null);
+        return !(properties != null ? !Utils.compareJSONObjects(properties, revenue.properties) : revenue.properties != null);
 
     }
 

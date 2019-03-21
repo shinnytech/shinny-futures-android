@@ -2,7 +2,6 @@ package com.shinnytech.futures.model.adapter;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,17 +33,17 @@ public class NavigationRightAdapter extends RecyclerView.Adapter<NavigationRight
         this.mData = mData;
     }
 
-    public void updateItem(int position, String content){
+    public void updateItem(int position, String content) {
         NavigationRightEntity navigationRightEntity = mData.get(position);
-        if (navigationRightEntity == null)return;
+        if (navigationRightEntity == null) return;
         navigationRightEntity.setContent(content);
         notifyItemChanged(position);
     }
 
-    public void addItem(int position){
+    public void addItem(int position) {
         NavigationRightEntity navigationRightEntity = mData.get(position);
-        if (navigationRightEntity == null)return;
-        if (CommonConstants.POSITION.equals(navigationRightEntity.getContent())){
+        if (navigationRightEntity == null) return;
+        if (CommonConstants.POSITION.equals(navigationRightEntity.getContent())) {
             NavigationRightEntity menu = new NavigationRightEntity();
             menu.setIcon(R.mipmap.ic_assignment_turned_in_white_18dp);
             menu.setContent(CommonConstants.PASSWORD);
@@ -53,10 +52,10 @@ public class NavigationRightAdapter extends RecyclerView.Adapter<NavigationRight
         }
     }
 
-    public void removeItem(int position){
+    public void removeItem(int position) {
         NavigationRightEntity navigationRightEntity = mData.get(position);
-        if (navigationRightEntity == null)return;
-        if (CommonConstants.PASSWORD.equals(navigationRightEntity.getContent())){
+        if (navigationRightEntity == null) return;
+        if (CommonConstants.PASSWORD.equals(navigationRightEntity.getContent())) {
             mData.remove(position);
             notifyItemRemoved(position);
         }
@@ -107,7 +106,7 @@ public class NavigationRightAdapter extends RecyclerView.Adapter<NavigationRight
             mBinding.content.setText(content);
 
             if (CommonConstants.LOGIN.equals(content) || CommonConstants.LOGOUT.equals(content)
-                    || CommonConstants.SETTING.equals(content)){
+                    || CommonConstants.SETTING.equals(content)) {
                 ViewGroup.LayoutParams layoutParams = mBinding.divider.getLayoutParams();
                 layoutParams.height = DensityUtils.dp2px(sContext, 3);
                 mBinding.divider.setLayoutParams(layoutParams);

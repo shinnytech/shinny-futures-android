@@ -18,19 +18,17 @@ import com.github.mikephil.charting.utils.MPPointD;
 import com.github.mikephil.charting.utils.Transformer;
 import com.github.mikephil.charting.utils.Utils;
 import com.github.mikephil.charting.utils.ViewPortHandler;
-import com.shinnytech.futures.utils.LogUtils;
 
 public class MyBarChartRenderer extends BarChartRenderer {
 
+    private RectF mBarShadowRectBuffer = new RectF();
+    //画线型成交量图
+    private Paint mLinePaint;
     public MyBarChartRenderer(BarDataProvider chart, ChartAnimator animator, ViewPortHandler viewPortHandler) {
         super(chart, animator, viewPortHandler);
         mLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLinePaint.setStyle(Paint.Style.STROKE);
     }
-
-    private RectF mBarShadowRectBuffer = new RectF();
-    //画线型成交量图
-    private Paint mLinePaint;
 
     protected void drawDataSet(Canvas c, IBarDataSet dataSet, int index) {
 
@@ -59,7 +57,7 @@ public class MyBarChartRenderer extends BarChartRenderer {
             final float barWidthHalf = barWidth / 2.0f;
             float x;
 
-            for (int i = 0, count = Math.min((int)(Math.ceil((float)(dataSet.getEntryCount()) * phaseX)), dataSet.getEntryCount());
+            for (int i = 0, count = Math.min((int) (Math.ceil((float) (dataSet.getEntryCount()) * phaseX)), dataSet.getEntryCount());
                  i < count;
                  i++) {
 
@@ -116,17 +114,17 @@ public class MyBarChartRenderer extends BarChartRenderer {
                 float sub = e != null ? (float) e.getData() : 0.0f;
 
                 //线和柱子的颜色
-                if (barWidth == 0.01f){
-                    if (sub > 0){
+                if (barWidth == 0.01f) {
+                    if (sub > 0) {
                         mLinePaint.setColor(dataSet.getColor(0));
-                    }else {
+                    } else {
                         mLinePaint.setColor(dataSet.getColor(1));
                     }
-                }else {
-                    if (sub > 0){
+                } else {
+                    if (sub > 0) {
                         mRenderPaint.setColor(dataSet.getColor(0));
                         mRenderPaint.setStyle(Paint.Style.FILL);
-                    }else {
+                    } else {
                         mRenderPaint.setColor(dataSet.getColor(1));
                         mRenderPaint.setStyle(Paint.Style.STROKE);
                     }
@@ -134,17 +132,17 @@ public class MyBarChartRenderer extends BarChartRenderer {
             }
 
             //成交量是画线还是画柱子
-            if (barWidth == 0.01f){
+            if (barWidth == 0.01f) {
                 float x = (buffer.buffer[j] + buffer.buffer[j + 2]) / 2;
                 float startY = buffer.buffer[j + 3];
                 float stopY = buffer.buffer[j + 1];
                 c.drawLine(x, startY, x, stopY, mLinePaint);
-            }else{
+            } else {
                 float height = buffer.buffer[j + 1] - buffer.buffer[j + 3];
-                if (height == 0){
+                if (height == 0) {
                     c.drawLine(buffer.buffer[j], buffer.buffer[j + 1], buffer.buffer[j + 2],
                             buffer.buffer[j + 3], mRenderPaint);
-                }else {
+                } else {
                     c.drawRect(buffer.buffer[j], buffer.buffer[j + 1], buffer.buffer[j + 2],
                             buffer.buffer[j + 3], mRenderPaint);
                 }
@@ -180,7 +178,7 @@ public class MyBarChartRenderer extends BarChartRenderer {
 
             float barWidth = barData.getBarWidth();
             Transformer trans = mChart.getTransformer(set.getAxisDependency());
-            prepareBarHighlight(e.getX() , 0, 0, barWidth / 2, trans);
+            prepareBarHighlight(e.getX(), 0, 0, barWidth / 2, trans);
 
             //画竖线
             float xp = mBarRect.centerX();

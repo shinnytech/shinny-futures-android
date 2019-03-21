@@ -28,7 +28,6 @@ import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.bean.accountinfobean.BrokerEntity;
-import com.shinnytech.futures.model.bean.futureinfobean.ChartEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqCancelOrderEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqConfirmSettlementEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqInsertOrderEntity;
@@ -49,17 +48,14 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
-import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
-import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
 
 /**
  * date: 7/9/17
@@ -119,7 +115,7 @@ public class WebSocketService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String NOTIFICATION_CHANNEL_ID = "com.shinnytech.futures";
             String channelName = "WebSocketService";
             NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
@@ -139,7 +135,7 @@ public class WebSocketService extends Service {
                     .setContentIntent(pendingIntent)
                     .build();
             startForeground(1, notification);
-        } else{
+        } else {
             Intent intent = new Intent(this, MainActivity.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
             Notification notification = new NotificationCompat.Builder(this, "service")
@@ -162,13 +158,13 @@ public class WebSocketService extends Service {
                 if ((System.currentTimeMillis() / 1000 - mMDLastPong) >= 20) {
                     sendMessage(MD_OFFLINE, MD_BROADCAST);
                 } else {
-                    if (mWebSocketClientMD != null)mWebSocketClientMD.sendPing();
+                    if (mWebSocketClientMD != null) mWebSocketClientMD.sendPing();
                 }
 
                 if ((System.currentTimeMillis() / 1000 - mTDLastPong) >= 20) {
                     sendMessage(TD_OFFLINE, TD_BROADCAST);
                 } else {
-                    if (mWebSocketClientTD != null)mWebSocketClientTD.sendPing();
+                    if (mWebSocketClientTD != null) mWebSocketClientTD.sendPing();
                 }
 
             }
@@ -265,11 +261,10 @@ public class WebSocketService extends Service {
      * description: 首次连接行情服务器与断开重连的行情订阅处理
      */
     private void sendSubscribeAfterConnect() {
-        if (!sDataManager.QUOTES.isEmpty() && mWebSocketClientMD != null){
+        if (!sDataManager.QUOTES.isEmpty() && mWebSocketClientMD != null) {
             mWebSocketClientMD.sendText(sDataManager.QUOTES);
             LogUtils.e(sDataManager.QUOTES, true);
-        }
-        else if (LatestFileManager.getOptionalInsList().isEmpty())
+        } else if (LatestFileManager.getOptionalInsList().isEmpty())
             sendSubscribeQuote(TextUtils.join(",",
                     new ArrayList(LatestFileManager.getMainInsList().keySet()).subList(0, LOAD_QUOTE_NUM)));
         else {
@@ -280,7 +275,7 @@ public class WebSocketService extends Service {
             else sendSubscribeQuote(TextUtils.join(",", list.subList(0, LOAD_QUOTE_NUM)));
         }
 
-        if (!sDataManager.CHARTS.isEmpty() && mWebSocketClientMD != null){
+        if (!sDataManager.CHARTS.isEmpty() && mWebSocketClientMD != null) {
             mWebSocketClientMD.sendText(sDataManager.CHARTS);
             LogUtils.e(sDataManager.CHARTS, true);
         }
@@ -356,7 +351,7 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: k线图
      */
-    public void sendSetChartKline(String ins_list, int view_width, String duration){
+    public void sendSetChartKline(String ins_list, int view_width, String duration) {
         if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
             try {
                 long duration_l = Long.parseLong(duration);
@@ -370,7 +365,7 @@ public class WebSocketService extends Service {
                 sDataManager.CHARTS = setChart;
                 mWebSocketClientMD.sendText(setChart);
                 LogUtils.e(setChart, true);
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -437,15 +432,15 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 登录设置，自动登录
      */
-    private void loginConfig(String message){
+    private void loginConfig(String message) {
         BrokerEntity brokerInfo = new Gson().fromJson(message, BrokerEntity.class);
         sDataManager.getBroker().setBrokers(brokerInfo.getBrokers());
         sendMessage(TD_MESSAGE_BROKER_INFO, TD_BROADCAST);
 
         Context context = BaseApplication.getContext();
-        if (SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)){
+        if (SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
             String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
-            if (TimeUtils.getNowTime().equals(date)){
+            if (TimeUtils.getNowTime().equals(date)) {
                 String name = (String) SPUtils.get(context, CommonConstants.CONFIG_ACCOUNT, "");
                 String password = (String) SPUtils.get(context, CommonConstants.CONFIG_PASSWORD, "");
                 String broker = (String) SPUtils.get(context, CommonConstants.CONFIG_BROKER, "");

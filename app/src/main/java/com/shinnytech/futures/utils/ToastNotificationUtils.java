@@ -16,7 +16,7 @@ public class ToastNotificationUtils {
 
     public static void showToast(Context context,
                                  String content) {
-        if (toast != null){
+        if (toast != null) {
             toast.cancel();
         }
         toast = Toast.makeText(context, content, Toast.LENGTH_SHORT);

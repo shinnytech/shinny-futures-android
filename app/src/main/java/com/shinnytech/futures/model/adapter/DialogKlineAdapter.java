@@ -9,12 +9,6 @@ import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ItemDialogKlineBinding;
-import com.shinnytech.futures.databinding.ItemDialogOptionalBinding;
-import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
-import com.shinnytech.futures.model.engine.LatestFileManager;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**

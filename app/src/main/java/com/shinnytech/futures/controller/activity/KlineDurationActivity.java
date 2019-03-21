@@ -37,7 +37,7 @@ public class KlineDurationActivity extends BaseActivity {
         String duration = (String) SPUtils.get(BaseApplication.getContext(), CommonConstants.CONFIG_KLINE_DURATION_DEFAULT, "");
         String[] durations = duration.split(",");
         List<String> list = new ArrayList<>();
-        for (String data: durations) {
+        for (String data : durations) {
             list.add(data);
         }
         mKlineDurationAdapter = new KlineDurationAdapter(this, list);
@@ -109,11 +109,11 @@ public class KlineDurationActivity extends BaseActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CommonConstants.KLINE_DURATION_ACYIVITY_TO_ADD_DURATION_ACTIVITY
-                && resultCode == RESULT_OK){
+                && resultCode == RESULT_OK) {
             String duration = (String) SPUtils.get(BaseApplication.getContext(), CommonConstants.CONFIG_KLINE_DURATION_DEFAULT, "");
             String[] durations = duration.split(",");
             List<String> list = new ArrayList<>();
-            for (String d: durations) {
+            for (String d : durations) {
                 list.add(d);
             }
             mKlineDurationAdapter.updateList(list);

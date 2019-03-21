@@ -60,6 +60,10 @@ public class QuoteEntity implements Serializable {
 
     private String status;//
 
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
     public String getInstrument_id() {
         return instrument_id;
     }
@@ -234,10 +238,6 @@ public class QuoteEntity implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public static long getSerialVersionUID() {
-        return serialVersionUID;
     }
 
     public String getAsk_price2() {

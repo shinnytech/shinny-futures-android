@@ -3,13 +3,10 @@ package com.shinnytech.futures.controller.activity;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,8 +34,6 @@ import com.shinnytech.futures.utils.ToastNotificationUtils;
 import java.io.File;
 
 import static com.shinnytech.futures.constants.CommonConstants.FEEDBACK;
-import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
-import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 
 /**
  * date: 7/7/17

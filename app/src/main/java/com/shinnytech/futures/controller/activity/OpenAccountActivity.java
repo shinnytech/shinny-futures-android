@@ -72,18 +72,18 @@ public class OpenAccountActivity extends BaseActivity {
                 String url = request.getUrl().getPath();
                 LogUtils.e(url, true);
                 if (url.contains("profileController")
-                                || url.contains("loginController")
-                                || url.contains("collectController")
-                                || url.contains("depositoryController")
-                                || url.contains("videoController")
-                                || url.contains("common")) {
+                        || url.contains("loginController")
+                        || url.contains("collectController")
+                        || url.contains("depositoryController")
+                        || url.contains("videoController")
+                        || url.contains("common")) {
                     url = url.replace("/template/future/js/", "");
-                    return getJSWebResourceResponseFromAsset(view,url);
+                    return getJSWebResourceResponseFromAsset(view, url);
                 }
-                    return super.shouldInterceptRequest(view, request);
-                }
-            });
-        }
+                return super.shouldInterceptRequest(view, request);
+            }
+        });
+    }
 
     private WebResourceResponse getJSWebResourceResponseFromAsset(WebView webView, String fileName) {
         try {
@@ -97,8 +97,8 @@ public class OpenAccountActivity extends BaseActivity {
         return new WebResourceResponse("text/javascript", "UTF-8", data);
     }
 
-        @Override
-        protected void refreshUI () {
+    @Override
+    protected void refreshUI() {
 
-        }
     }
+}

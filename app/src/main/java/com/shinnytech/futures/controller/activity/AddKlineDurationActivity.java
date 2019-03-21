@@ -34,13 +34,13 @@ public class AddKlineDurationActivity extends BaseActivity {
         String duration = CommonConstants.KLINE_DURATION_ALL;
         String[] durations = duration.split(",");
         List<String> list = new ArrayList<>();
-        for (String data: durations) {
+        for (String data : durations) {
             list.add(data);
         }
         String durationPre = (String) SPUtils.get(BaseApplication.getContext(), CommonConstants.CONFIG_KLINE_DURATION_DEFAULT, "");
         String[] durationsPre = durationPre.split(",");
         List<String> listPre = new ArrayList<>();
-        for (String data: durationsPre) {
+        for (String data : durationsPre) {
             listPre.add(data);
         }
         final AddDurationAdapter addDurationAdapter = new AddDurationAdapter(this, list, listPre);

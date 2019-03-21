@@ -18,7 +18,6 @@ import com.shinnytech.futures.model.listener.ItemTouchHelperListener;
 import com.shinnytech.futures.utils.LogUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -109,8 +108,8 @@ public class DragDialogAdapter extends RecyclerView.Adapter<DragDialogAdapter.It
             mBinding.tvDragDialog.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    if (event.getAction()== MotionEvent.ACTION_DOWN) {
-                        if (itemTouchHelper != null)itemTouchHelper.startDrag(ItemViewHolder.this);
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        if (itemTouchHelper != null) itemTouchHelper.startDrag(ItemViewHolder.this);
                     }
                     return false;
                 }

@@ -13,8 +13,42 @@ import java.io.Serializable;
 
 public class PositionEntity implements Comparable<PositionEntity>, Serializable {
     private static final long serialVersionUID = 2631590509760908283L;
+    private String key = "";
+    private String user_id = "";
+    private String exchange_id = "";
+    private String instrument_id = "";
+    private String volume_long_today = "";
+    private String volume_long_his = "";
+    private String volume_long = "";
+    private String volume_long_frozen_today = "";
+    private String volume_long_frozen_his = "";
+    private String volume_long_frozen = "";
+    private String volume_short_today = "";
+    private String volume_short_his = "";
+    private String volume_short = "";
+    private String volume_short_frozen_today = "";
+    private String volume_short_frozen_his = "";
+    private String volume_short_frozen = "";
+    private String open_price_long = "";
+    private String open_price_short = "";
+    private String open_cost_long = "";
+    private String open_cost_short = "";
+    private String position_price_long = "";
+    private String position_price_short = "";
+    private String position_cost_long = "";
+    private String position_cost_short = "";
+    private String last_price = "";
+    private String float_profit_long = "";
+    private String float_profit_short = "";
+    private String float_profit = "";
+    private String position_profit_long = "";
+    private String position_profit_short = "";
+    private String position_profit = "";
+    private String margin_long = "";
+    private String margin_short = "";
+    private String margin = "";
 
-    public PositionEntity cloneLong(){
+    public PositionEntity cloneLong() {
         PositionEntity positionEntity = new PositionEntity();
         positionEntity.key = key;
         positionEntity.user_id = user_id;
@@ -55,7 +89,7 @@ public class PositionEntity implements Comparable<PositionEntity>, Serializable 
         return positionEntity;
     }
 
-    public PositionEntity cloneShort(){
+    public PositionEntity cloneShort() {
         PositionEntity positionEntity = new PositionEntity();
         positionEntity.key = key;
         positionEntity.user_id = user_id;
@@ -95,43 +129,6 @@ public class PositionEntity implements Comparable<PositionEntity>, Serializable 
         positionEntity.margin_long = "0.0";
         return positionEntity;
     }
-    private String key = "";
-    private String user_id = "";
-    private String exchange_id = "";
-    private String instrument_id = "";
-
-    private String volume_long_today = "";
-    private String volume_long_his = "";
-    private String volume_long = "";
-    private String volume_long_frozen_today = "";
-    private String volume_long_frozen_his = "";
-    private String volume_long_frozen = "";
-    private String volume_short_today = "";
-    private String volume_short_his = "";
-    private String volume_short = "";
-    private String volume_short_frozen_today = "";
-    private String volume_short_frozen_his = "";
-    private String volume_short_frozen = "";
-
-    private String open_price_long = "";
-    private String open_price_short = "";
-    private String open_cost_long = "";
-    private String open_cost_short = "";
-    private String position_price_long = "";
-    private String position_price_short = "";
-    private String position_cost_long = "";
-    private String position_cost_short = "";
-    private String last_price = "";
-    private String float_profit_long = "";
-    private String float_profit_short = "";
-    private String float_profit = "";
-    private String position_profit_long = "";
-    private String position_profit_short = "";
-    private String position_profit = "";
-
-    private String margin_long = "";
-    private String margin_short = "";
-    private String margin = "";
 
     public String getVolume_long_frozen() {
         return volume_long_frozen;

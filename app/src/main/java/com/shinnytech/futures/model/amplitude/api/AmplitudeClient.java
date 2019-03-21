@@ -116,19 +116,13 @@ public class AmplitudeClient {
      * The user's Device ID value.
      */
     protected String deviceId;
-    private boolean newDeviceIdPerInstall = false;
-    private boolean useAdvertisingIdForDeviceId = false;
     protected boolean initialized = false;
-    private boolean optOut = false;
-    private boolean offline = false;
-    TrackingOptions trackingOptions = new TrackingOptions();
-    JSONObject apiPropertiesTrackingOptions;
-
     /**
      * The device's Platform value.
      */
     protected String platform;
-
+    TrackingOptions trackingOptions = new TrackingOptions();
+    JSONObject apiPropertiesTrackingOptions;
     /**
      * Event metadata
      */
@@ -138,31 +132,10 @@ public class AmplitudeClient {
     long lastIdentifyId = -1;
     long lastEventTime = -1;
     long previousSessionId = -1;
-
-    private DeviceInfo deviceInfo;
-
-    /**
-     * The current session ID value.
-     */
-    private int eventUploadThreshold = Constants.EVENT_UPLOAD_THRESHOLD;
-    private int eventUploadMaxBatchSize = Constants.EVENT_UPLOAD_MAX_BATCH_SIZE;
-    private int eventMaxCount = Constants.EVENT_MAX_COUNT;
-    private long eventUploadPeriodMillis = Constants.EVENT_UPLOAD_PERIOD_MILLIS;
-    private long minTimeBetweenSessionsMillis = Constants.MIN_TIME_BETWEEN_SESSIONS_MILLIS;
-    private long sessionTimeoutMillis = Constants.SESSION_TIMEOUT_MILLIS;
-    private boolean backoffUpload = false;
-    private int backoffUploadBatchSize = eventUploadMaxBatchSize;
-    private boolean usingForegroundTracking = false;
-    private boolean trackingSessionEvents = false;
-    private boolean inForeground = false;
-    private boolean flushEventsOnClose = true;
-
-    private AtomicBoolean updateScheduled = new AtomicBoolean(false);
     /**
      * Whether or not the SDK is in the process of uploading events.
      */
     AtomicBoolean uploadingCurrently = new AtomicBoolean(false);
-
     /**
      * The last SDK error - used for testing.
      */
@@ -179,6 +152,27 @@ public class AmplitudeClient {
      * The background event uploading worker thread instance.
      */
     WorkerThread httpThread = new WorkerThread("httpThread");
+    private boolean newDeviceIdPerInstall = false;
+    private boolean useAdvertisingIdForDeviceId = false;
+    private boolean optOut = false;
+    private boolean offline = false;
+    private DeviceInfo deviceInfo;
+    /**
+     * The current session ID value.
+     */
+    private int eventUploadThreshold = Constants.EVENT_UPLOAD_THRESHOLD;
+    private int eventUploadMaxBatchSize = Constants.EVENT_UPLOAD_MAX_BATCH_SIZE;
+    private int eventMaxCount = Constants.EVENT_MAX_COUNT;
+    private long eventUploadPeriodMillis = Constants.EVENT_UPLOAD_PERIOD_MILLIS;
+    private long minTimeBetweenSessionsMillis = Constants.MIN_TIME_BETWEEN_SESSIONS_MILLIS;
+    private long sessionTimeoutMillis = Constants.SESSION_TIMEOUT_MILLIS;
+    private boolean backoffUpload = false;
+    private int backoffUploadBatchSize = eventUploadMaxBatchSize;
+    private boolean usingForegroundTracking = false;
+    private boolean trackingSessionEvents = false;
+    private boolean inForeground = false;
+    private boolean flushEventsOnClose = true;
+    private AtomicBoolean updateScheduled = new AtomicBoolean(false);
 
     /**
      * Instantiates a new default instance AmplitudeClient and starts worker threads.
@@ -189,12 +183,223 @@ public class AmplitudeClient {
 
     /**
      * Instantiates a new AmplitudeClient with instance name and starts worker threads.
+     *
      * @param instance
      */
     public AmplitudeClient(String instance) {
         this.instanceName = Utils.normalizeInstanceName(instance);
         logThread.start();
         httpThread.start();
+    }
+
+    /**
+     * Truncate a string to 1024 characters.
+     *
+     * @param value the value
+     * @return the truncated string
+     */
+    public static String truncate(String value) {
+        return value.length() <= Constants.MAX_STRING_LENGTH ? value :
+                value.substring(0, Constants.MAX_STRING_LENGTH);
+    }
+
+    /**
+     * Move all preference data from the legacy name to the new, static name if needed.
+     * <p/>
+     * Constants.PACKAGE_NAME used to be set using "Constants.class.getPackage().getName()"
+     * Some aggressive proguard optimizations broke the reflection and caused apps
+     * to crash on startup.
+     * <p/>
+     * Now that Constants.PACKAGE_NAME is changed, old data on devices needs to be
+     * moved over to the new location so that device ids remain consistent.
+     * <p/>
+     * This should only happen once -- the first time a user loads the app after updating.
+     * This logic needs to remain in place for quite a long time. It was first introduced in
+     * April 2015 in version 1.6.0.
+     *
+     * @param context the context
+     * @return the boolean
+     */
+    static boolean upgradePrefs(Context context) {
+        return upgradePrefs(context, null, null);
+    }
+
+    /**
+     * Upgrade prefs boolean.
+     *
+     * @param context       the context
+     * @param sourcePkgName the source pkg name
+     * @param targetPkgName the target pkg name
+     * @return the boolean
+     */
+    static boolean upgradePrefs(Context context, String sourcePkgName, String targetPkgName) {
+        try {
+            if (sourcePkgName == null) {
+                // Try to load the package name using the old reflection strategy.
+                sourcePkgName = Constants.PACKAGE_NAME;
+                try {
+                    sourcePkgName = Constants.class.getPackage().getName();
+                } catch (Exception e) {
+                }
+            }
+
+            if (targetPkgName == null) {
+                targetPkgName = Constants.PACKAGE_NAME;
+            }
+
+            // No need to copy if the source and target are the same.
+            if (targetPkgName.equals(sourcePkgName)) {
+                return false;
+            }
+
+            // Copy over any preferences that may exist in a source preference store.
+            String sourcePrefsName = sourcePkgName + "." + context.getPackageName();
+            SharedPreferences source =
+                    context.getSharedPreferences(sourcePrefsName, Context.MODE_PRIVATE);
+
+            // Nothing left in the source store to copy
+            if (source.getAll().size() == 0) {
+                return false;
+            }
+
+            String prefsName = targetPkgName + "." + context.getPackageName();
+            SharedPreferences targetPrefs =
+                    context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
+            SharedPreferences.Editor target = targetPrefs.edit();
+
+            // Copy over all existing data.
+            if (source.contains(sourcePkgName + ".previousSessionId")) {
+                target.putLong(Constants.PREFKEY_PREVIOUS_SESSION_ID,
+                        source.getLong(sourcePkgName + ".previousSessionId", -1));
+            }
+            if (source.contains(sourcePkgName + ".deviceId")) {
+                target.putString(Constants.PREFKEY_DEVICE_ID,
+                        source.getString(sourcePkgName + ".deviceId", null));
+            }
+            if (source.contains(sourcePkgName + ".userId")) {
+                target.putString(Constants.PREFKEY_USER_ID,
+                        source.getString(sourcePkgName + ".userId", null));
+            }
+            if (source.contains(sourcePkgName + ".optOut")) {
+                target.putBoolean(Constants.PREFKEY_OPT_OUT,
+                        source.getBoolean(sourcePkgName + ".optOut", false));
+            }
+
+            // Commit the changes and clear the source store so we don't recopy.
+            target.apply();
+            source.edit().clear().apply();
+
+            logger.i(TAG, "Upgraded shared preferences from " + sourcePrefsName + " to " + prefsName);
+            return true;
+
+        } catch (Exception e) {
+            logger.e(TAG, "Error upgrading shared preferences", e);
+            Diagnostics.getLogger().logError("Failed to upgrade shared prefs", e);
+            return false;
+        }
+    }
+
+    /**
+     * Upgrade shared prefs to db boolean.
+     *
+     * @param context the context
+     * @return the boolean
+     */
+    /*
+     * Move all data from sharedPrefs to sqlite key value store to support multi-process apps.
+     * sharedPrefs is known to not be process-safe.
+     */
+    static boolean upgradeSharedPrefsToDB(Context context) {
+        return upgradeSharedPrefsToDB(context, null);
+    }
+
+    /**
+     * Upgrade shared prefs to db boolean.
+     *
+     * @param context       the context
+     * @param sourcePkgName the source pkg name
+     * @return the boolean
+     */
+    static boolean upgradeSharedPrefsToDB(Context context, String sourcePkgName) {
+        if (sourcePkgName == null) {
+            sourcePkgName = Constants.PACKAGE_NAME;
+        }
+
+        // check if upgrade needed
+        DatabaseHelper dbHelper = DatabaseHelper.getDatabaseHelper(context);
+        String deviceId = dbHelper.getValue(DEVICE_ID_KEY);
+        Long previousSessionId = dbHelper.getLongValue(PREVIOUS_SESSION_ID_KEY);
+        Long lastEventTime = dbHelper.getLongValue(LAST_EVENT_TIME_KEY);
+        if (!Utils.isEmptyString(deviceId) && previousSessionId != null && lastEventTime != null) {
+            return true;
+        }
+
+        String prefsName = sourcePkgName + "." + context.getPackageName();
+        SharedPreferences preferences =
+                context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
+
+        migrateStringValue(
+                preferences, Constants.PREFKEY_DEVICE_ID, null, dbHelper, DEVICE_ID_KEY
+        );
+
+        migrateLongValue(
+                preferences, Constants.PREFKEY_LAST_EVENT_TIME, -1, dbHelper, LAST_EVENT_TIME_KEY
+        );
+
+        migrateLongValue(
+                preferences, Constants.PREFKEY_LAST_EVENT_ID, -1, dbHelper, LAST_EVENT_ID_KEY
+        );
+
+        migrateLongValue(
+                preferences, Constants.PREFKEY_LAST_IDENTIFY_ID, -1, dbHelper, LAST_IDENTIFY_ID_KEY
+        );
+
+        migrateLongValue(
+                preferences, Constants.PREFKEY_PREVIOUS_SESSION_ID, -1,
+                dbHelper, PREVIOUS_SESSION_ID_KEY
+        );
+
+        migrateStringValue(
+                preferences, Constants.PREFKEY_USER_ID, null, dbHelper, USER_ID_KEY
+        );
+
+        migrateBooleanValue(
+                preferences, Constants.PREFKEY_OPT_OUT, false, dbHelper, OPT_OUT_KEY
+        );
+
+        return true;
+    }
+
+    private static void migrateLongValue(SharedPreferences prefs, String prefKey, long defValue, DatabaseHelper dbHelper, String dbKey) {
+        Long value = dbHelper.getLongValue(dbKey);
+        if (value != null) { // if value already exists don't need to migrate
+            return;
+        }
+        long oldValue = prefs.getLong(prefKey, defValue);
+        dbHelper.insertOrReplaceKeyLongValue(dbKey, oldValue);
+        prefs.edit().remove(prefKey).apply();
+    }
+
+    private static void migrateStringValue(SharedPreferences prefs, String prefKey, String defValue, DatabaseHelper dbHelper, String dbKey) {
+        String value = dbHelper.getValue(dbKey);
+        if (!Utils.isEmptyString(value)) {
+            return;
+        }
+        String oldValue = prefs.getString(prefKey, defValue);
+        if (!Utils.isEmptyString(oldValue)) {
+            dbHelper.insertOrReplaceKeyValue(dbKey, oldValue);
+            prefs.edit().remove(prefKey).apply();
+        }
+    }
+
+    private static void migrateBooleanValue(SharedPreferences prefs, String prefKey, boolean defValue, DatabaseHelper dbHelper, String dbKey) {
+        Long value = dbHelper.getLongValue(dbKey);
+        if (value != null) {
+            return;
+        }
+        boolean oldValue = prefs.getBoolean(prefKey, defValue);
+        dbHelper.insertOrReplaceKeyLongValue(dbKey, oldValue ? 1L : 0L);
+        prefs.edit().remove(prefKey).apply();
     }
 
     /**
@@ -307,7 +512,7 @@ public class AmplitudeClient {
 
                     } catch (CursorWindowAllocationException e) {  // treat as uninitialized SDK
                         logger.e(TAG, String.format(
-                           "Failed to initialize Amplitude SDK due to: %s", e.getMessage()
+                                "Failed to initialize Amplitude SDK due to: %s", e.getMessage()
                         ));
                         Diagnostics.getLogger().logError("Failed to initialize Amplitude SDK", e);
                         client.apiKey = null;
@@ -326,7 +531,7 @@ public class AmplitudeClient {
      * @param app the Android application
      * @return the AmplitudeClient
      * @see <a href="https://github.com/amplitude/Amplitude-Android#tracking-sessions">
-     *     Tracking Sessions</a>
+     * Tracking Sessions</a>
      */
     public AmplitudeClient enableForegroundTracking(Application app) {
         if (usingForegroundTracking || !contextAndApiKeySet("enableForegroundTracking()")) {
@@ -399,8 +604,8 @@ public class AmplitudeClient {
             @Override
             public void run() {
                 if (deviceInfo == null) {
-		    throw new IllegalStateException(
-		            "Must initialize before acting on location listening.");
+                    throw new IllegalStateException(
+                            "Must initialize before acting on location listening.");
                 }
                 deviceInfo.setLocationListening(true);
             }
@@ -419,8 +624,8 @@ public class AmplitudeClient {
             @Override
             public void run() {
                 if (deviceInfo == null) {
-		    throw new IllegalStateException(
-		            "Must initialize before acting on location listening.");
+                    throw new IllegalStateException(
+                            "Must initialize before acting on location listening.");
                 }
                 deviceInfo.setLocationListening(false);
             }
@@ -494,6 +699,7 @@ public class AmplitudeClient {
 
     /**
      * Sets a custom server url for event upload.
+     *
      * @param serverUrl - a string url for event upload.
      * @return the AmplitudeClient
      */
@@ -506,11 +712,11 @@ public class AmplitudeClient {
 
     /**
      * Sets session timeout millis. If foreground tracking has not been enabled with
-     * @{code enableForegroundTracking()}, then new sessions will be started after
-     * sessionTimeoutMillis milliseconds have passed since the last event logged.
      *
      * @param sessionTimeoutMillis the session timeout millis
      * @return the AmplitudeClient
+     * @{code enableForegroundTracking()}, then new sessions will be started after
+     * sessionTimeoutMillis milliseconds have passed since the last event logged.
      */
     public AmplitudeClient setSessionTimeoutMillis(long sessionTimeoutMillis) {
         this.sessionTimeoutMillis = sessionTimeoutMillis;
@@ -616,7 +822,7 @@ public class AmplitudeClient {
      * @param trackingSessionEvents whether to enable tracking of session events
      * @return the AmplitudeClient
      * @see <a href="https://github.com/amplitude/Amplitude-Android#tracking-sessions">
-     *     Tracking Sessions</a>
+     * Tracking Sessions</a>
      */
     public AmplitudeClient trackSessionEvents(boolean trackingSessionEvents) {
         this.trackingSessionEvents = trackingSessionEvents;
@@ -635,14 +841,18 @@ public class AmplitudeClient {
      *
      * @return whether foreground tracking is enabled
      */
-    boolean isUsingForegroundTracking() { return usingForegroundTracking; }
+    boolean isUsingForegroundTracking() {
+        return usingForegroundTracking;
+    }
 
     /**
      * Whether app is in the foreground.
      *
      * @return whether app is in the foreground
      */
-    boolean isInForeground() { return inForeground; }
+    boolean isInForeground() {
+        return inForeground;
+    }
 
     /**
      * Log an event with the specified event type.
@@ -661,7 +871,7 @@ public class AmplitudeClient {
      * @param eventType       the event type
      * @param eventProperties the event properties
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-event-properties">
-     *     Setting Event Properties</a>
+     * Setting Event Properties</a>
      */
     public void logEvent(String eventType, JSONObject eventProperties) {
         logEvent(eventType, eventProperties, false);
@@ -678,9 +888,9 @@ public class AmplitudeClient {
      * @param eventProperties the event properties
      * @param outOfSession    the out of session
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-event-properties">
-     *     Setting Event Properties</a>
+     * Setting Event Properties</a>
      * @see <a href="https://github.com/amplitude/Amplitude-Android#tracking-sessions">
-     *     Tracking Sessions</a>
+     * Tracking Sessions</a>
      */
     public void logEvent(String eventType, JSONObject eventProperties, boolean outOfSession) {
         logEvent(eventType, eventProperties, null, outOfSession);
@@ -696,9 +906,9 @@ public class AmplitudeClient {
      * @param eventProperties the event properties
      * @param groups          the groups
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-event-properties">
-     *     Setting Event Properties</a>
+     * Setting Event Properties</a>
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-groups">
-     *     Setting Groups</a>
+     * Setting Groups</a>
      */
     public void logEvent(String eventType, JSONObject eventProperties, JSONObject groups) {
         logEvent(eventType, eventProperties, groups, false);
@@ -716,11 +926,11 @@ public class AmplitudeClient {
      * @param groups          the groups
      * @param outOfSession    the out of session
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-event-properties">
-     *     Setting Event Properties</a>
+     * Setting Event Properties</a>
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-groups">
-     *     Setting Groups</a>
+     * Setting Groups</a>
      * @see <a href="https://github.com/amplitude/Amplitude-Android#tracking-sessions">
-     *     Tracking Sessions</a>
+     * Tracking Sessions</a>
      */
     public void logEvent(String eventType, JSONObject eventProperties, JSONObject groups, boolean outOfSession) {
         logEvent(eventType, eventProperties, groups, getCurrentTimeMillis(), outOfSession);
@@ -739,17 +949,17 @@ public class AmplitudeClient {
      * @param timestamp       the timestamp in millisecond since epoch
      * @param outOfSession    the out of session
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-event-properties">
-     *     Setting Event Properties</a>
+     * Setting Event Properties</a>
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-groups">
-     *     Setting Groups</a>
+     * Setting Groups</a>
      * @see <a href="https://github.com/amplitude/Amplitude-Android#tracking-sessions">
-     *     Tracking Sessions</a>
+     * Tracking Sessions</a>
      */
     public void logEvent(String eventType, JSONObject eventProperties, JSONObject groups, long timestamp, boolean outOfSession) {
         if (validateLogEvent(eventType)) {
             logEventAsync(
-                eventType, eventProperties, null, null, groups, null,
-                timestamp, outOfSession
+                    eventType, eventProperties, null, null, groups, null,
+                    timestamp, outOfSession
             );
         }
     }
@@ -771,7 +981,7 @@ public class AmplitudeClient {
      * @param eventType       the event type
      * @param eventProperties the event properties
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-event-properties">
-     *     Setting Event Properties</a>
+     * Setting Event Properties</a>
      */
     public void logEventSync(String eventType, JSONObject eventProperties) {
         logEventSync(eventType, eventProperties, false);
@@ -788,9 +998,9 @@ public class AmplitudeClient {
      * @param eventProperties the event properties
      * @param outOfSession    the out of session
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-event-properties">
-     *     Setting Event Properties</a>
+     * Setting Event Properties</a>
      * @see <a href="https://github.com/amplitude/Amplitude-Android#tracking-sessions">
-     *     Tracking Sessions</a>
+     * Tracking Sessions</a>
      */
     public void logEventSync(String eventType, JSONObject eventProperties, boolean outOfSession) {
         logEventSync(eventType, eventProperties, null, outOfSession);
@@ -806,9 +1016,9 @@ public class AmplitudeClient {
      * @param eventProperties the event properties
      * @param groups          the groups
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-event-properties">
-     *     Setting Event Properties</a>
+     * Setting Event Properties</a>
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-groups">
-     *     Setting Groups</a>
+     * Setting Groups</a>
      */
     public void logEventSync(String eventType, JSONObject eventProperties, JSONObject groups) {
         logEventSync(eventType, eventProperties, groups, false);
@@ -826,11 +1036,11 @@ public class AmplitudeClient {
      * @param groups          the groups
      * @param outOfSession    the out of session
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-event-properties">
-     *     Setting Event Properties</a>
+     * Setting Event Properties</a>
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-groups">
-     *     Setting Groups</a>
+     * Setting Groups</a>
      * @see <a href="https://github.com/amplitude/Amplitude-Android#tracking-sessions">
-     *     Tracking Sessions</a>
+     * Tracking Sessions</a>
      */
     public void logEventSync(String eventType, JSONObject eventProperties, JSONObject groups, boolean outOfSession) {
         logEventSync(eventType, eventProperties, groups, getCurrentTimeMillis(), outOfSession);
@@ -849,11 +1059,11 @@ public class AmplitudeClient {
      * @param timestamp       the timestamp in milliseconds since epoch
      * @param outOfSession    the out of session
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-event-properties">
-     *     Setting Event Properties</a>
+     * Setting Event Properties</a>
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-groups">
-     *     Setting Groups</a>
+     * Setting Groups</a>
      * @see <a href="https://github.com/amplitude/Amplitude-Android#tracking-sessions">
-     *     Tracking Sessions</a>
+     * Tracking Sessions</a>
      */
     public void logEventSync(String eventType, JSONObject eventProperties, JSONObject groups, long timestamp, boolean outOfSession) {
         if (validateLogEvent(eventType)) {
@@ -889,8 +1099,8 @@ public class AmplitudeClient {
      * @param outOfSession    the out of session
      */
     protected void logEventAsync(final String eventType, JSONObject eventProperties,
-            JSONObject apiProperties, JSONObject userProperties, JSONObject groups,
-            JSONObject groupProperties, final long timestamp, final boolean outOfSession) {
+                                 JSONObject apiProperties, JSONObject userProperties, JSONObject groups,
+                                 JSONObject groupProperties, final long timestamp, final boolean outOfSession) {
         // Clone the incoming eventProperties object before sending over
         // to the log thread. Helps avoid ConcurrentModificationException
         // if the caller starts mutating the object they passed in.
@@ -928,8 +1138,8 @@ public class AmplitudeClient {
                     return;
                 }
                 logEvent(
-                    eventType, copyEventProperties, copyApiProperties,
-                    copyUserProperties, copyGroups, copyGroupProperties, timestamp, outOfSession
+                        eventType, copyEventProperties, copyApiProperties,
+                        copyUserProperties, copyGroups, copyGroupProperties, timestamp, outOfSession
                 );
             }
         });
@@ -949,8 +1159,8 @@ public class AmplitudeClient {
      * @return the event ID if succeeded, else -1.
      */
     protected long logEvent(String eventType, JSONObject eventProperties, JSONObject apiProperties,
-            JSONObject userProperties, JSONObject groups, JSONObject groupProperties,
-            long timestamp, boolean outOfSession) {
+                            JSONObject userProperties, JSONObject groups, JSONObject groupProperties,
+                            long timestamp, boolean outOfSession) {
         logger.d(TAG, "Logged event to Amplitude: " + eventType);
 
         if (optOut) {
@@ -963,7 +1173,7 @@ public class AmplitudeClient {
 
         if (!loggingSessionEvent && !outOfSession) {
             // default case + corner case when async logEvent between onPause and onResume
-            if (!inForeground){
+            if (!inForeground) {
                 startNewSessionIfNeeded(timestamp);
             } else {
                 refreshSessionTime(timestamp);
@@ -1039,20 +1249,20 @@ public class AmplitudeClient {
 
             event.put("api_properties", apiProperties);
             event.put("event_properties", (eventProperties == null) ? new JSONObject()
-                : truncate(eventProperties));
+                    : truncate(eventProperties));
             event.put("user_properties", (userProperties == null) ? new JSONObject()
-                : truncate(userProperties));
+                    : truncate(userProperties));
             event.put("groups", (groups == null) ? new JSONObject() : truncate(groups));
             event.put("group_properties", (groupProperties == null) ? new JSONObject()
-                : truncate(groupProperties));
+                    : truncate(groupProperties));
 
             result = saveEvent(eventType, event);
         } catch (JSONException e) {
             logger.e(TAG, String.format(
-                "JSON Serialization of event type %s failed, skipping: %s", eventType, e.toString()
+                    "JSON Serialization of event type %s failed, skipping: %s", eventType, e.toString()
             ));
             Diagnostics.getLogger().logError(
-                String.format("Failed to JSON serialize event type %s", eventType), e
+                    String.format("Failed to JSON serialize event type %s", eventType), e
             );
         }
 
@@ -1070,7 +1280,7 @@ public class AmplitudeClient {
         String eventString = event.toString();
         if (Utils.isEmptyString(eventString)) {
             logger.e(TAG, String.format(
-                "Detected empty event string for event type %s, skipping", eventType
+                    "Detected empty event string for event type %s, skipping", eventType
             ));
             return -1;
         }
@@ -1084,7 +1294,7 @@ public class AmplitudeClient {
         }
 
         int numEventsToRemove = Math.min(
-                Math.max(1, eventMaxCount/10),
+                Math.max(1, eventMaxCount / 10),
                 Constants.EVENT_REMOVE_BATCH_SIZE
         );
         if (dbHelper.getEventCount() > eventMaxCount) {
@@ -1103,8 +1313,8 @@ public class AmplitudeClient {
         }
 
         return (
-            eventType.equals(Constants.IDENTIFY_EVENT) ||
-            eventType.equals(Constants.GROUP_IDENTIFY_EVENT)
+                eventType.equals(Constants.IDENTIFY_EVENT) ||
+                        eventType.equals(Constants.GROUP_IDENTIFY_EVENT)
         ) ? lastIdentifyId : lastEventId;
     }
 
@@ -1163,6 +1373,11 @@ public class AmplitudeClient {
      */
     public long getSessionId() {
         return sessionId;
+    }
+
+    private void setSessionId(long timestamp) {
+        sessionId = timestamp;
+        setPreviousSessionId(timestamp);
     }
 
     /**
@@ -1234,11 +1449,6 @@ public class AmplitudeClient {
         return (timestamp - lastEventTime) < sessionLimit;
     }
 
-    private void setSessionId(long timestamp) {
-        sessionId = timestamp;
-        setPreviousSessionId(timestamp);
-    }
-
     /**
      * Internal method to refresh the current session time.
      *
@@ -1266,7 +1476,7 @@ public class AmplitudeClient {
             apiProperties.put("special", sessionEvent);
         } catch (JSONException e) {
             Diagnostics.getLogger().logError(
-                String.format("Failed to generate API Properties JSON for session event %s", sessionEvent), e
+                    String.format("Failed to generate API Properties JSON for session event %s", sessionEvent), e
             );
             return;
         }
@@ -1324,9 +1534,9 @@ public class AmplitudeClient {
      * Log revenue amount via a revenue event.
      *
      * @param amount the amount
-     * @deprecated - use {@code logRevenueV2} instead
      * @see <a href="https://github.com/amplitude/Amplitude-Android#tracking-revenue">
-     *     Tracking Revenue</a>
+     * Tracking Revenue</a>
+     * @deprecated - use {@code logRevenueV2} instead
      */
     public void logRevenue(double amount) {
         // Amount is in dollars
@@ -1340,9 +1550,9 @@ public class AmplitudeClient {
      * @param productId the product id
      * @param quantity  the quantity
      * @param price     the price
-     * @deprecated - use {@code logRevenueV2} instead
      * @see <a href="https://github.com/amplitude/Amplitude-Android#tracking-revenue">
-     *     Tracking Revenue</a>
+     * Tracking Revenue</a>
+     * @deprecated - use {@code logRevenueV2} instead
      */
     public void logRevenue(String productId, int quantity, double price) {
         logRevenue(productId, quantity, price, null, null);
@@ -1356,12 +1566,12 @@ public class AmplitudeClient {
      * @param price            the price
      * @param receipt          the receipt
      * @param receiptSignature the receipt signature
-     * @deprecated - use {@code logRevenueV2} instead
      * @see <a href="https://github.com/amplitude/Amplitude-Android#tracking-revenue">
-     *     Tracking Revenue</a>
+     * Tracking Revenue</a>
+     * @deprecated - use {@code logRevenueV2} instead
      */
     public void logRevenue(String productId, int quantity, double price, String receipt,
-            String receiptSignature) {
+                           String receiptSignature) {
         if (!contextAndApiKeySet("logRevenue()")) {
             return;
         }
@@ -1380,7 +1590,7 @@ public class AmplitudeClient {
         }
 
         logEventAsync(
-            Constants.AMP_REVENUE_EVENT, null, apiProperties, null, null, null, getCurrentTimeMillis(), false
+                Constants.AMP_REVENUE_EVENT, null, apiProperties, null, null, null, getCurrentTimeMillis(), false
         );
     }
 
@@ -1391,7 +1601,7 @@ public class AmplitudeClient {
      * @param revenue a {@link com.amplitude.api.Revenue} object
      * @see com.amplitude.api.Revenue
      * @see <a href="https://github.com/amplitude/Amplitude-Android#tracking-revenue">
-     *     Tracking Revenue</a>
+     * Tracking Revenue</a>
      */
     public void logRevenueV2(Revenue revenue) {
         if (!contextAndApiKeySet("logRevenueV2()") || revenue == null || !revenue.isValidRevenue()) {
@@ -1408,9 +1618,9 @@ public class AmplitudeClient {
      *
      * @param userProperties the user properties
      * @param replace        the replace - has no effect
-     * @deprecated
      * @see <a href="https://github.com/amplitude/Amplitude-Android#user-properties-and-user-property-operations">
-     *     User Properties</a>
+     * User Properties</a>
+     * @deprecated
      */
     public void setUserProperties(final JSONObject userProperties, final boolean replace) {
         setUserProperties(userProperties);
@@ -1423,7 +1633,7 @@ public class AmplitudeClient {
      *
      * @param userProperties the user properties
      * @see <a href="https://github.com/amplitude/Amplitude-Android#user-properties-and-user-property-operations">
-     *     User Properties</a>
+     * User Properties</a>
      */
     public void setUserProperties(final JSONObject userProperties) {
         if (userProperties == null || userProperties.length() == 0 ||
@@ -1446,7 +1656,7 @@ public class AmplitudeClient {
             } catch (JSONException e) {
                 logger.e(TAG, e.toString());
                 Diagnostics.getLogger().logError(
-                    String.format("Failed to set user property %s", key), e
+                        String.format("Failed to set user property %s", key), e
                 );
             }
         }
@@ -1456,8 +1666,9 @@ public class AmplitudeClient {
     /**
      * Clear user properties. This will clear all user properties at once. <b>Note: the
      * result is irreversible!</b>
+     *
      * @see <a href="https://github.com/amplitude/Amplitude-Android#user-properties-and-user-property-operations">
-     *     User Properties</a>
+     * User Properties</a>
      */
     public void clearUserProperties() {
         Identify identify = new Identify().clearAll();
@@ -1471,7 +1682,7 @@ public class AmplitudeClient {
      * @param identify an {@link com.amplitude.api.Identify} object
      * @see com.amplitude.api.Identify
      * @see <a href="https://github.com/amplitude/Amplitude-Android#user-properties-and-user-property-operations">
-     *     User Properties</a>
+     * User Properties</a>
      */
     public void identify(Identify identify) {
         identify(identify, false);
@@ -1482,20 +1693,20 @@ public class AmplitudeClient {
      * user property operations to Amplitude server. If outOfSession is true, then the identify
      * event is sent with a session id of -1, and does not trigger any session-handling logic.
      *
-     * @param identify an {@link com.amplitude.api.Identify} object
+     * @param identify     an {@link com.amplitude.api.Identify} object
      * @param outOfSession whther to log the identify event out of session
      * @see com.amplitude.api.Identify
      * @see <a href="https://github.com/amplitude/Amplitude-Android#user-properties-and-user-property-operations">
-     *     User Properties</a>
+     * User Properties</a>
      */
     public void identify(Identify identify, boolean outOfSession) {
         if (
-            identify == null || identify.userPropertiesOperations.length() == 0 ||
-            !contextAndApiKeySet("identify()")
-        ) return;
+                identify == null || identify.userPropertiesOperations.length() == 0 ||
+                        !contextAndApiKeySet("identify()")
+                ) return;
         logEventAsync(
-            Constants.IDENTIFY_EVENT, null, null, identify.userPropertiesOperations,
-            null, null, getCurrentTimeMillis(), outOfSession
+                Constants.IDENTIFY_EVENT, null, null, identify.userPropertiesOperations,
+                null, null, getCurrentTimeMillis(), outOfSession
         );
     }
 
@@ -1505,7 +1716,7 @@ public class AmplitudeClient {
      * @param groupType the group type (ex: orgId)
      * @param groupName the group name (ex: 15)
      * @see <a href="https://github.com/amplitude/Amplitude-Android#setting-groups">
-     *     Setting Groups</a>
+     * Setting Groups</a>
      */
     public void setGroup(String groupType, Object groupName) {
         if (!contextAndApiKeySet("setGroup()") || Utils.isEmptyString(groupType)) {
@@ -1514,11 +1725,10 @@ public class AmplitudeClient {
         JSONObject group = null;
         try {
             group = new JSONObject().put(groupType, groupName);
-        }
-        catch (JSONException e) {
+        } catch (JSONException e) {
             logger.e(TAG, e.toString());
             Diagnostics.getLogger().logError(
-                String.format("Failed to generate Group JSON for groupType: %s", groupType), e
+                    String.format("Failed to generate Group JSON for groupType: %s", groupType), e
             );
         }
         Identify identify = new Identify().setUserProperty(groupType, groupName);
@@ -1532,22 +1742,21 @@ public class AmplitudeClient {
 
     public void groupIdentify(String groupType, Object groupName, Identify groupIdentify, boolean outOfSession) {
         if (
-            groupIdentify == null || groupIdentify.userPropertiesOperations.length() == 0 ||
-            !contextAndApiKeySet("groupIdentify()") || Utils.isEmptyString(groupType)
-        ) return;
+                groupIdentify == null || groupIdentify.userPropertiesOperations.length() == 0 ||
+                        !contextAndApiKeySet("groupIdentify()") || Utils.isEmptyString(groupType)
+                ) return;
         JSONObject group = null;
         try {
             group = new JSONObject().put(groupType, groupName);
-        }
-        catch (JSONException e) {
+        } catch (JSONException e) {
             logger.e(TAG, e.toString());
             Diagnostics.getLogger().logError(
-                String.format("Failed to generate Group Identify JSON Object for groupType %s", groupType), e
+                    String.format("Failed to generate Group Identify JSON Object for groupType %s", groupType), e
             );
         }
         logEventAsync(
-            Constants.GROUP_IDENTIFY_EVENT, null, null, null, group,
-            groupIdentify.userPropertiesOperations, getCurrentTimeMillis(), outOfSession
+                Constants.GROUP_IDENTIFY_EVENT, null, null, null, group,
+                groupIdentify.userPropertiesOperations, getCurrentTimeMillis(), outOfSession
         );
     }
 
@@ -1621,18 +1830,6 @@ public class AmplitudeClient {
     }
 
     /**
-     * Truncate a string to 1024 characters.
-     *
-     * @param value the value
-     * @return the truncated string
-     */
-    public static String truncate(String value) {
-        return value.length() <= Constants.MAX_STRING_LENGTH ? value :
-                value.substring(0, Constants.MAX_STRING_LENGTH);
-    }
-
-
-    /**
      * Gets the user's id. Can be null.
      *
      * @return The developer specified identifier for tracking within the analytics system.
@@ -1695,42 +1892,13 @@ public class AmplitudeClient {
     }
 
     /**
-     * Sets a custom device id. <b>Note: only do this if you know what you are doing!</b>
-     *
-     * @param deviceId the device id
-     * @return the AmplitudeClient
-     * @see <a href="https://github.com/amplitude/Amplitude-Android#custom-device-ids">
-     *     Custom Device Ids</a>
-     */
-    public AmplitudeClient setDeviceId(final String deviceId) {
-        Set<String> invalidDeviceIds = getInvalidDeviceIds();
-        if (!contextAndApiKeySet("setDeviceId()") || Utils.isEmptyString(deviceId) ||
-                invalidDeviceIds.contains(deviceId)) {
-            return this;
-        }
-
-        final AmplitudeClient client = this;
-        runOnLogThread(new Runnable() {
-            @Override
-            public void run() {
-                if (Utils.isEmptyString(client.apiKey)) {  // in case initialization failed
-                    return;
-                }
-                client.deviceId = deviceId;
-                dbHelper.insertOrReplaceKeyValue(DEVICE_ID_KEY, deviceId);
-            }
-        });
-        return this;
-    }
-
-    /**
      * Regenerates a new random deviceId for current user. Note: this is not recommended unless you
      * know what you are doing. This can be used in conjunction with setUserId(null) to anonymize
      * users after they log out. With a null userId and a completely new deviceId, the current user
      * would appear as a brand new user in dashboard.
      *
      * @see <a href="https://github.com/amplitude/Amplitude-Android#logging-out-and-anonymous-users">
-     *     Logging Out Users</a>
+     * Logging Out Users</a>
      */
     public AmplitudeClient regenerateDeviceId() {
         if (!contextAndApiKeySet("regenerateDeviceId()")) {
@@ -1807,8 +1975,8 @@ public class AmplitudeClient {
         if (!uploadingCurrently.getAndSet(true)) {
             long totalEventCount = dbHelper.getTotalEventCount();
             long batchSize = Math.min(
-                limit ? backoffUploadBatchSize : eventUploadMaxBatchSize,
-                totalEventCount
+                    limit ? backoffUploadBatchSize : eventUploadMaxBatchSize,
+                    totalEventCount
             );
 
             if (batchSize <= 0) {
@@ -1842,12 +2010,12 @@ public class AmplitudeClient {
                 logger.e(TAG, e.toString());
                 Diagnostics.getLogger().logError("Failed to update server", e);
 
-            // handle CursorWindowAllocationException when fetching events, defer upload
+                // handle CursorWindowAllocationException when fetching events, defer upload
             } catch (CursorWindowAllocationException e) {
                 uploadingCurrently.set(false);
                 logger.e(TAG, String.format(
-                    "Caught Cursor window exception during event upload, deferring upload: %s",
-                    e.getMessage()
+                        "Caught Cursor window exception during event upload, deferring upload: %s",
+                        e.getMessage()
                 ));
                 Diagnostics.getLogger().logError("Failed to update server", e);
             }
@@ -1863,8 +2031,8 @@ public class AmplitudeClient {
      * @return the merged array, max event id, and max identify id
      * @throws JSONException the json exception
      */
-    protected Pair<Pair<Long,Long>, JSONArray> mergeEventsAndIdentifys(List<JSONObject> events,
-                            List<JSONObject> identifys, long numEvents) throws JSONException {
+    protected Pair<Pair<Long, Long>, JSONArray> mergeEventsAndIdentifys(List<JSONObject> events,
+                                                                        List<JSONObject> identifys, long numEvents) throws JSONException {
         JSONArray merged = new JSONArray();
         long maxEventId = -1;
         long maxIdentifyId = -1;
@@ -1878,29 +2046,29 @@ public class AmplitudeClient {
             // than expected
             if (noEvents && noIdentifys) {
                 logger.w(TAG, String.format(
-                    "mergeEventsAndIdentifys: number of events and identifys " +
-                    "less than expected by %d", numEvents - merged.length())
+                        "mergeEventsAndIdentifys: number of events and identifys " +
+                                "less than expected by %d", numEvents - merged.length())
                 );
                 break;
 
-            // case 1: no identifys, grab from events
+                // case 1: no identifys, grab from events
             } else if (noIdentifys) {
                 JSONObject event = events.remove(0);
                 maxEventId = event.getLong("event_id");
                 merged.put(event);
 
-            // case 2: no events, grab from identifys
+                // case 2: no events, grab from identifys
             } else if (noEvents) {
                 JSONObject identify = identifys.remove(0);
                 maxIdentifyId = identify.getLong("event_id");
                 merged.put(identify);
 
-            // case 3: need to compare sequence numbers
+                // case 3: need to compare sequence numbers
             } else {
                 // events logged before v2.1.0 won't have a sequence number, put those first
                 if (!events.get(0).has("sequence_number") ||
                         events.get(0).getLong("sequence_number") <
-                        identifys.get(0).getLong("sequence_number")) {
+                                identifys.get(0).getLong("sequence_number")) {
                     JSONObject event = events.remove(0);
                     maxEventId = event.getLong("event_id");
                     merged.put(event);
@@ -1912,7 +2080,7 @@ public class AmplitudeClient {
             }
         }
 
-        return new Pair<Pair<Long, Long>, JSONArray>(new Pair<Long,Long>(maxEventId, maxIdentifyId), merged);
+        return new Pair<Pair<Long, Long>, JSONArray>(new Pair<Long, Long>(maxEventId, maxIdentifyId), merged);
     }
 
     /**
@@ -1946,19 +2114,19 @@ public class AmplitudeClient {
         }
 
         FormBody body = new FormBody.Builder()
-            .add("v", apiVersionString)
-            .add("client", apiKey)
-            .add("e", events)
-            .add("upload_time", timestampString)
-            .add("checksum", checksumString)
-            .build();
+                .add("v", apiVersionString)
+                .add("client", apiKey)
+                .add("e", events)
+                .add("upload_time", timestampString)
+                .add("checksum", checksumString)
+                .build();
 
         Request request;
         try {
-             request = new Request.Builder()
-                .url(url)
-                .post(body)
-                .build();
+            request = new Request.Builder()
+                    .url(url)
+                    .post(body)
+                    .build();
         } catch (IllegalArgumentException e) {
             logger.e(TAG, e.toString());
             uploadingCurrently.set(false);
@@ -1986,8 +2154,7 @@ public class AmplitudeClient {
                                     updateServer(backoffUpload);
                                 }
                             });
-                        }
-                        else {
+                        } else {
                             backoffUpload = false;
                             backoffUploadBatchSize = eventUploadMaxBatchSize;
                         }
@@ -2012,15 +2179,15 @@ public class AmplitudeClient {
 
                 // Server complained about length of request, backoff and try again
                 backoffUpload = true;
-                int numEvents = Math.min((int)dbHelper.getEventCount(), backoffUploadBatchSize);
-                backoffUploadBatchSize = (int)Math.ceil(numEvents / 2.0);
+                int numEvents = Math.min((int) dbHelper.getEventCount(), backoffUploadBatchSize);
+                backoffUploadBatchSize = (int) Math.ceil(numEvents / 2.0);
                 logger.w(TAG, "Request too large, will decrease size and attempt to reupload");
                 logThread.post(new Runnable() {
-                   @Override
+                    @Override
                     public void run() {
-                       uploadingCurrently.set(false);
-                       updateServer(true);
-                   }
+                        uploadingCurrently.set(false);
+                        updateServer(true);
+                    }
                 });
             } else {
                 logger.w(TAG, "Upload failed, " + stringResponse
@@ -2065,6 +2232,35 @@ public class AmplitudeClient {
      */
     public String getDeviceId() {
         return deviceId;
+    }
+
+    /**
+     * Sets a custom device id. <b>Note: only do this if you know what you are doing!</b>
+     *
+     * @param deviceId the device id
+     * @return the AmplitudeClient
+     * @see <a href="https://github.com/amplitude/Amplitude-Android#custom-device-ids">
+     * Custom Device Ids</a>
+     */
+    public AmplitudeClient setDeviceId(final String deviceId) {
+        Set<String> invalidDeviceIds = getInvalidDeviceIds();
+        if (!contextAndApiKeySet("setDeviceId()") || Utils.isEmptyString(deviceId) ||
+                invalidDeviceIds.contains(deviceId)) {
+            return this;
+        }
+
+        final AmplitudeClient client = this;
+        runOnLogThread(new Runnable() {
+            @Override
+            public void run() {
+                if (Utils.isEmptyString(client.apiKey)) {  // in case initialization failed
+                    return;
+                }
+                client.deviceId = deviceId;
+                dbHelper.insertOrReplaceKeyValue(DEVICE_ID_KEY, deviceId);
+            }
+        });
+        return this;
     }
 
     // don't need to keep this in memory, if only using it at most 1 or 2 times
@@ -2154,8 +2350,8 @@ public class AmplitudeClient {
      * @return the string
      */
     protected String bytesToHexString(byte[] bytes) {
-        final char[] hexArray = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b',
-                'c', 'd', 'e', 'f' };
+        final char[] hexArray = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b',
+                'c', 'd', 'e', 'f'};
         char[] hexChars = new char[bytes.length * 2];
         int v;
         for (int j = 0; j < bytes.length; j++) {
@@ -2167,207 +2363,11 @@ public class AmplitudeClient {
     }
 
     /**
-     * Move all preference data from the legacy name to the new, static name if needed.
-     * <p/>
-     * Constants.PACKAGE_NAME used to be set using "Constants.class.getPackage().getName()"
-     * Some aggressive proguard optimizations broke the reflection and caused apps
-     * to crash on startup.
-     * <p/>
-     * Now that Constants.PACKAGE_NAME is changed, old data on devices needs to be
-     * moved over to the new location so that device ids remain consistent.
-     * <p/>
-     * This should only happen once -- the first time a user loads the app after updating.
-     * This logic needs to remain in place for quite a long time. It was first introduced in
-     * April 2015 in version 1.6.0.
-     *
-     * @param context the context
-     * @return the boolean
-     */
-    static boolean upgradePrefs(Context context) {
-        return upgradePrefs(context, null, null);
-    }
-
-    /**
-     * Upgrade prefs boolean.
-     *
-     * @param context       the context
-     * @param sourcePkgName the source pkg name
-     * @param targetPkgName the target pkg name
-     * @return the boolean
-     */
-    static boolean upgradePrefs(Context context, String sourcePkgName, String targetPkgName) {
-        try {
-            if (sourcePkgName == null) {
-                // Try to load the package name using the old reflection strategy.
-                sourcePkgName = Constants.PACKAGE_NAME;
-                try {
-                    sourcePkgName = Constants.class.getPackage().getName();
-                } catch (Exception e) { }
-            }
-
-            if (targetPkgName == null) {
-                targetPkgName = Constants.PACKAGE_NAME;
-            }
-
-            // No need to copy if the source and target are the same.
-            if (targetPkgName.equals(sourcePkgName)) {
-                return false;
-            }
-
-            // Copy over any preferences that may exist in a source preference store.
-            String sourcePrefsName = sourcePkgName + "." + context.getPackageName();
-            SharedPreferences source =
-                    context.getSharedPreferences(sourcePrefsName, Context.MODE_PRIVATE);
-
-            // Nothing left in the source store to copy
-            if (source.getAll().size() == 0) {
-                return false;
-            }
-
-            String prefsName = targetPkgName + "." + context.getPackageName();
-            SharedPreferences targetPrefs =
-                    context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
-            SharedPreferences.Editor target = targetPrefs.edit();
-
-            // Copy over all existing data.
-            if (source.contains(sourcePkgName + ".previousSessionId")) {
-                target.putLong(Constants.PREFKEY_PREVIOUS_SESSION_ID,
-                        source.getLong(sourcePkgName + ".previousSessionId", -1));
-            }
-            if (source.contains(sourcePkgName + ".deviceId")) {
-                target.putString(Constants.PREFKEY_DEVICE_ID,
-                        source.getString(sourcePkgName + ".deviceId", null));
-            }
-            if (source.contains(sourcePkgName + ".userId")) {
-                target.putString(Constants.PREFKEY_USER_ID,
-                        source.getString(sourcePkgName + ".userId", null));
-            }
-            if (source.contains(sourcePkgName + ".optOut")) {
-                target.putBoolean(Constants.PREFKEY_OPT_OUT,
-                        source.getBoolean(sourcePkgName + ".optOut", false));
-            }
-
-            // Commit the changes and clear the source store so we don't recopy.
-            target.apply();
-            source.edit().clear().apply();
-
-            logger.i(TAG, "Upgraded shared preferences from " + sourcePrefsName + " to " + prefsName);
-            return true;
-
-        } catch (Exception e) {
-            logger.e(TAG, "Error upgrading shared preferences", e);
-            Diagnostics.getLogger().logError("Failed to upgrade shared prefs", e);
-            return false;
-        }
-    }
-
-    /**
-     * Upgrade shared prefs to db boolean.
-     *
-     * @param context the context
-     * @return the boolean
-     */
-/*
-     * Move all data from sharedPrefs to sqlite key value store to support multi-process apps.
-     * sharedPrefs is known to not be process-safe.
-     */
-    static boolean upgradeSharedPrefsToDB(Context context) {
-        return upgradeSharedPrefsToDB(context, null);
-    }
-
-    /**
-     * Upgrade shared prefs to db boolean.
-     *
-     * @param context       the context
-     * @param sourcePkgName the source pkg name
-     * @return the boolean
-     */
-    static boolean upgradeSharedPrefsToDB(Context context, String sourcePkgName) {
-        if (sourcePkgName == null) {
-            sourcePkgName = Constants.PACKAGE_NAME;
-        }
-
-        // check if upgrade needed
-        DatabaseHelper dbHelper = DatabaseHelper.getDatabaseHelper(context);
-        String deviceId = dbHelper.getValue(DEVICE_ID_KEY);
-        Long previousSessionId = dbHelper.getLongValue(PREVIOUS_SESSION_ID_KEY);
-        Long lastEventTime = dbHelper.getLongValue(LAST_EVENT_TIME_KEY);
-        if (!Utils.isEmptyString(deviceId) && previousSessionId != null && lastEventTime != null) {
-            return true;
-        }
-
-        String prefsName = sourcePkgName + "." + context.getPackageName();
-        SharedPreferences preferences =
-                context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
-
-        migrateStringValue(
-            preferences, Constants.PREFKEY_DEVICE_ID, null, dbHelper, DEVICE_ID_KEY
-        );
-
-        migrateLongValue(
-            preferences, Constants.PREFKEY_LAST_EVENT_TIME, -1, dbHelper, LAST_EVENT_TIME_KEY
-        );
-
-        migrateLongValue(
-            preferences, Constants.PREFKEY_LAST_EVENT_ID, -1, dbHelper, LAST_EVENT_ID_KEY
-        );
-
-        migrateLongValue(
-            preferences, Constants.PREFKEY_LAST_IDENTIFY_ID, -1, dbHelper, LAST_IDENTIFY_ID_KEY
-        );
-
-        migrateLongValue(
-            preferences, Constants.PREFKEY_PREVIOUS_SESSION_ID, -1,
-            dbHelper, PREVIOUS_SESSION_ID_KEY
-        );
-
-        migrateStringValue(
-            preferences, Constants.PREFKEY_USER_ID, null, dbHelper, USER_ID_KEY
-        );
-
-        migrateBooleanValue(
-            preferences, Constants.PREFKEY_OPT_OUT, false, dbHelper, OPT_OUT_KEY
-        );
-
-        return true;
-    }
-
-    private static void migrateLongValue(SharedPreferences prefs, String prefKey, long defValue, DatabaseHelper dbHelper, String dbKey) {
-        Long value = dbHelper.getLongValue(dbKey);
-        if (value != null) { // if value already exists don't need to migrate
-            return;
-        }
-        long oldValue = prefs.getLong(prefKey, defValue);
-        dbHelper.insertOrReplaceKeyLongValue(dbKey, oldValue);
-        prefs.edit().remove(prefKey).apply();
-    }
-
-    private static void migrateStringValue(SharedPreferences prefs, String prefKey, String defValue, DatabaseHelper dbHelper, String dbKey) {
-        String value = dbHelper.getValue(dbKey);
-        if (!Utils.isEmptyString(value)) {
-            return;
-        }
-        String oldValue = prefs.getString(prefKey, defValue);
-        if (!Utils.isEmptyString(oldValue)) {
-            dbHelper.insertOrReplaceKeyValue(dbKey, oldValue);
-            prefs.edit().remove(prefKey).apply();
-        }
-    }
-
-    private static void migrateBooleanValue(SharedPreferences prefs, String prefKey, boolean defValue, DatabaseHelper dbHelper, String dbKey) {
-        Long value = dbHelper.getLongValue(dbKey);
-        if (value != null) {
-            return;
-        }
-        boolean oldValue = prefs.getBoolean(prefKey, defValue);
-        dbHelper.insertOrReplaceKeyLongValue(dbKey, oldValue ? 1L : 0L);
-        prefs.edit().remove(prefKey).apply();
-    }
-
-    /**
      * Internal method to fetch the current time millis. Used for testing.
      *
      * @return the current time millis
      */
-    protected long getCurrentTimeMillis() { return System.currentTimeMillis(); }
+    protected long getCurrentTimeMillis() {
+        return System.currentTimeMillis();
+    }
 }

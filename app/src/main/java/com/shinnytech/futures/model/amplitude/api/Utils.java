@@ -89,7 +89,8 @@ public class Utils {
             }
 
             return true;
-        } catch (JSONException e) {}
+        } catch (JSONException e) {
+        }
         return false;
     }
 

@@ -92,10 +92,14 @@ public class AmplitudePlugin {
     }
 
     @Deprecated
-    public static void startSession() { return; }
+    public static void startSession() {
+        return;
+    }
 
     @Deprecated
-    public static void endSession() { return; }
+    public static void endSession() {
+        return;
+    }
 
     public static void logEvent(String instanceName, String event) {
         Amplitude.getInstance(instanceName).logEvent(event);
@@ -154,13 +158,17 @@ public class AmplitudePlugin {
         return Amplitude.getInstance(instanceName).getDeviceId();
     }
 
-    public static void regenerateDeviceId(String instanceName) { Amplitude.getInstance(instanceName).regenerateDeviceId(); }
+    public static void regenerateDeviceId(String instanceName) {
+        Amplitude.getInstance(instanceName).regenerateDeviceId();
+    }
 
     public static void trackSessionEvents(String instanceName, boolean enabled) {
         Amplitude.getInstance(instanceName).trackSessionEvents(enabled);
     }
 
-    public static long getSessionId(String instanceName) { return Amplitude.getInstance(instanceName).getSessionId(); }
+    public static long getSessionId(String instanceName) {
+        return Amplitude.getInstance(instanceName).getSessionId();
+    }
 
     // User Property Operations
 
@@ -209,7 +217,7 @@ public class AmplitudePlugin {
             return;
         }
         Amplitude.getInstance(instanceName).identify(new Identify().setOnce(
-            property, properties.optJSONArray("list")
+                property, properties.optJSONArray("list")
         ));
     }
 

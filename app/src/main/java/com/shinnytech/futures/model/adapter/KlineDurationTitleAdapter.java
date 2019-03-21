@@ -4,23 +4,14 @@ import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ItemDurationTitleBinding;
-import com.shinnytech.futures.databinding.ItemKlineDurationBinding;
-import com.shinnytech.futures.model.listener.ItemTouchHelperListener;
-import com.shinnytech.futures.utils.SPUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -41,19 +32,19 @@ public class KlineDurationTitleAdapter extends RecyclerView.Adapter<KlineDuratio
         this.mData.addAll(data);
     }
 
-    public void update(int position){
+    public void update(int position) {
         index = position;
         notifyDataSetChanged();
     }
 
-    public int next(){
+    public int next() {
         index = index + 1;
         if (index == mData.size()) index = 0;
         notifyDataSetChanged();
         return index;
     }
 
-    public String getDurationTitle(){
+    public String getDurationTitle() {
         String duration_title = mData.get(index);
         return duration_title;
     }
@@ -97,10 +88,10 @@ public class KlineDurationTitleAdapter extends RecyclerView.Adapter<KlineDuratio
             if (mData == null || mData.size() == 0) return;
             String duration_title = mData.get(getLayoutPosition());
             mBinding.durationTitle.setText(duration_title);
-            if (index == getLayoutPosition()){
+            if (index == getLayoutPosition()) {
                 mBinding.durationTitleUnderline.setBackground(ContextCompat.getDrawable(sContext, R.color.marker_yellow));
                 mBinding.durationTitle.setTextColor(ContextCompat.getColor(sContext, R.color.marker_yellow));
-            } else{
+            } else {
                 mBinding.durationTitleUnderline.setBackground(ContextCompat.getDrawable(sContext, R.color.black_light));
                 mBinding.durationTitle.setTextColor(ContextCompat.getColor(sContext, R.color.white));
             }

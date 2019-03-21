@@ -19,7 +19,6 @@ import android.widget.CompoundButton;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ActivityLoginBinding;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.SPUtils;
@@ -30,12 +29,12 @@ import java.util.List;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
 import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOCK_ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOCK_PASSWORD;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PASSWORD;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY;
@@ -84,23 +83,23 @@ public class LoginActivity extends BaseActivity {
         if (SPUtils.contains(sContext, CONFIG_BROKER)) {
             String brokerName = (String) SPUtils.get(sContext, CONFIG_BROKER, "");
             mBinding.broker.setText(brokerName);
-        }else if (brokerList != null && brokerList.size() != 0){
+        } else if (brokerList != null && brokerList.size() != 0) {
             mBinding.broker.setText(brokerList.get(0));
         }
 
         boolean mRememberPassword = false;
         boolean mRememberAccount = false;
 
-        if (SPUtils.contains(sContext, CONFIG_LOCK_ACCOUNT)){
+        if (SPUtils.contains(sContext, CONFIG_LOCK_ACCOUNT)) {
             mRememberAccount = (boolean) SPUtils.get(sContext, CONFIG_LOCK_ACCOUNT, false);
-            if (mRememberAccount){
+            if (mRememberAccount) {
                 mBinding.cbRememberAccount.setChecked(true);
             }
         }
 
-        if (SPUtils.contains(sContext, CONFIG_LOCK_PASSWORD)){
+        if (SPUtils.contains(sContext, CONFIG_LOCK_PASSWORD)) {
             mRememberPassword = (boolean) SPUtils.get(sContext, CONFIG_LOCK_PASSWORD, false);
-            if (mRememberPassword){
+            if (mRememberPassword) {
                 mBinding.cbRememberPassword.setChecked(true);
             }
         }
@@ -116,12 +115,12 @@ public class LoginActivity extends BaseActivity {
         }
 
         if (SPUtils.contains(sContext, CONFIG_PASSWORD)) {
-            String password ;
+            String password;
             if (mRememberPassword) password = (String) SPUtils.get(sContext, CONFIG_PASSWORD, "");
             else password = "";
             mBinding.password.setText(password);
             mBinding.password.setSelection(password.length());
-            if (!password.isEmpty())mBinding.deletePassword.setVisibility(View.VISIBLE);
+            if (!password.isEmpty()) mBinding.deletePassword.setVisibility(View.VISIBLE);
         }
     }
 
@@ -171,9 +170,9 @@ public class LoginActivity extends BaseActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.length() == 0){
+                if (s.length() == 0) {
                     mBinding.deleteAccount.setVisibility(View.INVISIBLE);
-                }else {
+                } else {
                     mBinding.deleteAccount.setVisibility(View.VISIBLE);
                 }
 
@@ -193,9 +192,9 @@ public class LoginActivity extends BaseActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.length() == 0){
+                if (s.length() == 0) {
                     mBinding.deletePassword.setVisibility(View.INVISIBLE);
-                }else {
+                } else {
                     mBinding.deletePassword.setVisibility(View.VISIBLE);
                 }
 
@@ -205,9 +204,9 @@ public class LoginActivity extends BaseActivity {
         mBinding.account.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus){
+                if (hasFocus) {
                     mBinding.llAccount.setBackgroundResource(R.drawable.rectangle_border_focused);
-                }else {
+                } else {
                     mBinding.llAccount.setBackgroundResource(R.drawable.rectangle_border);
                 }
             }
@@ -216,9 +215,9 @@ public class LoginActivity extends BaseActivity {
         mBinding.password.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus){
+                if (hasFocus) {
                     mBinding.llPassword.setBackgroundResource(R.drawable.rectangle_border_focused);
-                }else {
+                } else {
                     mBinding.llPassword.setBackgroundResource(R.drawable.rectangle_border);
                 }
             }
@@ -227,9 +226,9 @@ public class LoginActivity extends BaseActivity {
         mBinding.cbRememberAccount.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked){
+                if (isChecked) {
                     SPUtils.putAndApply(sContext, CONFIG_LOCK_ACCOUNT, true);
-                }else {
+                } else {
                     SPUtils.putAndApply(sContext, CONFIG_LOCK_ACCOUNT, false);
                 }
             }
@@ -238,9 +237,9 @@ public class LoginActivity extends BaseActivity {
         mBinding.cbRememberPassword.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked){
+                if (isChecked) {
                     SPUtils.putAndApply(sContext, CONFIG_LOCK_PASSWORD, true);
-                }else {
+                } else {
                     SPUtils.putAndApply(sContext, CONFIG_LOCK_PASSWORD, false);
                 }
             }
@@ -328,7 +327,8 @@ public class LoginActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (mReceiverLogin != null)LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLogin);
+        if (mReceiverLogin != null)
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLogin);
     }
 
     /**
@@ -418,6 +418,28 @@ public class LoginActivity extends BaseActivity {
     }
 
     /**
+     * date: 6/21/17
+     * author: chenli
+     * description: 合约详情页返回,发送原来订阅合约
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY:
+                    String broker = data.getStringExtra("broker");
+                    mBinding.broker.setText(broker);
+                    break;
+                case LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY:
+                    mBinding.password.setText("");
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    /**
      * date: 6/1/18
      * author: chenli
      * description: 点击登录后服务器返回处理
@@ -460,7 +482,7 @@ public class LoginActivity extends BaseActivity {
                         List<String> brokerList = LatestFileManager
                                 .getBrokerIdFromBuildConfig(activity.sDataManager.getBroker().getBrokers());
                         if (activity.mBinding.broker.getText().toString().isEmpty()
-                                && brokerList != null && brokerList.size() != 0){
+                                && brokerList != null && brokerList.size() != 0) {
                             activity.mBinding.broker.setText(brokerList.get(0));
                         }
                         break;
@@ -471,28 +493,6 @@ public class LoginActivity extends BaseActivity {
                     default:
                         break;
                 }
-            }
-        }
-    }
-
-    /**
-     * date: 6/21/17
-     * author: chenli
-     * description: 合约详情页返回,发送原来订阅合约
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK){
-            switch (requestCode){
-                case LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY:
-                    String broker = data.getStringExtra("broker");
-                    mBinding.broker.setText(broker);
-                    break;
-                case LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY:
-                    mBinding.password.setText("");
-                    break;
-                default:
-                    break;
             }
         }
     }

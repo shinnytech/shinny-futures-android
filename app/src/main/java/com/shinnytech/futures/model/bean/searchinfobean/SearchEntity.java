@@ -2,15 +2,13 @@ package com.shinnytech.futures.model.bean.searchinfobean;
 
 import android.support.annotation.NonNull;
 
-import com.shinnytech.futures.utils.LogUtils;
-
 /**
  * Created on 6/20/17.
  * Created by chenli.
  * Description: .
  */
 
-public class SearchEntity implements Comparable<SearchEntity>{
+public class SearchEntity implements Comparable<SearchEntity> {
     private String instrumentName = "";
     private String instrumentId = "";
     private String exchangeName = "";
@@ -169,17 +167,17 @@ public class SearchEntity implements Comparable<SearchEntity>{
     public int compareTo(@NonNull SearchEntity o) {
         String product_id1 = this.product_id;
         String product_id2 = o.product_id;
-        if (product_id1.length() != product_id2.length()){
-            if (product_id1.isEmpty())return 1;
-            else if (product_id2.isEmpty())return -1;
+        if (product_id1.length() != product_id2.length()) {
+            if (product_id1.isEmpty()) return 1;
+            else if (product_id2.isEmpty()) return -1;
             return product_id1.length() - product_id2.length();
-        }else {
+        } else {
             int key1 = product_id1.compareTo(product_id2);
-            if (key1 == 0){
+            if (key1 == 0) {
                 int pre_volume1 = this.pre_volume;
                 int pre_volume2 = o.pre_volume;
                 int key2 = pre_volume2 - pre_volume1;
-                if (key2 == 0){
+                if (key2 == 0) {
                     String ins_id1 = this.ins_id;
                     String ins_id2 = o.ins_id;
                     return -ins_id1.compareTo(ins_id2);

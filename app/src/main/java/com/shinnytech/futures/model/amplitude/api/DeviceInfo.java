@@ -35,6 +35,141 @@ public class DeviceInfo {
 
     private CachedInfo cachedInfo;
 
+    public DeviceInfo(Context context) {
+        this.context = context;
+    }
+
+    public static String generateUUID() {
+        return UUID.randomUUID().toString();
+    }
+
+    private CachedInfo getCachedInfo() {
+        if (cachedInfo == null) {
+            cachedInfo = new CachedInfo();
+        }
+        return cachedInfo;
+    }
+
+    public void prefetch() {
+        getCachedInfo();
+    }
+
+    public String getVersionName() {
+        return getCachedInfo().versionName;
+    }
+
+    public String getOsName() {
+        return getCachedInfo().osName;
+    }
+
+    public String getOsVersion() {
+        return getCachedInfo().osVersion;
+    }
+
+    public String getBrand() {
+        return getCachedInfo().brand;
+    }
+
+    public String getManufacturer() {
+        return getCachedInfo().manufacturer;
+    }
+
+    public String getModel() {
+        return getCachedInfo().model;
+    }
+
+    public String getCarrier() {
+        return getCachedInfo().carrier;
+    }
+
+    public String getCountry() {
+        return getCachedInfo().country;
+    }
+
+    public String getLanguage() {
+        return getCachedInfo().language;
+    }
+
+    public String getAdvertisingId() {
+        return getCachedInfo().advertisingId;
+    }
+
+    public boolean isLimitAdTrackingEnabled() {
+        return getCachedInfo().limitAdTrackingEnabled;
+    }
+
+    public boolean isGooglePlayServicesEnabled() {
+        return getCachedInfo().gpsEnabled;
+    }
+
+    public Location getMostRecentLocation() {
+        if (!isLocationListening()) {
+            return null;
+        }
+
+        LocationManager locationManager = (LocationManager) context
+                .getSystemService(Context.LOCATION_SERVICE);
+
+        // Don't crash if the device does not have location services.
+        if (locationManager == null) {
+            return null;
+        }
+
+        // It's possible that the location service is running out of process
+        // and the remote getProviders call fails. Handle null provider lists.
+        List<String> providers = null;
+        try {
+            providers = locationManager.getProviders(true);
+        } catch (SecurityException e) {
+            // failed to get providers list
+            Diagnostics.getLogger().logError("Failed to get most recent location", e);
+        }
+        if (providers == null) {
+            return null;
+        }
+
+        List<Location> locations = new ArrayList<Location>();
+        for (String provider : providers) {
+            Location location = null;
+            try {
+                location = locationManager.getLastKnownLocation(provider);
+            } catch (IllegalArgumentException e) {
+                // failed to get last known location from provider
+                Diagnostics.getLogger().logError("Failed to get most recent location", e);
+            } catch (SecurityException e) {
+                // failed to get last known location from provider
+                Diagnostics.getLogger().logError("Failed to get most recent location", e);
+            }
+            if (location != null) {
+                locations.add(location);
+            }
+        }
+
+        long maximumTimestamp = -1;
+        Location bestLocation = null;
+        for (Location location : locations) {
+            if (location.getTime() > maximumTimestamp) {
+                maximumTimestamp = location.getTime();
+                bestLocation = location;
+            }
+        }
+
+        return bestLocation;
+    }
+
+    public boolean isLocationListening() {
+        return locationListening;
+    }
+
+    public void setLocationListening(boolean locationListening) {
+        this.locationListening = locationListening;
+    }
+
+    // @VisibleForTesting
+    protected Geocoder getGeocoder() {
+        return new Geocoder(context, Locale.ENGLISH);
+    }
+
     /**
      * Internal class serves as a cache
      */
@@ -274,139 +409,6 @@ public class DeviceInfo {
             }
             return false;
         }
-    }
-
-    public DeviceInfo(Context context) {
-        this.context = context;
-    }
-
-    private CachedInfo getCachedInfo() {
-        if (cachedInfo == null) {
-            cachedInfo = new CachedInfo();
-        }
-        return cachedInfo;
-    }
-
-    public void prefetch() {
-        getCachedInfo();
-    }
-
-    public static String generateUUID() {
-        return UUID.randomUUID().toString();
-    }
-
-    public String getVersionName() {
-        return getCachedInfo().versionName;
-    }
-
-    public String getOsName() {
-        return getCachedInfo().osName;
-    }
-
-    public String getOsVersion() {
-        return getCachedInfo().osVersion;
-    }
-
-    public String getBrand() {
-        return getCachedInfo().brand;
-    }
-
-    public String getManufacturer() {
-        return getCachedInfo().manufacturer;
-    }
-
-    public String getModel() {
-        return getCachedInfo().model;
-    }
-
-    public String getCarrier() {
-        return getCachedInfo().carrier;
-    }
-
-    public String getCountry() {
-        return getCachedInfo().country;
-    }
-
-    public String getLanguage() {
-        return getCachedInfo().language;
-    }
-
-    public String getAdvertisingId() {
-        return getCachedInfo().advertisingId;
-    }
-
-    public boolean isLimitAdTrackingEnabled() {
-        return getCachedInfo().limitAdTrackingEnabled;
-    }
-
-    public boolean isGooglePlayServicesEnabled() { return getCachedInfo().gpsEnabled; }
-
-    public Location getMostRecentLocation() {
-        if (!isLocationListening()) {
-            return null;
-        }
-
-        LocationManager locationManager = (LocationManager) context
-                .getSystemService(Context.LOCATION_SERVICE);
-
-        // Don't crash if the device does not have location services.
-        if (locationManager == null) {
-            return null;
-        }
-
-        // It's possible that the location service is running out of process
-        // and the remote getProviders call fails. Handle null provider lists.
-        List<String> providers = null;
-        try {
-            providers = locationManager.getProviders(true);
-        } catch (SecurityException e) {
-            // failed to get providers list
-            Diagnostics.getLogger().logError("Failed to get most recent location", e);
-        }
-        if (providers == null) {
-            return null;
-        }
-
-        List<Location> locations = new ArrayList<Location>();
-        for (String provider : providers) {
-            Location location = null;
-            try {
-                location = locationManager.getLastKnownLocation(provider);
-            } catch (IllegalArgumentException e) {
-                // failed to get last known location from provider
-                Diagnostics.getLogger().logError("Failed to get most recent location", e);
-            } catch (SecurityException e) {
-                // failed to get last known location from provider
-                Diagnostics.getLogger().logError("Failed to get most recent location", e);
-            }
-            if (location != null) {
-                locations.add(location);
-            }
-        }
-
-        long maximumTimestamp = -1;
-        Location bestLocation = null;
-        for (Location location : locations) {
-            if (location.getTime() > maximumTimestamp) {
-                maximumTimestamp = location.getTime();
-                bestLocation = location;
-            }
-        }
-
-        return bestLocation;
-    }
-
-    public boolean isLocationListening() {
-        return locationListening;
-    }
-
-    public void setLocationListening(boolean locationListening) {
-        this.locationListening = locationListening;
-    }
-
-    // @VisibleForTesting
-    protected Geocoder getGeocoder() {
-        return new Geocoder(context, Locale.ENGLISH);
     }
 
 }

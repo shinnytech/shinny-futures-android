@@ -25,16 +25,16 @@ import android.widget.TextView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.databinding.FragmentOrderBinding;
+import com.shinnytech.futures.model.adapter.OrderAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.utils.CloneUtils;
-import com.shinnytech.futures.utils.DividerItemDecorationUtils;
-import com.shinnytech.futures.controller.activity.FutureInfoActivity;
-import com.shinnytech.futures.model.adapter.OrderAdapter;
 import com.shinnytech.futures.model.listener.OrderDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
+import com.shinnytech.futures.utils.CloneUtils;
+import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
 import java.util.ArrayList;
@@ -157,13 +157,13 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
                 if (orderEntity != null) {
                     if (("ALIVE").equals(orderEntity.getStatus())) {
                         String order_id = orderEntity.getOrder_id();
-                        if (mIsShowDialog){
+                        if (mIsShowDialog) {
                             String instrument_id = orderEntity.getInstrument_id();
                             String direction_title = ((TextView) view.findViewById(R.id.order_offset)).getText().toString();
                             String volume = orderEntity.getVolume_left();
                             String price = ((TextView) view.findViewById(R.id.order_price)).getText().toString();
                             initDialog(order_id, instrument_id, direction_title, volume, price);
-                        }else {
+                        } else {
                             BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
                         }
                     }
@@ -235,7 +235,7 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
             diffResult.dispatchUpdatesTo(mAdapter);
             mOldData.clear();
             mOldData.addAll(mNewData);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

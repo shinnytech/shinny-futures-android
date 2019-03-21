@@ -2,7 +2,6 @@ package com.shinnytech.futures.model.engine;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
-import android.widget.TextView;
 
 import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
@@ -69,7 +68,7 @@ public class LatestFileManager {
                 } else {
                     return sort_key1 - sort_key2;
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 return 0;
             }
@@ -258,31 +257,31 @@ public class LatestFileManager {
                 if ("FUTURE".equals(classN)) {
                     switch (exchange_id) {
                         case "SHFE"://上期所
-                            if (!expired)sShangqiInsList.put(instrument_id, quoteEntity);
+                            if (!expired) sShangqiInsList.put(instrument_id, quoteEntity);
                             if (!sShangqiInsListNameNav.containsValue(product_short_name))
                                 sShangqiInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("上海期货交易所");
                             break;
                         case "CZCE"://郑商所
-                            if (!expired)sZhengzhouInsList.put(instrument_id, quoteEntity);
+                            if (!expired) sZhengzhouInsList.put(instrument_id, quoteEntity);
                             if (!sZhengzhouInsListNameNav.containsValue(product_short_name))
                                 sZhengzhouInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("郑州商品交易所");
                             break;
                         case "DCE"://大商所
-                            if (!expired)sDalianInsList.put(instrument_id, quoteEntity);
+                            if (!expired) sDalianInsList.put(instrument_id, quoteEntity);
                             if (!sDalianInsListNameNav.containsValue(product_short_name))
                                 sDalianInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("大连商品交易所");
                             break;
                         case "CFFEX"://中金所
-                            if (!expired)sZhongjinInsList.put(instrument_id, quoteEntity);
+                            if (!expired) sZhongjinInsList.put(instrument_id, quoteEntity);
                             if (!sZhongjinInsListNameNav.containsValue(product_short_name))
                                 sZhongjinInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("中国金融期货交易所");
                             break;
                         case "INE"://上期能源
-                            if (!expired)sNengyuanInsList.put(instrument_id, quoteEntity);
+                            if (!expired) sNengyuanInsList.put(instrument_id, quoteEntity);
                             if (!sNengyuanInsListNameNav.containsValue(product_short_name))
                                 sNengyuanInsListNameNav.put(instrument_id, product_short_name);
                             searchEntity.setExchangeName("上海国际能源交易中心");
@@ -303,13 +302,13 @@ public class LatestFileManager {
                     searchEntity.setPy(py_leg);
                     switch (exchange_id) {
                         case "CZCE":
-                            if (!expired)sZhengzhouzuheInsList.put(instrument_id, quoteEntity);
+                            if (!expired) sZhengzhouzuheInsList.put(instrument_id, quoteEntity);
                             if (!sZhengzhouzuheInsListNameNav.containsValue(product_short_name_leg))
                                 sZhengzhouzuheInsListNameNav.put(instrument_id, product_short_name_leg);
                             searchEntity.setExchangeName("郑州商品交易所");
                             break;
                         case "DCE":
-                            if (!expired)sDalianzuheInsList.put(instrument_id, quoteEntity);
+                            if (!expired) sDalianzuheInsList.put(instrument_id, quoteEntity);
                             if (!sDalianzuheInsListNameNav.containsValue(product_short_name_leg))
                                 sDalianzuheInsListNameNav.put(instrument_id, product_short_name_leg);
                             searchEntity.setExchangeName("大连商品交易所");
@@ -473,13 +472,14 @@ public class LatestFileManager {
         }
     }
 
-    public static int setTextViewColor(String data, String pre_settlement){
-        try{
+    public static int setTextViewColor(String data, String pre_settlement) {
+        try {
             float value = Float.parseFloat(data) - Float.parseFloat(pre_settlement);
             if (value < 0) return ContextCompat.getColor(BaseApplication.getContext(), R.color.ask);
-            else if (value > 0 )return ContextCompat.getColor(BaseApplication.getContext(), R.color.bid);
+            else if (value > 0)
+                return ContextCompat.getColor(BaseApplication.getContext(), R.color.bid);
             else return ContextCompat.getColor(BaseApplication.getContext(), R.color.white);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ContextCompat.getColor(BaseApplication.getContext(), R.color.white);
         }
@@ -495,7 +495,7 @@ public class LatestFileManager {
         List<String> insList = new ArrayList<>();
         for (String ins : data) {
             insList.add(ins);
-            if (ins.contains("&") && ins.contains(" ")){
+            if (ins.contains("&") && ins.contains(" ")) {
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(ins);
                 if (searchEntity == null) continue;
                 String leg1_symbol = searchEntity.getLeg1_symbol();
@@ -513,14 +513,14 @@ public class LatestFileManager {
      * author: chenli
      * description: 计算组合部分行情
      */
-    public static QuoteEntity calculateCombineQuotePart(QuoteEntity quoteEntity){
+    public static QuoteEntity calculateCombineQuotePart(QuoteEntity quoteEntity) {
         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(quoteEntity.getInstrument_id());
         if (searchEntity == null) return quoteEntity;
         String leg1_symbol = searchEntity.getLeg1_symbol();
         String leg2_symbol = searchEntity.getLeg2_symbol();
         QuoteEntity quoteEntity_leg1 = DataManager.getInstance().getRtnData().getQuotes().get(leg1_symbol);
         QuoteEntity quoteEntity_leg2 = DataManager.getInstance().getRtnData().getQuotes().get(leg2_symbol);
-        if (quoteEntity_leg1 == null || quoteEntity_leg2 == null)return quoteEntity;
+        if (quoteEntity_leg1 == null || quoteEntity_leg2 == null) return quoteEntity;
         String last_leg1 = quoteEntity_leg1.getLast_price();
         String last_leg2 = quoteEntity_leg2.getLast_price();
         String ask_price_leg1 = quoteEntity_leg1.getAsk_price1();
@@ -561,14 +561,14 @@ public class LatestFileManager {
      * author: chenli
      * description: 计算组合完整行情
      */
-    public static QuoteEntity calculateCombineQuoteFull(QuoteEntity quoteEntity){
+    public static QuoteEntity calculateCombineQuoteFull(QuoteEntity quoteEntity) {
         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(quoteEntity.getInstrument_id());
         if (searchEntity == null) return quoteEntity;
         String leg1_symbol = searchEntity.getLeg1_symbol();
         String leg2_symbol = searchEntity.getLeg2_symbol();
         QuoteEntity quoteEntity_leg1 = DataManager.getInstance().getRtnData().getQuotes().get(leg1_symbol);
         QuoteEntity quoteEntity_leg2 = DataManager.getInstance().getRtnData().getQuotes().get(leg2_symbol);
-        if (quoteEntity_leg1 == null || quoteEntity_leg2 == null)return quoteEntity;
+        if (quoteEntity_leg1 == null || quoteEntity_leg2 == null) return quoteEntity;
         String last_leg1 = quoteEntity_leg1.getLast_price();
         String last_leg2 = quoteEntity_leg2.getLast_price();
         String ask_price_leg1 = quoteEntity_leg1.getAsk_price1();
@@ -628,17 +628,17 @@ public class LatestFileManager {
         return quoteEntity;
     }
 
-    public static Map<String, KlineEntity> getCombineLeg1KLines(String ins){
+    public static Map<String, KlineEntity> getCombineLeg1KLines(String ins) {
         Map<String, KlineEntity> klineEntities = new HashMap<>();
         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(ins);
         if (searchEntity == null) return klineEntities;
         String leg1_symbol = searchEntity.getLeg1_symbol();
         Map<String, KlineEntity> klineEntities_leg1 = DataManager.getInstance().getRtnData().getKlines().get(leg1_symbol);
-        if (klineEntities_leg1 == null)return klineEntities;
+        if (klineEntities_leg1 == null) return klineEntities;
         return klineEntities_leg1;
     }
 
-    public static Map<String, KlineEntity.DataEntity> calculateCombineKLineData(String ins, String klineType){
+    public static Map<String, KlineEntity.DataEntity> calculateCombineKLineData(String ins, String klineType) {
         Map<String, KlineEntity.DataEntity> dataEntities = new HashMap<>();
         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(ins);
         if (searchEntity == null) return dataEntities;
@@ -646,18 +646,18 @@ public class LatestFileManager {
         String leg2_symbol = searchEntity.getLeg2_symbol();
         Map<String, KlineEntity> klineEntities_leg1 = DataManager.getInstance().getRtnData().getKlines().get(leg1_symbol);
         Map<String, KlineEntity> klineEntities_leg2 = DataManager.getInstance().getRtnData().getKlines().get(leg2_symbol);
-        if (klineEntities_leg1 == null || klineEntities_leg2 == null)return dataEntities;
+        if (klineEntities_leg1 == null || klineEntities_leg2 == null) return dataEntities;
         KlineEntity klineEntity_leg1 = klineEntities_leg1.get(klineType);
         KlineEntity klineEntity_leg2 = klineEntities_leg2.get(klineType);
-        if (klineEntity_leg1 == null || klineEntity_leg2 == null)return dataEntities;
+        if (klineEntity_leg1 == null || klineEntity_leg2 == null) return dataEntities;
         Map<String, KlineEntity.DataEntity> dataEntities_leg1 = klineEntity_leg1.getData();
         Map<String, KlineEntity.DataEntity> dataEntities_leg2 = klineEntity_leg2.getData();
-        if (dataEntities_leg1.isEmpty() || dataEntities_leg2.isEmpty())return dataEntities;
+        if (dataEntities_leg1.isEmpty() || dataEntities_leg2.isEmpty()) return dataEntities;
         KlineEntity.BindingEntity bindingEntity = klineEntity_leg1.getBinding().get(leg2_symbol);
-        if (bindingEntity == null)return dataEntities;
+        if (bindingEntity == null) return dataEntities;
         Map<String, String> bindingData = bindingEntity.getBindingData();
-        if (bindingData.isEmpty())return dataEntities;
-        for (Map.Entry<String, KlineEntity.DataEntity> entry : dataEntities_leg1.entrySet()){
+        if (bindingData.isEmpty()) return dataEntities;
+        for (Map.Entry<String, KlineEntity.DataEntity> entry : dataEntities_leg1.entrySet()) {
             String key_leg1 = entry.getKey();
             String key_leg2 = bindingData.get(key_leg1);
             KlineEntity.DataEntity dataEntity_leg2 = dataEntities_leg2.get(key_leg2);
@@ -735,19 +735,17 @@ public class LatestFileManager {
     }
 
     //写数据
-    public static void writeFile(String fileName, String data){
-        try{
+    public static void writeFile(String fileName, String data) {
+        try {
 
             FileOutputStream fout = BaseApplication.getContext().openFileOutput(fileName, Context.MODE_APPEND);
 
-            byte [] bytes = data.getBytes();
+            byte[] bytes = data.getBytes();
 
             fout.write(bytes);
 
             fout.close();
-        }
-
-        catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

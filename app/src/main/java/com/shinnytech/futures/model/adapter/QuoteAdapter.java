@@ -15,13 +15,11 @@ import com.shinnytech.futures.databinding.ItemFragmentQuoteBinding;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 
 import java.util.List;
 
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
-import static com.shinnytech.futures.constants.CommonConstants.LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
 import static com.shinnytech.futures.model.engine.LatestFileManager.getUpDown;
 import static com.shinnytech.futures.model.engine.LatestFileManager.getUpDownRate;
@@ -127,7 +125,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
             if (quoteEntity == null) return;
             try {
                 String instrumentId = quoteEntity.getInstrument_id();
-                if (instrumentId == null)return;
+                if (instrumentId == null) return;
                 String instrumentName = instrumentId;
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrumentId);
                 if (searchEntity != null) instrumentName = searchEntity.getInstrumentName();
@@ -147,9 +145,9 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                 setTextColor(mBinding.quoteLatest, latest, pre_settlement);
                 if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
                     if (mSwitchChange) {
-                        setTextColor( mBinding.quoteChangePercent, askPrice1, pre_settlement);
+                        setTextColor(mBinding.quoteChangePercent, askPrice1, pre_settlement);
                     } else {
-                        setTextColor( mBinding.quoteChangePercent, bidPrice1, pre_settlement);
+                        setTextColor(mBinding.quoteChangePercent, bidPrice1, pre_settlement);
                     }
                     if (mSwitchVolume) {
                         mBinding.quoteOpenInterest.setText(quoteEntity.getAsk_volume1());
@@ -168,7 +166,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                         mBinding.quoteOpenInterest.setText(quoteEntity.getOpen_interest());
                     }
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -235,16 +233,18 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
          */
         public void setChangeTextColor(TextView textView, String data) {
             textView.setText(data);
-            if (data == null || data.equals("-")){
+            if (data == null || data.equals("-")) {
                 textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
                 return;
             }
-            try{
+            try {
                 float value = new Float(data);
-                if (value < 0) textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
-                else if (value > 0 )textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
+                if (value < 0)
+                    textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
+                else if (value > 0)
+                    textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
                 else textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
 
             }
@@ -255,19 +255,21 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
          * author: chenli
          * description: 设置最新价文字颜色
          */
-        public void setTextColor(TextView textView, String latest, String pre_settlement){
+        public void setTextColor(TextView textView, String latest, String pre_settlement) {
             textView.setText(latest);
             if (latest == null || latest.equals("-") ||
-                    pre_settlement == null || pre_settlement.equals("-")){
+                    pre_settlement == null || pre_settlement.equals("-")) {
                 textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
                 return;
             }
-            try{
+            try {
                 float value = Float.parseFloat(latest) - Float.parseFloat(pre_settlement);
-                if (value < 0) textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
-                else if (value > 0 )textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
+                if (value < 0)
+                    textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
+                else if (value > 0)
+                    textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
                 else textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
 
             }

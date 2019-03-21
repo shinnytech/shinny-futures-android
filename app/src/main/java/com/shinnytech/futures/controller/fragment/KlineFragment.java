@@ -103,6 +103,12 @@ public class KlineFragment extends BaseChartFragment {
      */
     private static final String FRAGMENT_KLINE_TYPE = "kline_type";
     public static float mScaleX = 0.0f;
+    public boolean mIsDrag;
+    /**
+     * date: 2018/11/19
+     * description: 最新价线
+     */
+    protected Map<String, LimitLine> mLatestLimitLines;
     /**
      * date: 7/9/17
      * description: 均线数据
@@ -120,13 +126,6 @@ public class KlineFragment extends BaseChartFragment {
     private int mRightIndex;
     private int mLastIndex;
     private int mBaseIndex;
-    public boolean mIsDrag;
-
-    /**
-     * date: 2018/11/19
-     * description: 最新价线
-     */
-    protected Map<String, LimitLine> mLatestLimitLines;
     private ChartEntity mChartEntity;
     private KlineEntity mKlineEntity;
     private List<Integer> mas;
@@ -358,6 +357,7 @@ public class KlineFragment extends BaseChartFragment {
 
         touchListenerTop = new View.OnTouchListener() {
             private float startX = 0.0f;
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 mDetectorTop.onTouchEvent(event);
@@ -403,6 +403,7 @@ public class KlineFragment extends BaseChartFragment {
 
         touchListenerMiddle = new View.OnTouchListener() {
             private float startX = 0.0f;
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 mDetectorMiddle.onTouchEvent(event);
@@ -460,7 +461,7 @@ public class KlineFragment extends BaseChartFragment {
                 yValue = LatestFileManager.saveScaleByPtick(yData + "", instrument_id);
                 float y = touchY - mTopChartViewBase.getHeight();
                 Highlight hl = mMiddleChartViewBase.getHighlightByTouchPoint(h.getXPx(), h.getYPx());
-                if (hl != null)hl.setDraw(h.getX(), y);
+                if (hl != null) hl.setDraw(h.getX(), y);
                 mMiddleChartViewBase.highlightValue(hl);
             }
 
@@ -483,7 +484,7 @@ public class KlineFragment extends BaseChartFragment {
                 yValue = yData + "";
                 float y = touchY + mTopChartViewBase.getHeight();
                 Highlight hl = mTopChartViewBase.getHighlightByTouchPoint(h.getXPx(), h.getYPx());
-                if (hl != null)hl.setDraw(h.getX(), y);
+                if (hl != null) hl.setDraw(h.getX(), y);
                 mTopChartViewBase.highlightValue(hl);
             }
 
@@ -515,11 +516,11 @@ public class KlineFragment extends BaseChartFragment {
                 String right_id_t = mChartEntity.getRight_id();
                 String last_id_t = mKlineEntity.getLast_id();
                 int last_index_t = Integer.parseInt(last_id_t);
-                if (last_index_t < 0)last_index_t = 0;
+                if (last_index_t < 0) last_index_t = 0;
                 int left_index_t = Integer.parseInt(left_id_t);
-                if (left_index_t < 0)left_index_t = 0;
+                if (left_index_t < 0) left_index_t = 0;
                 int right_index_t = Integer.parseInt(right_id_t);
-                if (right_index_t < 0)right_index_t = 0;
+                if (right_index_t < 0) right_index_t = 0;
                 Map<String, KlineEntity.DataEntity> dataEntities = mKlineEntity.getData();
 
                 if (right_index_t == mRightIndex && left_index_t == mLeftIndex) {
@@ -584,13 +585,13 @@ public class KlineFragment extends BaseChartFragment {
                 Map<String, KlineEntity.DataEntity> dataEntities = mKlineEntity.getData();
                 if (last_id_t == null || "-1".equals(last_id_t) || dataEntities.isEmpty()) return;
                 mBaseIndex = Integer.parseInt(left_id_t);
-                if (mBaseIndex < 0)mBaseIndex = 0;
+                if (mBaseIndex < 0) mBaseIndex = 0;
                 mLeftIndex = Integer.parseInt(left_id_t);
-                if (mLeftIndex < 0)mLeftIndex = 0;
+                if (mLeftIndex < 0) mLeftIndex = 0;
                 mRightIndex = Integer.parseInt(right_id_t);
-                if (mRightIndex < 0)mRightIndex = 0;
+                if (mRightIndex < 0) mRightIndex = 0;
                 mLastIndex = Integer.parseInt(last_id_t);
-                if (mLastIndex < 0)mLastIndex = 0;
+                if (mLastIndex < 0) mLastIndex = 0;
 
                 CombinedData topCombinedData = new CombinedData();
                 List<CandleEntry> candleEntries = new ArrayList<>();
@@ -629,7 +630,7 @@ public class KlineFragment extends BaseChartFragment {
                 mTopChartViewBase.setVisibleXRangeMinimum(10);
                 mTopChartViewBase.setVisibleXRangeMaximum(200);
                 generateLatestLine(dataEntities.get(right_id_t));
-                LogUtils.e("ScaleX"+mScaleX, true);
+                LogUtils.e("ScaleX" + mScaleX, true);
                 mTopChartViewBase.zoom(mScaleX, 1.0f, mLastIndex - mBaseIndex, 0, YAxis.AxisDependency.LEFT);
                 mTopChartViewBase.moveViewToX(mLastIndex - mBaseIndex);
                 int height = (int) mTopChartViewBase.getViewPortHandler().contentHeight();

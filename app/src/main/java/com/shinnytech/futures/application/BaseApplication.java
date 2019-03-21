@@ -15,7 +15,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -36,7 +35,6 @@ import com.lzy.okgo.model.HttpHeaders;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.ConfirmActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.service.WebSocketService;
@@ -100,6 +98,7 @@ public class BaseApplication extends Application implements ServiceConnection {
     private static WebSocketService sWebSocketService;
     private static List<String> sMDURLs = new ArrayList<>();
     private static int index = 0;
+    private static OSS ossClient;
     private boolean mServiceBound = false;
     private boolean mBackGround = false;
     private BroadcastReceiver mReceiverMarket;
@@ -107,7 +106,6 @@ public class BaseApplication extends Application implements ServiceConnection {
     private BroadcastReceiver mReceiverNetwork;
     private BroadcastReceiver mReceiverScreen;
     private MyHandler mMyHandler = new MyHandler();
-    private static OSS ossClient;
 
     public static int getIndex() {
         return index;
@@ -121,7 +119,9 @@ public class BaseApplication extends Application implements ServiceConnection {
         return sContext;
     }
 
-    public static OSS getOssClient(){return ossClient;}
+    public static OSS getOssClient() {
+        return ossClient;
+    }
 
     @NonNull
     public static WebSocketService getWebSocketService() {
@@ -167,7 +167,7 @@ public class BaseApplication extends Application implements ServiceConnection {
      * author: chenli
      * description:
      */
-    private void initTradeLog(){
+    private void initTradeLog() {
         File file = new File(CommonConstants.TRADE_FILE_NAME);
         if (!file.exists()) LogUtils.w2f("交易日志");
     }
@@ -451,7 +451,7 @@ public class BaseApplication extends Application implements ServiceConnection {
      */
     private void notifyForeground() {
         //前台
-        if (mServiceBound && mBackGround){
+        if (mServiceBound && mBackGround) {
             mBackGround = false;
             sWebSocketService.connectTD();
             sWebSocketService.connectMD(sMDURLs.get(index));
@@ -601,7 +601,8 @@ public class BaseApplication extends Application implements ServiceConnection {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 0:
-                    if (sWebSocketService != null) sWebSocketService.reConnectMD(sMDURLs.get(index));
+                    if (sWebSocketService != null)
+                        sWebSocketService.reConnectMD(sMDURLs.get(index));
                     break;
                 case 1:
                     if (sWebSocketService != null) sWebSocketService.reConnectTD();

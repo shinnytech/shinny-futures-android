@@ -10,12 +10,12 @@ import android.support.v7.widget.RecyclerView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityTradeBinding;
+import com.shinnytech.futures.model.adapter.TradeAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.TradeEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
+import com.shinnytech.futures.model.listener.TradeDiffCallback;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
-import com.shinnytech.futures.model.adapter.TradeAdapter;
-import com.shinnytech.futures.model.listener.TradeDiffCallback;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,7 +81,7 @@ public class TradeActivity extends BaseActivity {
 
     @Override
     protected void refreshUI() {
-        if (!mIsUpdate)return;
+        if (!mIsUpdate) return;
         try {
             UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
@@ -97,7 +97,7 @@ public class TradeActivity extends BaseActivity {
             diffResult.dispatchUpdatesTo(mAdapter);
             mOldData.clear();
             mOldData.addAll(mNewData);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

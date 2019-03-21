@@ -7,16 +7,16 @@ import android.util.Log;
  */
 public class AmplitudeLog {
 
+    protected static AmplitudeLog instance = new AmplitudeLog();
     private volatile boolean enableLogging = true;
     private volatile int logLevel = Log.INFO; // default log level
 
-    protected static AmplitudeLog instance = new AmplitudeLog();
+    private AmplitudeLog() {
+    } // prevent instantiation
 
     public static AmplitudeLog getLogger() {
         return instance;
     }
-
-    private AmplitudeLog() {} // prevent instantiation
 
     AmplitudeLog setEnableLogging(boolean enableLogging) {
         this.enableLogging = enableLogging;

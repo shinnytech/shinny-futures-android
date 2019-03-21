@@ -27,7 +27,6 @@ import com.shinnytech.futures.model.bean.eventbusbean.VisibilityEvent;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.utils.LogUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -51,8 +50,11 @@ import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST
  * version:
  * state:
  */
-public class BaseChartFragment extends LazyLoadFragment{
+public class BaseChartFragment extends LazyLoadFragment {
 
+    public String mFragmentType;
+    public String mKlineType;
+    public boolean mIsUpdate;
     /**
      * date: 7/9/17
      * description: 组合图
@@ -60,43 +62,36 @@ public class BaseChartFragment extends LazyLoadFragment{
     protected CombinedChart mTopChartViewBase;
     protected CombinedChart mMiddleChartViewBase;
     protected CombinedChart mBottomChartViewBase;
-
     /**
      * date: 7/9/17
      * description: 图表背景色
      */
     protected int mColorHomeBg;
-
     /**
      * date: 7/9/17
      * description: 轴线颜色
      */
     protected int mColorAxis;
-
     /**
      * date: 7/9/17
      * description: 文字颜色
      */
     protected int mColorText;
-
     /**
      * date: 7/9/17
      * description: 网格线颜色
      */
     protected int mColorGrid;
-
     /**
      * date: 7/9/17
      * description: 持仓线颜色
      */
     protected int mColorBuy;
-
     /**
      * date: 7/9/17
      * description: 挂单线颜色
      */
     protected int mColorSell;
-
     /**
      * date: 7/9/17
      * description: 判断是否显示持仓线、挂单线、均线
@@ -104,13 +99,11 @@ public class BaseChartFragment extends LazyLoadFragment{
     protected boolean mIsPosition;
     protected boolean mIsPending;
     protected boolean mIsAverage;
-
     /**
      * date: 7/9/17
      * description: 持仓线
      */
     protected Map<String, LimitLine> mPositionLimitLines;
-
     /**
      * date: 2018/11/20
      * description: 持仓线合约手数
@@ -121,13 +114,11 @@ public class BaseChartFragment extends LazyLoadFragment{
      * description: 挂单线
      */
     protected Map<String, LimitLine> mOrderLimitLines;
-
     /**
      * date: 2018/11/20
      * description: 挂单合约手数
      */
     protected Map<String, Integer> mOrderVolumes;
-
     protected DataManager sDataManager;
     protected BroadcastReceiver mReceiver;
     protected BroadcastReceiver mReceiver1;
@@ -137,10 +128,7 @@ public class BaseChartFragment extends LazyLoadFragment{
     protected SimpleDateFormat mSimpleDateFormat;
     protected SparseArray<String> xVals;
     protected int mLayoutId;
-    public String mFragmentType;
-    public String mKlineType;
     private ViewDataBinding mViewDataBinding;
-    public boolean mIsUpdate;
 
     /**
      * date: 7/9/17
@@ -266,10 +254,10 @@ public class BaseChartFragment extends LazyLoadFragment{
         mBottomChartViewBase.setHighlightPerDragEnabled(false);
 
         //切换周期时控制图表显示
-        if (sDataManager.IS_SHOW_VP_CONTENT){
+        if (sDataManager.IS_SHOW_VP_CONTENT) {
             mMiddleChartViewBase.setVisibility(View.GONE);
 //            mBottomChartViewBase.setVisibility(View.GONE);
-        }else {
+        } else {
             mMiddleChartViewBase.setVisibility(View.VISIBLE);
 //            mBottomChartViewBase.setVisibility(View.VISIBLE);
         }
@@ -625,10 +613,10 @@ public class BaseChartFragment extends LazyLoadFragment{
      * author: chenli
      * description: 获取组合两腿
      */
-    private String getIns(String ins){
+    private String getIns(String ins) {
         if (ins.contains("&") && ins.contains(" ")) {
             SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(ins);
-            if (searchEntity != null){
+            if (searchEntity != null) {
                 String leg1_symbol = searchEntity.getLeg1_symbol();
                 String leg2_symbol = searchEntity.getLeg2_symbol();
                 ins = leg1_symbol + "," + leg2_symbol;
@@ -668,10 +656,10 @@ public class BaseChartFragment extends LazyLoadFragment{
      */
     @Subscribe
     public void onEventBase(VisibilityEvent data) {
-        if (data.isVisible()){
+        if (data.isVisible()) {
             mMiddleChartViewBase.setVisibility(View.VISIBLE);
 //            mBottomChartViewBase.setVisibility(View.VISIBLE);
-        }else {
+        } else {
             mMiddleChartViewBase.setVisibility(View.GONE);
 //            mBottomChartViewBase.setVisibility(View.GONE);
         }

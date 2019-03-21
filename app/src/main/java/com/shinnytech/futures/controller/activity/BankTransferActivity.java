@@ -12,14 +12,14 @@ import android.widget.ArrayAdapter;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityBankTransferBinding;
+import com.shinnytech.futures.model.adapter.BankTransferAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.BankEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.TransferEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
+import com.shinnytech.futures.model.listener.TransferDiffCallback;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
-import com.shinnytech.futures.model.adapter.BankTransferAdapter;
-import com.shinnytech.futures.model.listener.TransferDiffCallback;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -107,7 +107,7 @@ public class BankTransferActivity extends BaseActivity {
                 String amount = mBinding.etTransferMoney.getText().toString();
                 String currency = (String) mBinding.spinnerCurrency.getSelectedItem();
                 try {
-                    float amountF = abs(Float.parseFloat(amount)) ;
+                    float amountF = abs(Float.parseFloat(amount));
                     BaseApplication.getWebSocketService().sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
                 } catch (Exception e) {
                     ToastNotificationUtils.showToast(sContext, "输入金额错误！");
@@ -137,7 +137,7 @@ public class BankTransferActivity extends BaseActivity {
 
     @Override
     protected void refreshUI() {
-        if (mBankSpinnerAdapter.isEmpty())refreshBank();
+        if (mBankSpinnerAdapter.isEmpty()) refreshBank();
         if (mCurrencySpinnerAdapter.isEmpty()) refreshCurrency();
         if (mIsUpdate) refreshTransfer();
     }
@@ -169,7 +169,7 @@ public class BankTransferActivity extends BaseActivity {
 
     }
 
-    private void refreshCurrency(){
+    private void refreshCurrency() {
         UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
         if (userEntity == null) return;
         mCurrencySpinnerAdapter.clear();
@@ -198,7 +198,7 @@ public class BankTransferActivity extends BaseActivity {
             diffResult.dispatchUpdatesTo(mAdapter);
             mOldData.clear();
             mOldData.addAll(mNewData);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

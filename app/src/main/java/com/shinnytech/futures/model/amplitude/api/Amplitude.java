@@ -159,13 +159,17 @@ public class Amplitude {
      * Start session.
      */
     @Deprecated
-    public static void startSession() { return; }
+    public static void startSession() {
+        return;
+    }
 
     /**
      * End session.
      */
     @Deprecated
-    public static void endSession() { return; }
+    public static void endSession() {
+        return;
+    }
 
     /**
      * Log revenue.
@@ -200,7 +204,7 @@ public class Amplitude {
      */
     @Deprecated
     public static void logRevenue(String productId, int quantity, double price, String receipt,
-            String receiptSignature) {
+                                  String receiptSignature) {
         getInstance().logRevenue(productId, quantity, price, receipt, receiptSignature);
     }
 

@@ -9,7 +9,6 @@ import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -58,17 +57,10 @@ import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -78,9 +70,7 @@ import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
-import static com.shinnytech.futures.constants.CommonConstants.LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN_JUMP_TO_LOG_IN_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.LOGOUT;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY;
@@ -96,6 +86,7 @@ import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
  */
 
 public class MainActivityPresenter implements NavigationView.OnNavigationItemSelectedListener, ViewPager.OnPageChangeListener, View.OnClickListener, DrawerLayout.DrawerListener {
+    public final NavigationRightAdapter mNavigationRightAdapter;
     private final Handler mDrawerActionHandler = new Handler();
     private final ViewPagerFragmentAdapter mViewPagerFragmentAdapter;
     private ActivityMainDrawerBinding mBinding;
@@ -107,7 +98,6 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
     private Map<String, String> mInsListNameNav = new TreeMap<>();
     private String mIns;
     private int mCurItemId;
-    public final NavigationRightAdapter mNavigationRightAdapter;
 
     public MainActivityPresenter(final MainActivity mainActivity, Context context,
                                  ActivityMainDrawerBinding binding, Toolbar toolbar, TextView toolbarTitle) {
@@ -366,7 +356,8 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                     case CommonConstants.OPEN_ACCOUNT:
 //                        Intent intentOpenAccount = new Intent(mMainActivity, OpenAccountActivity.class);
                         Intent intentOpenAccount = mMainActivity.getPackageManager().getLaunchIntentForPackage("com.cfmmc.app.sjkh");
-                        if (intentOpenAccount != null) mMainActivity.startActivity(intentOpenAccount);
+                        if (intentOpenAccount != null)
+                            mMainActivity.startActivity(intentOpenAccount);
                         else {
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://appficaos.cfmmc.com/apps/download.html"));
                             mMainActivity.startActivity(browserIntent);
@@ -406,7 +397,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
 
             LogUtils.e("版本大于 N ，开始使用 fileProvider 进行安装", true);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            Uri contentUri = FileProvider.getUriForFile(sContext, BuildConfig.APPLICATION_ID+".fileProvider", file);
+            Uri contentUri = FileProvider.getUriForFile(sContext, BuildConfig.APPLICATION_ID + ".fileProvider", file);
             intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
         } else {
             LogUtils.e("正常进行安装", true);

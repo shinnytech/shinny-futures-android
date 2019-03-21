@@ -1,7 +1,6 @@
 package com.shinnytech.futures.controller.activity;
 
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
@@ -20,7 +19,7 @@ public class AboutActivity extends BaseActivity {
 
     @Override
     protected void initData() {
-        ((TextView)findViewById(R.id.version)).setText(DataManager.getInstance().APP_VERSION);
+        ((TextView) findViewById(R.id.version)).setText(DataManager.getInstance().APP_VERSION);
     }
 
     @Override

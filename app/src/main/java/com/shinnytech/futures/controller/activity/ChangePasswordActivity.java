@@ -18,6 +18,7 @@ import com.shinnytech.futures.databinding.ActivityChangePasswordBinding;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import java.lang.ref.WeakReference;
+
 import static com.shinnytech.futures.constants.CommonConstants.PASSWORD;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_CHANGE_SUCCESS;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
@@ -38,7 +39,8 @@ public class ChangePasswordActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (mReceiverChange != null)LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverChange);
+        if (mReceiverChange != null)
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverChange);
     }
 
     @Override
@@ -84,9 +86,9 @@ public class ChangePasswordActivity extends BaseActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.length() == 0){
+                if (s.length() == 0) {
                     mBinding.deleteOldPassword.setVisibility(View.INVISIBLE);
-                }else {
+                } else {
                     mBinding.deleteOldPassword.setVisibility(View.VISIBLE);
                 }
 
@@ -106,9 +108,9 @@ public class ChangePasswordActivity extends BaseActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.length() == 0){
+                if (s.length() == 0) {
                     mBinding.deleteNewPassword.setVisibility(View.INVISIBLE);
-                }else {
+                } else {
                     mBinding.deleteNewPassword.setVisibility(View.VISIBLE);
                 }
 
@@ -128,9 +130,9 @@ public class ChangePasswordActivity extends BaseActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.length() == 0){
+                if (s.length() == 0) {
                     mBinding.deleteConfirmPassword.setVisibility(View.INVISIBLE);
-                }else {
+                } else {
                     mBinding.deleteConfirmPassword.setVisibility(View.VISIBLE);
                 }
 
@@ -140,9 +142,9 @@ public class ChangePasswordActivity extends BaseActivity {
         mBinding.etOldPassword.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus){
+                if (hasFocus) {
                     mBinding.llOldPassword.setBackgroundResource(R.drawable.rectangle_border_focused);
-                }else {
+                } else {
                     mBinding.llOldPassword.setBackgroundResource(R.drawable.rectangle_border);
                 }
             }
@@ -151,9 +153,9 @@ public class ChangePasswordActivity extends BaseActivity {
         mBinding.etNewPassword.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus){
+                if (hasFocus) {
                     mBinding.llNewPassword.setBackgroundResource(R.drawable.rectangle_border_focused);
-                }else {
+                } else {
                     mBinding.llNewPassword.setBackgroundResource(R.drawable.rectangle_border);
                 }
             }
@@ -162,9 +164,9 @@ public class ChangePasswordActivity extends BaseActivity {
         mBinding.etConfirmNewPassword.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus){
+                if (hasFocus) {
                     mBinding.llConfirmNewPassword.setBackgroundResource(R.drawable.rectangle_border_focused);
-                }else {
+                } else {
                     mBinding.llConfirmNewPassword.setBackgroundResource(R.drawable.rectangle_border);
                 }
             }
@@ -174,29 +176,29 @@ public class ChangePasswordActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
 
-                if (BaseApplication.getWebSocketService() == null){
+                if (BaseApplication.getWebSocketService() == null) {
                     ToastNotificationUtils.showToast(sContext, "连接断开，请重启");
                     return;
                 }
 
                 String old_password = mBinding.etOldPassword.getText().toString();
-                if (old_password == null || old_password.isEmpty()){
+                if (old_password == null || old_password.isEmpty()) {
                     ToastNotificationUtils.showToast(sContext, "旧密码不能为空");
                     return;
                 }
 
                 String new_password = mBinding.etNewPassword.getText().toString();
-                if (new_password == null || new_password.isEmpty()){
+                if (new_password == null || new_password.isEmpty()) {
                     ToastNotificationUtils.showToast(sContext, "新密码不能为空");
                     return;
                 }
                 String confirm_new_password = mBinding.etConfirmNewPassword.getText().toString();
-                if (confirm_new_password == null || confirm_new_password.isEmpty()){
+                if (confirm_new_password == null || confirm_new_password.isEmpty()) {
                     ToastNotificationUtils.showToast(sContext, "请确认新密码");
                     return;
                 }
 
-                if (!confirm_new_password.equals(new_password)){
+                if (!confirm_new_password.equals(new_password)) {
                     ToastNotificationUtils.showToast(sContext, "新密码确认不一致");
                     return;
                 }

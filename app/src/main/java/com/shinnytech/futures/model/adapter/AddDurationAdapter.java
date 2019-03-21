@@ -91,36 +91,36 @@ public class AddDurationAdapter extends RecyclerView.Adapter<AddDurationAdapter.
         public void update() {
             if (mData == null || mData.size() == 0) return;
             int index = getLayoutPosition();
-            if (index < mData.size()){
+            if (index < mData.size()) {
                 String data = mData.get(index);
                 mBinding.tvDuration.setText(data);
-                if (mDataPre.contains(data)){
+                if (mDataPre.contains(data)) {
                     mBinding.tvDuration.setBackgroundColor(ContextCompat.getColor(sContext, R.color.launch_light));
                     mBinding.tvDuration.setTag("1");
                 }
-            }else if (index == mData.size()){
+            } else if (index == mData.size()) {
                 mBinding.tvDuration.setText("✚");
             }
         }
 
-        public void initEvent(){
+        public void initEvent() {
             mBinding.tvDuration.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     int index = getLayoutPosition();
-                    if (index < mData.size()){
+                    if (index < mData.size()) {
                         String tag = (String) mBinding.tvDuration.getTag();
-                        if ("0".equals(tag)){
+                        if ("0".equals(tag)) {
                             mBinding.tvDuration.setBackgroundColor(ContextCompat.getColor(sContext, R.color.launch_light));
                             mBinding.tvDuration.setTag("1");
                             mDataPre.add(mBinding.tvDuration.getText().toString());
-                        }else if ("1".equals(tag)){
+                        } else if ("1".equals(tag)) {
                             mBinding.tvDuration.setBackgroundColor(ContextCompat.getColor(sContext, R.color.black_light));
                             mBinding.tvDuration.setTag("0");
                             mDataPre.remove(mBinding.tvDuration.getText().toString());
                         }
                         SPUtils.putAndApply(BaseApplication.getContext(), CommonConstants.CONFIG_KLINE_DURATION_DEFAULT, TextUtils.join(",", mDataPre));
-                    }else if (index == mData.size()){
+                    } else if (index == mData.size()) {
                         if (mDialogDuration == null) {
                             mDialogDuration = new Dialog(sContext, R.style.Theme_Light_Dialog);
                             View viewDialog = View.inflate(sContext, R.layout.view_add_kline_duration, null);

@@ -8,21 +8,21 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- *  <h1>Identify</h1>
- *  Identify objects are a wrapper for user property operations. Each method adds a user
- *  property operation to the Identify object, and returns the same Identify object, allowing
- *  you to chain multiple method calls together, for example:
- *  {@code Identify identify = new Identify().set("color", "green").add("karma", 1);}
- *  <br><br>
- *  <b>Note:</b> if the same user property is used
- *  in multiple operations on a single Identify object, only the first operation on that
- *  property will be saved, and the rest will be ignored.
- *  <br><br>
- *  After creating an Identify object and setting the desired operations, send it to Amplitude
- *  servers by calling {@code Amplitude.getInstance().identify(identify);} and pass in the object.
+ * <h1>Identify</h1>
+ * Identify objects are a wrapper for user property operations. Each method adds a user
+ * property operation to the Identify object, and returns the same Identify object, allowing
+ * you to chain multiple method calls together, for example:
+ * {@code Identify identify = new Identify().set("color", "green").add("karma", 1);}
+ * <br><br>
+ * <b>Note:</b> if the same user property is used
+ * in multiple operations on a single Identify object, only the first operation on that
+ * property will be saved, and the rest will be ignored.
+ * <br><br>
+ * After creating an Identify object and setting the desired operations, send it to Amplitude
+ * servers by calling {@code Amplitude.getInstance().identify(identify);} and pass in the object.
  *
- *  @see <a href="https://github.com/amplitude/Amplitude-Android#user-properties-and-user-property-operations">
- *      Android SDK README</a> for more information on the Identify API and user property operations.
+ * @see <a href="https://github.com/amplitude/Amplitude-Android#user-properties-and-user-property-operations">
+ * Android SDK README</a> for more information on the Identify API and user property operations.
  */
 public class Identify {
 
@@ -123,7 +123,7 @@ public class Identify {
      * property will be ignored.
      *
      * @param property the user property to setOnce
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify setOnce(String property, JSONArray values) {
@@ -136,7 +136,7 @@ public class Identify {
      * property will be ignored.
      *
      * @param property the user property to setOnce
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify setOnce(String property, JSONObject values) {
@@ -149,7 +149,7 @@ public class Identify {
      * property will be ignored.
      *
      * @param property the user property to setOnce
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify setOnce(String property, boolean[] values) {
@@ -162,7 +162,7 @@ public class Identify {
      * property will be ignored.
      *
      * @param property the user property to setOnce
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify setOnce(String property, double[] values) {
@@ -175,7 +175,7 @@ public class Identify {
      * property will be ignored.
      *
      * @param property the user property to setOnce
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify setOnce(String property, float[] values) {
@@ -188,7 +188,7 @@ public class Identify {
      * property will be ignored.
      *
      * @param property the user property to setOnce
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify setOnce(String property, int[] values) {
@@ -201,7 +201,7 @@ public class Identify {
      * property will be ignored.
      *
      * @param property the user property to setOnce
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify setOnce(String property, long[] values) {
@@ -214,7 +214,7 @@ public class Identify {
      * property will be ignored.
      *
      * @param property the user property to setOnce
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify setOnce(String property, String[] values) {
@@ -299,7 +299,7 @@ public class Identify {
      * Sets a user property value. Existing values for that user property will be overwritten.
      *
      * @param property the user property to set
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify set(String property, JSONObject values) {
@@ -311,7 +311,7 @@ public class Identify {
      * Sets a user property value. Existing values for that user property will be overwritten.
      *
      * @param property the user property to set
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify set(String property, JSONArray values) {
@@ -323,7 +323,7 @@ public class Identify {
      * Sets a user property value. Existing values for that user property will be overwritten.
      *
      * @param property the user property to set
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify set(String property, boolean[] values) {
@@ -335,7 +335,7 @@ public class Identify {
      * Sets a user property value. Existing values for that user property will be overwritten.
      *
      * @param property the user property to set
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify set(String property, double[] values) {
@@ -347,7 +347,7 @@ public class Identify {
      * Sets a user property value. Existing values for that user property will be overwritten.
      *
      * @param property the user property to set
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify set(String property, float[] values) {
@@ -359,7 +359,7 @@ public class Identify {
      * Sets a user property value. Existing values for that user property will be overwritten.
      *
      * @param property the user property to set
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify set(String property, int[] values) {
@@ -371,7 +371,7 @@ public class Identify {
      * Sets a user property value. Existing values for that user property will be overwritten.
      *
      * @param property the user property to set
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify set(String property, long[] values) {
@@ -383,7 +383,7 @@ public class Identify {
      * Sets a user property value. Existing values for that user property will be overwritten.
      *
      * @param property the user property to set
-     * @param values    the value of the user property
+     * @param values   the value of the user property
      * @return the same Identify object
      */
     public Identify set(String property, String[] values) {
@@ -469,7 +469,7 @@ public class Identify {
      * negative to decrement a user property value.
      *
      * @param property the user property to increment
-     * @param values    the value (can be negative) to increment. Server-side we flatten
+     * @param values   the value (can be negative) to increment. Server-side we flatten
      *                 dictionaries and apply add to each flattened property value.
      * @return the same Identify object
      */
@@ -576,7 +576,7 @@ public class Identify {
      * a list with the new value(s) appended.
      *
      * @param property the user property property to which to append
-     * @param values    the values being appended
+     * @param values   the values being appended
      * @return the same Identify object
      */
     public Identify append(String property, JSONArray values) {
@@ -591,8 +591,8 @@ public class Identify {
      * a list with the new value(s) appended.
      *
      * @param property the user property property to which to append
-     * @param values    the values being appended. Server-side we flatten dictionaries and apply
-     *                  append to each flattened property.
+     * @param values   the values being appended. Server-side we flatten dictionaries and apply
+     *                 append to each flattened property.
      * @return the same Identify object
      */
     public Identify append(String property, JSONObject values) {
@@ -607,7 +607,7 @@ public class Identify {
      * a list with the new value(s) appended.
      *
      * @param property the user property property to which to append
-     * @param values    the values being appended
+     * @param values   the values being appended
      * @return the same Identify object
      */
     public Identify append(String property, boolean[] values) {
@@ -622,7 +622,7 @@ public class Identify {
      * a list with the new value(s) appended.
      *
      * @param property the user property property to which to append
-     * @param values    the values being appended
+     * @param values   the values being appended
      * @return the same Identify object
      */
     public Identify append(String property, double[] values) {
@@ -637,7 +637,7 @@ public class Identify {
      * a list with the new value(s) appended.
      *
      * @param property the user property property to which to append
-     * @param values    the values being appended
+     * @param values   the values being appended
      * @return the same Identify object
      */
     public Identify append(String property, float[] values) {
@@ -652,7 +652,7 @@ public class Identify {
      * a list with the new value(s) appended.
      *
      * @param property the user property property to which to append
-     * @param values    the values being appended
+     * @param values   the values being appended
      * @return the same Identify object
      */
     public Identify append(String property, int[] values) {
@@ -667,7 +667,7 @@ public class Identify {
      * a list with the new value(s) appended.
      *
      * @param property the user property property to which to append
-     * @param values    the values being appended
+     * @param values   the values being appended
      * @return the same Identify object
      */
     public Identify append(String property, long[] values) {
@@ -682,7 +682,7 @@ public class Identify {
      * a list with the new value(s) appended.
      *
      * @param property the user property property to which to append
-     * @param values    the values being appended
+     * @param values   the values being appended
      * @return the same Identify object
      */
     public Identify append(String property, String[] values) {
@@ -795,7 +795,7 @@ public class Identify {
      * new value(s) prepended.
      *
      * @param property the user property to which to append
-     * @param values    the value being prepended
+     * @param values   the value being prepended
      * @return the same Identify object
      */
     public Identify prepend(String property, JSONArray values) {
@@ -811,8 +811,8 @@ public class Identify {
      * new value(s) prepended.
      *
      * @param property the user property to which to append
-     * @param values    the values being prepended. Server-side we flatten dictionaries and apply
-     *                  prepend to each flattened property.
+     * @param values   the values being prepended. Server-side we flatten dictionaries and apply
+     *                 prepend to each flattened property.
      * @return the same Identify object
      */
     public Identify prepend(String property, JSONObject values) {
@@ -828,7 +828,7 @@ public class Identify {
      * new value(s) prepended.
      *
      * @param property the user property to which to append
-     * @param values    the values being prepended
+     * @param values   the values being prepended
      * @return the same Identify object
      */
     public Identify prepend(String property, boolean[] values) {
@@ -844,7 +844,7 @@ public class Identify {
      * new value(s) prepended.
      *
      * @param property the user property to which to append
-     * @param values    the values being prepended
+     * @param values   the values being prepended
      * @return the same Identify object
      */
     public Identify prepend(String property, double[] values) {
@@ -860,7 +860,7 @@ public class Identify {
      * new value(s) prepended.
      *
      * @param property the user property to which to append
-     * @param values    the values being prepended
+     * @param values   the values being prepended
      * @return the same Identify object
      */
     public Identify prepend(String property, float[] values) {
@@ -876,7 +876,7 @@ public class Identify {
      * new value(s) prepended.
      *
      * @param property the user property to which to append
-     * @param values    the values being prepended
+     * @param values   the values being prepended
      * @return the same Identify object
      */
     public Identify prepend(String property, int[] values) {
@@ -892,7 +892,7 @@ public class Identify {
      * new value(s) prepended.
      *
      * @param property the user property to which to append
-     * @param values    the values being prepended
+     * @param values   the values being prepended
      * @return the same Identify object
      */
     public Identify prepend(String property, long[] values) {
@@ -908,7 +908,7 @@ public class Identify {
      * new value(s) prepended.
      *
      * @param property the user property to which to append
-     * @param values    the values being prepended
+     * @param values   the values being prepended
      * @return the same Identify object
      */
     public Identify prepend(String property, String[] values) {
@@ -939,8 +939,8 @@ public class Identify {
         if (userPropertiesOperations.length() > 0) {
             if (!userProperties.contains(Constants.AMP_OP_CLEAR_ALL)) {
                 AmplitudeLog.getLogger().w(TAG, String.format(
-                   "Need to send $clearAll on its own Identify object without any other " +
-                   "operations, ignoring $clearAll"
+                        "Need to send $clearAll on its own Identify object without any other " +
+                                "operations, ignoring $clearAll"
                 ));
             }
             return this;
@@ -958,16 +958,16 @@ public class Identify {
     private void addToUserProperties(String operation, String property, Object value) {
         if (Utils.isEmptyString(property)) {
             AmplitudeLog.getLogger().w(TAG, String.format(
-               "Attempting to perform operation %s with a null or empty string property, ignoring",
-                operation
+                    "Attempting to perform operation %s with a null or empty string property, ignoring",
+                    operation
             ));
             return;
         }
 
         if (value == null) {
             AmplitudeLog.getLogger().w(TAG, String.format(
-                "Attempting to perform operation %s with null value for property %s, ignoring",
-                operation, property
+                    "Attempting to perform operation %s with null value for property %s, ignoring",
+                    operation, property
             ));
             return;
         }
@@ -975,8 +975,8 @@ public class Identify {
         // check that clearAll wasn't already used in this Identify
         if (userPropertiesOperations.has(Constants.AMP_OP_CLEAR_ALL)) {
             AmplitudeLog.getLogger().w(TAG, String.format(
-                "This Identify already contains a $clearAll operation, ignoring operation %s",
-                operation
+                    "This Identify already contains a $clearAll operation, ignoring operation %s",
+                    operation
             ));
             return;
         }
@@ -984,8 +984,8 @@ public class Identify {
         // check if property already used in previous operation
         if (userProperties.contains(property)) {
             AmplitudeLog.getLogger().w(TAG, String.format(
-                "Already used property %s in previous operation, ignoring operation %s",
-                property, operation
+                    "Already used property %s in previous operation, ignoring operation %s",
+                    property, operation
             ));
             return;
         }
@@ -1014,7 +1014,7 @@ public class Identify {
                 array.put(value);
             } catch (JSONException e) {
                 AmplitudeLog.getLogger().e(TAG, String.format(
-                    "Error converting float %f to JSON: %s", value, e.toString()
+                        "Error converting float %f to JSON: %s", value, e.toString()
                 ));
             }
         }
@@ -1028,7 +1028,7 @@ public class Identify {
                 array.put(value);
             } catch (JSONException e) {
                 AmplitudeLog.getLogger().e(TAG, String.format(
-                    "Error converting double %d to JSON: %s", value, e.toString()
+                        "Error converting double %d to JSON: %s", value, e.toString()
                 ));
             }
         }
@@ -1077,8 +1077,8 @@ public class Identify {
      */
     public Identify setOnce(String property, Object value) {
         AmplitudeLog.getLogger().w(
-            TAG,
-            "This version of setOnce is deprecated. Please use one with a different signature."
+                TAG,
+                "This version of setOnce is deprecated. Please use one with a different signature."
         );
         return this;
     }
@@ -1094,16 +1094,17 @@ public class Identify {
      */
     public Identify set(String property, Object value) {
         AmplitudeLog.getLogger().w(
-            TAG,
-            "This version of set is deprecated. Please use one with a different signature."
+                TAG,
+                "This version of set is deprecated. Please use one with a different signature."
         );
         return this;
     }
 
     /**
      * Public method that exposes the user property operations JSON blob.
-      * @return a copy of the User Property Operations JSONObject. If copying fails, returns
-     *      an empty JSONObject
+     *
+     * @return a copy of the User Property Operations JSONObject. If copying fails, returns
+     * an empty JSONObject
      */
     public JSONObject getUserPropertiesOperations() {
         try {

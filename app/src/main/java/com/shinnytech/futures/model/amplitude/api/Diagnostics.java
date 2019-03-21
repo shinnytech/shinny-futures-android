@@ -29,25 +29,16 @@ public class Diagnostics {
 
     public static final int DIAGNOSTIC_EVENT_MAX_COUNT = 50; // limit memory footprint
     public static final int DIAGNOSTIC_EVENT_MIN_COUNT = 5;
-
+    protected static Diagnostics instance;
     volatile boolean enabled;
-    private volatile String apiKey;
-    private volatile OkHttpClient httpClient;
-    private volatile String deviceId;
     int diagnosticEventMaxCount;
     String url;
     WorkerThread diagnosticThread = new WorkerThread("diagnosticThread");
     List<String> unsentErrorStrings;
     Map<String, JSONObject> unsentErrors;
-
-    protected static Diagnostics instance;
-
-    static synchronized Diagnostics getLogger() {
-        if (instance == null) {
-            instance = new Diagnostics();
-        }
-        return instance;
-    }
+    private volatile String apiKey;
+    private volatile OkHttpClient httpClient;
+    private volatile String deviceId;
 
     private Diagnostics() {
         enabled = false;
@@ -56,6 +47,13 @@ public class Diagnostics {
         unsentErrorStrings = new ArrayList<String>(diagnosticEventMaxCount);
         unsentErrors = new HashMap<String, JSONObject>(diagnosticEventMaxCount);
         diagnosticThread.start();
+    }
+
+    static synchronized Diagnostics getLogger() {
+        if (instance == null) {
+            instance = new Diagnostics();
+        }
+        return instance;
     }
 
     Diagnostics enableLogging(OkHttpClient httpClient, String apiKey, String deviceId) {
@@ -133,13 +131,15 @@ public class Diagnostics {
                         unsentErrors.put(error, event);
                         unsentErrorStrings.add(error);
 
-                    } catch (JSONException e) {}
+                    } catch (JSONException e) {
+                    }
 
                 } else {
                     int count = event.optInt("count", 0);
                     try {
                         event.put("count", count + 1);
-                    } catch (JSONException e) {}
+                    } catch (JSONException e) {
+                    }
                 }
             }
         });

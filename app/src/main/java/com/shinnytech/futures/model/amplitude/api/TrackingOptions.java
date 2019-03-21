@@ -8,17 +8,15 @@ import java.util.Set;
 
 public class TrackingOptions {
 
-    private static String[] SERVER_SIDE_PROPERTIES = {
-        Constants.AMP_TRACKING_OPTION_CITY,
-        Constants.AMP_TRACKING_OPTION_COUNTRY,
-        Constants.AMP_TRACKING_OPTION_DMA,
-        Constants.AMP_TRACKING_OPTION_IP_ADDRESS,
-        Constants.AMP_TRACKING_OPTION_LAT_LNG,
-        Constants.AMP_TRACKING_OPTION_REGION,
-    };
-
     public static final String TAG = "com.amplitude.api.TrackingOptions";
-
+    private static String[] SERVER_SIDE_PROPERTIES = {
+            Constants.AMP_TRACKING_OPTION_CITY,
+            Constants.AMP_TRACKING_OPTION_COUNTRY,
+            Constants.AMP_TRACKING_OPTION_DMA,
+            Constants.AMP_TRACKING_OPTION_IP_ADDRESS,
+            Constants.AMP_TRACKING_OPTION_LAT_LNG,
+            Constants.AMP_TRACKING_OPTION_REGION,
+    };
     Set<String> disabledFields = new HashSet<String>();
 
     public TrackingOptions disableAdid() {

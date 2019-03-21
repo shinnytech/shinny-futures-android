@@ -29,6 +29,7 @@ public class ParaChangeActivity extends BaseActivity {
         mTitle = CommonConstants.PARA_CHANGE;
         super.onCreate(savedInstanceState);
     }
+
     @Override
     protected void initData() {
         mBinding = (ActivityParaChangeBinding) mViewDataBinding;
@@ -44,7 +45,7 @@ public class ParaChangeActivity extends BaseActivity {
         mBinding.paraNav.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                switch (checkedId){
+                switch (checkedId) {
                     case R.id.para_ma:
                         String data = (String) SPUtils.get(sContext, CommonConstants.CONFIG_PARA_MA, CommonConstants.PARA_MA);
                         mParaContentAdapter.setData(data.split(","));
@@ -68,23 +69,23 @@ public class ParaChangeActivity extends BaseActivity {
                 String[] mData = mParaContentAdapter.getData();
                 if (mData == null || mData.length == 0) return;
                 List<String> paras = new ArrayList<>();
-                for (int i = 0; i < mData.length; i++){
+                for (int i = 0; i < mData.length; i++) {
                     try {
                         ParaContentAdapter.ItemViewHolder itemViewHolder = (ParaContentAdapter.ItemViewHolder)
                                 mBinding.contentRv.findViewHolderForAdapterPosition(i);
                         String data = itemViewHolder.mBinding.edValue.getText().toString();
                         int value = Integer.parseInt(data);
-                        if (value < 0 && id == R.id.para_ma){
+                        if (value < 0 && id == R.id.para_ma) {
                             ToastNotificationUtils.showToast(BaseApplication.getContext(), "参数需要大于等于0");
                             return;
                         }
                         paras.add(data);
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         ToastNotificationUtils.showToast(BaseApplication.getContext(), "输入参数需为整数");
                         return;
                     }
                 }
-                switch (id){
+                switch (id) {
                     case R.id.para_ma:
                         SPUtils.putAndApply(BaseApplication.getContext(), CommonConstants.CONFIG_PARA_MA, TextUtils.join(",", paras));
                         break;
@@ -102,7 +103,7 @@ public class ParaChangeActivity extends BaseActivity {
         mBinding.paraReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switch (mBinding.paraNav.getCheckedRadioButtonId()){
+                switch (mBinding.paraNav.getCheckedRadioButtonId()) {
                     case R.id.para_ma:
                         mParaContentAdapter.setData(CommonConstants.PARA_MA.split(","));
                         SPUtils.putAndApply(BaseApplication.getContext(), CommonConstants.CONFIG_PARA_MA, CommonConstants.PARA_MA);

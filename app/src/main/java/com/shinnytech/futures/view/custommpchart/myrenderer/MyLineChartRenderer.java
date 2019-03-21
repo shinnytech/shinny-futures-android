@@ -21,7 +21,7 @@ import java.util.List;
 class MyLineChartRenderer extends LineChartRenderer {
 
     public MyLineChartRenderer(LineDataProvider chart, ChartAnimator animator,
-                                 ViewPortHandler viewPortHandler) {
+                               ViewPortHandler viewPortHandler) {
         super(chart, animator, viewPortHandler);
     }
 
@@ -121,8 +121,8 @@ class MyLineChartRenderer extends LineChartRenderer {
                         Utils.drawImage(
                                 c,
                                 icon,
-                                (int)(x + iconsOffset.x),
-                                (int)(y + iconsOffset.y),
+                                (int) (x + iconsOffset.x),
+                                (int) (y + iconsOffset.y),
                                 icon.getIntrinsicWidth(),
                                 icon.getIntrinsicHeight());
                     }

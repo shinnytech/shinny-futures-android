@@ -34,7 +34,7 @@ public class SettingAdapter extends RecyclerView.Adapter<SettingAdapter.ItemView
         this.mData = data;
     }
 
-    public void setSettingItemClickListener(SettingItemClickListener settingItemClickListener){
+    public void setSettingItemClickListener(SettingItemClickListener settingItemClickListener) {
         this.mSettingItemClickListener = settingItemClickListener;
     }
 
@@ -120,18 +120,19 @@ public class SettingAdapter extends RecyclerView.Adapter<SettingAdapter.ItemView
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.setting_item:
-                    if (mBinding.settingToggle.getVisibility() == View.VISIBLE){
-                        if (mBinding.settingToggle.isChecked()) mBinding.settingToggle.setChecked(false);
+                    if (mBinding.settingToggle.getVisibility() == View.VISIBLE) {
+                        if (mBinding.settingToggle.isChecked())
+                            mBinding.settingToggle.setChecked(false);
                         else mBinding.settingToggle.setChecked(true);
                         saveSettingConfig();
-                    }else {
-                        if (mSettingItemClickListener != null){
+                    } else {
+                        if (mSettingItemClickListener != null) {
                             mSettingItemClickListener.onJump(mBinding.content.getText().toString());
                         }
                     }
                     break;
                 case R.id.setting_jump:
-                    if (mSettingItemClickListener != null){
+                    if (mSettingItemClickListener != null) {
                         mSettingItemClickListener.onJump(mBinding.content.getText().toString());
                     }
                     break;
@@ -143,8 +144,8 @@ public class SettingAdapter extends RecyclerView.Adapter<SettingAdapter.ItemView
             }
         }
 
-        public void saveSettingConfig(){
-            switch (mBinding.content.getText().toString()){
+        public void saveSettingConfig() {
+            switch (mBinding.content.getText().toString()) {
                 case CommonConstants.ORDER_CONFIRM:
                     SPUtils.putAndApply(sContext, CommonConstants.CONFIG_ORDER_CONFIRM, mBinding.settingToggle.isChecked());
                     break;

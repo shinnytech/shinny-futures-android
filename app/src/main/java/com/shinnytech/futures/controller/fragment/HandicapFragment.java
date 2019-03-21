@@ -7,23 +7,20 @@ import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.databinding.FragmentHandicapBinding;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.CloneUtils;
-import com.shinnytech.futures.utils.LogUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -52,8 +49,8 @@ public class HandicapFragment extends LazyLoadFragment {
      */
     private void refreshUI() {
         QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
-        if (quoteEntity == null)return;
-        if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")){
+        if (quoteEntity == null) return;
+        if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")) {
             quoteEntity = CloneUtils.clone(quoteEntity);
             quoteEntity = LatestFileManager.calculateCombineQuoteFull(quoteEntity);
         }
@@ -66,7 +63,7 @@ public class HandicapFragment extends LazyLoadFragment {
      * author: chenli
      * description: 设置价格颜色
      */
-    private void setPriceColor(QuoteEntity quoteEntity){
+    private void setPriceColor(QuoteEntity quoteEntity) {
         String pre_settlement = LatestFileManager.saveScaleByPtick(quoteEntity.getPre_settlement(),
                 quoteEntity.getInstrument_id());
     }

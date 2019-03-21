@@ -231,7 +231,7 @@ public class CurrentDayFragment extends BaseChartFragment {
             }
         });
 
-        mDetectorMiddle= new GestureDetector(this.getContext(), new GestureDetector.SimpleOnGestureListener() {
+        mDetectorMiddle = new GestureDetector(this.getContext(), new GestureDetector.SimpleOnGestureListener() {
             @Override
             public void onLongPress(MotionEvent e) {
                 super.onLongPress(e);
@@ -258,7 +258,7 @@ public class CurrentDayFragment extends BaseChartFragment {
             public boolean onTouch(View v, MotionEvent event) {
                 mDetectorTop.onTouchEvent(event);
                 if (mIsLongPress && event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (event.getY() > mTopChartViewBase.getViewPortHandler().contentHeight()){
+                    if (event.getY() > mTopChartViewBase.getViewPortHandler().contentHeight()) {
                         touchListenerMiddle.onTouch(v, event);
                     } else {
                         float y = event.getY();
@@ -283,7 +283,7 @@ public class CurrentDayFragment extends BaseChartFragment {
             public boolean onTouch(View v, MotionEvent event) {
                 mDetectorMiddle.onTouchEvent(event);
                 if (mIsLongPress && event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (event.getY() < 0){
+                    if (event.getY() < 0) {
                         touchListenerTop.onTouch(v, event);
                     } else {
                         float y = event.getY();
@@ -314,10 +314,10 @@ public class CurrentDayFragment extends BaseChartFragment {
                 float yMax = (float) transformer.getPixelForValues(xValue, yMinValue).y;
                 float touchY = h.getDrawY();//手指接触点在srcChart上的Y坐标，即手势监听器中保存数据
                 float yData = (yMax - touchY) / (yMax - yMin) * (yMaxValue - yMinValue) + yMinValue;
-                yValue = LatestFileManager.saveScaleByPtick(yData+"", instrument_id);
+                yValue = LatestFileManager.saveScaleByPtick(yData + "", instrument_id);
                 float y = touchY - mTopChartViewBase.getHeight();
                 Highlight hl = mMiddleChartViewBase.getHighlightByTouchPoint(h.getXPx(), h.getYPx());
-                if (hl != null)hl.setDraw(h.getX(), y);
+                if (hl != null) hl.setDraw(h.getX(), y);
                 mMiddleChartViewBase.highlightValue(hl);
             }
 
@@ -340,7 +340,7 @@ public class CurrentDayFragment extends BaseChartFragment {
                 yValue = yData + "";
                 float y = touchY + mTopChartViewBase.getHeight();
                 Highlight hl = mTopChartViewBase.getHighlightByTouchPoint(h.getXPx(), h.getYPx());
-                if (hl != null)hl.setDraw(h.getX(), y);
+                if (hl != null) hl.setDraw(h.getX(), y);
                 mTopChartViewBase.highlightValue(hl);
             }
 
@@ -389,7 +389,7 @@ public class CurrentDayFragment extends BaseChartFragment {
                     topLineData.addEntry(entries.get(1), 1);
                     middleLineData.addEntry(entries.get(2), 0);
                     middleBarData.addEntry(entries.get(3), 0);
-                } else if (last_index_t > mLastIndex){
+                } else if (last_index_t > mLastIndex) {
                     LogUtils.e("分时图加载多个数据", false);
                     for (int i = mLastIndex + 1; i <= last_index_t; i++) {
                         KlineEntity.DataEntity dataEntity = dataEntities.get(i + "");
@@ -456,7 +456,7 @@ public class CurrentDayFragment extends BaseChartFragment {
                     KlineEntity.DataEntity dataEntity = dataEntities.get(String.valueOf(index));
                     if (dataEntity == null) continue;
                     generateXAxisLabel(index, dataEntity);
-                    List<Entry> entries =  generateMultiDataEntry(index, dataEntity);
+                    List<Entry> entries = generateMultiDataEntry(index, dataEntity);
                     oneMinuteEntries.add(entries.get(0));
                     averageEntries.add(entries.get(1));
                     oiEntries.add(entries.get(2));
@@ -561,7 +561,7 @@ public class CurrentDayFragment extends BaseChartFragment {
      * author: chenli
      * description: 初始化时产生分时图数据集
      */
-    private LineDataSet generateLineDataSet(List<Entry> entries, int color, String label, boolean isHighlight, YAxis.AxisDependency axisDependency ) {
+    private LineDataSet generateLineDataSet(List<Entry> entries, int color, String label, boolean isHighlight, YAxis.AxisDependency axisDependency) {
         LineDataSet set = new LineDataSet(entries, label);
         set.setColor(color);
         set.setLineWidth(0.7f);
@@ -605,7 +605,7 @@ public class CurrentDayFragment extends BaseChartFragment {
      * author: chenli
      * description: 生成成交量数据集
      */
-    private BarDataSet generateBarDataSet(List<BarEntry> entries, int color, String label, boolean isHighlight ) {
+    private BarDataSet generateBarDataSet(List<BarEntry> entries, int color, String label, boolean isHighlight) {
         BarDataSet set = new BarDataSet(entries, label);
         set.setColor(color);
         set.setBarBorderColor(color);
@@ -808,13 +808,17 @@ public class CurrentDayFragment extends BaseChartFragment {
                 this.deltaOi.setText(deltaOi);
                 try {
                     int volume_delta = Integer.parseInt(volumeDelta);
-                    if (volume_delta < 0)this.volumeDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_green));
-                    else this.volumeDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_red));
+                    if (volume_delta < 0)
+                        this.volumeDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_green));
+                    else
+                        this.volumeDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_red));
 
                     int oi_delta = Integer.parseInt(deltaOi);
-                    if (oi_delta < 0)this.deltaOi.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_green));
-                    else this.deltaOi.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_red));
-                }catch (Exception ex){
+                    if (oi_delta < 0)
+                        this.deltaOi.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_green));
+                    else
+                        this.deltaOi.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_red));
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }

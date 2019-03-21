@@ -16,26 +16,19 @@ import android.view.MenuItem;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
-import com.shinnytech.futures.controller.fragment.QuoteFragment;
-import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
 import com.shinnytech.futures.controller.MainActivityPresenter;
-import com.shinnytech.futures.model.bean.settingbean.NavigationRightEntity;
+import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
-import static com.shinnytech.futures.constants.CommonConstants.LOGIN;
-import static com.shinnytech.futures.constants.CommonConstants.LOGIN_JUMP_TO_LOG_IN_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.LOGOUT;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
@@ -104,10 +97,10 @@ public class MainActivity extends BaseActivity {
         super.onResume();
         mMainActivityPresenter.resetNavigationItem();
         //合约详情页登录切回主页刷新右导航栏
-        if (sDataManager.IS_LOGIN){
+        if (sDataManager.IS_LOGIN) {
             mMainActivityPresenter.mNavigationRightAdapter.updateItem(0, CommonConstants.LOGOUT);
             mMainActivityPresenter.mNavigationRightAdapter.addItem(3);
-        }else {
+        } else {
             mMainActivityPresenter.mNavigationRightAdapter.updateItem(0, CommonConstants.LOGIN);
             mMainActivityPresenter.mNavigationRightAdapter.removeItem(3);
         }
@@ -145,7 +138,7 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String msg = intent.getStringExtra("msg");
-                if (TD_OFFLINE.equals(msg))refreshMenu(false);
+                if (TD_OFFLINE.equals(msg)) refreshMenu(false);
             }
         };
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverLocal, new IntentFilter(TD_BROADCAST_ACTION));
@@ -155,7 +148,8 @@ public class MainActivity extends BaseActivity {
             public void onReceive(Context context, Intent intent) {
                 String msg = intent.getStringExtra("msg");
                 switch (msg) {
-                    case TD_MESSAGE_LOGIN:refreshMenu(true);
+                    case TD_MESSAGE_LOGIN:
+                        refreshMenu(true);
                         break;
                     default:
                         break;
@@ -172,10 +166,10 @@ public class MainActivity extends BaseActivity {
      */
     private void refreshMenu(boolean isLogin) {
         DataManager.getInstance().IS_LOGIN = isLogin;
-        if (!isLogin){
+        if (!isLogin) {
             mMainActivityPresenter.mNavigationRightAdapter.updateItem(0, CommonConstants.LOGIN);
             mMainActivityPresenter.mNavigationRightAdapter.removeItem(3);
-        }else {
+        } else {
             mMainActivityPresenter.mNavigationRightAdapter.updateItem(0, CommonConstants.LOGOUT);
             mMainActivityPresenter.mNavigationRightAdapter.addItem(3);
         }
@@ -185,7 +179,8 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (mReceiverLogin != null)LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLogin);
+        if (mReceiverLogin != null)
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLogin);
     }
 
     @Override
@@ -222,10 +217,10 @@ public class MainActivity extends BaseActivity {
         if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             mBinding.drawerLayout.closeDrawer(GravityCompat.START);
             return true;
-        } else if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.END)){
+        } else if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.END)) {
             mBinding.drawerLayout.closeDrawer(GravityCompat.END);
             return true;
-        }else {
+        } else {
             if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
                 if ((System.currentTimeMillis() - mExitTime) > 2000) {
                     ToastNotificationUtils.showToast(BaseApplication.getContext(), getString(R.string.main_activity_exit));
@@ -248,8 +243,8 @@ public class MainActivity extends BaseActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         //很重要,决定了quoteFragment中的方法能不能被调用
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK){
-            switch (requestCode){
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
                 case POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY:
                     if (BaseApplication.getWebSocketService() != null)
                         BaseApplication.getWebSocketService().sendSubscribeQuote(mMainActivityPresenter.getPreSubscribedQuotes());

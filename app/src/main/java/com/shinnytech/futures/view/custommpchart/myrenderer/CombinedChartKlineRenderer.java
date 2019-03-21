@@ -1,10 +1,8 @@
 package com.shinnytech.futures.view.custommpchart.myrenderer;
 
 import com.github.mikephil.charting.animation.ChartAnimator;
-import com.github.mikephil.charting.renderer.BarChartRenderer;
 import com.github.mikephil.charting.renderer.BubbleChartRenderer;
 import com.github.mikephil.charting.renderer.CombinedChartRenderer;
-import com.github.mikephil.charting.renderer.LineChartRenderer;
 import com.github.mikephil.charting.renderer.ScatterChartRenderer;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.shinnytech.futures.view.custommpchart.mychart.CombinedChartKline;

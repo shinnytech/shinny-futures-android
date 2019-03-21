@@ -181,10 +181,10 @@ public class KeyboardUtils {
                                 String data;
                                 if (idKeyboard == R.xml.future_price) {
                                     //添加负号功能
-                                    if (mEditText.getSelectionStart() == 0 && mEditText.getSelectionEnd() == 0){
+                                    if (mEditText.getSelectionStart() == 0 && mEditText.getSelectionEnd() == 0) {
                                         editable.insert(0, "-");
                                         break;
-                                    }else {
+                                    } else {
                                         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
                                         String price_tick = searchEntity == null ? "0" : searchEntity.getpTick();
                                         data = MathUtils.subtract(editable.toString(), price_tick);

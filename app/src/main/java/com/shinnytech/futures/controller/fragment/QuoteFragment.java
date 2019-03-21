@@ -43,7 +43,6 @@ import com.shinnytech.futures.model.adapter.QuoteAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
-import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.QuoteDiffCallback;
@@ -144,7 +143,7 @@ public class QuoteFragment extends LazyLoadFragment {
     //开机合约列表解析完毕刷新主力行情
     @Subscribe
     public void onEvent(String msg) {
-        if (DOMINANT.equals(mTitle) && DOMINANT.equals(msg)){
+        if (DOMINANT.equals(mTitle) && DOMINANT.equals(msg)) {
             update();
         }
     }
@@ -159,7 +158,7 @@ public class QuoteFragment extends LazyLoadFragment {
             int lastPosition1 = (position + visibleItemCount1) > mInsList.size() ? mInsList.size() : (position + visibleItemCount1);
             int firstPosition1 = (lastPosition1 - position) != visibleItemCount1 ? (lastPosition1 - visibleItemCount1) : position;
             try {
-                if (mInsList.size() > LOAD_QUOTE_NUM){
+                if (mInsList.size() > LOAD_QUOTE_NUM) {
                     List<String> insList = mInsList.subList(firstPosition1, lastPosition1);
                     sendSubscribeQuotes(insList);
                 }
@@ -341,7 +340,7 @@ public class QuoteFragment extends LazyLoadFragment {
                         int firstVisibleItemPosition = lm.findFirstVisibleItemPosition();
                         int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
                         try {
-                            if (mInsList.size() > LOAD_QUOTE_NUM){
+                            if (mInsList.size() > LOAD_QUOTE_NUM) {
                                 List<String> insList = mInsList.subList(firstVisibleItemPosition, lastVisibleItemPosition + 1);
                                 sendSubscribeQuotes(insList);
                             }
@@ -578,14 +577,14 @@ public class QuoteFragment extends LazyLoadFragment {
      */
     public void refreshUI(String title) {
         //防止相邻合约列表页面刷新
-        if (!title.equals(mTitle))return;
+        if (!title.equals(mTitle)) return;
         try {
             String[] insList = mDataManager.getRtnData().getIns_list().split(",");
-            for (String ins : insList){
+            for (String ins : insList) {
                 //防止合约页切换时,前一页的数据加载
                 if (mNewData.containsKey(ins)) {
                     QuoteEntity quoteEntity = CloneUtils.clone(mDataManager.getRtnData().getQuotes().get(ins));
-                    if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle) || OPTIONAL.equals(mTitle)){
+                    if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle) || OPTIONAL.equals(mTitle)) {
                         if (ins.contains("&") && ins.contains(" "))
                             quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
                     }

@@ -144,7 +144,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemViewHold
                     String date = DataManager.getInstance().getSimpleDateFormat().format(new Date(dateTime));
                     mBinding.orderTime.setText(date);
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 

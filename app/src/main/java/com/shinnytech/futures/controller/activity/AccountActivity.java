@@ -7,7 +7,6 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ActivityAccountBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
-import com.shinnytech.futures.utils.LogUtils;
 
 import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;

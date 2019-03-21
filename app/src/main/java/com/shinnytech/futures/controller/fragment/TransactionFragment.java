@@ -303,15 +303,15 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                     mBinding.askPrice1Direction.setText("加空");
                     mBinding.closePrice.setText(mBinding.bidPrice11.getText().toString());
                 } else if (volume_long != 0 && volume_short != 0) {
-                    if (sDataManager.POSITION_DIRECTION.isEmpty()){
+                    if (sDataManager.POSITION_DIRECTION.isEmpty()) {
                         this.mDirection = "双向";
                         mBinding.volume.setText("1");
                         mIsClosePriceShow = false;
                         mBinding.bidPrice1Direction.setText("买多");
                         mBinding.askPrice1Direction.setText("卖空");
                         mBinding.closePrice.setText("锁仓状态");
-                    }else {
-                        switch (sDataManager.POSITION_DIRECTION){
+                    } else {
+                        switch (sDataManager.POSITION_DIRECTION) {
                             case "多":
                                 this.mDirection = "多";
                                 mBinding.volume.setText(volume_available_long);
@@ -408,7 +408,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      * author: chenli
      * description: 设置价格颜色
      */
-    private void setPriceColor(QuoteEntity quoteEntity){
+    private void setPriceColor(QuoteEntity quoteEntity) {
         String pre_settlement = LatestFileManager.saveScaleByPtick(quoteEntity.getPre_settlement(),
                 quoteEntity.getInstrument_id());
         setTextViewColor(mBinding.tvIdTransactionLastPrice, pre_settlement);
@@ -416,15 +416,16 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         setTextViewColor(mBinding.tvIdTransactionBidPrice1, pre_settlement);
     }
 
-    private void setTextViewColor(TextView textView, String pre_settlement){
-        try{
+    private void setTextViewColor(TextView textView, String pre_settlement) {
+        try {
             String data = textView.getText().toString();
-            if ("".equals(data))return;
+            if ("".equals(data)) return;
             float value = Float.parseFloat(data) - Float.parseFloat(pre_settlement);
             if (value < 0) textView.setTextColor(ContextCompat.getColor(sContext, R.color.ask));
-            else if (value > 0 )textView.setTextColor(ContextCompat.getColor(sContext, R.color.bid));
+            else if (value > 0)
+                textView.setTextColor(ContextCompat.getColor(sContext, R.color.bid));
             else textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -436,8 +437,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      */
     private void refreshPrice() {
         QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
-        if (quoteEntity == null)return;
-        if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")){
+        if (quoteEntity == null) return;
+        if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")) {
             quoteEntity = CloneUtils.clone(quoteEntity);
             quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
         }
@@ -521,7 +522,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                     case TD_MESSAGE:
                         if (((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId() == R.id.rb_transaction_info) {
                             refreshAccount();
-                            if (mIsRefreshPosition)refreshPosition();
+                            if (mIsRefreshPosition) refreshPosition();
                         }
                         break;
                     default:
@@ -588,23 +589,23 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         if (mBinding.bidPrice11.getText() != null && mBinding.volume.getText() != null) {
             String price = mBinding.bidPrice11.getText().toString();
             String volume = mBinding.volume.getText().toString();
-            if (price.length() == 0){
+            if (price.length() == 0) {
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "价格不能为空");
                 return;
             }
-            if (".".equals(price)){
+            if (".".equals(price)) {
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "价格输入不合法");
                 return;
             }
-            if (volume.length() == 0){
+            if (volume.length() == 0) {
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数不能为空");
                 return;
             }
-            if (volume.length() > 10){
+            if (volume.length() > 10) {
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数太大");
                 return;
             }
-            if ("0".equals(volume)){
+            if ("0".equals(volume)) {
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数不能为零");
                 return;
             }
@@ -630,23 +631,23 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         if (mBinding.askPrice11.getText() != null && mBinding.volume.getText() != null) {
             String price = mBinding.askPrice11.getText().toString();
             String volume = mBinding.volume.getText().toString();
-            if (price.length() == 0){
+            if (price.length() == 0) {
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "价格不能为空");
                 return;
             }
-            if (".".equals(price)){
+            if (".".equals(price)) {
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "价格输入不合法");
                 return;
             }
-            if (volume.length() == 0){
+            if (volume.length() == 0) {
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数不能为空");
                 return;
             }
-            if (volume.length() > 10){
+            if (volume.length() > 10) {
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数太大");
                 return;
             }
-            if ("0".equals(volume)){
+            if ("0".equals(volume)) {
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "手数不能为零");
                 return;
             }
@@ -918,7 +919,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             mInstrumentIdTransaction = searchEntity.getUnderlying_symbol();
         else mInstrumentIdTransaction = mInstrumentId;
         mExchangeId = mInstrumentIdTransaction.split("\\.")[0];
-        if (sDataManager.POSITION_DIRECTION.isEmpty())update();
+        if (sDataManager.POSITION_DIRECTION.isEmpty()) update();
         if (mKeyboardUtilsPrice != null) mKeyboardUtilsPrice.refreshInstrumentId(mInstrumentId);
         if (mKeyboardUtilsVolume != null) mKeyboardUtilsVolume.refreshInstrumentId(mInstrumentId);
     }
@@ -931,9 +932,11 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      */
     @Subscribe
     public void onEventBase(VisibilityEvent data) {
-        if (data.isVisible()){
-            if (mKeyboardUtilsPrice != null && mKeyboardUtilsPrice.isVisible()) mKeyboardUtilsPrice.hideKeyboard();
-            if (mKeyboardUtilsVolume != null && mKeyboardUtilsVolume.isVisible()) mKeyboardUtilsVolume.hideKeyboard();
+        if (data.isVisible()) {
+            if (mKeyboardUtilsPrice != null && mKeyboardUtilsPrice.isVisible())
+                mKeyboardUtilsPrice.hideKeyboard();
+            if (mKeyboardUtilsVolume != null && mKeyboardUtilsVolume.isVisible())
+                mKeyboardUtilsVolume.hideKeyboard();
         }
     }
 
@@ -946,7 +949,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                             String direction_title, String direction_title1, final String direction,
                             final String offset, final String offset1, final int volume, final int volume1,
                             final String price_type, final double price) {
-        if (mIsShowDialog){
+        if (mIsShowDialog) {
             mIsRefreshPosition = false;
             final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
             View view = View.inflate(getActivity(), R.layout.view_dialog_insert_order, null);
@@ -1004,7 +1007,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 }
             });
             dialog.show();
-        }else {
+        } else {
             if (BaseApplication.getWebSocketService() != null) {
                 BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
                 BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, price);
@@ -1023,7 +1026,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     private void initDialog(final String exchange_id, final String instrument_id,
                             String direction_title, final String direction, final String offset, final int volume,
                             final String price_type, final double price) {
-        if (mIsShowDialog){
+        if (mIsShowDialog) {
             mIsRefreshPosition = false;
             final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
             View view = View.inflate(getActivity(), R.layout.view_dialog_insert_order, null);
@@ -1067,7 +1070,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 }
             });
             dialog.show();
-        }else {
+        } else {
             if (BaseApplication.getWebSocketService() != null)
                 BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
             refreshPosition();

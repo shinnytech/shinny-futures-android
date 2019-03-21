@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivitySearchBinding;
+import com.shinnytech.futures.model.adapter.SearchAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
@@ -28,7 +29,6 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
-import com.shinnytech.futures.model.adapter.SearchAdapter;
 import com.umeng.analytics.MobclickAgent;
 
 import org.greenrobot.eventbus.EventBus;
@@ -88,9 +88,9 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
             @Override
             public void OnItemJump(SearchEntity searchEntity, String instrument_id) {
                 //如果用户点击了搜索到的合约信息，就把此条合约保存到搜索历史中
-                if (instrument_id != null && !instrument_id.isEmpty()){
+                if (instrument_id != null && !instrument_id.isEmpty()) {
                     LatestFileManager.getSearchEntitiesHistory().put(instrument_id, searchEntity);
-                    if (mIsFromFutureInfoActivity){
+                    if (mIsFromFutureInfoActivity) {
                         IdEvent idEvent = new IdEvent();
                         idEvent.setInstrument_id(instrument_id);
                         EventBus.getDefault().post(idEvent);

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -32,7 +31,7 @@ public class ParaContentAdapter extends RecyclerView.Adapter<ParaContentAdapter.
         return mData;
     }
 
-    public void setData(String[] data){
+    public void setData(String[] data) {
         mData = data;
         notifyDataSetChanged();
     }
@@ -75,7 +74,7 @@ public class ParaContentAdapter extends RecyclerView.Adapter<ParaContentAdapter.
         public void update() {
             if (mData == null || mData.length == 0) return;
             String data = mData[getLayoutPosition()];
-            mBinding.tvKey.setText("参数N"+(getLayoutPosition()+1));
+            mBinding.tvKey.setText("参数N" + (getLayoutPosition() + 1));
             mBinding.edValue.setText(data);
         }
 

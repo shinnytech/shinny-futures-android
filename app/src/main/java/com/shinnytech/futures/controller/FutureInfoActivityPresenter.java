@@ -98,6 +98,8 @@ import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_JUMP_
 
 public class FutureInfoActivityPresenter {
     private final ViewPagerFragmentAdapter mInfoPagerAdapter;
+    private final KlineDurationTitleAdapter mKlineDurationTitleAdapter;
+    public Drawable mRightDrawable;
     /**
      * date: 7/7/17
      * description: 合约代码
@@ -156,7 +158,6 @@ public class FutureInfoActivityPresenter {
     private Toolbar mToolbar;
     private TextView mToolbarTitle;
     private FragmentManager mFragmentManager;
-    public Drawable mRightDrawable;
     private int mNav_position;
     private Dialog mDialogOptional;
     private RecyclerView mRecyclerViewOptional;
@@ -166,7 +167,6 @@ public class FutureInfoActivityPresenter {
             KLINE_15_SECOND, KLINE_20_SECOND, KLINE_30_SECOND, KLINE_1_MINUTE, KLINE_2_MINUTE, KLINE_3_MINUTE,
             KLINE_5_MINUTE, KLINE_10_MINUTE, KLINE_15_MINUTE, KLINE_30_MINUTE, KLINE_1_HOUR, KLINE_2_HOUR,
             KLINE_4_HOUR, KLINE_1_DAY, KLINE_7_DAY, KLINE_28_DAY};
-    private final KlineDurationTitleAdapter mKlineDurationTitleAdapter;
 
     public FutureInfoActivityPresenter(FutureInfoActivity futureInfoActivity, Context context, ActivityFutureInfoBinding binding, Toolbar toolbar, TextView toolbarTitle) {
         this.mBinding = binding;
@@ -208,13 +208,13 @@ public class FutureInfoActivityPresenter {
         initMD5ViewVisibility();
 
         //控制图表显示
-        if (DataManager.getInstance().IS_SHOW_VP_CONTENT){
+        if (DataManager.getInstance().IS_SHOW_VP_CONTENT) {
             mBinding.vpInfoContent.setVisibility(View.VISIBLE);
             mBinding.rbHandicapInfo.setText(R.string.future_info_activity_handicap_down);
             mBinding.rbPositionInfo.setText(R.string.future_info_activity_position_down);
             mBinding.rbOrderInfo.setText(R.string.future_info_activity_order_down);
             mBinding.rbTransactionInfo.setText(R.string.future_info_activity_transaction_down);
-        }else {
+        } else {
             mBinding.vpInfoContent.setVisibility(View.GONE);
             mBinding.rbHandicapInfo.setText(R.string.future_info_activity_handicap_up);
             mBinding.rbPositionInfo.setText(R.string.future_info_activity_position_up);
@@ -227,7 +227,7 @@ public class FutureInfoActivityPresenter {
         String[] durations = durationPre.split(",");
         List<String> list = new ArrayList<>();
         list.add(CommonConstants.KLINE_DURATION_DAY);
-        for (String data: durations) {
+        for (String data : durations) {
             list.add(data);
         }
         mKlineDurationTitleAdapter = new KlineDurationTitleAdapter(sContext, list);
@@ -272,14 +272,14 @@ public class FutureInfoActivityPresenter {
      * author: chenli
      * description: 初始化五档行情
      */
-    public void initMD5ViewVisibility(){
+    public void initMD5ViewVisibility() {
         //显示五档行情
         if (!mInstrumentId.contains("SHFE") && !mInstrumentId.contains("INE"))
             mBinding.md.setVisibility(View.GONE);
         else {
             //判断有无五档行情
             QuoteEntity quoteEntity = DataManager.getInstance().getRtnData().getQuotes().get(mInstrumentId);
-            if (quoteEntity != null && quoteEntity.getAsk_price5() == null){
+            if (quoteEntity != null && quoteEntity.getAsk_price5() == null) {
                 SPUtils.putAndApply(sContext, CONFIG_MD5, false);
             }
             mIsMD5 = (boolean) SPUtils.get(sContext, CONFIG_MD5, true);
@@ -293,7 +293,7 @@ public class FutureInfoActivityPresenter {
      * author: chenli
      * description: 切换合约更新五档行情
      */
-    public void updateMD5ViewVisibility(){
+    public void updateMD5ViewVisibility() {
         //显示五档行情
         if (!mInstrumentId.contains("SHFE") && !mInstrumentId.contains("INE"))
             mBinding.md.setVisibility(View.GONE);
@@ -335,28 +335,29 @@ public class FutureInfoActivityPresenter {
                     mRecyclerViewOptional.addOnItemTouchListener(
                             new SimpleRecyclerViewItemClickListener(mRecyclerViewOptional,
                                     new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(View view, int position) {
-                            String instrumentId = (String) view.getTag();
-                            //添加判断，防止自选合约列表为空时产生无效的点击事件
-                            if (instrumentId != null) {
-                                if (!instrumentId.isEmpty()) {
-                                    mInstrumentId = instrumentId;
-                                    IdEvent idEvent = new IdEvent();
-                                    idEvent.setInstrument_id(instrumentId);
-                                    EventBus.getDefault().post(idEvent);
-                                }
-                            }
-                            mDialogOptional.dismiss();
-                        }
+                                        @Override
+                                        public void onItemClick(View view, int position) {
+                                            String instrumentId = (String) view.getTag();
+                                            //添加判断，防止自选合约列表为空时产生无效的点击事件
+                                            if (instrumentId != null) {
+                                                if (!instrumentId.isEmpty()) {
+                                                    mInstrumentId = instrumentId;
+                                                    IdEvent idEvent = new IdEvent();
+                                                    idEvent.setInstrument_id(instrumentId);
+                                                    EventBus.getDefault().post(idEvent);
+                                                }
+                                            }
+                                            mDialogOptional.dismiss();
+                                        }
 
-                        @Override
-                        public void onItemLongClick(View view, int position) {
+                                        @Override
+                                        public void onItemLongClick(View view, int position) {
 
-                        }
-                    }));
+                                        }
+                                    }));
 
-                }else mDialogAdapterOptional.updateList(new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
+                } else
+                    mDialogAdapterOptional.updateList(new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
 
                 if (!mDialogOptional.isShowing()) mDialogOptional.show();
             }
@@ -554,10 +555,10 @@ public class FutureInfoActivityPresenter {
      * author: chenli
      * description: 控制交易相关页的显示
      */
-    public void controlTransactionPageVisibility(int index){
+    public void controlTransactionPageVisibility(int index) {
         VisibilityEvent data = new VisibilityEvent();
-        if (mBinding.vpInfoContent.getCurrentItem() == index){
-            if (mBinding.vpInfoContent.getVisibility() == View.GONE){
+        if (mBinding.vpInfoContent.getCurrentItem() == index) {
+            if (mBinding.vpInfoContent.getVisibility() == View.GONE) {
                 mBinding.vpInfoContent.setVisibility(View.VISIBLE);
                 mBinding.rbHandicapInfo.setText(R.string.future_info_activity_handicap_down);
                 mBinding.rbPositionInfo.setText(R.string.future_info_activity_position_down);
@@ -566,7 +567,7 @@ public class FutureInfoActivityPresenter {
                 data.setVisible(false);
                 EventBus.getDefault().post(data);
                 DataManager.getInstance().IS_SHOW_VP_CONTENT = true;
-            }else {
+            } else {
                 mBinding.vpInfoContent.setVisibility(View.GONE);
                 mBinding.rbHandicapInfo.setText(R.string.future_info_activity_handicap_up);
                 mBinding.rbPositionInfo.setText(R.string.future_info_activity_position_up);
@@ -576,8 +577,8 @@ public class FutureInfoActivityPresenter {
                 EventBus.getDefault().post(data);
                 DataManager.getInstance().IS_SHOW_VP_CONTENT = false;
             }
-        }else{
-            if (mBinding.vpInfoContent.getVisibility() == View.GONE){
+        } else {
+            if (mBinding.vpInfoContent.getVisibility() == View.GONE) {
                 mBinding.vpInfoContent.setVisibility(View.VISIBLE);
                 mBinding.rbHandicapInfo.setText(R.string.future_info_activity_handicap_down);
                 mBinding.rbPositionInfo.setText(R.string.future_info_activity_position_down);
@@ -665,16 +666,17 @@ public class FutureInfoActivityPresenter {
 
     private void switchDuration(String durationTitle) {
 
-        if (CommonConstants.KLINE_DURATION_DAY.equals(durationTitle))switchUpFragment(CURRENT_DAY_FRAGMENT, "");
-        else{
+        if (CommonConstants.KLINE_DURATION_DAY.equals(durationTitle))
+            switchUpFragment(CURRENT_DAY_FRAGMENT, "");
+        else {
             String duration = getDuration(durationTitle);
-            if (durationTitle.contains("秒")){
+            if (durationTitle.contains("秒")) {
                 switchUpFragment(SECOND_FRAGMENT, duration);
-            }else if (durationTitle.contains("分")){
+            } else if (durationTitle.contains("分")) {
                 switchUpFragment(MINUTE_FRAGMENT, duration);
-            }else if (durationTitle.contains("时")){
+            } else if (durationTitle.contains("时")) {
                 switchUpFragment(HOUR_FRAGMENT, duration);
-            }else {
+            } else {
                 switchUpFragment(DAY_FRAGMENT, duration);
             }
         }
@@ -715,16 +717,16 @@ public class FutureInfoActivityPresenter {
         }
     }
 
-    private String getDurationTitle(String data){
-        for (int i = 0; i < mKlineDuration.length; i++){
-            if (mKlineDuration[i].equals(data))return mKlineTitle[i];
+    private String getDurationTitle(String data) {
+        for (int i = 0; i < mKlineDuration.length; i++) {
+            if (mKlineDuration[i].equals(data)) return mKlineTitle[i];
         }
         return "";
     }
 
-    private String getDuration(String data){
-        for (int i = 0; i < mKlineTitle.length; i++){
-            if (mKlineTitle[i].equals(data))return mKlineDuration[i];
+    private String getDuration(String data) {
+        for (int i = 0; i < mKlineTitle.length; i++) {
+            if (mKlineTitle[i].equals(data)) return mKlineDuration[i];
         }
         return "";
     }

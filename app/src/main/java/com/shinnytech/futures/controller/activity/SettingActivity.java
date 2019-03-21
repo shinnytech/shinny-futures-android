@@ -10,7 +10,6 @@ import com.alibaba.sdk.android.oss.ClientException;
 import com.alibaba.sdk.android.oss.ServiceException;
 import com.alibaba.sdk.android.oss.callback.OSSCompletedCallback;
 import com.alibaba.sdk.android.oss.callback.OSSProgressCallback;
-import com.alibaba.sdk.android.oss.internal.OSSAsyncTask;
 import com.alibaba.sdk.android.oss.model.PutObjectRequest;
 import com.alibaba.sdk.android.oss.model.PutObjectResult;
 import com.shinnytech.futures.R;
@@ -23,7 +22,6 @@ import com.shinnytech.futures.utils.TimeUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,7 +82,7 @@ public class SettingActivity extends BaseActivity {
         mSettingAdapter.setSettingItemClickListener(new SettingAdapter.SettingItemClickListener() {
             @Override
             public void onJump(String content) {
-                switch (content){
+                switch (content) {
                     case CommonConstants.PARA_CHANGE:
                         Intent paraIntent = new Intent(SettingActivity.this, ParaChangeActivity.class);
                         startActivity(paraIntent);
@@ -110,11 +108,11 @@ public class SettingActivity extends BaseActivity {
 
     }
 
-    private void uploadLog(){
-        String objectKey = TimeUtils.getNowTime() + "/" +sDataManager.USER_ID ;
+    private void uploadLog() {
+        String objectKey = TimeUtils.getNowTime() + "/" + sDataManager.USER_ID;
         File file = new File(CommonConstants.TRADE_FILE_NAME);
         String path = "";
-        if (file != null)path = file.getAbsolutePath();
+        if (file != null) path = file.getAbsolutePath();
 
         // 构造上传请求
         PutObjectRequest put = new PutObjectRequest(CommonConstants.BUCKET_NAME, objectKey, path);

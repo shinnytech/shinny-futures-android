@@ -8,9 +8,8 @@ class AmplitudeCallbacks implements Application.ActivityLifecycleCallbacks {
 
     public static final String TAG = "com.amplitude.api.AmplitudeCallbacks";
     private static final String NULLMSG = "Need to initialize AmplitudeCallbacks with AmplitudeClient instance";
-
-    private AmplitudeClient clientInstance = null;
     private static AmplitudeLog logger = AmplitudeLog.getLogger();
+    private AmplitudeClient clientInstance = null;
 
     public AmplitudeCallbacks(AmplitudeClient clientInstance) {
         if (clientInstance == null) {
@@ -23,10 +22,12 @@ class AmplitudeCallbacks implements Application.ActivityLifecycleCallbacks {
     }
 
     @Override
-    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {}
+    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+    }
 
     @Override
-    public void onActivityDestroyed(Activity activity) {}
+    public void onActivityDestroyed(Activity activity) {
+    }
 
     @Override
     public void onActivityPaused(Activity activity) {
@@ -49,13 +50,16 @@ class AmplitudeCallbacks implements Application.ActivityLifecycleCallbacks {
     }
 
     @Override
-    public void onActivitySaveInstanceState(Activity activity, Bundle outstate) {}
+    public void onActivitySaveInstanceState(Activity activity, Bundle outstate) {
+    }
 
     @Override
-    public void onActivityStarted(Activity activity) {}
+    public void onActivityStarted(Activity activity) {
+    }
 
     @Override
-    public void onActivityStopped(Activity activity) {}
+    public void onActivityStopped(Activity activity) {
+    }
 
     protected long getCurrentTimeMillis() {
         return System.currentTimeMillis();

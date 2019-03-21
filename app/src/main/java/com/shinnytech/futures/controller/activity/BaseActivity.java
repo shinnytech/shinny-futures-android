@@ -80,7 +80,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String msg = intent.getStringExtra("msg");
-                if (TD_MESSAGE.equals(msg))refreshUI();
+                if (TD_MESSAGE.equals(msg)) refreshUI();
             }
         };
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverLocal, new IntentFilter(TD_BROADCAST_ACTION));
@@ -117,8 +117,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         MobclickAgent.onPause(this);
-        if (mReceiverLocal != null)LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLocal);
-        if (mReceiverNetwork != null)unregisterReceiver(mReceiverNetwork);
+        if (mReceiverLocal != null)
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLocal);
+        if (mReceiverNetwork != null) unregisterReceiver(mReceiverNetwork);
     }
 
     /**

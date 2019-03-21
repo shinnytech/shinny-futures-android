@@ -9,7 +9,6 @@ import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
 /**
@@ -63,7 +62,7 @@ public class CoupleChartGestureListener implements OnChartGestureListener {
     @Override
     public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
         float mScalex = (float) SPUtils.get(BaseApplication.getContext(), CommonConstants.SCALE_X, 1.0f);
-        if ((scaleX > 1 && scaleX > mScalex) || (scaleX < 1 && scaleX < mScalex )){
+        if ((scaleX > 1 && scaleX > mScalex) || (scaleX < 1 && scaleX < mScalex)) {
             mScalex = scaleX;
         }
         SPUtils.putAndApply(BaseApplication.getContext(), CommonConstants.SCALE_X, mScalex);
@@ -77,12 +76,23 @@ public class CoupleChartGestureListener implements OnChartGestureListener {
     }
 
     //以下5个方法仅为了：方便在外部根据需要自行重写
-    public void chartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {}
-    public void chartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {}
-    public void chartLongPressed(MotionEvent me) {}
-    public void chartDoubleTapped(MotionEvent me) {}
-    public void chartSingleTapped(MotionEvent me) {}
-    public void chartTranslate(MotionEvent me, float dX, float dY) {}
+    public void chartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
+    }
+
+    public void chartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
+    }
+
+    public void chartLongPressed(MotionEvent me) {
+    }
+
+    public void chartDoubleTapped(MotionEvent me) {
+    }
+
+    public void chartSingleTapped(MotionEvent me) {
+    }
+
+    public void chartTranslate(MotionEvent me, float dX, float dY) {
+    }
 
     private void syncCharts() {
         Matrix srcMatrix;

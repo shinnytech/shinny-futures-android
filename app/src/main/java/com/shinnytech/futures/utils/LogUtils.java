@@ -160,7 +160,7 @@ public class LogUtils {
     /**
      * 写日志
      *
-     * @param message   日志信息
+     * @param message 日志信息
      */
     public static void w2f(String message) {
         String date = TimeUtils.getNowTimeSecond();

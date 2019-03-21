@@ -6,7 +6,7 @@ package com.shinnytech.futures.model.bean.accountinfobean;
  * Description: .
  */
 
-public class AccountEntity{
+public class AccountEntity {
     private String key = "";
     private String user_id = "";
     private String currency = "";

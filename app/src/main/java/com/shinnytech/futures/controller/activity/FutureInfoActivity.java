@@ -22,7 +22,6 @@ import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.CloneUtils;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
@@ -79,11 +78,11 @@ public class FutureInfoActivity extends BaseActivity {
 
     }
 
-    private void refreshMD(){
-        if (mInstrumentId.contains("SHFE") || mInstrumentId.contains("INE")){
+    private void refreshMD() {
+        if (mInstrumentId.contains("SHFE") || mInstrumentId.contains("INE")) {
             QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
-            if (quoteEntity == null)return;
-            if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")){
+            if (quoteEntity == null) return;
+            if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")) {
                 quoteEntity = CloneUtils.clone(quoteEntity);
                 quoteEntity = LatestFileManager.calculateCombineQuoteFull(quoteEntity);
             }
@@ -297,10 +296,10 @@ public class FutureInfoActivity extends BaseActivity {
      * author: chenli
      * description: 订阅合约行情
      */
-    private void sendSubscribeQuote(String ins){
+    private void sendSubscribeQuote(String ins) {
         if (ins.contains("&") && ins.contains(" ")) {
             SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(ins);
-            if (searchEntity != null){
+            if (searchEntity != null) {
                 String leg1_symbol = searchEntity.getLeg1_symbol();
                 String leg2_symbol = searchEntity.getLeg2_symbol();
                 ins = ins + "," + leg1_symbol + "," + leg2_symbol;

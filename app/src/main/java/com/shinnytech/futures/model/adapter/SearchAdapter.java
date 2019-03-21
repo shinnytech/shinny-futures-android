@@ -11,13 +11,10 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ItemActivitySearchQuoteBinding;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.utils.LogUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -77,23 +74,23 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ItemViewHo
             List<SearchEntity> data3 = new ArrayList<>();
             List<SearchEntity> data4 = new ArrayList<>();
             for (SearchEntity searchEntity : mDataOriginal) {
-                if (searchEntity.getIns_id().toLowerCase().contains(text)){
+                if (searchEntity.getIns_id().toLowerCase().contains(text)) {
                     data0.add(searchEntity);
                     continue;
                 }
-                if (searchEntity.getPy().toLowerCase().contains(text)){
+                if (searchEntity.getPy().toLowerCase().contains(text)) {
                     data1.add(searchEntity);
                     continue;
                 }
-                if (searchEntity.getInstrumentName().toLowerCase().contains(text)){
+                if (searchEntity.getInstrumentName().toLowerCase().contains(text)) {
                     data2.add(searchEntity);
                     continue;
                 }
-                if (searchEntity.getExchangeId().toLowerCase().contains(text)){
+                if (searchEntity.getExchangeId().toLowerCase().contains(text)) {
                     data3.add(searchEntity);
                     continue;
                 }
-                if (searchEntity.getExchangeName().toLowerCase().contains(text)){
+                if (searchEntity.getExchangeName().toLowerCase().contains(text)) {
                     data4.add(searchEntity);
                     continue;
                 }

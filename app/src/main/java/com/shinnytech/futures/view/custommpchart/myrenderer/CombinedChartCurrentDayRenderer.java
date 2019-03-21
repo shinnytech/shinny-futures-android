@@ -4,7 +4,6 @@ import com.github.mikephil.charting.animation.ChartAnimator;
 import com.github.mikephil.charting.renderer.BubbleChartRenderer;
 import com.github.mikephil.charting.renderer.CandleStickChartRenderer;
 import com.github.mikephil.charting.renderer.CombinedChartRenderer;
-import com.github.mikephil.charting.renderer.LineChartRenderer;
 import com.github.mikephil.charting.renderer.ScatterChartRenderer;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.shinnytech.futures.view.custommpchart.mychart.CombinedChartCurrentDay;
