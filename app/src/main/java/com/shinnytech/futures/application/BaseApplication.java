@@ -18,12 +18,11 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.alibaba.sdk.android.oss.ClientConfiguration;
-import com.alibaba.sdk.android.oss.OSS;
-import com.alibaba.sdk.android.oss.OSSClient;
-import com.alibaba.sdk.android.oss.common.OSSLog;
-import com.alibaba.sdk.android.oss.common.auth.OSSAuthCredentialsProvider;
-import com.alibaba.sdk.android.oss.common.auth.OSSCredentialProvider;
+import com.aliyun.sls.android.sdk.ClientConfiguration;
+import com.aliyun.sls.android.sdk.LOGClient;
+import com.aliyun.sls.android.sdk.SLSDatabaseManager;
+import com.aliyun.sls.android.sdk.SLSLog;
+import com.aliyun.sls.android.sdk.core.auth.PlainTextAKSKCredentialProvider;
 import com.baidu.mobstat.StatService;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheEntity;
@@ -35,6 +34,7 @@ import com.lzy.okgo.model.HttpHeaders;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.ConfirmActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
+import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.service.WebSocketService;
@@ -59,6 +59,9 @@ import java.util.logging.Level;
 
 import okhttp3.OkHttpClient;
 
+import static com.shinnytech.futures.constants.CommonConstants.AMP_BACKGROUND;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_INIT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_QUIT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_DURATION_DEFAULT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
@@ -98,7 +101,6 @@ public class BaseApplication extends Application implements ServiceConnection {
     private static WebSocketService sWebSocketService;
     private static List<String> sMDURLs = new ArrayList<>();
     private static int index = 0;
-    private static OSS ossClient;
     private boolean mServiceBound = false;
     private boolean mBackGround = false;
     private BroadcastReceiver mReceiverMarket;
@@ -106,6 +108,7 @@ public class BaseApplication extends Application implements ServiceConnection {
     private BroadcastReceiver mReceiverNetwork;
     private BroadcastReceiver mReceiverScreen;
     private MyHandler mMyHandler = new MyHandler();
+    private LOGClient mLOGClient;
 
     public static int getIndex() {
         return index;
@@ -117,10 +120,6 @@ public class BaseApplication extends Application implements ServiceConnection {
 
     public static Context getContext() {
         return sContext;
-    }
-
-    public static OSS getOssClient() {
-        return ossClient;
     }
 
     @NonNull
@@ -154,45 +153,29 @@ public class BaseApplication extends Application implements ServiceConnection {
         //广播注册
         registerBroaderCast();
 
-        //配置OSS
-        initConfigOSS();
-
-        //配置交易日志
-        initTradeLog();
-
     }
 
     /**
-     * date: 2019/3/7
+     * date: 2019/3/24
      * author: chenli
-     * description:
+     * description: 配置阿里日志服务
      */
-    private void initTradeLog() {
-        File file = new File(CommonConstants.TRADE_FILE_NAME);
-        if (!file.exists()) LogUtils.w2f("交易日志");
-    }
+    private void initAliLog(String ak, String sk){
+        SLSDatabaseManager.getInstance().setupDB(sContext);
 
-    /**
-     * date: 2019/3/6
-     * author: chenli
-     * description: 初始化OSS
-     */
-    private void initConfigOSS() {
-        String endpoint = "http://oss-cn-shanghai.aliyuncs.com";
-        String stsServer = "https://sts.aliyuncs.com";
-        // 推荐使用OSSAuthCredentialsProvider。token过期可以及时更新
-        OSSCredentialProvider credentialProvider = new OSSAuthCredentialsProvider(stsServer);
+        PlainTextAKSKCredentialProvider credentialProvider =
+                new PlainTextAKSKCredentialProvider(ak, sk);
 
-        //该配置类如果不设置，会有默认配置，具体可看该类
         ClientConfiguration conf = new ClientConfiguration();
         conf.setConnectionTimeout(15 * 1000); // 连接超时，默认15秒
         conf.setSocketTimeout(15 * 1000); // socket超时，默认15秒
-        conf.setMaxConcurrentRequest(5); // 最大并发请求数，默认5个
+        conf.setMaxConcurrentRequest(5); // 最大并发请求书，默认5个
         conf.setMaxErrorRetry(2); // 失败后最大重试次数，默认2次
-        OSSLog.enableLog(); //这个开启会支持写入手机sd卡中的一份日志文件位置在SDCard_path\OSSLog\logs.csv
+        SLSLog.enableLog(); // log打印在控制台
 
-        ossClient = new OSSClient(getApplicationContext(), endpoint, credentialProvider, conf);
+        String endpoint = "http://cn-shanghai.log.aliyuncs.com";
 
+        mLOGClient = new LOGClient(sContext, endpoint, credentialProvider, conf);
     }
 
     /**
@@ -356,7 +339,9 @@ public class BaseApplication extends Application implements ServiceConnection {
             String BUGLY_KEY = (String) cl.getMethod("getBuglyKey").invoke(null);
             String UMENG_KEY = (String) cl.getMethod("getUmengKey").invoke(null);
             String BAIDU_KEY = (String) cl.getMethod("getBaiduKey").invoke(null);
-//            String AMP_KEY = (String) cl.getMethod("getAmpKey").invoke(null);
+            String AMP_KEY = (String) cl.getMethod("getAmpKey").invoke(null);
+//            String AK = (String) cl.getMethod("getAK").invoke(null);
+//            String SK = (String) cl.getMethod("getSK").invoke(null);
             sMDURLs.add(MARKET_URL_8);
             TRANSACTION_URL = TRANSACTION_URL_L;
             JSON_FILE_URL = JSON_FILE_URL_L;
@@ -364,7 +349,9 @@ public class BaseApplication extends Application implements ServiceConnection {
             UMConfigure.init(sContext, UMENG_KEY, "ShinnyTech", UMConfigure.DEVICE_TYPE_PHONE, "");
             StatService.setAppKey(BAIDU_KEY);
             StatService.start(this);
-//            Amplitude.getInstance().initialize(this, AMP_KEY).enableForegroundTracking(this);
+            Amplitude.getInstance().initialize(this, AMP_KEY).enableForegroundTracking(this);
+            Amplitude.getInstance().logEvent(AMP_INIT);
+//            initAliLog(AK, SK);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             sMDURLs.add(MARKET_URL_1);
@@ -380,7 +367,6 @@ public class BaseApplication extends Application implements ServiceConnection {
         }
         sMDURLs.addAll(MDUrlGroup);
     }
-
 
     /**
      * date: 7/21/17
@@ -424,10 +410,11 @@ public class BaseApplication extends Application implements ServiceConnection {
             public void onActivityDestroyed(Activity activity) {
                 if (activity instanceof MainActivity) {
                     LogUtils.e("App彻底销毁", true);
-                    LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverMarket);
-                    LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverTransaction);
-                    sContext.unregisterReceiver(mReceiverNetwork);
-                    sContext.unregisterReceiver(mReceiverScreen);
+                    Amplitude.getInstance().logEvent(AMP_QUIT, DataManager.getInstance().EVENT_PROPERTIES);
+                    if (mReceiverMarket != null)LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverMarket);
+                    if (mReceiverTransaction != null)LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverTransaction);
+                    if (mReceiverNetwork != null)sContext.unregisterReceiver(mReceiverNetwork);
+                    if (mReceiverScreen != null)sContext.unregisterReceiver(mReceiverScreen);
                     if (sWebSocketService != null) {
                         sWebSocketService.disConnectMD();
                         sWebSocketService.disConnectTD();
@@ -438,7 +425,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                         LogUtils.e("解除绑定", true);
                         mServiceBound = false;
                     }
-                    System.exit(0);
+//                    System.exit(0);
                 }
             }
         });
@@ -468,6 +455,7 @@ public class BaseApplication extends Application implements ServiceConnection {
         sWebSocketService.disConnectTD();
         sWebSocketService.disConnectMD();
         mBackGround = true;
+        Amplitude.getInstance().logEvent(AMP_BACKGROUND, DataManager.getInstance().EVENT_PROPERTIES);
     }
 
     /**

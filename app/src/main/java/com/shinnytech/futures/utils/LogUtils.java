@@ -158,17 +158,6 @@ public class LogUtils {
     }
 
     /**
-     * 写日志
-     *
-     * @param message 日志信息
-     */
-    public static void w2f(String message) {
-        String date = TimeUtils.getNowTimeSecond();
-        String data = date + ": " + message + "\n";
-        LatestFileManager.writeFile(CommonConstants.TRADE_FILE_NAME, data);
-    }
-
-    /**
      * 得到默认tag【类名】以及信息详情
      *
      * @param message 要显示的信息

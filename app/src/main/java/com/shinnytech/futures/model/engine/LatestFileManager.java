@@ -3,6 +3,9 @@ package com.shinnytech.futures.model.engine;
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 
+import com.aliyun.sls.android.sdk.LogEntity;
+import com.aliyun.sls.android.sdk.SLSDatabaseManager;
+import com.aliyun.sls.android.sdk.SLSLog;
 import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
@@ -27,6 +30,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -771,6 +775,15 @@ public class LatestFileManager {
             BaseApplication.getWebSocketService().reConnectTD();
 
         return brokerList;
+    }
+
+    public static void insertLogToDB(String jsonString) {
+        LogEntity entity = new LogEntity();
+        entity.setEndPoint("cn-hangzhou.sls.aliyuncs.com");
+        entity.setJsonString(jsonString);
+        Date date = new Date();
+        entity.setTimestamp(new Long(date.getTime()));
+        SLSDatabaseManager.getInstance().insertRecordIntoDB(entity);
     }
 
 }

@@ -10,6 +10,8 @@ public final class CommonConstants {
     public static final String MARKET_URL_6 = "ws://106.15.82.189/t/md/front/mobile";
     public static final String MARKET_URL_7 = "ws://106.15.219.160/t/md/front/mobile";
     public static final String FEED_BACK_URL = "https://ask.shinnytech.com/src/indexm.html";
+    public static String TRANSACTION_URL = "ws://opentd.shinnytech.com/trade/user0";
+    public static String JSON_FILE_URL = "http://openmd.shinnytech.com/t/md/symbols/latest.json";
     //广播信息类型
     public static final String MD_ONLINE = "MD_ONLINE";
     public static final String MD_OFFLINE = "MD_OFFLINE";
@@ -132,9 +134,20 @@ public final class CommonConstants {
     public static final String KLINE_DURATION_ALL = "3秒,5秒,10秒,15秒,20秒,30秒,1分,2分," +
             "3分,5分,10分,15分,30分,1时,2时,4时,1日,1周,4周";
     public static final String KLINE_DURATION_DAY = "分时";
-    //OSS
-    public static final String BUCKET_NAME = "kuaiqi-xiaoq";
-    public static final String TRADE_FILE_NAME = "TradeLogFile";
-    public static String TRANSACTION_URL = "ws://opentd.shinnytech.com/trade/user0";
-    public static String JSON_FILE_URL = "http://openmd.shinnytech.com/t/md/symbols/latest.json";
+
+    //amp event type
+    public static final String AMP_INIT = "amp_init";
+    public static final String AMP_QUIT = "amp_quit";
+    public static final String AMP_BACKGROUND = "amp_background";
+    public static final String AMP_TRADE = "amp_trade";
+    public static final String AMP_TRANSFER = "amp_transfer";
+    public static final String AMP_LOGGED = "amp_logged";
+    //amp event property
+    public static final String AMP_EVENT_BROKER_ID = "broker_id";
+    public static final String AMP_EVENT_PACKAGE_ID = "package_id";
+    //amp user property
+    public static final String AMP_USER_PHONE_BRAND = "phone_brand";
+    public static final String AMP_USER_PHONE_OS_LAST = "phone_os_last";
+    public static final String AMP_USER_SCREEN_SIZE = "screen_size";
+    public static final String AMP_USER_VERSION_ID_LAST = "version_id_last";
 }

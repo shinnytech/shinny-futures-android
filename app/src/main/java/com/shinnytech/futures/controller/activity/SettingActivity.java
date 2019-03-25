@@ -6,12 +6,9 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 
-import com.alibaba.sdk.android.oss.ClientException;
-import com.alibaba.sdk.android.oss.ServiceException;
-import com.alibaba.sdk.android.oss.callback.OSSCompletedCallback;
-import com.alibaba.sdk.android.oss.callback.OSSProgressCallback;
-import com.alibaba.sdk.android.oss.model.PutObjectRequest;
-import com.alibaba.sdk.android.oss.model.PutObjectResult;
+import com.aliyun.sls.android.sdk.LogEntity;
+import com.aliyun.sls.android.sdk.SLSDatabaseManager;
+import com.aliyun.sls.android.sdk.SLSLog;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
@@ -93,7 +90,7 @@ public class SettingActivity extends BaseActivity {
                         break;
                     case CommonConstants.UPLOAD_LOG:
                         ToastNotificationUtils.showToast(sContext, "日志上传成功");
-//                        uploadLog();
+//                        upload();
                         break;
                     default:
                         break;
@@ -108,45 +105,24 @@ public class SettingActivity extends BaseActivity {
 
     }
 
-    private void uploadLog() {
-        String objectKey = TimeUtils.getNowTime() + "/" + sDataManager.USER_ID;
-        File file = new File(CommonConstants.TRADE_FILE_NAME);
-        String path = "";
-        if (file != null) path = file.getAbsolutePath();
-
-        // 构造上传请求
-        PutObjectRequest put = new PutObjectRequest(CommonConstants.BUCKET_NAME, objectKey, path);
-
-        // 异步上传时可以设置进度回调
-        put.setProgressCallback(new OSSProgressCallback<PutObjectRequest>() {
-            @Override
-            public void onProgress(PutObjectRequest request, long currentSize, long totalSize) {
-                Log.d("PutObject", "currentSize: " + currentSize + " totalSize: " + totalSize);
-            }
-        });
-
-        BaseApplication.getOssClient().asyncPutObject(put, new OSSCompletedCallback<PutObjectRequest, PutObjectResult>() {
-            @Override
-            public void onSuccess(PutObjectRequest request, PutObjectResult result) {
-                ToastNotificationUtils.showToast(sContext, "日志上传成功");
-            }
+    private void upload(){
+        new Thread(new Runnable() {
 
             @Override
-            public void onFailure(PutObjectRequest request, ClientException clientExcepion, ServiceException serviceException) {
-                // 请求异常
-                if (clientExcepion != null) {
-                    // 本地异常如网络异常等
-                    clientExcepion.printStackTrace();
-                }
-                if (serviceException != null) {
-                    // 服务异常
-                    Log.e("ErrorCode", serviceException.getErrorCode());
-                    Log.e("RequestId", serviceException.getRequestId());
-                    Log.e("HostId", serviceException.getHostId());
-                    Log.e("RawMessage", serviceException.getRawMessage());
+            public void run() {
+                try {
+                    /* 发送log 会调用网络操作，需要在一个异步线程中完成*/
+                    List<LogEntity> list = SLSDatabaseManager.getInstance().queryRecordFromDB();
+                    for (LogEntity logEntity: list) {
+                        String msg = "logEntity:{\ntimeStamp: " + logEntity.getTimestamp() + ",\njsonString: " + logEntity.getJsonString() + "}";
+                        SLSLog.logInfo(msg);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return;
                 }
             }
-        });
+        }).start();
     }
 
 }

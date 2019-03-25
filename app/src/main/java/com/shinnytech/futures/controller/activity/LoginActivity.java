@@ -20,15 +20,20 @@ import android.widget.CompoundButton;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityLoginBinding;
+import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
+
+import org.json.JSONException;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
 import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BROKER_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGGED;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOCK_ACCOUNT;
@@ -459,10 +464,17 @@ public class LoginActivity extends BaseActivity {
             if (activity != null) {
                 switch (msg.what) {
                     case 0:
+                        String broker_id = activity.mBinding.broker.getText().toString();
+                        try {
+                            activity.sDataManager.EVENT_PROPERTIES.put(AMP_EVENT_BROKER_ID, broker_id);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_LOGGED, activity.sDataManager.EVENT_PROPERTIES);
                         SPUtils.putAndApply(activity.sContext, CONFIG_LOGIN_DATE, TimeUtils.getNowTime());
                         SPUtils.putAndApply(activity.sContext, CONFIG_ACCOUNT, activity.mPhoneNumber);
                         SPUtils.putAndApply(activity.sContext, CONFIG_PASSWORD, activity.mPassword);
-                        SPUtils.putAndApply(activity.sContext, CONFIG_BROKER, activity.mBinding.broker.getText().toString());
+                        SPUtils.putAndApply(activity.sContext, CONFIG_BROKER, broker_id);
                         //关闭键盘
                         View view = activity.getWindow().getCurrentFocus();
                         if (view != null) {

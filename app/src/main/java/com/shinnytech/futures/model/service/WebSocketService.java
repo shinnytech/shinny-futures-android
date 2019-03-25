@@ -27,6 +27,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.MainActivity;
+import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.accountinfobean.BrokerEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqCancelOrderEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqConfirmSettlementEntity;
@@ -51,6 +52,8 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.shinnytech.futures.constants.CommonConstants.AMP_TRADE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_TRANSFER;
 import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
 import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
@@ -387,8 +390,6 @@ public class WebSocketService extends Service {
                         // A text message arrived from the server.
                         public void onTextMessage(final WebSocket websocket, String message) {
                             LogUtils.e(message, false);
-//                            LatestFileManager.writeFile("TDData", message);
-
                             try {
                                 JSONObject jsonObject = new JSONObject(message);
                                 String aid = jsonObject.getString("aid");
@@ -490,6 +491,7 @@ public class WebSocketService extends Service {
             String reqLogin = new Gson().toJson(reqLoginEntity);
             mWebSocketClientTD.sendText(reqLogin);
             LogUtils.e(reqLogin, true);
+//            LatestFileManager.insertLogToDB(reqLogin);
         }
     }
 
@@ -505,7 +507,7 @@ public class WebSocketService extends Service {
             String confirmSettlement = new Gson().toJson(reqConfirmSettlementEntity);
             mWebSocketClientTD.sendText(confirmSettlement);
             LogUtils.e(confirmSettlement, true);
-            LogUtils.w2f(confirmSettlement);
+//            LatestFileManager.insertLogToDB(confirmSettlement);
         }
     }
 
@@ -534,7 +536,9 @@ public class WebSocketService extends Service {
             reqInsertOrderEntity.setTime_condition("GFD");
             String reqInsertOrder = new Gson().toJson(reqInsertOrderEntity);
             mWebSocketClientTD.sendText(reqInsertOrder);
-            LogUtils.w2f(reqInsertOrder);
+            Amplitude.getInstance().logEvent(AMP_TRADE, sDataManager.EVENT_PROPERTIES);
+            LogUtils.e(reqInsertOrder, true);
+//            LatestFileManager.insertLogToDB(reqInsertOrder);
         }
     }
 
@@ -552,8 +556,9 @@ public class WebSocketService extends Service {
             reqCancelOrderEntity.setOrder_id(order_id);
             String reqInsertOrder = new Gson().toJson(reqCancelOrderEntity);
             mWebSocketClientTD.sendText(reqInsertOrder);
+            Amplitude.getInstance().logEvent(AMP_TRADE, sDataManager.EVENT_PROPERTIES);
             LogUtils.e(reqInsertOrder, true);
-            LogUtils.w2f(reqInsertOrder);
+//            LatestFileManager.insertLogToDB(reqInsertOrder);
         }
     }
 
@@ -575,8 +580,9 @@ public class WebSocketService extends Service {
             reqTransferEntity.setAmount(amount);
             String reqTransfer = new Gson().toJson(reqTransferEntity);
             mWebSocketClientTD.sendText(reqTransfer);
+            Amplitude.getInstance().logEvent(AMP_TRANSFER, sDataManager.EVENT_PROPERTIES);
             LogUtils.e(reqTransfer, true);
-            LogUtils.w2f(reqTransfer);
+//            LatestFileManager.insertLogToDB(reqTransfer);
         }
     }
 
@@ -594,7 +600,7 @@ public class WebSocketService extends Service {
             String reqPassword = new Gson().toJson(reqPasswordEntity);
             mWebSocketClientTD.sendText(reqPassword);
             LogUtils.e(reqPassword, true);
-            LogUtils.w2f(reqPassword);
+//            LatestFileManager.insertLogToDB(reqPassword);
         }
     }
 
