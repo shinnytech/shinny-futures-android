@@ -4,21 +4,27 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
+import android.text.TextUtils;
 
+import com.aliyun.sls.android.sdk.LOGClient;
 import com.aliyun.sls.android.sdk.LogEntity;
+import com.aliyun.sls.android.sdk.LogException;
 import com.aliyun.sls.android.sdk.SLSDatabaseManager;
 import com.aliyun.sls.android.sdk.SLSLog;
+import com.aliyun.sls.android.sdk.core.callback.CompletedCallback;
+import com.aliyun.sls.android.sdk.model.Log;
+import com.aliyun.sls.android.sdk.model.LogGroup;
+import com.aliyun.sls.android.sdk.request.PostLogRequest;
+import com.aliyun.sls.android.sdk.result.PostLogResult;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ActivitySettingBinding;
 import com.shinnytech.futures.model.adapter.SettingAdapter;
 import com.shinnytech.futures.model.bean.settingbean.SettingEntity;
-import com.shinnytech.futures.utils.TimeUtils;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,8 +95,7 @@ public class SettingActivity extends BaseActivity {
                         startActivity(klineIntent);
                         break;
                     case CommonConstants.UPLOAD_LOG:
-                        ToastNotificationUtils.showToast(sContext, "日志上传成功");
-//                        upload();
+                        upload();
                         break;
                     default:
                         break;
@@ -106,23 +111,40 @@ public class SettingActivity extends BaseActivity {
     }
 
     private void upload(){
-        new Thread(new Runnable() {
+        /* 创建logGroup */
+        final LogGroup logGroup = new LogGroup("user log", "V"+sDataManager.APP_VERSION + " User Id:" + sDataManager.USER_ID);
 
-            @Override
-            public void run() {
-                try {
-                    /* 发送log 会调用网络操作，需要在一个异步线程中完成*/
-                    List<LogEntity> list = SLSDatabaseManager.getInstance().queryRecordFromDB();
-                    for (LogEntity logEntity: list) {
-                        String msg = "logEntity:{\ntimeStamp: " + logEntity.getTimestamp() + ",\njsonString: " + logEntity.getJsonString() + "}";
-                        SLSLog.logInfo(msg);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return;
+        List<LogEntity> list = SLSDatabaseManager.getInstance().queryRecordFromDB();
+        for (LogEntity logEntity: list) {
+            /* 存入一条log */
+            Log log = new Log();
+            log.PutContent("timeStamp", "" + logEntity.getTimestamp() / 1000);
+            log.PutContent("content", logEntity.getJsonString());
+            LogUtils.e(logEntity.getJsonString(), true);
+            logGroup.PutLog(log);
+        }
+
+        try {
+            PostLogRequest request = new PostLogRequest("kq-xq", "kq-xq", logGroup);
+            LOGClient logClient = BaseApplication.getLOGClient();
+            if (logClient == null)return;
+            logClient.asyncPostLog(request, new CompletedCallback<PostLogRequest, PostLogResult>() {
+                @Override
+                public void onSuccess(PostLogRequest request, PostLogResult result) {
+                    ToastNotificationUtils.showToast(sContext, "日志上传成功");
+                    LogUtils.e("111", true);
                 }
-            }
-        }).start();
+
+                @Override
+                public void onFailure(PostLogRequest request, LogException exception) {
+                    ToastNotificationUtils.showToast(sContext, "日志上传失败");
+                    LogUtils.e("222", true);
+                }
+
+            });
+        } catch (LogException e) {
+            e.printStackTrace();
+        }
     }
 
 }

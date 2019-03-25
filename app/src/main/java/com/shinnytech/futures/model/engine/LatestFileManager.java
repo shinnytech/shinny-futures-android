@@ -779,7 +779,6 @@ public class LatestFileManager {
 
     public static void insertLogToDB(String jsonString) {
         LogEntity entity = new LogEntity();
-        entity.setEndPoint("cn-hangzhou.sls.aliyuncs.com");
         entity.setJsonString(jsonString);
         Date date = new Date();
         entity.setTimestamp(new Long(date.getTime()));

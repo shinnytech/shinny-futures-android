@@ -108,7 +108,7 @@ public class BaseApplication extends Application implements ServiceConnection {
     private BroadcastReceiver mReceiverNetwork;
     private BroadcastReceiver mReceiverScreen;
     private MyHandler mMyHandler = new MyHandler();
-    private LOGClient mLOGClient;
+    private static LOGClient mLOGClient;
 
     public static int getIndex() {
         return index;
@@ -125,6 +125,10 @@ public class BaseApplication extends Application implements ServiceConnection {
     @NonNull
     public static WebSocketService getWebSocketService() {
         return sWebSocketService;
+    }
+
+    public static LOGClient getLOGClient(){
+        return mLOGClient;
     }
 
     @Override
@@ -167,6 +171,8 @@ public class BaseApplication extends Application implements ServiceConnection {
                 new PlainTextAKSKCredentialProvider(ak, sk);
 
         ClientConfiguration conf = new ClientConfiguration();
+        conf.setCachable(false);
+        conf.setConnectType(ClientConfiguration.NetworkPolicy.WWAN_OR_WIFI);
         conf.setConnectionTimeout(15 * 1000); // 连接超时，默认15秒
         conf.setSocketTimeout(15 * 1000); // socket超时，默认15秒
         conf.setMaxConcurrentRequest(5); // 最大并发请求书，默认5个
@@ -340,8 +346,8 @@ public class BaseApplication extends Application implements ServiceConnection {
             String UMENG_KEY = (String) cl.getMethod("getUmengKey").invoke(null);
             String BAIDU_KEY = (String) cl.getMethod("getBaiduKey").invoke(null);
             String AMP_KEY = (String) cl.getMethod("getAmpKey").invoke(null);
-//            String AK = (String) cl.getMethod("getAK").invoke(null);
-//            String SK = (String) cl.getMethod("getSK").invoke(null);
+            String AK = (String) cl.getMethod("getAK").invoke(null);
+            String SK = (String) cl.getMethod("getSK").invoke(null);
             sMDURLs.add(MARKET_URL_8);
             TRANSACTION_URL = TRANSACTION_URL_L;
             JSON_FILE_URL = JSON_FILE_URL_L;
@@ -351,7 +357,7 @@ public class BaseApplication extends Application implements ServiceConnection {
             StatService.start(this);
             Amplitude.getInstance().initialize(this, AMP_KEY).enableForegroundTracking(this);
             Amplitude.getInstance().logEvent(AMP_INIT);
-//            initAliLog(AK, SK);
+            initAliLog(AK, SK);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             sMDURLs.add(MARKET_URL_1);

@@ -491,7 +491,7 @@ public class WebSocketService extends Service {
             String reqLogin = new Gson().toJson(reqLoginEntity);
             mWebSocketClientTD.sendText(reqLogin);
             LogUtils.e(reqLogin, true);
-//            LatestFileManager.insertLogToDB(reqLogin);
+            LatestFileManager.insertLogToDB(reqLogin);
         }
     }
 
@@ -507,7 +507,7 @@ public class WebSocketService extends Service {
             String confirmSettlement = new Gson().toJson(reqConfirmSettlementEntity);
             mWebSocketClientTD.sendText(confirmSettlement);
             LogUtils.e(confirmSettlement, true);
-//            LatestFileManager.insertLogToDB(confirmSettlement);
+            LatestFileManager.insertLogToDB(confirmSettlement);
         }
     }
 
@@ -538,7 +538,7 @@ public class WebSocketService extends Service {
             mWebSocketClientTD.sendText(reqInsertOrder);
             Amplitude.getInstance().logEvent(AMP_TRADE, sDataManager.EVENT_PROPERTIES);
             LogUtils.e(reqInsertOrder, true);
-//            LatestFileManager.insertLogToDB(reqInsertOrder);
+            LatestFileManager.insertLogToDB(reqInsertOrder);
         }
     }
 
@@ -558,7 +558,7 @@ public class WebSocketService extends Service {
             mWebSocketClientTD.sendText(reqInsertOrder);
             Amplitude.getInstance().logEvent(AMP_TRADE, sDataManager.EVENT_PROPERTIES);
             LogUtils.e(reqInsertOrder, true);
-//            LatestFileManager.insertLogToDB(reqInsertOrder);
+            LatestFileManager.insertLogToDB(reqInsertOrder);
         }
     }
 
@@ -582,7 +582,7 @@ public class WebSocketService extends Service {
             mWebSocketClientTD.sendText(reqTransfer);
             Amplitude.getInstance().logEvent(AMP_TRANSFER, sDataManager.EVENT_PROPERTIES);
             LogUtils.e(reqTransfer, true);
-//            LatestFileManager.insertLogToDB(reqTransfer);
+            LatestFileManager.insertLogToDB(reqTransfer);
         }
     }
 
@@ -600,7 +600,7 @@ public class WebSocketService extends Service {
             String reqPassword = new Gson().toJson(reqPasswordEntity);
             mWebSocketClientTD.sendText(reqPassword);
             LogUtils.e(reqPassword, true);
-//            LatestFileManager.insertLogToDB(reqPassword);
+            LatestFileManager.insertLogToDB(reqPassword);
         }
     }
 
