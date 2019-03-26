@@ -198,6 +198,12 @@ public class BaseApplication extends Application implements ServiceConnection {
 
         if (!SPUtils.contains(sContext, CONFIG_KLINE_DURATION_DEFAULT)) {
             SPUtils.putAndApply(sContext, CONFIG_KLINE_DURATION_DEFAULT, CommonConstants.KLINE_DURATION_DEFAULT);
+        }else {
+            //覆盖之前的配置
+            String kline = (String) SPUtils.get(sContext, CONFIG_KLINE_DURATION_DEFAULT, "");
+            kline = kline.replace("钟", "");
+            kline = kline.replace("小", "");
+            SPUtils.putAndApply(sContext, CONFIG_KLINE_DURATION_DEFAULT, kline);
         }
 
         if (!SPUtils.contains(sContext, CONFIG_PARA_MA)) {

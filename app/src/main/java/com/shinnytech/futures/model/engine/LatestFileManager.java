@@ -5,7 +5,6 @@ import android.support.v4.content.ContextCompat;
 
 import com.aliyun.sls.android.sdk.LogEntity;
 import com.aliyun.sls.android.sdk.SLSDatabaseManager;
-import com.aliyun.sls.android.sdk.SLSLog;
 import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
@@ -15,6 +14,8 @@ import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
+import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.TimeUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -783,6 +784,19 @@ public class LatestFileManager {
         Date date = new Date();
         entity.setTimestamp(new Long(date.getTime()));
         SLSDatabaseManager.getInstance().insertRecordIntoDB(entity);
+    }
+
+    public static void deleteLogDB(){
+        Context context = BaseApplication.getContext();
+        if (SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
+            String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
+            if (!TimeUtils.getNowTime().equals(date)) {
+                List<LogEntity> list = SLSDatabaseManager.getInstance().queryRecordFromDB();
+                for (LogEntity logEntity: list) {
+                    SLSDatabaseManager.getInstance().deleteRecordFromDB(logEntity);
+                }
+            }
+        }
     }
 
 }

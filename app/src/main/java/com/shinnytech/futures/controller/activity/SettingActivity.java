@@ -2,15 +2,16 @@ package com.shinnytech.futures.controller.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
-import android.text.TextUtils;
+import android.text.format.DateFormat;
 
 import com.aliyun.sls.android.sdk.LOGClient;
 import com.aliyun.sls.android.sdk.LogEntity;
 import com.aliyun.sls.android.sdk.LogException;
 import com.aliyun.sls.android.sdk.SLSDatabaseManager;
-import com.aliyun.sls.android.sdk.SLSLog;
 import com.aliyun.sls.android.sdk.core.callback.CompletedCallback;
 import com.aliyun.sls.android.sdk.model.Log;
 import com.aliyun.sls.android.sdk.model.LogGroup;
@@ -22,11 +23,13 @@ import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ActivitySettingBinding;
 import com.shinnytech.futures.model.adapter.SettingAdapter;
 import com.shinnytech.futures.model.bean.settingbean.SettingEntity;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import static com.shinnytech.futures.constants.CommonConstants.SETTING;
 
@@ -34,6 +37,10 @@ public class SettingActivity extends BaseActivity {
 
     private ActivitySettingBinding mBinding;
     private SettingAdapter mSettingAdapter;
+
+    public final static int HANDLER_MESSAGE_UPLOAD_FAILED = 00011;
+    public final static int HANDLER_MESSAGE_UPLOAD_SUCCESS = 00012;
+    private MyHandler myHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +85,8 @@ public class SettingActivity extends BaseActivity {
         settingEntities.add(settingEntity3);
         mSettingAdapter = new SettingAdapter(this, settingEntities);
         mBinding.settingRv.setAdapter(mSettingAdapter);
+
+        myHandler = new MyHandler(this);
     }
 
     @Override
@@ -112,15 +121,14 @@ public class SettingActivity extends BaseActivity {
 
     private void upload(){
         /* 创建logGroup */
-        final LogGroup logGroup = new LogGroup("user log", "V"+sDataManager.APP_VERSION + " User Id:" + sDataManager.USER_ID);
+        final LogGroup logGroup = new LogGroup("user log", "V"+sDataManager.APP_VERSION + " User Id: " + sDataManager.USER_ID);
 
         List<LogEntity> list = SLSDatabaseManager.getInstance().queryRecordFromDB();
         for (LogEntity logEntity: list) {
             /* 存入一条log */
             Log log = new Log();
-            log.PutContent("timeStamp", "" + logEntity.getTimestamp() / 1000);
+            log.PutContent("timeStamp", getDate(logEntity.getTimestamp()));
             log.PutContent("content", logEntity.getJsonString());
-            LogUtils.e(logEntity.getJsonString(), true);
             logGroup.PutLog(log);
         }
 
@@ -131,19 +139,52 @@ public class SettingActivity extends BaseActivity {
             logClient.asyncPostLog(request, new CompletedCallback<PostLogRequest, PostLogResult>() {
                 @Override
                 public void onSuccess(PostLogRequest request, PostLogResult result) {
-                    ToastNotificationUtils.showToast(sContext, "日志上传成功");
-                    LogUtils.e("111", true);
+                    Message message = new Message();
+                    message.what = HANDLER_MESSAGE_UPLOAD_SUCCESS;
+                    myHandler.sendMessage(message);
                 }
 
                 @Override
                 public void onFailure(PostLogRequest request, LogException exception) {
-                    ToastNotificationUtils.showToast(sContext, "日志上传失败");
-                    LogUtils.e("222", true);
+                    Message message = new Message();
+                    message.what = HANDLER_MESSAGE_UPLOAD_FAILED;
+                    myHandler.sendMessage(message);
                 }
 
             });
         } catch (LogException e) {
             e.printStackTrace();
+        }
+    }
+
+    private String getDate(long time) {
+        Calendar cal = Calendar.getInstance(Locale.CHINA);
+        cal.setTimeInMillis(time);
+        String date = DateFormat.format("yyyy-MM-dd HH:mm:ss", cal).toString();
+        return date;
+    }
+
+    static class MyHandler extends Handler {
+        WeakReference<SettingActivity> mActivityReference;
+
+        MyHandler(SettingActivity activity) {
+            mActivityReference = new WeakReference<>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final SettingActivity activity = mActivityReference.get();
+            if (activity != null) {
+                switch (msg.what) {
+                    case HANDLER_MESSAGE_UPLOAD_SUCCESS:
+                        ToastNotificationUtils.showToast(BaseApplication.getContext(), "日志上传成功");
+                        break;
+                    case HANDLER_MESSAGE_UPLOAD_FAILED:
+                        ToastNotificationUtils.showToast(BaseApplication.getContext(), "日志上传失败");
+                    default:
+                        break;
+                }
+            }
         }
     }
 
