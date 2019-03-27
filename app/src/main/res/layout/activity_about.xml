@@ -193,7 +193,7 @@
                 android:textSize="@dimen/font_size_small_high"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Copyright(c)2006-2018 ShinnyTech. All Rights Reserved"
+                android:text="Copyright(c)2006-2019 ShinnyTech. All Rights Reserved"
                 android:textColor="@color/gray" />
         </LinearLayout>
 

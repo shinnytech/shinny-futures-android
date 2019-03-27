@@ -137,17 +137,13 @@ public final class CommonConstants {
 
     //amp event type
     public static final String AMP_INIT = "amp_init";
-    public static final String AMP_QUIT = "amp_quit";
     public static final String AMP_BACKGROUND = "amp_background";
     public static final String AMP_TRADE = "amp_trade";
     public static final String AMP_TRANSFER = "amp_transfer";
     public static final String AMP_LOGGED = "amp_logged";
-    //amp event property
-    public static final String AMP_EVENT_BROKER_ID = "broker_id";
-    public static final String AMP_EVENT_PACKAGE_ID = "package_id";
+
     //amp user property
-    public static final String AMP_USER_PHONE_BRAND = "phone_brand";
-    public static final String AMP_USER_PHONE_OS_LAST = "phone_os_last";
     public static final String AMP_USER_SCREEN_SIZE = "screen_size";
-    public static final String AMP_USER_VERSION_ID_LAST = "version_id_last";
+    public static final String AMP_USER_BROKER_ID = "broker_id_last";
+    public static final String AMP_USER_PACKAGE_ID = "package_id_last";
 }

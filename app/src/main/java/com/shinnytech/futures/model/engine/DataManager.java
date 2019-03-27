@@ -3,7 +3,6 @@ package com.shinnytech.futures.model.engine;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.BankEntity;
@@ -33,8 +32,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BROKER_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PACKAGE_ID;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_CHANGE_SUCCESS;
@@ -95,11 +92,6 @@ public class DataManager {
      */
     public String QUOTES = "";
     public String CHARTS = "";
-    /**
-     * date: 2019/3/22
-     * description: 用户的期货公司
-     */
-    public JSONObject EVENT_PROPERTIES = new JSONObject();
 
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
     /**
@@ -119,12 +111,6 @@ public class DataManager {
     private BrokerEntity BROKER = new BrokerEntity();
 
     private DataManager() {
-        try {
-            EVENT_PROPERTIES.put(AMP_EVENT_BROKER_ID, "unknown");
-            EVENT_PROPERTIES.put(AMP_EVENT_PACKAGE_ID, BuildConfig.FLAVOR);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 

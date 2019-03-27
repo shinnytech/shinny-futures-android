@@ -23,7 +23,6 @@ import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ActivitySettingBinding;
 import com.shinnytech.futures.model.adapter.SettingAdapter;
 import com.shinnytech.futures.model.bean.settingbean.SettingEntity;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import java.lang.ref.WeakReference;
@@ -142,13 +141,13 @@ public class SettingActivity extends BaseActivity {
                     Message message = new Message();
                     message.what = HANDLER_MESSAGE_UPLOAD_SUCCESS;
                     myHandler.sendMessage(message);
-                    List<LogEntity> list = SLSDatabaseManager.getInstance().queryRecordFromDB();
-                    if (list != null && list.size() > 1000){
-                        for (int i = 0; i < 500; i++){
-                            LogEntity logEntity = list.get(i);
-                            SLSDatabaseManager.getInstance().deleteRecordFromDB(logEntity);
-                        }
-                    }
+//                    List<LogEntity> list = SLSDatabaseManager.getInstance().queryRecordFromDB();
+//                    if (list != null && list.size() > 1000){
+//                        for (int i = 0; i < 500; i++){
+//                            LogEntity logEntity = list.get(i);
+//                            SLSDatabaseManager.getInstance().deleteRecordFromDB(logEntity);
+//                        }
+//                    }
                 }
 
                 @Override

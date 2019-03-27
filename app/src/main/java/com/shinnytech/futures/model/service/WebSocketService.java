@@ -536,7 +536,7 @@ public class WebSocketService extends Service {
             reqInsertOrderEntity.setTime_condition("GFD");
             String reqInsertOrder = new Gson().toJson(reqInsertOrderEntity);
             mWebSocketClientTD.sendText(reqInsertOrder);
-            Amplitude.getInstance().logEvent(AMP_TRADE, sDataManager.EVENT_PROPERTIES);
+            Amplitude.getInstance().logEvent(AMP_TRADE);
             LogUtils.e(reqInsertOrder, true);
             LatestFileManager.insertLogToDB(reqInsertOrder);
         }
@@ -556,7 +556,7 @@ public class WebSocketService extends Service {
             reqCancelOrderEntity.setOrder_id(order_id);
             String reqInsertOrder = new Gson().toJson(reqCancelOrderEntity);
             mWebSocketClientTD.sendText(reqInsertOrder);
-            Amplitude.getInstance().logEvent(AMP_TRADE, sDataManager.EVENT_PROPERTIES);
+            Amplitude.getInstance().logEvent(AMP_TRADE);
             LogUtils.e(reqInsertOrder, true);
             LatestFileManager.insertLogToDB(reqInsertOrder);
         }
@@ -580,7 +580,7 @@ public class WebSocketService extends Service {
             reqTransferEntity.setAmount(amount);
             String reqTransfer = new Gson().toJson(reqTransferEntity);
             mWebSocketClientTD.sendText(reqTransfer);
-            Amplitude.getInstance().logEvent(AMP_TRANSFER, sDataManager.EVENT_PROPERTIES);
+            Amplitude.getInstance().logEvent(AMP_TRANSFER);
             LogUtils.e(reqTransfer, true);
             LatestFileManager.insertLogToDB(reqTransfer);
         }

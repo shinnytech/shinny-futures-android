@@ -2,6 +2,7 @@ package com.shinnytech.futures.application;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -16,6 +17,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.aliyun.sls.android.sdk.ClientConfiguration;
@@ -61,7 +63,6 @@ import okhttp3.OkHttpClient;
 
 import static com.shinnytech.futures.constants.CommonConstants.AMP_BACKGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_INIT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_QUIT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_DURATION_DEFAULT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
@@ -422,7 +423,6 @@ public class BaseApplication extends Application implements ServiceConnection {
             public void onActivityDestroyed(Activity activity) {
                 if (activity instanceof MainActivity) {
                     LogUtils.e("App彻底销毁", true);
-                    Amplitude.getInstance().logEvent(AMP_QUIT, DataManager.getInstance().EVENT_PROPERTIES);
                     if (mReceiverMarket != null)LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverMarket);
                     if (mReceiverTransaction != null)LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverTransaction);
                     if (mReceiverNetwork != null)sContext.unregisterReceiver(mReceiverNetwork);
@@ -437,7 +437,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                         LogUtils.e("解除绑定", true);
                         mServiceBound = false;
                     }
-//                    System.exit(0);
+                    System.exit(0);
                 }
             }
         });
@@ -467,7 +467,7 @@ public class BaseApplication extends Application implements ServiceConnection {
         sWebSocketService.disConnectTD();
         sWebSocketService.disConnectMD();
         mBackGround = true;
-        Amplitude.getInstance().logEvent(AMP_BACKGROUND, DataManager.getInstance().EVENT_PROPERTIES);
+        Amplitude.getInstance().logEvent(AMP_BACKGROUND);
     }
 
     /**

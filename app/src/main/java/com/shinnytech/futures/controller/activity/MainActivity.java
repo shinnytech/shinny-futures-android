@@ -5,17 +5,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
@@ -30,10 +30,9 @@ import com.shinnytech.futures.utils.ToastNotificationUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_PHONE_BRAND;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_PHONE_OS_LAST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_PACKAGE_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_SCREEN_SIZE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_VERSION_ID_LAST;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
@@ -94,17 +93,13 @@ public class MainActivity extends BaseActivity {
      * description: 初始化amp用户属性
      */
     private void initAmpUserProperties(){
-        String os = "Android " + Build.VERSION.RELEASE;
-        String brand = Build.BRAND + " " + Build.MODEL;
-        String version_id = DataManager.getInstance().APP_VERSION;
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int height = metrics.heightPixels;
         int width = metrics.widthPixels;
-        Identify identify = new Identify().set(AMP_USER_PHONE_BRAND, brand)
-                .set(AMP_USER_PHONE_OS_LAST, os)
-                .set(AMP_USER_SCREEN_SIZE, width + "*" + height)
-                .set(AMP_USER_VERSION_ID_LAST, version_id);
+        Identify identify = new Identify().set(AMP_USER_BROKER_ID, "unknown")
+                .set(AMP_USER_PACKAGE_ID, BuildConfig.FLAVOR)
+                .set(AMP_USER_SCREEN_SIZE, width + "*" + height);
         Amplitude.getInstance().identify(identify);
     }
 
@@ -256,7 +251,7 @@ public class MainActivity extends BaseActivity {
                     ToastNotificationUtils.showToast(BaseApplication.getContext(), getString(R.string.main_activity_exit));
                     mExitTime = System.currentTimeMillis();
                 } else {
-                    this.finish();
+                    MainActivity.this.finish();
                 }
                 return true;
             }

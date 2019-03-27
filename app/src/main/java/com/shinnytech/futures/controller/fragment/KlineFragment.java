@@ -1084,19 +1084,28 @@ public class KlineFragment extends BaseChartFragment {
                 KlineEntity.DataEntity dataEntity = dataEntities.get(xValue);
                 String xValuePre = MathUtils.subtract(xValue, "1");
                 KlineEntity.DataEntity dataEntityPre = dataEntities.get(xValuePre);
-                if (dataEntity != null && dataEntityPre != null) {
+                if (dataEntity != null) {
                     calendar.setTimeInMillis(Long.valueOf(dataEntity.getDatetime()) / 1000000);
                     String time = simpleDateFormat.format(calendar.getTime());
                     String open = LatestFileManager.saveScaleByPtick(dataEntity.getOpen(), instrument_id);
                     String high = LatestFileManager.saveScaleByPtick(dataEntity.getHigh(), instrument_id);
                     String low = LatestFileManager.saveScaleByPtick(dataEntity.getLow(), instrument_id);
                     String close = LatestFileManager.saveScaleByPtick(dataEntity.getClose(), instrument_id);
-                    String closePre = LatestFileManager.saveScaleByPtick(dataEntityPre.getClose(), instrument_id);
-                    String change = LatestFileManager.saveScaleByPtick(MathUtils.subtract(dataEntity.getClose(), dataEntityPre.getClose()), instrument_id);
-                    String changePercent = MathUtils.round(MathUtils.multiply(MathUtils.divide(change, dataEntityPre.getClose()), "100"), 2) + "%";
                     String volume = dataEntity.getVolume();
                     String closeOi = dataEntity.getClose_oi();
-                    String closeOiDelta = MathUtils.subtract(closeOi, dataEntityPre.getClose_oi());
+                    String closeOiDelta = closeOi;
+                    String closePre = "0";
+                    String changePercent = "-";
+                    if (dataEntityPre != null){
+                        closePre = LatestFileManager.saveScaleByPtick(dataEntityPre.getClose(), instrument_id);
+                        closeOiDelta = MathUtils.subtract(closeOi, dataEntityPre.getClose_oi());
+                    }
+                    String change = MathUtils.subtract(close, closePre);
+                    if (!"0".equals(closePre)){
+                        changePercent = MathUtils.round(MathUtils.multiply(
+                                MathUtils.divide(change, closePre), "100"), 2) + "%";
+                    }
+
                     this.yValue.setText(KlineFragment.this.yValue);
                     if (this.dateTime.getVisibility() == VISIBLE) {
                         String date = simpleDateFormat1.format(calendar.getTime());
