@@ -59,6 +59,7 @@ import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
+import static com.shinnytech.futures.constants.CommonConstants.TD_ONLINE;
 
 /**
  * date: 7/9/17
@@ -395,6 +396,7 @@ public class WebSocketService extends Service {
                                 String aid = jsonObject.getString("aid");
                                 switch (aid) {
                                     case "rtn_brokers":
+                                        sendMessage(TD_ONLINE, TD_BROADCAST);
                                         mWebSocketClientTD.sendPing();
                                         loginConfig(message);
                                         break;
@@ -438,16 +440,21 @@ public class WebSocketService extends Service {
         sDataManager.getBroker().setBrokers(brokerInfo.getBrokers());
         sendMessage(TD_MESSAGE_BROKER_INFO, TD_BROADCAST);
 
-        Context context = BaseApplication.getContext();
-        if (SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
-            String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
-            if (TimeUtils.getNowTime().equals(date)) {
-                String name = (String) SPUtils.get(context, CommonConstants.CONFIG_ACCOUNT, "");
-                String password = (String) SPUtils.get(context, CommonConstants.CONFIG_PASSWORD, "");
-                String broker = (String) SPUtils.get(context, CommonConstants.CONFIG_BROKER, "");
-                sendReqLogin(broker, name, password);
+        if (sDataManager.IS_FIRST_LOGIN){
+            sDataManager.IS_FIRST_LOGIN = false;
+        }else {
+            Context context = BaseApplication.getContext();
+            if (SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
+                String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
+                if (TimeUtils.getNowTime().equals(date)) {
+                    String name = (String) SPUtils.get(context, CommonConstants.CONFIG_ACCOUNT, "");
+                    String password = (String) SPUtils.get(context, CommonConstants.CONFIG_PASSWORD, "");
+                    String broker = (String) SPUtils.get(context, CommonConstants.CONFIG_BROKER, "");
+                    sendReqLogin(broker, name, password);
+                }
             }
         }
+
     }
 
     public void reConnectTD() {

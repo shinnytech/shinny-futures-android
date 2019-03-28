@@ -921,11 +921,8 @@ public class KlineFragment extends BaseChartFragment {
             if (BaseApplication.getWebSocketService() != null)
                 BaseApplication.getWebSocketService().sendSetChartKline(instrument_id, VIEW_WIDTH, mKlineType);
 
-
-            if (sDataManager.IS_LOGIN) {
-                if (mIsPosition) addPositionLimitLines();
-                if (mIsPending) addOrderLimitLines();
-            }
+            if (mIsPosition) addPositionLimitLines();
+            if (mIsPending) addOrderLimitLines();
 
         }
     }
@@ -958,12 +955,8 @@ public class KlineFragment extends BaseChartFragment {
             instrument_id_transaction = searchEntity.getUnderlying_symbol();
         else instrument_id_transaction = instrument_id;
 
-        if (sDataManager.IS_LOGIN) {
-            if (mIsPosition) addPositionLimitLines();
-            if (mIsPending) addOrderLimitLines();
-        }
-
-
+        if (mIsPosition) addPositionLimitLines();
+        if (mIsPending) addOrderLimitLines();
     }
 
     /**
@@ -975,18 +968,14 @@ public class KlineFragment extends BaseChartFragment {
     public void onEventMainThread(SetUpEvent data) {
         if (mIsPending != data.isPending()) {
             mIsPending = data.isPending();
-            if (sDataManager.IS_LOGIN) {
-                if (mIsPending) addOrderLimitLines();
-                else removeOrderLimitLines();
-            }
+            if (mIsPending) addOrderLimitLines();
+            else removeOrderLimitLines();
         }
 
         if (mIsPosition != data.isPosition()) {
             mIsPosition = data.isPosition();
-            if (sDataManager.IS_LOGIN) {
-                if (mIsPosition) addPositionLimitLines();
-                else removePositionLimitLines();
-            }
+            if (mIsPosition) addPositionLimitLines();
+            else removePositionLimitLines();
         }
 
         if (mIsAverage != data.isAverage()) {

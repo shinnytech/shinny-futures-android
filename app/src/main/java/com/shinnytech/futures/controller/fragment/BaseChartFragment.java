@@ -185,10 +185,8 @@ public class BaseChartFragment extends LazyLoadFragment {
         if (!mIsAverage) mTopChartViewBase.getLegend().setEnabled(false);
         mIsPosition = ((FutureInfoActivity) getActivity()).isPosition();
         mIsPending = ((FutureInfoActivity) getActivity()).isPending();
-        if (sDataManager.IS_LOGIN) {
-            if (mIsPosition) addPositionLimitLines();
-            if (mIsPending) addOrderLimitLines();
-        }
+        if (mIsPosition) addPositionLimitLines();
+        if (mIsPending) addOrderLimitLines();
     }
 
     protected void initData() {
@@ -285,7 +283,7 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void refreshTrade() {
         UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
         if (userEntity == null) return;
-        if (sDataManager.IS_LOGIN && mIsPending) {
+        if (mIsPending) {
             for (OrderEntity orderEntity :
                     userEntity.getOrders().values()) {
                 if (orderEntity != null &&
@@ -305,7 +303,7 @@ public class BaseChartFragment extends LazyLoadFragment {
             }
         }
 
-        if (sDataManager.IS_LOGIN && mIsPosition) {
+        if (mIsPosition) {
             String key = instrument_id_transaction;
             if (!mPositionLimitLines.containsKey(key + "0")) {
                 //添加多头持仓线

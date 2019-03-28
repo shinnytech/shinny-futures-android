@@ -93,6 +93,7 @@ public final class CommonConstants {
     public static final int LOGIN_JUMP_TO_LOG_IN_ACTIVITY = 8;
     public static final int KLINE_DURATION_ACYIVITY_TO_ADD_DURATION_ACTIVITY = 9;
     public static final int LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY = 10;
+    public static final int LOGIN_JUMP_TO_MAIN_ACTIVITY = 11;
     //app名称
     public static final String KUAI_QI_XIAO_Q = "快期小Q";
     //本地自选合约文件名

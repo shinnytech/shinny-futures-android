@@ -94,7 +94,6 @@ public class FutureInfoActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        mFutureInfoActivityPresenter.checkLoginState();
         sendSubscribeQuote(mInstrumentId);
     }
 

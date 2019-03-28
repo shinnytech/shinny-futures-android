@@ -33,34 +33,6 @@ public class NavigationRightAdapter extends RecyclerView.Adapter<NavigationRight
         this.mData = mData;
     }
 
-    public void updateItem(int position, String content) {
-        NavigationRightEntity navigationRightEntity = mData.get(position);
-        if (navigationRightEntity == null) return;
-        navigationRightEntity.setContent(content);
-        notifyItemChanged(position);
-    }
-
-    public void addItem(int position) {
-        NavigationRightEntity navigationRightEntity = mData.get(position);
-        if (navigationRightEntity == null) return;
-        if (CommonConstants.POSITION.equals(navigationRightEntity.getContent())) {
-            NavigationRightEntity menu = new NavigationRightEntity();
-            menu.setIcon(R.mipmap.ic_assignment_turned_in_white_18dp);
-            menu.setContent(CommonConstants.PASSWORD);
-            mData.add(position, menu);
-            notifyItemInserted(position);
-        }
-    }
-
-    public void removeItem(int position) {
-        NavigationRightEntity navigationRightEntity = mData.get(position);
-        if (navigationRightEntity == null) return;
-        if (CommonConstants.PASSWORD.equals(navigationRightEntity.getContent())) {
-            mData.remove(position);
-            notifyItemRemoved(position);
-        }
-    }
-
     @Override
     public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         final ItemRightNavigationBinding binding = DataBindingUtil.inflate(LayoutInflater
@@ -105,6 +77,7 @@ public class NavigationRightAdapter extends RecyclerView.Adapter<NavigationRight
             mBinding.icon.setImageResource(icon);
             mBinding.content.setText(content);
 
+            //分割线加粗
             if (CommonConstants.LOGIN.equals(content) || CommonConstants.LOGOUT.equals(content)
                     || CommonConstants.SETTING.equals(content)) {
                 ViewGroup.LayoutParams layoutParams = mBinding.divider.getLayoutParams();

@@ -1,9 +1,7 @@
 package com.shinnytech.futures.controller;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
+import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
@@ -66,11 +64,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
-import static com.shinnytech.futures.constants.CommonConstants.LOGIN_JUMP_TO_LOG_IN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY;
@@ -166,16 +162,16 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
         mBinding.navigationRightRv.setItemAnimator(new DefaultItemAnimator());
         NavigationRightEntity menu0 = new NavigationRightEntity();
         menu0.setIcon(R.mipmap.ic_account_circle_white_18dp);
-        menu0.setContent(CommonConstants.LOGIN);
+        menu0.setContent(CommonConstants.LOGOUT);
         NavigationRightEntity menu1 = new NavigationRightEntity();
         menu1.setIcon(R.mipmap.ic_settings_white_18dp);
         menu1.setContent(CommonConstants.SETTING);
         NavigationRightEntity menu2 = new NavigationRightEntity();
         menu2.setIcon(R.mipmap.ic_assessment_white_18dp);
         menu2.setContent(CommonConstants.ACCOUNT);
-//        NavigationRightEntity menu3 = new NavigationRightEntity();
-//        menu3.setIcon(R.mipmap.ic_assignment_turned_in_white_18dp);
-//        menu3.setContent(CommonConstants.PASSWORD);
+        NavigationRightEntity menu3 = new NavigationRightEntity();
+        menu3.setIcon(R.mipmap.ic_assignment_turned_in_white_18dp);
+        menu3.setContent(CommonConstants.PASSWORD);
         NavigationRightEntity menu4 = new NavigationRightEntity();
         menu4.setIcon(R.mipmap.ic_donut_large_white_18dp);
         menu4.setContent(CommonConstants.POSITION);
@@ -198,7 +194,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
         list.add(menu0);
         list.add(menu1);
         list.add(menu2);
-//        list.add(menu3);
+        list.add(menu3);
         list.add(menu4);
         list.add(menu5);
         list.add(menu6);
@@ -209,72 +205,12 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
         mBinding.navigationRightRv.setAdapter(mNavigationRightAdapter);
     }
 
-    public ViewPagerFragmentAdapter getmViewPagerFragmentAdapter() {
-        return mViewPagerFragmentAdapter;
-    }
-
     //使导航栏和viewPager页面匹配,重新初始化mCurItemId
     public void resetNavigationItem() {
         mCurItemId = mBinding.vpContent.getCurrentItem();
         mBinding.nvMenu.getMenu().getItem(mCurItemId).setChecked(true);
     }
 
-    /**
-     * date: 1/16/18
-     * author: chenli
-     * description: 检查是否第一次启动APP,弹出免责条款框
-     */
-    public void checkResponsibility() {
-        try {
-            final float nowVersionCode = DataManager.getInstance().APP_CODE;
-            float versionCode = (float) SPUtils.get(sContext, "versionCode", 0.0f);
-            if (nowVersionCode > versionCode) {
-                final Dialog dialog = new Dialog(mMainActivity, R.style.responsibilityDialog);
-                View view = View.inflate(mMainActivity, R.layout.view_dialog_responsibility, null);
-                dialog.setContentView(view);
-                dialog.setCanceledOnTouchOutside(false);
-                dialog.setCancelable(false);
-                dialog.show();
-                view.findViewById(R.id.agree).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        SPUtils.putAndApply(mMainActivity, "versionCode", nowVersionCode);
-                        dialog.dismiss();
-                    }
-                });
-                view.findViewById(R.id.disagree).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mMainActivity.finish();
-                    }
-                });
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    /**
-     * date: 7/7/17
-     * author: chenli
-     * description: 检查网络的状态
-     */
-    public void checkNetwork() {
-        if (!NetworkUtils.isNetworkConnected(sContext)) {
-            AlertDialog.Builder dialog = new AlertDialog.Builder(mMainActivity);
-            dialog.setTitle("登录结果");
-            dialog.setMessage("网络故障，无法连接到服务器");
-            dialog.setCancelable(false);
-            dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    mMainActivity.finish();
-                }
-            });
-            dialog.show();
-        }
-    }
 
     /**
      * date: 1/18/18
@@ -309,17 +245,11 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
             public void onItemClick(View view, int position) {
                 String title = (String) view.getTag();
                 switch (title) {
-                    case CommonConstants.LOGIN:
-                        Intent intentLogin = new Intent(mMainActivity, LoginActivity.class);
-                        intentLogin.putExtra(ACTIVITY_TYPE, "MainActivityLoginMenu");
-                        mMainActivity.startActivityForResult(intentLogin, LOGIN_JUMP_TO_LOG_IN_ACTIVITY);
-                        break;
                     case CommonConstants.LOGOUT:
-                        DataManager.getInstance().IS_LOGIN = false;
                         SPUtils.putAndApply(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
                         BaseApplication.getWebSocketService().reConnectTD();
-                        mNavigationRightAdapter.updateItem(position, CommonConstants.LOGIN);
-                        mNavigationRightAdapter.removeItem(3);
+                        mMainActivity.setResult(Activity.RESULT_OK);
+                        mMainActivity.finish();
                         break;
                     case CommonConstants.SETTING:
                         Intent intentSetting = new Intent(mMainActivity, SettingActivity.class);

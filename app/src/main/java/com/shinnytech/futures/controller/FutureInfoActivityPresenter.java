@@ -28,7 +28,6 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
-import com.shinnytech.futures.controller.activity.LoginActivity;
 import com.shinnytech.futures.controller.fragment.BaseChartFragment;
 import com.shinnytech.futures.controller.fragment.CurrentDayFragment;
 import com.shinnytech.futures.controller.fragment.HandicapFragment;
@@ -57,7 +56,6 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
@@ -85,10 +83,7 @@ import static com.shinnytech.futures.constants.CommonConstants.KLINE_5_MINUTE;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_5_SECOND;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_7_DAY;
 import static com.shinnytech.futures.constants.CommonConstants.MINUTE_FRAGMENT;
-import static com.shinnytech.futures.constants.CommonConstants.ORDER_JUMP_TO_LOG_IN_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.POSITION_JUMP_TO_LOG_IN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.SECOND_FRAGMENT;
-import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_JUMP_TO_LOG_IN_ACTIVITY;
 
 /**
  * Created on 1/17/18.
@@ -511,13 +506,6 @@ public class FutureInfoActivityPresenter {
         mBinding.rbPositionInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!DataManager.getInstance().IS_LOGIN) {
-                    Intent intent = new Intent(mFutureInfoActivity, LoginActivity.class);
-                    //判断从哪个页面跳到登录页，登录页的销毁方式不一样
-                    intent.putExtra(ACTIVITY_TYPE, "FutureInfoActivity");
-                    mFutureInfoActivity.startActivityForResult(intent, POSITION_JUMP_TO_LOG_IN_ACTIVITY);
-                    return;
-                }
                 controlTransactionPageVisibility(1);
             }
         });
@@ -525,12 +513,6 @@ public class FutureInfoActivityPresenter {
         mBinding.rbOrderInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!DataManager.getInstance().IS_LOGIN) {
-                    Intent intent = new Intent(mFutureInfoActivity, LoginActivity.class);
-                    intent.putExtra(ACTIVITY_TYPE, "FutureInfoActivity");
-                    mFutureInfoActivity.startActivityForResult(intent, ORDER_JUMP_TO_LOG_IN_ACTIVITY);
-                    return;
-                }
                 controlTransactionPageVisibility(2);
             }
         });
@@ -538,12 +520,6 @@ public class FutureInfoActivityPresenter {
         mBinding.rbTransactionInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!DataManager.getInstance().IS_LOGIN) {
-                    Intent intent = new Intent(mFutureInfoActivity, LoginActivity.class);
-                    intent.putExtra(ACTIVITY_TYPE, "FutureInfoActivity");
-                    mFutureInfoActivity.startActivityForResult(intent, TRANSACTION_JUMP_TO_LOG_IN_ACTIVITY);
-                    return;
-                }
                 controlTransactionPageVisibility(3);
             }
         });
@@ -590,22 +566,6 @@ public class FutureInfoActivityPresenter {
             }
             mBinding.vpInfoContent.setCurrentItem(index, false);
         }
-    }
-
-    /**
-     * date: 1/18/18
-     * author: chenli
-     * description: 当从持仓菜单进入本页时判断登录状态
-     */
-    public void checkLoginState() {
-        if (mNav_position == 1 && !DataManager.getInstance().IS_LOGIN) {
-            Intent intent = new Intent(mFutureInfoActivity, LoginActivity.class);
-            //判断从哪个页面跳到登录页，登录页的销毁方式不一样
-            intent.putExtra(ACTIVITY_TYPE, "FutureInfoActivity");
-            mFutureInfoActivity.startActivity(intent);
-            mNav_position = 2;
-        } else if (mNav_position == 2 && !DataManager.getInstance().IS_LOGIN)
-            mFutureInfoActivity.finish();
     }
 
     public void setToolbarTitle() {

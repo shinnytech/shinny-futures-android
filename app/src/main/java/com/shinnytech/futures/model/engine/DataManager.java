@@ -52,11 +52,6 @@ public class DataManager {
 
     private static final DataManager INSTANCE = new DataManager();
     /**
-     * date: 7/7/17
-     * description: 用于判断是否登录成功的全局标志
-     */
-    public boolean IS_LOGIN = false;
-    /**
      * date: 9/1/18
      * description: 账户id
      */
@@ -92,6 +87,12 @@ public class DataManager {
      */
     public String QUOTES = "";
     public String CHARTS = "";
+
+    /**
+     * date: 2019/3/28
+     * description: 判断是否首次登录
+     */
+    public boolean IS_FIRST_LOGIN = true;
 
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
     /**
@@ -450,7 +451,6 @@ public class DataManager {
                                             String userId = user.getJSONObject("session").optString("user_id");
                                             USER_ID = userId;
                                             userEntity.setUser_id(userId);
-                                            IS_LOGIN = true;
                                             if (BaseApplication.getWebSocketService() != null)
                                                 BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_LOGIN, TD_BROADCAST);
                                             break;

@@ -145,12 +145,6 @@ public class BankTransferActivity extends BaseActivity {
     @Override
     public void onResume() {
         super.onResume();
-        if (!sDataManager.IS_LOGIN) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            //判断从哪个页面跳到登录页，登录页的销毁方式不一样
-            intent.putExtra(ACTIVITY_TYPE, "MainActivity");
-            startActivityForResult(intent, 0);
-        }
     }
 
     private void refreshBank() {

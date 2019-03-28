@@ -2,7 +2,6 @@ package com.shinnytech.futures.application;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -15,9 +14,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.aliyun.sls.android.sdk.ClientConfiguration;
@@ -35,6 +34,7 @@ import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.ConfirmActivity;
+import com.shinnytech.futures.controller.activity.LoginActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.DataManager;
@@ -48,7 +48,6 @@ import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.umeng.commonsdk.UMConfigure;
 
-import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -70,7 +69,6 @@ import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_CONF
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PARA_MA;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
-import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.JSON_FILE_URL;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_1;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_2;
@@ -421,7 +419,7 @@ public class BaseApplication extends Application implements ServiceConnection {
 
             @Override
             public void onActivityDestroyed(Activity activity) {
-                if (activity instanceof MainActivity) {
+                if (activity instanceof LoginActivity) {
                     LogUtils.e("App彻底销毁", true);
                     if (mReceiverMarket != null)LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverMarket);
                     if (mReceiverTransaction != null)LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverTransaction);
@@ -450,7 +448,7 @@ public class BaseApplication extends Application implements ServiceConnection {
      */
     private void notifyForeground() {
         //前台
-        if (mServiceBound && mBackGround) {
+        if (mServiceBound && mBackGround && sWebSocketService != null) {
             mBackGround = false;
             sWebSocketService.connectTD();
             sWebSocketService.connectMD(sMDURLs.get(index));
@@ -464,9 +462,11 @@ public class BaseApplication extends Application implements ServiceConnection {
      */
     private void notifyBackground() {
         //后台
-        sWebSocketService.disConnectTD();
-        sWebSocketService.disConnectMD();
-        mBackGround = true;
+        if (sWebSocketService != null){
+            sWebSocketService.disConnectTD();
+            sWebSocketService.disConnectMD();
+            mBackGround = true;
+        }
         Amplitude.getInstance().logEvent(AMP_BACKGROUND);
     }
 
@@ -481,12 +481,15 @@ public class BaseApplication extends Application implements ServiceConnection {
                 .execute(new FileCallback(sContext.getFilesDir().getAbsolutePath(), "latest.json") {
                     @Override
                     public void onSuccess(final com.lzy.okgo.model.Response<File> response) {
-                        LogUtils.e("下载latest文件结束onResponse: " + response.body().getAbsolutePath(), true);
-                        LatestFileManager.initInsList(response.body());
-                        // 通知mainActivity和quoteFragment刷新列表
-                        EventBus.getDefault().post(DOMINANT);
-                        Intent intent = new Intent(sContext, WebSocketService.class);
-                        sContext.bindService(intent, BaseApplication.this, Context.BIND_AUTO_CREATE);
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                LatestFileManager.initInsList(response.body());
+                                Intent intent = new Intent(sContext, WebSocketService.class);
+                                sContext.bindService(intent, BaseApplication.this, Context.BIND_AUTO_CREATE);
+                            }
+                        }).start();
+
                     }
                 });
     }
@@ -533,7 +536,6 @@ public class BaseApplication extends Application implements ServiceConnection {
 //                        ToastNotificationUtils.showToast(sContext, "交易服务器连接成功");
                         break;
                     case TD_OFFLINE:
-                        DataManager.getInstance().IS_LOGIN = false;
                         //断线重连
                         LogUtils.e("交易服务器连接断开，正在重连...", true);
 

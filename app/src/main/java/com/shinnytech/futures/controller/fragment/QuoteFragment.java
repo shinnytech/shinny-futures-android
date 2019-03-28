@@ -140,14 +140,6 @@ public class QuoteFragment extends LazyLoadFragment {
         return mBinding.getRoot();
     }
 
-    //开机合约列表解析完毕刷新主力行情
-    @Subscribe
-    public void onEvent(String msg) {
-        if (DOMINANT.equals(mTitle) && DOMINANT.equals(msg)) {
-            update();
-        }
-    }
-
     //根据合约导航滑动行情列表
     @Subscribe
     public void onEvent(PositionEvent positionEvent) {

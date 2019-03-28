@@ -1,47 +1,58 @@
 package com.shinnytech.futures.controller.activity;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.view.KeyEvent;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 
+import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityLoginBinding;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.amplitude.api.Identify;
+import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
+import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
-import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGGED;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_PACKAGE_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_SCREEN_SIZE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOCK_ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOCK_PASSWORD;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PASSWORD;
-import static com.shinnytech.futures.constants.CommonConstants.LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.LOGIN_JUMP_TO_MAIN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_WEAK_PASSWORD;
@@ -55,40 +66,42 @@ import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST
  * state: basically done
  */
 
-public class LoginActivity extends BaseActivity {
+public class LoginActivity extends AppCompatActivity {
     /**
      * date: 7/7/17
      * description: 用户登录监听广播
      */
     private BroadcastReceiver mReceiverLogin;
-    private String mActivityType;
     private String mBrokerName;
     private String mPhoneNumber;
     private Handler mHandler;
     private ActivityLoginBinding mBinding;
     private String mPassword;
+    protected Context sContext;
+    protected DataManager sDataManager;
+    private long mExitTime = 0;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        mLayoutID = R.layout.activity_login;
-        mTitle = LOGIN;
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_login);
+        initData();
+        initEvent();
+        checkResponsibility();
+        checkNetwork();
+        initAmpUserProperties();
     }
 
-    @Override
-    protected void initData() {
+    private void initData() {
+
+        sContext = BaseApplication.getContext();
+        sDataManager = DataManager.getInstance();
         mHandler = new MyHandler(this);
-        mBinding = (ActivityLoginBinding) mViewDataBinding;
-        mActivityType = getIntent().getStringExtra(ACTIVITY_TYPE);
-        List<String> brokerList = LatestFileManager.
-                getBrokerIdFromBuildConfig(sDataManager.getBroker().getBrokers());
 
         //获取用户登录成功后保存在sharedPreference里的期货公司
         if (SPUtils.contains(sContext, CONFIG_BROKER)) {
             String brokerName = (String) SPUtils.get(sContext, CONFIG_BROKER, "");
             mBinding.broker.setText(brokerName);
-        } else if (brokerList != null && brokerList.size() != 0) {
-            mBinding.broker.setText(brokerList.get(0));
         }
 
         boolean mRememberPassword = false;
@@ -109,27 +122,34 @@ public class LoginActivity extends BaseActivity {
         }
 
         //获取用户登录成功后保存在sharedPreference里的用户名
-        if (SPUtils.contains(sContext, CONFIG_ACCOUNT)) {
-            String account;
-            if (mRememberAccount) account = (String) SPUtils.get(sContext, CONFIG_ACCOUNT, "");
-            else account = "";
-            mBinding.account.setText(account);
-            mBinding.account.setSelection(account.length());
-            if (!account.isEmpty()) mBinding.deleteAccount.setVisibility(View.VISIBLE);
+        if (mRememberAccount){
+            if (SPUtils.contains(sContext, CONFIG_ACCOUNT)) {
+                String account = (String) SPUtils.get(sContext, CONFIG_ACCOUNT, "");
+                mBinding.account.setText(account);
+                mBinding.account.setSelection(account.length());
+                if (!account.isEmpty()) mBinding.deleteAccount.setVisibility(View.VISIBLE);
+            }
+        }else {
+            mBinding.account.setText("");
         }
 
-        if (SPUtils.contains(sContext, CONFIG_PASSWORD)) {
-            String password;
-            if (mRememberPassword) password = (String) SPUtils.get(sContext, CONFIG_PASSWORD, "");
-            else password = "";
-            mBinding.password.setText(password);
-            mBinding.password.setSelection(password.length());
-            if (!password.isEmpty()) mBinding.deletePassword.setVisibility(View.VISIBLE);
+
+        if (mRememberPassword){
+            if (SPUtils.contains(sContext, CONFIG_PASSWORD)) {
+                String password = (String) SPUtils.get(sContext, CONFIG_PASSWORD, "");
+                mBinding.password.setText(password);
+                mBinding.password.setSelection(password.length());
+                if (!password.isEmpty()) mBinding.deletePassword.setVisibility(View.VISIBLE);
+            }
+        }else {
+            mBinding.password.setText("");
         }
+
+
+
     }
 
-    @Override
-    protected void initEvent() {
+    private void initEvent() {
 
         mBinding.broker.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -259,50 +279,6 @@ public class LoginActivity extends BaseActivity {
 
     }
 
-    @Override
-    protected void refreshUI() {
-
-    }
-
-    /**
-     * date: 6/1/18
-     * author: chenli
-     * description: 页面返回回调处理
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
-            case android.R.id.home:
-                //关闭键盘后销毁
-                View view = getCurrentFocus();
-                if (view != null) {
-                    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    if (inputMethodManager != null)
-                        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOT_ALWAYS);
-                }
-                switch (mActivityType) {
-                    case "MainActivity":
-//                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-//                        startActivity(intent);
-//                        break;
-                    case "FutureInfoActivity":
-                        //返回未登录信息给合约详情页，使盘口页显示，涉及登录页的fragment隐藏
-                        Intent intent1 = new Intent();
-                        setResult(RESULT_CANCELED, intent1);
-                        finish();
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     /**
      * date: 7/7/17
      * author: chenli
@@ -311,21 +287,21 @@ public class LoginActivity extends BaseActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-            switch (mActivityType) {
-                case "MainActivity":
-//                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-//                    startActivity(intent);
-//                    break;
-                case "FutureInfoActivity":
-                    //返回未登录信息给合约详情页，使盘口页显示，涉及登录页的fragment隐藏
-                    Intent intent1 = new Intent();
-                    setResult(RESULT_CANCELED, intent1);
-                    finish();
-                    break;
+            if ((System.currentTimeMillis() - mExitTime) > 2000) {
+                ToastNotificationUtils.showToast(BaseApplication.getContext(), getString(R.string.main_activity_exit));
+                mExitTime = System.currentTimeMillis();
+            } else {
+                LoginActivity.this.finish();
             }
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerBroaderCast();
     }
 
     @Override
@@ -393,9 +369,7 @@ public class LoginActivity extends BaseActivity {
      * author: chenli
      * description: 监控网络状态与登录状态
      */
-    protected void registerBroaderCast() {
-
-        super.registerBroaderCast();
+    private void registerBroaderCast() {
 
         mReceiverLogin = new BroadcastReceiver() {
             @Override
@@ -419,6 +393,7 @@ public class LoginActivity extends BaseActivity {
             }
         };
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverLogin, new IntentFilter(TD_BROADCAST_ACTION));
+
     }
 
     /**
@@ -441,6 +416,7 @@ public class LoginActivity extends BaseActivity {
                     break;
             }
         }
+        if (resultCode == RESULT_CANCELED)finish();
     }
 
     /**
@@ -464,7 +440,7 @@ public class LoginActivity extends BaseActivity {
                 switch (msg.what) {
                     case 0:
                         String broker_id = activity.mBinding.broker.getText().toString();
-                        Identify identify = new Identify().set(AMP_USER_BROKER_ID, "unknown");
+                        Identify identify = new Identify().set(AMP_USER_BROKER_ID, broker_id);
                         Amplitude.getInstance().identify(identify);
                         Amplitude.getInstance().logEvent(AMP_LOGGED);
                         SPUtils.putAndApply(activity.sContext, CONFIG_LOGIN_DATE, TimeUtils.getNowTime());
@@ -478,13 +454,8 @@ public class LoginActivity extends BaseActivity {
                             if (inputMethodManager != null)
                                 inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOT_ALWAYS);
                         }
-
-                        //返回登录信息给合约详情页，使相应页面显示
-                        if (activity.mActivityType.equals("FutureInfoActivity")) {
-                            Intent intent = new Intent();
-                            activity.setResult(RESULT_OK, intent);
-                        }
-                        activity.finish();
+                        Intent intent1 = new Intent(activity, MainActivity.class);
+                        activity.startActivityForResult(intent1, LOGIN_JUMP_TO_MAIN_ACTIVITY);
                         break;
                     case 1:
                         List<String> brokerList = LatestFileManager
@@ -504,5 +475,81 @@ public class LoginActivity extends BaseActivity {
             }
         }
     }
+
+
+    /**
+     * date: 1/16/18
+     * author: chenli
+     * description: 检查是否第一次启动APP,弹出免责条款框
+     */
+    public void checkResponsibility() {
+        try {
+            final float nowVersionCode = DataManager.getInstance().APP_CODE;
+            float versionCode = (float) SPUtils.get(sContext, "versionCode", 0.0f);
+            if (nowVersionCode > versionCode) {
+                final Dialog dialog = new Dialog(this, R.style.responsibilityDialog);
+                View view = View.inflate(this, R.layout.view_dialog_responsibility, null);
+                dialog.setContentView(view);
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.setCancelable(false);
+                dialog.show();
+                view.findViewById(R.id.agree).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        SPUtils.putAndApply(LoginActivity.this, "versionCode", nowVersionCode);
+                        dialog.dismiss();
+                    }
+                });
+                view.findViewById(R.id.disagree).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        LoginActivity.this.finish();
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * date: 7/7/17
+     * author: chenli
+     * description: 检查网络的状态
+     */
+    public void checkNetwork() {
+        if (!NetworkUtils.isNetworkConnected(sContext)) {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setTitle("登录结果");
+            dialog.setMessage("网络故障，无法连接到服务器");
+            dialog.setCancelable(false);
+            dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    LoginActivity.this.finish();
+                }
+            });
+            dialog.show();
+        }
+    }
+
+
+    /**
+     * date: 2019/3/22
+     * author: chenli
+     * description: 初始化amp用户属性
+     */
+    private void initAmpUserProperties(){
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        int height = metrics.heightPixels;
+        int width = metrics.widthPixels;
+        Identify identify = new Identify().set(AMP_USER_BROKER_ID, "unknown")
+                .set(AMP_USER_PACKAGE_ID, BuildConfig.FLAVOR)
+                .set(AMP_USER_SCREEN_SIZE, width + "*" + height);
+        Amplitude.getInstance().identify(identify);
+    }
+
 }
 
