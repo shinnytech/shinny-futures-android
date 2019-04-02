@@ -8,11 +8,13 @@ import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.SearchView;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -161,20 +163,39 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         switch (id) {
             case android.R.id.home:
                 //关闭键盘后销毁
-                View view = getCurrentFocus();
-                if (view != null) {
-                    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    if (inputMethodManager != null)
-                        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOT_ALWAYS);
-                }
-                Intent intent = new Intent();
-                setResult(RESULT_OK, intent);
-                finish();
+                back();
                 break;
             default:
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * 处理返回键逻辑或者使用onBackPressed()
+     */
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        back();
+        return super.onKeyDown(keyCode, event);
+    }
+
+    /**
+     * date: 2019/3/30
+     * author: chenli
+     * description: 返回上一页
+     */
+    private void back() {
+        //关闭键盘后销毁
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (inputMethodManager != null)
+                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOT_ALWAYS);
+        }
+        Intent intent = new Intent();
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     @Override

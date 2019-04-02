@@ -267,11 +267,7 @@ public class WebSocketService extends Service {
     private void sendSubscribeAfterConnect() {
         if (!sDataManager.QUOTES.isEmpty() && mWebSocketClientMD != null) {
             mWebSocketClientMD.sendText(sDataManager.QUOTES);
-            LogUtils.e(sDataManager.QUOTES, true);
-        } else if (LatestFileManager.getOptionalInsList().isEmpty())
-            sendSubscribeQuote(TextUtils.join(",",
-                    new ArrayList(LatestFileManager.getMainInsList().keySet()).subList(0, LOAD_QUOTE_NUM)));
-        else {
+        } else {
             List<String> list = LatestFileManager.getCombineInsList(
                     new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
 
@@ -281,7 +277,6 @@ public class WebSocketService extends Service {
 
         if (!sDataManager.CHARTS.isEmpty() && mWebSocketClientMD != null) {
             mWebSocketClientMD.sendText(sDataManager.CHARTS);
-            LogUtils.e(sDataManager.CHARTS, true);
         }
     }
 

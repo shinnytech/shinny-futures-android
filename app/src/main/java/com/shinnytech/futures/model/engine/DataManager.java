@@ -459,8 +459,9 @@ public class DataManager {
                                     }
                                 }
                                 userEntities.put(userKey, userEntity);
-                                if (BaseApplication.getWebSocketService() != null)
+                                if (BaseApplication.getWebSocketService() != null){
                                     BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE, TD_BROADCAST);
+                                }
                             }
                             break;
                         default:

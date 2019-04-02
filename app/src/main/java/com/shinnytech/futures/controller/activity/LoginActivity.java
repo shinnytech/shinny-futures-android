@@ -412,11 +412,13 @@ public class LoginActivity extends AppCompatActivity {
                 case LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY:
                     mBinding.password.setText("");
                     break;
+                case LOGIN_JUMP_TO_MAIN_ACTIVITY:
+                    finish();
+                    break;
                 default:
                     break;
             }
         }
-        if (resultCode == RESULT_CANCELED)finish();
     }
 
     /**

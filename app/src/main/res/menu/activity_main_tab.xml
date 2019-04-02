@@ -1,0 +1,20 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".controller.activity.MainActivity">
+
+    <item
+        android:id="@+id/market"
+        android:icon="@mipmap/ic_trending_up_white_18dp"
+        android:orderInCategory="101"
+        android:title="行情"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/trade"
+        android:icon="@mipmap/ic_perm_identity_white_18dp"
+        android:orderInCategory="101"
+        android:title="账户"
+        app:showAsAction="always" />
+
+</menu>

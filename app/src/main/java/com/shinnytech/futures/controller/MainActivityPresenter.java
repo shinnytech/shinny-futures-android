@@ -1,33 +1,28 @@
 package com.shinnytech.futures.controller;
 
-import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PointF;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.FileProvider;
-import android.support.v4.content.res.ResourcesCompat;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
@@ -37,28 +32,28 @@ import com.shinnytech.futures.controller.activity.BankTransferActivity;
 import com.shinnytech.futures.controller.activity.ChangePasswordActivity;
 import com.shinnytech.futures.controller.activity.FeedBackActivity;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
-import com.shinnytech.futures.controller.activity.LoginActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.controller.activity.SettingActivity;
 import com.shinnytech.futures.controller.activity.TradeActivity;
+import com.shinnytech.futures.controller.fragment.AccountFragment;
 import com.shinnytech.futures.controller.fragment.QuoteFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
+import com.shinnytech.futures.model.adapter.DialogAdapter;
 import com.shinnytech.futures.model.adapter.NavigationRightAdapter;
 import com.shinnytech.futures.model.adapter.QuoteNavAdapter;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
-import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
 import com.shinnytech.futures.model.bean.settingbean.NavigationRightEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
+import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +64,7 @@ import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
-import static com.shinnytech.futures.constants.CommonConstants.POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.POSITION_JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.SHANGHAI;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOU;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
@@ -81,48 +76,42 @@ import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
  * Description: 将主页的合约导航栏操作封装起来
  */
 
-public class MainActivityPresenter implements NavigationView.OnNavigationItemSelectedListener, ViewPager.OnPageChangeListener, View.OnClickListener, DrawerLayout.DrawerListener {
+public class MainActivityPresenter {
     public final NavigationRightAdapter mNavigationRightAdapter;
-    private final Handler mDrawerActionHandler = new Handler();
     private final ViewPagerFragmentAdapter mViewPagerFragmentAdapter;
     private ActivityMainDrawerBinding mBinding;
     private MainActivity mMainActivity;
     private Context sContext;
-    private Toolbar mToolbar;
     private TextView mToolbarTitle;
     private QuoteNavAdapter mNavAdapter;
     private Map<String, String> mInsListNameNav = new TreeMap<>();
     private String mIns;
-    private int mCurItemId;
+    private Dialog mTitleDialog;
+    private DialogAdapter mTitleDialogAdapter;
+    private RecyclerView mTitleRecyclerView;
+    private List<String> mTitleList;
 
     public MainActivityPresenter(final MainActivity mainActivity, Context context,
-                                 ActivityMainDrawerBinding binding, Toolbar toolbar, TextView toolbarTitle) {
+                                 ActivityMainDrawerBinding binding, String title, TextView toolbarTitle) {
         this.mBinding = binding;
         this.mMainActivity = mainActivity;
-        this.mToolbar = toolbar;
         this.mToolbarTitle = toolbarTitle;
         this.sContext = context;
 
-        //设置Drawer的开关
-        ActionBarDrawerToggle mToggle = new ActionBarDrawerToggle(
-                mMainActivity, mBinding.drawerLayout, mToolbar, R.string.main_activity_openDrawer,
-                R.string.main_activity_closeDrawer);
-        mToggle.setDrawerIndicatorEnabled(false);
-        Drawable drawable = ResourcesCompat.getDrawable(mMainActivity.getResources(),
-                R.mipmap.ic_folder_open_white_24dp, mMainActivity.getTheme());
-        mToggle.setHomeAsUpIndicator(drawable);
-        mToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mBinding.drawerLayout.isDrawerVisible(GravityCompat.START)) {
-                    mBinding.drawerLayout.closeDrawer(GravityCompat.START);
-                } else {
-                    mBinding.drawerLayout.openDrawer(GravityCompat.START);
-                }
-            }
-        });
-        mBinding.drawerLayout.addDrawerListener(mToggle);
-        mToggle.syncState();
+        mTitleList = new ArrayList<>();
+        mTitleList.add(OPTIONAL);
+        mTitleList.add(DOMINANT);
+        mTitleList.add(SHANGHAI);
+        mTitleList.add(NENGYUAN);
+        mTitleList.add(DALIAN);
+        mTitleList.add(ZHENGZHOU);
+        mTitleList.add(ZHONGJIN);
+        mTitleList.add(DALIANZUHE);
+        mTitleList.add(ZHENGZHOUZUHE);
+
+        //取消返回键
+        mainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        mainActivity.getSupportActionBar().setHomeButtonEnabled(false);
 
         //初始化合约列表导航
         mBinding.rvQuoteNavigation.setLayoutManager(new LinearLayoutManagerWithSmoothScroller(mMainActivity));
@@ -131,33 +120,20 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
 
         //添加合约页，设置首页是自选合约列表页
         List<Fragment> fragmentList = new ArrayList<>();
-        fragmentList.add(QuoteFragment.newInstance(OPTIONAL));
-        fragmentList.add(QuoteFragment.newInstance(DOMINANT));
-        fragmentList.add(QuoteFragment.newInstance(SHANGHAI));
-        fragmentList.add(QuoteFragment.newInstance(NENGYUAN));
-        fragmentList.add(QuoteFragment.newInstance(DALIAN));
-        fragmentList.add(QuoteFragment.newInstance(ZHENGZHOU));
-        fragmentList.add(QuoteFragment.newInstance(ZHONGJIN));
-        fragmentList.add(QuoteFragment.newInstance(DALIANZUHE));
-        fragmentList.add(QuoteFragment.newInstance(ZHENGZHOUZUHE));
+        fragmentList.add(QuoteFragment.newInstance(title));
+        fragmentList.add(AccountFragment.newInstance());
         //初始化适配器类
         mViewPagerFragmentAdapter = new ViewPagerFragmentAdapter(mMainActivity.getSupportFragmentManager(), fragmentList);
         mBinding.vpContent.setAdapter(mViewPagerFragmentAdapter);
-        if (LatestFileManager.getOptionalInsList().isEmpty())
-            mBinding.vpContent.setCurrentItem(1);
-        else mBinding.vpContent.setCurrentItem(0);
-        //保证lazyLoad的效用,每次加载一个fragment
-        mBinding.vpContent.setOffscreenPageLimit(7);
+        mBinding.vpContent.setCurrentItem(0);
+        switchQuotesNavigation(title);
 
-        // 设置导航菜单宽度
-        ViewGroup.LayoutParams params = mBinding.nvMenu.getLayoutParams();
-        params.width = mMainActivity.getResources().getDisplayMetrics().widthPixels * 6 / 10;
-        mBinding.nvMenu.setLayoutParams(params);
-
+        //设置右导航宽度
         ViewGroup.LayoutParams paramsR = mBinding.nvMenuRight.getLayoutParams();
         paramsR.width = mMainActivity.getResources().getDisplayMetrics().widthPixels / 2;
         mBinding.nvMenuRight.setLayoutParams(paramsR);
 
+        //加载右导航图标
         mBinding.navigationRightRv.setLayoutManager(new LinearLayoutManager(mMainActivity));
         mBinding.navigationRightRv.setItemAnimator(new DefaultItemAnimator());
         NavigationRightEntity menu0 = new NavigationRightEntity();
@@ -203,14 +179,8 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
         list.add(menu9);
         mNavigationRightAdapter = new NavigationRightAdapter(mainActivity, list);
         mBinding.navigationRightRv.setAdapter(mNavigationRightAdapter);
-    }
 
-    //使导航栏和viewPager页面匹配,重新初始化mCurItemId
-    public void resetNavigationItem() {
-        mCurItemId = mBinding.vpContent.getCurrentItem();
-        mBinding.nvMenu.getMenu().getItem(mCurItemId).setChecked(true);
     }
-
 
     /**
      * date: 1/18/18
@@ -218,13 +188,21 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
      * description: 注册各类监听事件
      */
     public void registerListeners() {
-        mBinding.nvMenu.setNavigationItemSelectedListener(this);
-        mBinding.nvMenuRight.setNavigationItemSelectedListener(this);
-        mBinding.drawerLayout.addDrawerListener(this);
-        mBinding.vpContent.addOnPageChangeListener(this);
         //合约导航左右移动
-        mBinding.quoteNavLeft.setOnClickListener(this);
-        mBinding.quoteNavRight.setOnClickListener(this);
+        mBinding.quoteNavLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBinding.rvQuoteNavigation.smoothScrollBy(-mBinding.rvQuoteNavigation.getMeasuredWidth(), 0);
+
+            }
+        });
+        mBinding.quoteNavRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBinding.rvQuoteNavigation.smoothScrollBy(mBinding.rvQuoteNavigation.getMeasuredWidth(), 0);
+            }
+        });
+
         //为底部合约导航栏添加监听事件
         mBinding.rvQuoteNavigation.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(
                 mBinding.rvQuoteNavigation, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
@@ -248,7 +226,6 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                     case CommonConstants.LOGOUT:
                         SPUtils.putAndApply(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
                         BaseApplication.getWebSocketService().reConnectTD();
-                        mMainActivity.setResult(Activity.RESULT_OK);
                         mMainActivity.finish();
                         break;
                     case CommonConstants.SETTING:
@@ -270,7 +247,7 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
                             intentPos.putExtra("nav_position", 1);
                             String instrument_id = new ArrayList<>(LatestFileManager.getMainInsList().keySet()).get(0);
                             intentPos.putExtra("instrument_id", instrument_id);
-                            mMainActivity.startActivityForResult(intentPos, POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY);
+                            mMainActivity.startActivityForResult(intentPos, POSITION_JUMP_TO_FUTURE_INFO_ACTIVITY);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -313,178 +290,155 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
             }
         }
         ));
-    }
 
-    /**
-     * date: 2019/3/15
-     * author: chenli
-     * description: 安装apk文件
-     */
-    private void installApk(File file) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        //为toolbar设置一个弹出框，用于显示自选合约列表，点击切换合约信息
+        mToolbarTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mTitleDialog == null) {
+                    //初始化自选合约弹出框
+                    mTitleDialog = new Dialog(mMainActivity, R.style.Theme_Light_Dialog);
+                    View viewDialog = View.inflate(mMainActivity, R.layout.view_dialog_optional_quote, null);
+                    Window dialogWindow = mTitleDialog.getWindow();
+                    if (dialogWindow != null) {
+                        dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+                        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+                        dialogWindow.setGravity(Gravity.BOTTOM);
+                        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                        dialogWindow.setAttributes(lp);
+                    }
+                    mTitleDialog.setContentView(viewDialog);
+                    mTitleDialogAdapter = new DialogAdapter(mMainActivity, mTitleList);
+                    TextView textView = viewDialog.findViewById(R.id.dialog_hint);
+                    textView.setText("选择期货交易所");
+                    mTitleRecyclerView = viewDialog.findViewById(R.id.dialog_rv);
+                    mTitleRecyclerView.setLayoutManager(
+                            new GridLayoutManager(mMainActivity, 3));
+                    mTitleRecyclerView.addItemDecoration(
+                            new DividerGridItemDecorationUtils(mMainActivity, R.drawable.divider_optional_dialog));
+                    mTitleRecyclerView.setAdapter(mTitleDialogAdapter);
 
-            LogUtils.e("版本大于 N ，开始使用 fileProvider 进行安装", true);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            Uri contentUri = FileProvider.getUriForFile(sContext, BuildConfig.APPLICATION_ID + ".fileProvider", file);
-            intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
-        } else {
-            LogUtils.e("正常进行安装", true);
-            intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
-        }
-        mMainActivity.startActivity(intent);
-    }
+                    mTitleRecyclerView.addOnItemTouchListener(
+                            new SimpleRecyclerViewItemClickListener(mTitleRecyclerView,
+                                    new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
+                                        @Override
+                                        public void onItemClick(View view, int position) {
+                                            String title = mTitleList.get(position);
+                                            switchQuotesNavigation(title);
+                                            ((QuoteFragment) mViewPagerFragmentAdapter.getItem(0))
+                                                    .switchQuotePage(title);
+                                            mTitleDialog.dismiss();
+                                        }
 
-    public String getPreSubscribedQuotes() {
-        return mIns;
-    }
+                                        @Override
+                                        public void onItemLongClick(View view, int position) {
 
-    /**
-     * date: 7/7/17
-     * author: chenli
-     * description: 切换合约导航栏和标题栏
-     */
-    private void switchNavigationAndTitle(int state) {
-        //获取当前页
-        int currentItem = mBinding.vpContent.getCurrentItem();
-        switch (currentItem) {
-            case 0:
-                //更新页面标题
-                if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(OPTIONAL);
-                //匹配对应合约导航栏
-                if (state == ViewPager.SCROLL_STATE_IDLE)
-                    refreshQuotesNavigation(OPTIONAL);
-                break;
-            case 1:
-                if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(DOMINANT);
+                                        }
+                                    }));
 
-                if (state == ViewPager.SCROLL_STATE_IDLE)
-                    refreshQuotesNavigation(DOMINANT);
-                break;
-            case 2:
-                if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(SHANGHAI);
+                }
+                if (!mTitleDialog.isShowing()) mTitleDialog.show();
+            }
+        });
 
-                if (state == ViewPager.SCROLL_STATE_IDLE)
-                    refreshQuotesNavigation(SHANGHAI);
-                break;
-            case 3:
-                if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(NENGYUAN);
+        mBinding.bottomNavigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.market:
+                        mBinding.vpContent.setCurrentItem(0, false);
+                        String title = ((QuoteFragment) mViewPagerFragmentAdapter.getItem(0)).getTitle();
+                        if (OPTIONAL.equals(title)) {
+                            mBinding.rvQuoteNavigation.setVisibility(View.GONE);
+                            mBinding.quoteNavLeft.setVisibility(View.GONE);
+                            mBinding.quoteNavRight.setVisibility(View.GONE);
+                        } else {
+                            mBinding.rvQuoteNavigation.setVisibility(View.VISIBLE);
+                            mBinding.quoteNavLeft.setVisibility(View.VISIBLE);
+                            mBinding.quoteNavRight.setVisibility(View.VISIBLE);
+                        }
+                        mToolbarTitle.setText(title);
+                        break;
+                    case R.id.trade:
+                        mBinding.rvQuoteNavigation.setVisibility(View.GONE);
+                        mBinding.quoteNavLeft.setVisibility(View.GONE);
+                        mBinding.quoteNavRight.setVisibility(View.GONE);
+                        mBinding.vpContent.setCurrentItem(1, false);
+                        mToolbarTitle.setText("账户详情");
+                        break;
+                    default:
+                        break;
+                }
+                return true;
+            }
+        });
 
-                if (state == ViewPager.SCROLL_STATE_IDLE)
-                    refreshQuotesNavigation(NENGYUAN);
-                break;
-            case 4:
-                if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(DALIAN);
+        //重复点击不切换页面
+        mBinding.bottomNavigation.setOnNavigationItemReselectedListener(new BottomNavigationView.OnNavigationItemReselectedListener() {
+            @Override
+            public void onNavigationItemReselected(@NonNull MenuItem item) {
 
-                if (state == ViewPager.SCROLL_STATE_IDLE)
-                    refreshQuotesNavigation(DALIAN);
-                break;
-            case 5:
-                if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(ZHENGZHOU);
+            }
+        });
 
-                if (state == ViewPager.SCROLL_STATE_IDLE)
-                    refreshQuotesNavigation(ZHENGZHOU);
-                break;
-            case 6:
-                if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(ZHONGJIN);
+        mBinding.vpContent.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
 
-                if (state == ViewPager.SCROLL_STATE_IDLE)
-                    refreshQuotesNavigation(ZHONGJIN);
-                break;
-            case 7:
-                if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(DALIANZUHE);
+            @Override
+            public void onPageSelected(int position) {
+                mBinding.vpContent.setCurrentItem(position, false);
+                if (position == 1){
+                    mBinding.bottomNavigation.setSelectedItemId(R.id.trade);
+                    mBinding.rvQuoteNavigation.setVisibility(View.GONE);
+                    mBinding.quoteNavLeft.setVisibility(View.GONE);
+                    mBinding.quoteNavRight.setVisibility(View.GONE);
+                    mToolbarTitle.setText("账户详情");
+                }else {
+                    mBinding.bottomNavigation.setSelectedItemId(R.id.market);
+                    String title = ((QuoteFragment) mViewPagerFragmentAdapter.getItem(0)).getTitle();
+                    if (OPTIONAL.equals(title)) {
+                        mBinding.rvQuoteNavigation.setVisibility(View.GONE);
+                        mBinding.quoteNavLeft.setVisibility(View.GONE);
+                        mBinding.quoteNavRight.setVisibility(View.GONE);
+                    } else {
+                        mBinding.rvQuoteNavigation.setVisibility(View.VISIBLE);
+                        mBinding.quoteNavLeft.setVisibility(View.VISIBLE);
+                        mBinding.quoteNavRight.setVisibility(View.VISIBLE);
+                    }
+                    mToolbarTitle.setText(title);
+                }
+            }
 
-                if (state == ViewPager.SCROLL_STATE_IDLE)
-                    refreshQuotesNavigation(DALIANZUHE);
-                break;
-            case 8:
-                if (state == ViewPager.SCROLL_STATE_SETTLING && NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(ZHENGZHOUZUHE);
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+        });
 
-                if (state == ViewPager.SCROLL_STATE_IDLE)
-                    refreshQuotesNavigation(ZHENGZHOUZUHE);
-                break;
-            default:
-                break;
-        }
-    }
+        //右导航监听器
+        mBinding.drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
 
-    /**
-     * date: 1/17/18
-     * author: chenli
-     * description: 点击侧滑栏事件
-     */
-    private void switchPages(int mCurItemId) {
-        switch (mCurItemId) {
-            case R.id.nav_optional:
-                //如果没有侧滑栏上的itemId没有发生变化,就不切换页面
-                //更新页面标题
-                if (NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(OPTIONAL);
-                mBinding.vpContent.setCurrentItem(0, false);
-                //匹配对应合约导航栏
-                refreshQuotesNavigation(OPTIONAL);
-                break;
-            case R.id.nav_dominant:
-                if (NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(DOMINANT);
-                mBinding.vpContent.setCurrentItem(1, false);
-                refreshQuotesNavigation(DOMINANT);
-                break;
-            case R.id.nav_shanghai:
-                if (NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(SHANGHAI);
-                mBinding.vpContent.setCurrentItem(2, false);
-                refreshQuotesNavigation(SHANGHAI);
-                break;
-            case R.id.nav_nengyuan:
-                if (NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(NENGYUAN);
-                mBinding.vpContent.setCurrentItem(3, false);
-                refreshQuotesNavigation(NENGYUAN);
-                break;
-            case R.id.nav_dalian:
-                if (NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(DALIAN);
-                mBinding.vpContent.setCurrentItem(4, false);
-                refreshQuotesNavigation(DALIAN);
-                break;
-            case R.id.nav_zhengzhou:
-                if (NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(ZHENGZHOU);
-                mBinding.vpContent.setCurrentItem(5, false);
-                refreshQuotesNavigation(ZHENGZHOU);
-                break;
-            case R.id.nav_zhongjin:
-                if (NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(ZHONGJIN);
-                mBinding.vpContent.setCurrentItem(6, false);
-                refreshQuotesNavigation(ZHONGJIN);
-                break;
-            case R.id.nav_dalian_zuhe:
-                if (NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(DALIANZUHE);
-                mBinding.vpContent.setCurrentItem(7, false);
-                refreshQuotesNavigation(DALIANZUHE);
-                break;
-            case R.id.nav_zhengzhou_zuhe:
-                if (NetworkUtils.isNetworkConnected(sContext))
-                    mToolbarTitle.setText(ZHENGZHOUZUHE);
-                mBinding.vpContent.setCurrentItem(8, false);
-                refreshQuotesNavigation(ZHENGZHOUZUHE);
-                break;
-            default:
-                break;
-        }
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                ((QuoteFragment) mViewPagerFragmentAdapter.getItem(0)).setmIsUpdate(true);
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                ((QuoteFragment) mViewPagerFragmentAdapter.getItem(0)).setmIsUpdate(false);
+            }
+        });
     }
 
     /**
@@ -545,158 +499,60 @@ public class MainActivityPresenter implements NavigationView.OnNavigationItemSel
      * author: chenli
      * description: 根据页面标题匹配对应的导航栏，自选合约页不显示导航栏
      */
-    public void refreshQuotesNavigation(String mTitle) {
+    public void switchQuotesNavigation(String mTitle) {
+        if (NetworkUtils.isNetworkConnected(sContext))
+            mToolbarTitle.setText(mTitle);
+        if (OPTIONAL.equals(mTitle)) {
+            mBinding.rvQuoteNavigation.setVisibility(View.GONE);
+            mBinding.quoteNavLeft.setVisibility(View.GONE);
+            mBinding.quoteNavRight.setVisibility(View.GONE);
+        } else {
+            mBinding.rvQuoteNavigation.setVisibility(View.VISIBLE);
+            mBinding.quoteNavLeft.setVisibility(View.VISIBLE);
+            mBinding.quoteNavRight.setVisibility(View.VISIBLE);
+        }
         switch (mTitle) {
-            case OPTIONAL:
-                setNavGone();
-                break;
             case DOMINANT:
-                setNavVisiable();
                 mInsListNameNav = LatestFileManager.getMainInsListNameNav();
-                mNavAdapter.updateList(mInsListNameNav);
                 break;
             case SHANGHAI:
-                setNavVisiable();
                 mInsListNameNav = LatestFileManager.getShangqiInsListNameNav();
-                mNavAdapter.updateList(mInsListNameNav);
                 break;
             case NENGYUAN:
-                setNavVisiable();
                 mInsListNameNav = LatestFileManager.getNengyuanInsListNameNav();
-                mNavAdapter.updateList(mInsListNameNav);
                 break;
             case DALIAN:
-                setNavVisiable();
                 mInsListNameNav = LatestFileManager.getDalianInsListNameNav();
-                mNavAdapter.updateList(mInsListNameNav);
                 break;
             case ZHENGZHOU:
-                setNavVisiable();
                 mInsListNameNav = LatestFileManager.getZhengzhouInsListNameNav();
-                mNavAdapter.updateList(mInsListNameNav);
                 break;
             case ZHONGJIN:
-                setNavVisiable();
                 mInsListNameNav = LatestFileManager.getZhongjinInsListNameNav();
-                mNavAdapter.updateList(mInsListNameNav);
                 break;
             case DALIANZUHE:
-                setNavVisiable();
                 mInsListNameNav = LatestFileManager.getDalianzuheInsListNameNav();
-                mNavAdapter.updateList(mInsListNameNav);
                 break;
             case ZHENGZHOUZUHE:
-                setNavVisiable();
                 mInsListNameNav = LatestFileManager.getZhengzhouzuheInsListNameNav();
-                mNavAdapter.updateList(mInsListNameNav);
                 break;
             default:
                 break;
         }
-    }
-
-    private void setNavGone() {
-        mBinding.rvQuoteNavigation.setVisibility(View.GONE);
-        mBinding.quoteNavLeft.setVisibility(View.GONE);
-        mBinding.quoteNavRight.setVisibility(View.GONE);
-    }
-
-    private void setNavVisiable() {
-        mBinding.rvQuoteNavigation.setVisibility(View.VISIBLE);
-        mBinding.quoteNavLeft.setVisibility(View.VISIBLE);
-        mBinding.quoteNavRight.setVisibility(View.VISIBLE);
-    }
-
-    /**
-     * date: 7/7/17
-     * author: chenli
-     * description: 侧滑导航栏的点击事件
-     */
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
-        final int id = item.getItemId();
-        if (id != mCurItemId) {
-            mDrawerActionHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    switchPages(id);
-                }
-            }, 350);
-            mCurItemId = id;
-            item.setChecked(true);
-        }
-        mBinding.drawerLayout.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-    /**
-     * date: 7/7/17
-     * author: chenli
-     * description: 切换合约导航栏和标题栏
-     */
-    @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-    }
-
-    @Override
-    public void onPageSelected(int position) {
-        int currentItem = mBinding.vpContent.getCurrentItem();
-        MenuItem menuItem = mBinding.nvMenu.getMenu().getItem(currentItem);
-        menuItem.setChecked(true);
-        mCurItemId = menuItem.getItemId();
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int state) {
-        switchNavigationAndTitle(state);
-    }
-
-    /**
-     * date: 7/26/17
-     * author: chenli
-     * description: 切换页面
-     */
-    @Override
-    public void onDrawerSlide(View drawerView, float slideOffset) {
+        if (!OPTIONAL.equals(mTitle)) mNavAdapter.updateList(mInsListNameNav);
 
     }
 
-    @Override
-    public void onDrawerOpened(View drawerView) {
-
+    public String getPreSubscribedQuotes() {
+        return mIns;
     }
 
-    @Override
-    public void onDrawerClosed(View drawerView) {
-        UpdateEvent updateEvent = new UpdateEvent();
-        updateEvent.setState(1);
-        EventBus.getDefault().post(updateEvent);
+    public void setPreSubscribedQuotes(String mIns) {
+        this.mIns = mIns;
     }
 
-    @Override
-    public void onDrawerStateChanged(int newState) {
-        UpdateEvent updateEvent = new UpdateEvent();
-        updateEvent.setState(newState);
-        EventBus.getDefault().post(updateEvent);
-    }
-
-
-    /**
-     * date: 7/11/17
-     * author: chenli
-     * description: 合约导航点击左右移动
-     */
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.quote_nav_left:
-                mBinding.rvQuoteNavigation.smoothScrollBy(-mBinding.nvMenu.getMeasuredWidth(), 0);
-                break;
-            case R.id.quote_nav_right:
-                mBinding.rvQuoteNavigation.smoothScrollBy(mBinding.nvMenu.getMeasuredWidth(), 0);
-                break;
-        }
+    public ViewPagerFragmentAdapter getmViewPagerFragmentAdapter() {
+        return mViewPagerFragmentAdapter;
     }
 
     /**

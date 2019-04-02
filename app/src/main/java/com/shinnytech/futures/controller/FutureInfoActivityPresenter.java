@@ -232,7 +232,7 @@ public class FutureInfoActivityPresenter {
         //初始化盘口、持仓、挂单、交易切换容器，fragment实例保存，有生命周期的变化，默认情况下屏幕外初始化两个fragment
         List<Fragment> fragmentList = new ArrayList<>();
         PositionFragment positionFragment = new PositionFragment();
-        OrderFragment orderFragment = new OrderFragment();
+        OrderFragment orderFragment = OrderFragment.newInstance(true);
         HandicapFragment handicapFragment = new HandicapFragment();
         TransactionFragment transactionFragment = new TransactionFragment();
         fragmentList.add(handicapFragment);

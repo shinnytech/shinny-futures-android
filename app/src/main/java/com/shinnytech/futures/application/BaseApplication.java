@@ -189,6 +189,7 @@ public class BaseApplication extends Application implements ServiceConnection {
      * description: 初始化默认配置
      */
     private void initDefaultConfig() {
+        //初始化自选合约列表文件
         try {
             BaseApplication.getContext().openFileInput(OPTIONAL_INS_LIST);
         } catch (FileNotFoundException e) {

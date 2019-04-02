@@ -2,21 +2,20 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <data>
-
-    </data>
+    <data></data>
 
     <LinearLayout
+        android:keepScreenOn="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/down_fragment"
+        android:background="@color/black_light"
         android:orientation="vertical">
-
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/layout_height_fragment_quote"
             android:gravity="center"
+            android:orientation="horizontal"
             android:paddingBottom="@dimen/padding_4dp"
             android:paddingTop="@dimen/padding_4dp">
 
@@ -24,30 +23,15 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1.4"
+                android:layout_weight="1"
                 android:gravity="center"
-                android:text="@string/order_fragment_instrument_id"
+                android:text="@string/trade_activity_instrument_id"
                 android:maxLines="1"
                 app:autoSizeTextType="uniform"
                 app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal"
                 app:autoSizeStepGranularity="1sp"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_normal" />
-
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1.2"
-                android:gravity="center"
-                android:text="@string/order_fragment_status"
-                android:maxLines="1"
-                app:autoSizeTextType="uniform"
-                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-                app:autoSizeMaxTextSize="@dimen/font_size_normal"
-                app:autoSizeStepGranularity="1sp"
-                android:textColor="@color/white"
+                android:textColor="@android:color/white"
                 android:textSize="@dimen/font_size_normal" />
 
 
@@ -56,28 +40,27 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="@string/order_fragment_direction"
+                android:text="@string/trade_activity_direction"
                 android:maxLines="1"
                 app:autoSizeTextType="uniform"
                 app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal"
                 app:autoSizeStepGranularity="1sp"
-                android:textColor="@color/white"
+                android:textColor="@android:color/white"
                 android:textSize="@dimen/font_size_normal" />
-
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1.2"
+                android:layout_weight="1"
                 android:gravity="end|center_vertical"
-                android:text="委托价"
+                android:text="@string/trade_activity_amount"
                 android:maxLines="1"
                 app:autoSizeTextType="uniform"
                 app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal"
                 app:autoSizeStepGranularity="1sp"
-                android:textColor="@color/white"
+                android:textColor="@android:color/white"
                 android:textSize="@dimen/font_size_normal" />
 
             <TextView
@@ -85,27 +68,27 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="@string/order_fragment_volume"
+                android:text="@string/trade_activity_volume"
                 android:maxLines="1"
                 app:autoSizeTextType="uniform"
                 app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal"
                 app:autoSizeStepGranularity="1sp"
-                android:textColor="@color/white"
+                android:textColor="@android:color/white"
                 android:textSize="@dimen/font_size_normal" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1.2"
+                android:layout_weight="1"
                 android:gravity="center"
-                android:text="@string/order_fragment_date"
+                android:text="@string/trade_activity_time"
                 android:maxLines="1"
                 app:autoSizeTextType="uniform"
                 app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal"
                 app:autoSizeStepGranularity="1sp"
-                android:textColor="@color/white"
+                android:textColor="@android:color/white"
                 android:textSize="@dimen/font_size_normal" />
 
         </LinearLayout>
@@ -115,11 +98,11 @@
             android:layout_height="@dimen/line_width"
             android:background="@color/alpha_white"></View>
 
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_height="match_parent" />
 
     </LinearLayout>
 </layout>

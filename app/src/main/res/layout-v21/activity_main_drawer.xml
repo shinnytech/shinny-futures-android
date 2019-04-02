@@ -15,19 +15,21 @@
         <android.support.design.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <include layout="@layout/view_toolbar"/>
+
+            <include layout="@layout/view_toolbar" />
 
             <android.support.v4.view.ViewPager
                 android:id="@+id/vp_content"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="?attr/actionBarSize"
-                android:layout_marginBottom="@dimen/margin_45dp"/>
+                android:layout_marginBottom="@dimen/margin_45dp" />
 
             <ImageView
                 android:id="@+id/quote_nav_left"
                 android:layout_width="@dimen/image_view_size"
                 android:layout_height="@dimen/image_view_size"
+                android:layout_marginBottom="@dimen/margin_50dp"
                 android:layout_gravity="bottom|start"
                 android:background="@color/black_light"
                 android:contentDescription="left"
@@ -41,11 +43,13 @@
                 android:layout_gravity="bottom|center_horizontal"
                 android:layout_marginStart="@dimen/margin_45dp"
                 android:layout_marginEnd="@dimen/margin_45dp"
+                android:layout_marginBottom="@dimen/margin_50dp"
                 android:background="@color/black_light"
                 android:gravity="center" />
 
             <ImageView
                 android:id="@+id/quote_nav_right"
+                android:layout_marginBottom="@dimen/margin_50dp"
                 android:layout_width="@dimen/image_view_size"
                 android:layout_height="@dimen/image_view_size"
                 android:layout_gravity="bottom|end"
@@ -54,18 +58,16 @@
                 android:gravity="center"
                 android:src="@mipmap/ic_chevron_right_white_24dp" />
 
-        </android.support.design.widget.CoordinatorLayout>
+            <android.support.design.widget.BottomNavigationView
+                app:itemIconTint="@drawable/bottom_navigation_selector"
+                app:itemTextColor="@drawable/bottom_navigation_selector"
+                app:menu="@menu/activity_main_tab"
+                android:id="@+id/bottom_navigation"
+                android:layout_gravity="bottom"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"/>
 
-        <android.support.design.widget.NavigationView
-            android:id="@+id/nv_menu"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:background="@color/black_light"
-            app:headerLayout="@layout/view_drawer_header"
-            app:itemTextColor="@color/menu_text_color"
-            app:menu="@menu/activity_main_drawer"
-            app:theme="@style/NavigationTheme"/>
+        </android.support.design.widget.CoordinatorLayout>
 
         <android.support.design.widget.NavigationView
             android:id="@+id/nv_menu_right"

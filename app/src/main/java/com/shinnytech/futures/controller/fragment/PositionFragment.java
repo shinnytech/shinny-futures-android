@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
+import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentPositionBinding;
 import com.shinnytech.futures.model.adapter.PositionAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.POSITION_JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
@@ -87,10 +89,24 @@ public class PositionFragment extends LazyLoadFragment {
                         String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
                         //添加判断，防止自选合约列表为空时产生无效的点击事件
                         if (instrument_id != null) {
-                            IdEvent idEvent = new IdEvent();
-                            idEvent.setInstrument_id(instrument_id);
-                            EventBus.getDefault().post(idEvent);
-                            ((FutureInfoActivity) getActivity()).getViewPager().setCurrentItem(3, false);
+                            if (getActivity() instanceof FutureInfoActivity){
+                                IdEvent idEvent = new IdEvent();
+                                idEvent.setInstrument_id(instrument_id);
+                                EventBus.getDefault().post(idEvent);
+                                ((FutureInfoActivity) getActivity()).getViewPager().setCurrentItem(3, false);
+                            }else if (getActivity() instanceof MainActivity){
+                                try {
+                                    MainActivity mainActivity = (MainActivity) getActivity();
+                                    mainActivity.getmMainActivityPresenter().setPreSubscribedQuotes(
+                                            DataManager.getInstance().getRtnData().getIns_list());
+                                    Intent intentPos = new Intent(getActivity(), FutureInfoActivity.class);
+                                    intentPos.putExtra("nav_position", 1);
+                                    intentPos.putExtra("instrument_id", instrument_id);
+                                    getActivity().startActivityForResult(intentPos, POSITION_JUMP_TO_FUTURE_INFO_ACTIVITY);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
                         }
                     }
 
@@ -157,9 +173,11 @@ public class PositionFragment extends LazyLoadFragment {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case TD_MESSAGE:
-                        if ((R.id.rb_position_info == ((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId())
+                        if (getActivity() instanceof FutureInfoActivity)
+                            if ((R.id.rb_position_info == ((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId())
                                 && mIsUpdate)
                             refreshPosition();
+                        else refreshPosition();
                         break;
                     default:
                         break;

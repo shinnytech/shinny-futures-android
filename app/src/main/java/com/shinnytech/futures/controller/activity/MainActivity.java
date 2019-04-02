@@ -8,28 +8,23 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
-import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.MainActivityPresenter;
+import com.shinnytech.futures.controller.fragment.QuoteFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
-import com.shinnytech.futures.model.amplitude.api.Identify;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_PACKAGE_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_SCREEN_SIZE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
+import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_SEARCH_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
-import static com.shinnytech.futures.constants.CommonConstants.POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.POSITION_JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 
 /**
@@ -53,21 +48,15 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mLayoutID = R.layout.activity_main_drawer;
-
         super.onCreate(savedInstanceState);
     }
 
     @Override
     protected void initData() {
         mBinding = (ActivityMainDrawerBinding) mViewDataBinding;
-        mMainActivityPresenter = new MainActivityPresenter(this, sContext, mBinding, mToolbar, mToolbarTitle);
-        if (LatestFileManager.getOptionalInsList().isEmpty()){
-            mMainActivityPresenter.refreshQuotesNavigation(DOMINANT);
-            mTitle = DOMINANT;
-        } else{
-            mMainActivityPresenter.refreshQuotesNavigation(OPTIONAL);
-            mTitle = OPTIONAL;
-        }
+        mTitle = OPTIONAL;
+        mMainActivityPresenter = new MainActivityPresenter(this, sContext, mBinding, mTitle, mToolbarTitle);
+
     }
 
     @Override
@@ -82,7 +71,6 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        mMainActivityPresenter.resetNavigationItem();
     }
 
     @Override
@@ -127,19 +115,28 @@ public class MainActivity extends BaseActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.drawer_right, menu);
+        getMenuInflater().inflate(R.menu.search, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.right_navigation) {
-            if (mBinding.drawerLayout.isDrawerVisible(GravityCompat.END)) {
-                mBinding.drawerLayout.closeDrawer(GravityCompat.END);
-            } else {
-                mBinding.drawerLayout.openDrawer(GravityCompat.END);
-            }
-            return true;
+        switch (id){
+            case R.id.right_navigation:
+                if (mBinding.drawerLayout.isDrawerVisible(GravityCompat.END)) {
+                    mBinding.drawerLayout.closeDrawer(GravityCompat.END);
+                } else {
+                    mBinding.drawerLayout.openDrawer(GravityCompat.END);
+                }
+                return true;
+            case R.id.search_quote:
+                mMainActivityPresenter.setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
+                Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+                startActivityForResult(intent, JUMP_TO_SEARCH_ACTIVITY);
+                return true;
+            default:
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -161,7 +158,7 @@ public class MainActivity extends BaseActivity {
                     ToastNotificationUtils.showToast(BaseApplication.getContext(), getString(R.string.main_activity_exit));
                     mExitTime = System.currentTimeMillis();
                 } else {
-                    setResult(RESULT_CANCELED);
+                    setResult(RESULT_OK);
                     finish();
                 }
                 return true;
@@ -177,18 +174,47 @@ public class MainActivity extends BaseActivity {
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (BaseApplication.getWebSocketService() == null) return;
         //很重要,决定了quoteFragment中的方法能不能被调用
         super.onActivityResult(requestCode, resultCode, data);
+        String mIns = mMainActivityPresenter.getPreSubscribedQuotes();
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
-                case POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY:
-                    if (BaseApplication.getWebSocketService() != null)
-                        BaseApplication.getWebSocketService().sendSubscribeQuote(mMainActivityPresenter.getPreSubscribedQuotes());
+                case POSITION_JUMP_TO_FUTURE_INFO_ACTIVITY:
+                    BaseApplication.getWebSocketService().sendSubscribeQuote(mIns);
+                    break;
+                case JUMP_TO_SEARCH_ACTIVITY:
+                    refreshQuotesAfterBack(mIns);
                     break;
                 default:
                     break;
             }
         }
+        //情况:搜索页点击进入合约详情页再返回
+        if (resultCode == RESULT_CANCELED && requestCode == JUMP_TO_SEARCH_ACTIVITY){
+            refreshQuotesAfterBack(mIns);
+        }
     }
 
+    /**
+     * date: 2019/3/30
+     * author: chenli
+     * description: 搜索页、合约详情页返回刷新行情列表
+     */
+    private void refreshQuotesAfterBack(String mIns) {
+        QuoteFragment quoteFragment = (QuoteFragment) mMainActivityPresenter.getmViewPagerFragmentAdapter().getItem(0);
+        if (quoteFragment == null)return;
+        if (OPTIONAL.equals(mToolbarTitle.getText().toString())
+                && quoteFragment.getmInsList().size() != LatestFileManager.getOptionalInsList().size())
+            quoteFragment.update();
+        else {
+            if (mIns != null && !mIns.equals(sDataManager.getRtnData().getIns_list())){
+                BaseApplication.getWebSocketService().sendSubscribeQuote(mIns);
+            }
+        }
+    }
+
+    public MainActivityPresenter getmMainActivityPresenter() {
+        return mMainActivityPresenter;
+    }
 }

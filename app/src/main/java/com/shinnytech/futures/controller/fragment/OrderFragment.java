@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.annotation.IdRes;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.util.DiffUtil;
@@ -19,7 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
@@ -51,7 +49,9 @@ import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST
  * version:
  * state: done
  */
-public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnCheckedChangeListener {
+public class OrderFragment extends LazyLoadFragment {
+
+    private static final String KEY_FRAGMENT_TYPE = "tradeType";
 
     protected BroadcastReceiver mReceiver;
     protected DataManager sDataManager = DataManager.getInstance();
@@ -62,51 +62,23 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
     private FragmentOrderBinding mBinding;
     private boolean mIsUpdate;
     private boolean mIsShowDialog;
+    private boolean mIsAllOrders;
 
-    /**
-     * date: 7/14/17
-     * author: chenli
-     * description: 撤单弹出框，根据固定宽高值自定义dialog，注意宽高值从dimens.xml文件中得到
-     */
-    private void initDialog(final String order_id, String instrument_id, String direction_title, String volume, String price) {
-        final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
-        View view = View.inflate(getActivity(), R.layout.view_dialog_cancel_order, null);
-        Window dialogWindow = dialog.getWindow();
-        if (dialogWindow != null) {
-            dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
-            WindowManager.LayoutParams lp = dialogWindow.getAttributes();
-            dialogWindow.setGravity(Gravity.CENTER);
-            lp.width = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_width);
-            lp.height = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_height);
-            dialogWindow.setAttributes(lp);
-        }
-        dialog.setContentView(view);
-        dialog.setCancelable(false);
-        TextView info = view.findViewById(R.id.order_instrument_id);
-        TextView ok = view.findViewById(R.id.order_ok);
-        TextView cancel = view.findViewById(R.id.order_cancel);
-        String information = instrument_id + ", " + price + ", " + direction_title + ", " + volume + "手";
-        info.setText(information);
-        ok.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    if (BaseApplication.getWebSocketService() != null)
-                        BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
-                } catch (NumberFormatException ex) {
-                    ex.printStackTrace();
-                }
-                dialog.dismiss();
-            }
-        });
-        cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-        dialog.show();
+    public static OrderFragment newInstance(boolean mIsAllOrders) {
+        OrderFragment fragment = new OrderFragment();
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(KEY_FRAGMENT_TYPE, mIsAllOrders);
+        fragment.setArguments(bundle);
+        return fragment;
     }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mIsAllOrders = getArguments().getBoolean(KEY_FRAGMENT_TYPE);
+        setHasOptionsMenu(true);
+    }
+
 
     @Nullable
     @Override
@@ -175,7 +147,6 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
             }
         }));
 
-        mBinding.rgOrder.setOnCheckedChangeListener(this);
     }
 
     @Override
@@ -198,9 +169,11 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case TD_MESSAGE:
-                        if ((R.id.rb_order_info == ((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId())
-                                && mIsUpdate)
-                            refreshOrder();
+                        if (getActivity() instanceof FutureInfoActivity)
+                            if ((R.id.rb_order_info == ((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId())
+                                    && mIsUpdate)
+                                refreshOrder();
+                        else refreshOrder();
                         break;
                     default:
                         break;
@@ -223,7 +196,7 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
             for (OrderEntity orderEntity :
                     userEntity.getOrders().values()) {
                 OrderEntity o = CloneUtils.clone(orderEntity);
-                if (mBinding.rbAllOrder.isChecked()) {
+                if (mIsAllOrders) {
                     mNewData.add(o);
                 } else if (("ALIVE").equals(orderEntity.getStatus())) {
                     mNewData.add(o);
@@ -241,26 +214,54 @@ public class OrderFragment extends LazyLoadFragment implements RadioGroup.OnChec
     }
 
     @Override
-    public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
-        switch (checkedId) {
-            case R.id.rb_all_order:
-                mBinding.rbAllOrder.setChecked(true);
-                refreshOrder();
-                break;
-            case R.id.rb_undone_order:
-                mBinding.rbUndoneOrder.setChecked(true);
-                refreshOrder();
-                break;
-            default:
-                break;
-        }
-    }
-
-
-    @Override
     public void update() {
         refreshOrder();
         mBinding.rv.scrollToPosition(0);
+    }
+
+    /**
+     * date: 7/14/17
+     * author: chenli
+     * description: 撤单弹出框，根据固定宽高值自定义dialog，注意宽高值从dimens.xml文件中得到
+     */
+    private void initDialog(final String order_id, String instrument_id, String direction_title, String volume, String price) {
+        final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
+        View view = View.inflate(getActivity(), R.layout.view_dialog_cancel_order, null);
+        Window dialogWindow = dialog.getWindow();
+        if (dialogWindow != null) {
+            dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+            WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+            dialogWindow.setGravity(Gravity.CENTER);
+            lp.width = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_width);
+            lp.height = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_height);
+            dialogWindow.setAttributes(lp);
+        }
+        dialog.setContentView(view);
+        dialog.setCancelable(false);
+        TextView info = view.findViewById(R.id.order_instrument_id);
+        TextView ok = view.findViewById(R.id.order_ok);
+        TextView cancel = view.findViewById(R.id.order_cancel);
+        String information = instrument_id + ", " + price + ", " + direction_title + ", " + volume + "手";
+        info.setText(information);
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    if (BaseApplication.getWebSocketService() != null)
+                        BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
+                } catch (NumberFormatException ex) {
+                    ex.printStackTrace();
+                }
+                dialog.dismiss();
+            }
+        });
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
     }
 
 }

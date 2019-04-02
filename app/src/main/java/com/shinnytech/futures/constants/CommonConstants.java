@@ -89,7 +89,7 @@ public final class CommonConstants {
     public static final int JUMP_TO_SEARCH_ACTIVITY = 4;
     public static final int JUMP_TO_FUTURE_INFO_ACTIVITY = 5;
     public static final int LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY = 6;
-    public static final int POSITION_MENU_JUMP_TO_FUTURE_INFO_ACTIVITY = 7;
+    public static final int POSITION_JUMP_TO_FUTURE_INFO_ACTIVITY = 7;
     public static final int LOGIN_JUMP_TO_LOG_IN_ACTIVITY = 8;
     public static final int KLINE_DURATION_ACYIVITY_TO_ADD_DURATION_ACTIVITY = 9;
     public static final int LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY = 10;

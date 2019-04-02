@@ -22,7 +22,7 @@
 
     <style name="LoginActivityTheme" parent="AppTheme">
         <!--preview window添加背景图-->
-        <item name="android:windowBackground">@color/black_light</item>
+        <item name="android:windowBackground">@mipmap/ic_login</item>
     </style>
 
     <style name="SearchActivityTheme" parent="AppTheme">

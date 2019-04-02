@@ -40,6 +40,8 @@ import com.shinnytech.futures.controller.activity.SearchActivity;
 import com.shinnytech.futures.databinding.FragmentQuoteBinding;
 import com.shinnytech.futures.model.adapter.DragDialogAdapter;
 import com.shinnytech.futures.model.adapter.QuoteAdapter;
+import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
@@ -50,6 +52,7 @@ import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -71,10 +74,12 @@ import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.SHANGHAI;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOU;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
 import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
+import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 7/9/17
@@ -99,6 +104,7 @@ public class QuoteFragment extends LazyLoadFragment {
     private QuoteAdapter mAdapter;
     private DataManager mDataManager = DataManager.getInstance();
     private BroadcastReceiver mReceiver;
+    private BroadcastReceiver mReceiverAccount;
     private String mTitle = DOMINANT;
     private TextView mToolbarTitle;
     private String mIns = "";
@@ -140,56 +146,38 @@ public class QuoteFragment extends LazyLoadFragment {
         return mBinding.getRoot();
     }
 
-    //根据合约导航滑动行情列表
-    @Subscribe
-    public void onEvent(PositionEvent positionEvent) {
-        if (mTitle.equals(mToolbarTitle.getText().toString())) {
-            int position = positionEvent.getPosition();
-            ((LinearLayoutManager) mBinding.rvQuote.getLayoutManager()).scrollToPositionWithOffset(position, 0);
-            int visibleItemCount1 = mBinding.rvQuote.getChildCount();
-            int lastPosition1 = (position + visibleItemCount1) > mInsList.size() ? mInsList.size() : (position + visibleItemCount1);
-            int firstPosition1 = (lastPosition1 - position) != visibleItemCount1 ? (lastPosition1 - visibleItemCount1) : position;
-            try {
-                if (mInsList.size() > LOAD_QUOTE_NUM) {
-                    List<String> insList = mInsList.subList(firstPosition1, lastPosition1);
-                    sendSubscribeQuotes(insList);
-                }
-            } catch (IndexOutOfBoundsException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    //控制行情是否刷新
-    @Subscribe
-    public void onEvent(UpdateEvent updateEvent) {
-        if (mTitle.equals(mToolbarTitle.getText().toString())) {
-            switch (updateEvent.getState()) {
-                case 1:
-                    mIsUpdate = true;
-                    break;
-                case 2:
-                    mIsUpdate = false;
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
     private void initData() {
         mToolbarTitle = getActivity().findViewById(R.id.title_toolbar);
+
+//        if (OPTIONAL.equals(mTitle))initConfigOptional();
 
         if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
             mBinding.tvChangePercent.setText(R.string.quote_fragment_bid_price1);
             mBinding.tvOpenInterest.setText(R.string.quote_fragment_bid_volume1);
         }
+
         mBinding.rvQuote.setLayoutManager(new LinearLayoutManager(getActivity()));
         mBinding.rvQuote.addItemDecoration(
                 new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
         mBinding.rvQuote.setItemAnimator(new DefaultItemAnimator());
         mAdapter = new QuoteAdapter(getActivity(), mOldData, mTitle);
         mBinding.rvQuote.setAdapter(mAdapter);
+    }
+
+    /**
+     * date: 2019/3/29
+     * author: chenli
+     * description: 切换交易所合约
+     */
+    public void switchQuotePage(String title){
+        mBinding.rvQuote.scrollToPosition(0);
+        mTitle = title;
+        update();
+        refreshUI(title);
+    }
+
+    public String getTitle(){
+        return mTitle;
     }
 
     /**
@@ -560,6 +548,21 @@ public class QuoteFragment extends LazyLoadFragment {
             }
         };
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, new IntentFilter(MD_BROADCAST_ACTION));
+
+        mReceiverAccount = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String mDataString = intent.getStringExtra("msg");
+                switch (mDataString) {
+                    case TD_MESSAGE:
+                        refreshConfigOptional();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiverAccount, new IntentFilter(TD_BROADCAST_ACTION));
     }
 
     /**
@@ -606,6 +609,7 @@ public class QuoteFragment extends LazyLoadFragment {
     public void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiverAccount);
     }
 
     @Override
@@ -617,23 +621,6 @@ public class QuoteFragment extends LazyLoadFragment {
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.search, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.search_quote) {
-            mIns = mDataManager.getRtnData().getIns_list();
-            Intent intent = new Intent(getActivity(), SearchActivity.class);
-            startActivityForResult(intent, JUMP_TO_SEARCH_ACTIVITY);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -648,14 +635,9 @@ public class QuoteFragment extends LazyLoadFragment {
                     && mInsList.size() != LatestFileManager.getOptionalInsList().size())
                 update();
             //三种情况:搜索页返回,合约详情页返回,搜索页点击进入合约详情页再返回
-            if (BaseApplication.getWebSocketService() == null) return;
             switch (requestCode) {
                 case JUMP_TO_FUTURE_INFO_ACTIVITY:
                     BaseApplication.getWebSocketService().sendSubscribeQuote(mIns);
-                    break;
-                case JUMP_TO_SEARCH_ACTIVITY:
-                    if (mIns != null && !mIns.equals(mDataManager.getRtnData().getIns_list()))
-                        BaseApplication.getWebSocketService().sendSubscribeQuote(mIns);
                     break;
                 default:
                     break;
@@ -664,5 +646,98 @@ public class QuoteFragment extends LazyLoadFragment {
         }
     }
 
+    //根据合约导航滑动行情列表
+    @Subscribe
+    public void onEvent(PositionEvent positionEvent) {
+        if (mTitle.equals(mToolbarTitle.getText().toString())) {
+            int position = positionEvent.getPosition();
+            ((LinearLayoutManager) mBinding.rvQuote.getLayoutManager()).scrollToPositionWithOffset(position, 0);
+            int visibleItemCount1 = mBinding.rvQuote.getChildCount();
+            int lastPosition1 = (position + visibleItemCount1) > mInsList.size() ? mInsList.size() : (position + visibleItemCount1);
+            int firstPosition1 = (lastPosition1 - position) != visibleItemCount1 ? (lastPosition1 - visibleItemCount1) : position;
+            try {
+                if (mInsList.size() > LOAD_QUOTE_NUM) {
+                    List<String> insList = mInsList.subList(firstPosition1, lastPosition1);
+                    sendSubscribeQuotes(insList);
+                }
+            } catch (IndexOutOfBoundsException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void setmIsUpdate(boolean mIsUpdate) {
+        this.mIsUpdate = mIsUpdate;
+    }
+
+    public List<String> getmInsList() {
+        return mInsList;
+    }
+
+    /**
+     * date: 2019/4/2
+     * author: chenli
+     * description: 配置新用户自选合约
+     */
+    public void refreshConfigOptional(){
+        if (LatestFileManager.getOptionalInsList().isEmpty()){
+            UserEntity userEntity = mDataManager.getTradeBean().getUsers().get(mDataManager.USER_ID);
+            LogUtils.e("fffff", true);
+            if (userEntity == null)return;
+            LogUtils.e("cccc", true);
+            Map<String, PositionEntity> positions = userEntity.getPositions();
+            LogUtils.e("dddd", true);
+            //从来没有持仓
+            if (!positions.isEmpty()){
+                LogUtils.e("eeeee", true);
+                List<String> list = new ArrayList<>();
+                for (PositionEntity positionEntity : positions.values()) {
+                    int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+                    int volume_short = Integer.parseInt(positionEntity.getVolume_short());
+                    LogUtils.e("aaaaaaaa"+volume_long, true);
+                    LogUtils.e("aaaaaaaa"+volume_short, true);
+
+                    if (!(volume_long == 0 && volume_short == 0)) {
+                        LogUtils.e("aaaaaaaa"+positionEntity.getInstrument_id(), true);
+                        list.add(positionEntity.getInstrument_id());
+                    }
+                }
+                //持仓已经全部平仓
+                if (list.isEmpty()) addSomeMainListToOptional();
+                else LatestFileManager.saveInsListToFile(list);
+            }else addSomeMainListToOptional();
+        }
+        update();
+    }
+    /**
+     * date: 2019/4/2
+     * author: chenli
+     * description: 配置新用户自选合约
+     */
+    public void initConfigOptional(){
+        if (LatestFileManager.getOptionalInsList().isEmpty()){
+            UserEntity userEntity = mDataManager.getTradeBean().getUsers().get(mDataManager.USER_ID);
+            if (userEntity == null)return;
+            Map<String, PositionEntity> positions = userEntity.getPositions();
+            if (!positions.isEmpty()){
+                LatestFileManager.saveInsListToFile(new ArrayList<>(positions.keySet()));
+            }else {
+                List<String> list = new ArrayList<>(LatestFileManager.getMainInsList().keySet());
+                if (10 < list.size()) LatestFileManager.saveInsListToFile(new ArrayList<>(list.subList(0, 9)));
+                else LatestFileManager.saveInsListToFile(list);
+            }
+        }
+    }
+
+    /**
+     * date: 2019/4/2
+     * author: chenli
+     * description: 添加一些主力合约到自选中
+     */
+    private void addSomeMainListToOptional(){
+        List<String> list = new ArrayList<>(LatestFileManager.getMainInsList().keySet());
+        if (10 < list.size()) LatestFileManager.saveInsListToFile(new ArrayList<>(list.subList(0, 9)));
+        else LatestFileManager.saveInsListToFile(list);
+    }
 }
 

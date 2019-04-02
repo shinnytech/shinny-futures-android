@@ -205,13 +205,6 @@
 
         </RelativeLayout>
 
-        <ImageView
-            android:layout_marginTop="@dimen/margin_30dp"
-            android:layout_gravity="center"
-            android:src="@mipmap/ic_launcher"
-            android:layout_width="100dp"
-            android:layout_height="100dp" />
-
     </LinearLayout>
 
 

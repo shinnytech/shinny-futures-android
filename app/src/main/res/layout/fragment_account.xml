@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="com.shinnytech.futures.utils.MathUtils"></import>
+
+        <variable
+            name="account"
+            type="com.shinnytech.futures.model.bean.accountinfobean.AccountEntity"></variable>
+    </data>
+
+    <LinearLayout
+        android:keepScreenOn="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:layout_marginStart="@dimen/margin_5dp"
+            android:layout_marginEnd="@dimen/margin_5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="@string/account_activity_user"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:textAlignment="textEnd"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:id="@+id/account_user"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="@{account.user_id}"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:layout_marginStart="@dimen/margin_5dp"
+            android:layout_marginEnd="@dimen/margin_5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="权益"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:textAlignment="textEnd"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:id="@+id/balance"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="@{MathUtils.round(account.balance, 0)}"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:layout_marginStart="@dimen/margin_5dp"
+            android:layout_marginEnd="@dimen/margin_5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="可用"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:textAlignment="textEnd"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:id="@+id/available"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="@{MathUtils.round(account.available, 0)}"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:layout_marginStart="@dimen/margin_5dp"
+            android:layout_marginEnd="@dimen/margin_5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="使用率"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:textAlignment="textEnd"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:id="@+id/using_ratio"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text='@{MathUtils.subZeroAndDot(MathUtils.round(MathUtils.multiply("100",MathUtils.divide(account.margin, account.balance)), 2)) + "%"}'
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:layout_marginStart="@dimen/margin_5dp"
+            android:layout_marginEnd="@dimen/margin_5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="持仓盈亏"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:textAlignment="textEnd"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:id="@+id/position_profit"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="@{MathUtils.round(account.position_profit, 2)}"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:layout_marginStart="@dimen/margin_5dp"
+            android:layout_marginEnd="@dimen/margin_5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="平仓盈亏"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:textAlignment="textEnd"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:id="@+id/close_profit"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="@{MathUtils.round(account.close_profit, 2)}"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:layout_marginStart="@dimen/margin_5dp"
+            android:layout_marginEnd="@dimen/margin_5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="占用保证金"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:textAlignment="textEnd"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:id="@+id/margin_using"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:text="@{MathUtils.round(account.margin, 2)}"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <View
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/line_width_half"
+            android:background="@color/bg_gray_light_more"/>
+
+        <android.support.design.widget.TabLayout
+            app:tabIndicatorColor="@color/marker_yellow"
+            android:id="@+id/tabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="40dp">
+
+            <android.support.design.widget.TabItem
+                android:text="持仓"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <android.support.design.widget.TabItem
+                android:text="挂单"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <android.support.design.widget.TabItem
+                android:text="委托"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <android.support.design.widget.TabItem
+                android:text="成交"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </android.support.design.widget.TabLayout>
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/vp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </android.support.v4.view.ViewPager>
+
+    </LinearLayout>
+</layout>

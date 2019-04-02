@@ -9,8 +9,11 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.RadioGroup;
 
 import com.shinnytech.futures.R;
@@ -31,6 +34,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.Map;
 
+import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
 import static com.shinnytech.futures.constants.CommonConstants.LOG_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
@@ -225,6 +229,19 @@ public class FutureInfoActivity extends BaseActivity {
                 break;
         }
         return true;
+    }
+
+
+    /**
+     * 处理返回键逻辑或者使用onBackPressed()
+     */
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (mFutureInfoActivityPresenter.closeKeyboard()) return true;
+        Intent intent = new Intent();
+        setResult(RESULT_OK, intent);
+        finish();
+        return super.onKeyDown(keyCode, event);
     }
 
     /**
