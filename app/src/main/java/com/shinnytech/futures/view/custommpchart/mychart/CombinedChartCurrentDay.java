@@ -109,7 +109,7 @@ public class CombinedChartCurrentDay extends CombinedChart {
 //            if (!mViewPortHandler.isInBoundsX(pos[0]))
 //                continue;
 
-            // callbacks to update the content
+            // callbacks to switchQuoteInsList the content
             mMarker.refreshContent(e, highlight);
 
             // draw the marker

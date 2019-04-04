@@ -24,6 +24,7 @@ public class MyBarChartRenderer extends BarChartRenderer {
     private RectF mBarShadowRectBuffer = new RectF();
     //画线型成交量图
     private Paint mLinePaint;
+
     public MyBarChartRenderer(BarDataProvider chart, ChartAnimator animator, ViewPortHandler viewPortHandler) {
         super(chart, animator, viewPortHandler);
         mLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);

@@ -9,7 +9,6 @@ import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 
 import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT;
-import static com.shinnytech.futures.constants.CommonConstants.ACTIVITY_TYPE;
 
 /**
  * date: 7/7/17

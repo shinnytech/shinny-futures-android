@@ -1085,12 +1085,12 @@ public class KlineFragment extends BaseChartFragment {
                     String closeOiDelta = closeOi;
                     String closePre = "0";
                     String changePercent = "-";
-                    if (dataEntityPre != null){
+                    if (dataEntityPre != null) {
                         closePre = LatestFileManager.saveScaleByPtick(dataEntityPre.getClose(), instrument_id);
                         closeOiDelta = MathUtils.subtract(closeOi, dataEntityPre.getClose_oi());
                     }
                     String change = MathUtils.subtract(close, closePre);
-                    if (!"0".equals(closePre)){
+                    if (!"0".equals(closePre)) {
                         changePercent = MathUtils.round(MathUtils.multiply(
                                 MathUtils.divide(change, closePre), "100"), 2) + "%";
                     }

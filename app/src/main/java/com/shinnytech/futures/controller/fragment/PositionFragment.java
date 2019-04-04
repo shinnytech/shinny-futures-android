@@ -29,6 +29,7 @@ import com.shinnytech.futures.model.listener.PositionDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
+import com.shinnytech.futures.utils.LogUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -36,7 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.shinnytech.futures.constants.CommonConstants.POSITION_JUMP_TO_FUTURE_INFO_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
@@ -55,6 +56,7 @@ public class PositionFragment extends LazyLoadFragment {
     private List<PositionEntity> mNewData = new ArrayList<>();
     private FragmentPositionBinding mBinding;
     private boolean mIsUpdate;
+    private boolean mIsPositionsAll;
 
     @Nullable
     @Override
@@ -67,6 +69,8 @@ public class PositionFragment extends LazyLoadFragment {
     }
 
     protected void initData() {
+        if (getActivity() instanceof MainActivity) mIsPositionsAll = true;
+        else mIsPositionsAll = false;
         mIsUpdate = true;
         mBinding.rv.setLayoutManager(
                 new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
@@ -89,23 +93,24 @@ public class PositionFragment extends LazyLoadFragment {
                         String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
                         //添加判断，防止自选合约列表为空时产生无效的点击事件
                         if (instrument_id != null) {
-                            if (getActivity() instanceof FutureInfoActivity){
+                            if (mIsPositionsAll) {
+                                try {
+                                    if (getActivity() instanceof MainActivity){
+                                        ((MainActivity)getActivity()).getmMainActivityPresenter()
+                                                .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
+                                    }
+                                    sDataManager.IS_SHOW_VP_CONTENT = true;
+                                    Intent intentPos = new Intent(getActivity(), FutureInfoActivity.class);
+                                    intentPos.putExtra("instrument_id", instrument_id);
+                                    startActivityForResult(intentPos, JUMP_TO_FUTURE_INFO_ACTIVITY);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }else {
                                 IdEvent idEvent = new IdEvent();
                                 idEvent.setInstrument_id(instrument_id);
                                 EventBus.getDefault().post(idEvent);
                                 ((FutureInfoActivity) getActivity()).getViewPager().setCurrentItem(3, false);
-                            }else if (getActivity() instanceof MainActivity){
-                                try {
-                                    MainActivity mainActivity = (MainActivity) getActivity();
-                                    mainActivity.getmMainActivityPresenter().setPreSubscribedQuotes(
-                                            DataManager.getInstance().getRtnData().getIns_list());
-                                    Intent intentPos = new Intent(getActivity(), FutureInfoActivity.class);
-                                    intentPos.putExtra("nav_position", 1);
-                                    intentPos.putExtra("instrument_id", instrument_id);
-                                    getActivity().startActivityForResult(intentPos, POSITION_JUMP_TO_FUTURE_INFO_ACTIVITY);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
                             }
                         }
                     }
@@ -136,24 +141,29 @@ public class PositionFragment extends LazyLoadFragment {
     }
 
     protected void refreshPosition() {
+
         try {
             UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
             mNewData.clear();
-
-            for (PositionEntity positionEntity :
-                    userEntity.getPositions().values()) {
-                int volume_long = Integer.parseInt(positionEntity.getVolume_long());
-                int volume_short = Integer.parseInt(positionEntity.getVolume_short());
-                if (volume_long != 0 && volume_short != 0) {
-                    PositionEntity positionEntityLong = positionEntity.cloneLong();
-                    PositionEntity positionEntityShort = positionEntity.cloneShort();
-                    mNewData.add(positionEntityLong);
-                    mNewData.add(positionEntityShort);
-                } else if (!(volume_long == 0 && volume_short == 0)) {
-                    mNewData.add(CloneUtils.clone(positionEntity));
+            if (mIsPositionsAll){
+                for (PositionEntity positionEntity :
+                        userEntity.getPositions().values()) {
+                    int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+                    int volume_short = Integer.parseInt(positionEntity.getVolume_short());
+                    if (volume_long != 0 && volume_short != 0) {
+                        PositionEntity positionEntityLong = positionEntity.cloneLong();
+                        PositionEntity positionEntityShort = positionEntity.cloneShort();
+                        mNewData.add(positionEntityLong);
+                        mNewData.add(positionEntityShort);
+                    } else if (!(volume_long == 0 && volume_short == 0)) {
+                        mNewData.add(CloneUtils.clone(positionEntity));
+                    }
                 }
+            }else {
+
             }
+
             Collections.sort(mNewData);
             DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new PositionDiffCallback(mOldData, mNewData), false);
             mAdapter.setData(mNewData);
@@ -173,11 +183,12 @@ public class PositionFragment extends LazyLoadFragment {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case TD_MESSAGE:
-                        if (getActivity() instanceof FutureInfoActivity)
-                            if ((R.id.rb_position_info == ((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId())
-                                && mIsUpdate)
-                            refreshPosition();
-                        else refreshPosition();
+                        if (!mIsPositionsAll) {
+                            if ((R.id.rb_position_info ==
+                                    ((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId()) && mIsUpdate) {
+                                refreshPosition();
+                            }
+                        } else refreshPosition();
                         break;
                     default:
                         break;
@@ -191,7 +202,6 @@ public class PositionFragment extends LazyLoadFragment {
     @Override
     public void onResume() {
         super.onResume();
-        update();
         registerBroaderCast();
     }
 
@@ -206,6 +216,6 @@ public class PositionFragment extends LazyLoadFragment {
     public void update() {
         refreshPosition();
         mBinding.rv.scrollToPosition(0);
-
     }
+
 }

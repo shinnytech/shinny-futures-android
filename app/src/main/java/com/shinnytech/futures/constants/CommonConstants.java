@@ -10,8 +10,6 @@ public final class CommonConstants {
     public static final String MARKET_URL_6 = "ws://106.15.82.189/t/md/front/mobile";
     public static final String MARKET_URL_7 = "ws://106.15.219.160/t/md/front/mobile";
     public static final String FEED_BACK_URL = "https://ask.shinnytech.com/src/indexm.html";
-    public static String TRANSACTION_URL = "ws://opentd.shinnytech.com/trade/user0";
-    public static String JSON_FILE_URL = "http://openmd.shinnytech.com/t/md/symbols/latest.json";
     //广播信息类型
     public static final String MD_ONLINE = "MD_ONLINE";
     public static final String MD_OFFLINE = "MD_OFFLINE";
@@ -82,18 +80,15 @@ public final class CommonConstants {
     //订阅合约数
     public static final int LOAD_QUOTE_NUM = 24;
     //页面跳转标志
-    public static final String ACTIVITY_TYPE = "activity_type";
     public static final int POSITION_JUMP_TO_LOG_IN_ACTIVITY = 1;
     public static final int ORDER_JUMP_TO_LOG_IN_ACTIVITY = 2;
     public static final int TRANSACTION_JUMP_TO_LOG_IN_ACTIVITY = 3;
     public static final int JUMP_TO_SEARCH_ACTIVITY = 4;
     public static final int JUMP_TO_FUTURE_INFO_ACTIVITY = 5;
     public static final int LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY = 6;
-    public static final int POSITION_JUMP_TO_FUTURE_INFO_ACTIVITY = 7;
-    public static final int LOGIN_JUMP_TO_LOG_IN_ACTIVITY = 8;
-    public static final int KLINE_DURATION_ACYIVITY_TO_ADD_DURATION_ACTIVITY = 9;
-    public static final int LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY = 10;
-    public static final int LOGIN_JUMP_TO_MAIN_ACTIVITY = 11;
+    public static final int KLINE_DURATION_ACTIVITY_TO_ADD_DURATION_ACTIVITY = 7;
+    public static final int LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY = 8;
+    public static final int LOGIN_JUMP_TO_MAIN_ACTIVITY = 9;
     //app名称
     public static final String KUAI_QI_XIAO_Q = "快期小Q";
     //本地自选合约文件名
@@ -135,16 +130,16 @@ public final class CommonConstants {
     public static final String KLINE_DURATION_ALL = "3秒,5秒,10秒,15秒,20秒,30秒,1分,2分," +
             "3分,5分,10分,15分,30分,1时,2时,4时,1日,1周,4周";
     public static final String KLINE_DURATION_DAY = "分时";
-
     //amp event type
     public static final String AMP_INIT = "amp_init";
     public static final String AMP_BACKGROUND = "amp_background";
     public static final String AMP_TRADE = "amp_trade";
     public static final String AMP_TRANSFER = "amp_transfer";
     public static final String AMP_LOGGED = "amp_logged";
-
     //amp user property
     public static final String AMP_USER_SCREEN_SIZE = "screen_size";
     public static final String AMP_USER_BROKER_ID = "broker_id_last";
     public static final String AMP_USER_PACKAGE_ID = "package_id_last";
+    public static String TRANSACTION_URL = "ws://opentd.shinnytech.com/trade/user0";
+    public static String JSON_FILE_URL = "http://openmd.shinnytech.com/t/md/symbols/latest.json";
 }

@@ -796,7 +796,7 @@ public class AmplitudeClient {
     public AmplitudeClient setOffline(boolean offline) {
         this.offline = offline;
 
-        // Try to update to the server once offline mode is disabled.
+        // Try to switchQuoteInsList to the server once offline mode is disabled.
         if (!offline) {
             uploadEvents();
         }
@@ -2008,7 +2008,7 @@ public class AmplitudeClient {
             } catch (JSONException e) {
                 uploadingCurrently.set(false);
                 logger.e(TAG, e.toString());
-                Diagnostics.getLogger().logError("Failed to update server", e);
+                Diagnostics.getLogger().logError("Failed to switchQuoteInsList server", e);
 
                 // handle CursorWindowAllocationException when fetching events, defer upload
             } catch (CursorWindowAllocationException e) {
@@ -2017,7 +2017,7 @@ public class AmplitudeClient {
                         "Caught Cursor window exception during event upload, deferring upload: %s",
                         e.getMessage()
                 ));
-                Diagnostics.getLogger().logError("Failed to update server", e);
+                Diagnostics.getLogger().logError("Failed to switchQuoteInsList server", e);
             }
         }
     }

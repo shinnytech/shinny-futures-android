@@ -90,9 +90,6 @@
             android:name=".controller.activity.AccountActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".controller.activity.TradeActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".controller.activity.FeedBackActivity"
             android:screenOrientation="portrait" />
         <activity

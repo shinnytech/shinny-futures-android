@@ -99,7 +99,7 @@ public class DataManager {
      * date: 7/9/17
      * description: 账户信息实例
      */
-    private TradeBean TRADE = new TradeBean();
+    private TradeBean TRADE_DATA = new TradeBean();
     /**
      * date: 7/9/17
      * description: 单例模式，行情数据类实例
@@ -129,7 +129,7 @@ public class DataManager {
     }
 
     public TradeBean getTradeBean() {
-        return TRADE;
+        return TRADE_DATA;
     }
 
     public BrokerEntity getBroker() {
@@ -138,6 +138,11 @@ public class DataManager {
 
     public SimpleDateFormat getSimpleDateFormat() {
         return simpleDateFormat;
+    }
+
+    public void clearAccount() {
+        USER_ID = "";
+        TRADE_DATA = new TradeBean();
     }
 
     /**
@@ -416,7 +421,7 @@ public class DataManager {
                             }
                             break;
                         case "trade":
-                            Map<String, UserEntity> userEntities = TRADE.getUsers();
+                            Map<String, UserEntity> userEntities = TRADE_DATA.getUsers();
                             Iterator<String> tradeIterator = data.keys();
                             while (tradeIterator.hasNext()) {
                                 String userKey = tradeIterator.next();
@@ -459,7 +464,7 @@ public class DataManager {
                                     }
                                 }
                                 userEntities.put(userKey, userEntity);
-                                if (BaseApplication.getWebSocketService() != null){
+                                if (BaseApplication.getWebSocketService() != null) {
                                     BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE, TD_BROADCAST);
                                 }
                             }

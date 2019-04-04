@@ -16,12 +16,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.controller.activity.FutureInfoActivity;
+import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentTradeBinding;
 import com.shinnytech.futures.model.adapter.TradeAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.TradeEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.engine.DataManager;
+import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.model.listener.TradeDiffCallback;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
@@ -30,26 +32,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 public class TradeFragment extends LazyLoadFragment {
 
     private DataManager sDataManager = DataManager.getInstance();
-    private Context sContext = BaseApplication.getContext();
     private BroadcastReceiver mReceiverAccount;
     private FragmentTradeBinding mBinding;
     private TradeAdapter mAdapter;
     private boolean mIsUpdate = true;
     private List<TradeEntity> mOldData = new ArrayList<>();
     private List<TradeEntity> mNewData = new ArrayList<>();
-
-    public static AccountFragment newInstance() {
-        AccountFragment fragment = new AccountFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -122,7 +117,7 @@ public class TradeFragment extends LazyLoadFragment {
         }
     }
 
-    private void initData(){
+    private void initData() {
         mBinding.rv.setLayoutManager(new LinearLayoutManager(getActivity()));
         mBinding.rv.addItemDecoration(
                 new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
@@ -131,7 +126,7 @@ public class TradeFragment extends LazyLoadFragment {
         mBinding.rv.setAdapter(mAdapter);
     }
 
-    private void initEvent(){
+    private void initEvent() {
         mBinding.rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -149,5 +144,26 @@ public class TradeFragment extends LazyLoadFragment {
                 }
             }
         });
+
+        mBinding.rv.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rv, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                TradeEntity tradeEntity = mAdapter.getData().get(position);
+                if (tradeEntity == null)return;
+                if (getActivity() instanceof MainActivity){
+                    ((MainActivity)getActivity()).getmMainActivityPresenter()
+                            .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
+                }
+                sDataManager.IS_SHOW_VP_CONTENT = true;
+                Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
+                intent.putExtra("instrument_id", tradeEntity.getExchange_id() + "." + tradeEntity.getInstrument_id());
+                startActivityForResult(intent, JUMP_TO_FUTURE_INFO_ACTIVITY);
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+
+            }
+        }));
     }
 }

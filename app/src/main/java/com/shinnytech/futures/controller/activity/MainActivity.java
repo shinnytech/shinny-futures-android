@@ -18,13 +18,12 @@ import com.shinnytech.futures.controller.MainActivityPresenter;
 import com.shinnytech.futures.controller.fragment.QuoteFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
-import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_SEARCH_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
-import static com.shinnytech.futures.constants.CommonConstants.POSITION_JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 
 /**
@@ -114,7 +113,7 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.drawer_right, menu);
+        getMenuInflater().inflate(R.menu.activity_main_menu, menu);
         getMenuInflater().inflate(R.menu.search, menu);
         return true;
     }
@@ -122,7 +121,7 @@ public class MainActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        switch (id){
+        switch (id) {
             case R.id.right_navigation:
                 if (mBinding.drawerLayout.isDrawerVisible(GravityCompat.END)) {
                     mBinding.drawerLayout.closeDrawer(GravityCompat.END);
@@ -175,25 +174,8 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (BaseApplication.getWebSocketService() == null) return;
-        //很重要,决定了quoteFragment中的方法能不能被调用
-        super.onActivityResult(requestCode, resultCode, data);
         String mIns = mMainActivityPresenter.getPreSubscribedQuotes();
-        if (resultCode == RESULT_OK) {
-            switch (requestCode) {
-                case POSITION_JUMP_TO_FUTURE_INFO_ACTIVITY:
-                    BaseApplication.getWebSocketService().sendSubscribeQuote(mIns);
-                    break;
-                case JUMP_TO_SEARCH_ACTIVITY:
-                    refreshQuotesAfterBack(mIns);
-                    break;
-                default:
-                    break;
-            }
-        }
-        //情况:搜索页点击进入合约详情页再返回
-        if (resultCode == RESULT_CANCELED && requestCode == JUMP_TO_SEARCH_ACTIVITY){
-            refreshQuotesAfterBack(mIns);
-        }
+        refreshQuotesAfterBack(mIns);
     }
 
     /**
@@ -203,12 +185,13 @@ public class MainActivity extends BaseActivity {
      */
     private void refreshQuotesAfterBack(String mIns) {
         QuoteFragment quoteFragment = (QuoteFragment) mMainActivityPresenter.getmViewPagerFragmentAdapter().getItem(0);
-        if (quoteFragment == null)return;
-        if (OPTIONAL.equals(mToolbarTitle.getText().toString())
-                && quoteFragment.getmInsList().size() != LatestFileManager.getOptionalInsList().size())
-            quoteFragment.update();
+        if (quoteFragment == null) return;
+        if (OPTIONAL.equals(quoteFragment.getTitle())
+                && quoteFragment.getmInsList().size() != LatestFileManager.getOptionalInsList().size()){
+            quoteFragment.refreshOptional();
+        }
         else {
-            if (mIns != null && !mIns.equals(sDataManager.getRtnData().getIns_list())){
+            if (mIns != null && !mIns.equals(sDataManager.getRtnData().getIns_list())) {
                 BaseApplication.getWebSocketService().sendSubscribeQuote(mIns);
             }
         }

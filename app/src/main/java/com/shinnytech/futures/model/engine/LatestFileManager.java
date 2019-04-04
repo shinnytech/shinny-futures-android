@@ -786,13 +786,13 @@ public class LatestFileManager {
         SLSDatabaseManager.getInstance().insertRecordIntoDB(entity);
     }
 
-    public static void deleteLogDB(){
+    public static void deleteLogDB() {
         Context context = BaseApplication.getContext();
         if (SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
             String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
             if (!TimeUtils.getNowTime().equals(date)) {
                 List<LogEntity> list = SLSDatabaseManager.getInstance().queryRecordFromDB();
-                for (LogEntity logEntity: list) {
+                for (LogEntity logEntity : list) {
                     SLSDatabaseManager.getInstance().deleteRecordFromDB(logEntity);
                 }
             }

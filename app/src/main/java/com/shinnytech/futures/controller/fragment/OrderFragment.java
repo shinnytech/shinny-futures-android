@@ -24,6 +24,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
+import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentOrderBinding;
 import com.shinnytech.futures.model.adapter.OrderAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
@@ -51,7 +53,7 @@ import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST
  */
 public class OrderFragment extends LazyLoadFragment {
 
-    private static final String KEY_FRAGMENT_TYPE = "tradeType";
+    private static final String KEY_FRAGMENT_TYPE = "mIsOrdersAlive";
 
     protected BroadcastReceiver mReceiver;
     protected DataManager sDataManager = DataManager.getInstance();
@@ -62,12 +64,13 @@ public class OrderFragment extends LazyLoadFragment {
     private FragmentOrderBinding mBinding;
     private boolean mIsUpdate;
     private boolean mIsShowDialog;
-    private boolean mIsAllOrders;
+    private boolean mIsOrdersAlive;
+    private boolean mIsOrdersAll;
 
-    public static OrderFragment newInstance(boolean mIsAllOrders) {
+    public static OrderFragment newInstance(boolean mIsOrdersAlive) {
         OrderFragment fragment = new OrderFragment();
         Bundle bundle = new Bundle();
-        bundle.putBoolean(KEY_FRAGMENT_TYPE, mIsAllOrders);
+        bundle.putBoolean(KEY_FRAGMENT_TYPE, mIsOrdersAlive);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -75,7 +78,7 @@ public class OrderFragment extends LazyLoadFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mIsAllOrders = getArguments().getBoolean(KEY_FRAGMENT_TYPE);
+        mIsOrdersAlive = getArguments().getBoolean(KEY_FRAGMENT_TYPE);
         setHasOptionsMenu(true);
     }
 
@@ -91,6 +94,7 @@ public class OrderFragment extends LazyLoadFragment {
     }
 
     protected void initData() {
+
         mIsUpdate = true;
         mBinding.rv.setLayoutManager(
                 new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
@@ -126,20 +130,36 @@ public class OrderFragment extends LazyLoadFragment {
             @Override
             public void onItemClick(View view, int position) {
                 OrderEntity orderEntity = mAdapter.getData().get(position);
-                if (orderEntity != null) {
-                    if (("ALIVE").equals(orderEntity.getStatus())) {
-                        String order_id = orderEntity.getOrder_id();
-                        if (mIsShowDialog) {
-                            String instrument_id = orderEntity.getInstrument_id();
-                            String direction_title = ((TextView) view.findViewById(R.id.order_offset)).getText().toString();
-                            String volume = orderEntity.getVolume_left();
-                            String price = ((TextView) view.findViewById(R.id.order_price)).getText().toString();
-                            initDialog(order_id, instrument_id, direction_title, volume, price);
-                        } else {
-                            BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
+                if (orderEntity == null) return;
+                if (!mIsOrdersAlive) {
+                    String order_id = orderEntity.getOrder_id();
+                    if (mIsShowDialog) {
+                        String instrument_id = orderEntity.getInstrument_id();
+                        String direction_title = ((TextView) view.findViewById(R.id.order_offset)).getText().toString();
+                        String volume = orderEntity.getVolume_left();
+                        String price = ((TextView) view.findViewById(R.id.order_price)).getText().toString();
+                        initDialog(order_id, instrument_id, direction_title, volume, price);
+                    } else {
+                        BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
+                    }
+                }else {
+                    if (getActivity() instanceof MainActivity){
+                        try {
+                            if (getActivity() instanceof MainActivity){
+                                ((MainActivity)getActivity()).getmMainActivityPresenter()
+                                        .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
+                            }
+                            sDataManager.IS_SHOW_VP_CONTENT = true;
+                            Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
+                            intent.putExtra("instrument_id", orderEntity.getExchange_id()
+                                    + "." + orderEntity.getInstrument_id());
+                            startActivityForResult(intent, JUMP_TO_FUTURE_INFO_ACTIVITY);
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
                 }
+
             }
 
             @Override
@@ -152,7 +172,6 @@ public class OrderFragment extends LazyLoadFragment {
     @Override
     public void onResume() {
         super.onResume();
-        update();
         registerBroaderCast();
     }
 
@@ -169,11 +188,12 @@ public class OrderFragment extends LazyLoadFragment {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case TD_MESSAGE:
-                        if (getActivity() instanceof FutureInfoActivity)
-                            if ((R.id.rb_order_info == ((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId())
-                                    && mIsUpdate)
+                        if (getActivity() instanceof FutureInfoActivity) {
+                            if ((R.id.rb_order_info ==
+                                    ((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId()) && mIsUpdate) {
                                 refreshOrder();
-                        else refreshOrder();
+                            }
+                        } else refreshOrder();
                         break;
                     default:
                         break;
@@ -193,15 +213,20 @@ public class OrderFragment extends LazyLoadFragment {
             UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
             mNewData.clear();
-            for (OrderEntity orderEntity :
-                    userEntity.getOrders().values()) {
-                OrderEntity o = CloneUtils.clone(orderEntity);
-                if (mIsAllOrders) {
-                    mNewData.add(o);
-                } else if (("ALIVE").equals(orderEntity.getStatus())) {
-                    mNewData.add(o);
+            if (getActivity() instanceof MainActivity){
+                for (OrderEntity orderEntity :
+                        userEntity.getOrders().values()) {
+                    OrderEntity o = CloneUtils.clone(orderEntity);
+                    if (mIsOrdersAlive) {
+                        mNewData.add(o);
+                    } else if (("ALIVE").equals(orderEntity.getStatus())) {
+                        mNewData.add(o);
+                    }
                 }
+            }else if (getActivity() instanceof FutureInfoActivity){
+
             }
+
             Collections.sort(mNewData);
             DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new OrderDiffCallback(mOldData, mNewData), false);
             mAdapter.setData(mNewData);

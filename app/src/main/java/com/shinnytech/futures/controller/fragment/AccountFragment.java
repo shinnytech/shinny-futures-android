@@ -15,12 +15,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.FragmentAccountBinding;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.engine.DataManager;
+import com.shinnytech.futures.utils.LogUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,6 @@ import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST
 public class AccountFragment extends LazyLoadFragment {
 
     private DataManager sDataManager = DataManager.getInstance();
-    private Context sContext = BaseApplication.getContext();
     private BroadcastReceiver mReceiverAccount;
     private FragmentAccountBinding mBinding;
     private ViewPagerFragmentAdapter mViewPagerFragmentAdapter;
@@ -100,7 +99,7 @@ public class AccountFragment extends LazyLoadFragment {
         mBinding.setAccount(accountEntity);
     }
 
-    private void initData(){
+    private void initData() {
         mBinding.tabLayout.setTabTextColors(getResources().getColor(R.color.white),
                 getResources().getColor(R.color.marker_yellow));
 
@@ -111,14 +110,14 @@ public class AccountFragment extends LazyLoadFragment {
         OrderFragment orderFragmentAlive = OrderFragment.newInstance(false);
         TradeFragment tradeFragment = new TradeFragment();
         fragmentList.add(positionFragment);
-        fragmentList.add(orderFragment);
         fragmentList.add(orderFragmentAlive);
+        fragmentList.add(orderFragment);
         fragmentList.add(tradeFragment);
         mViewPagerFragmentAdapter = new ViewPagerFragmentAdapter(getActivity().getSupportFragmentManager(), fragmentList);
         mBinding.vp.setAdapter(mViewPagerFragmentAdapter);
     }
 
-    private void initEvent(){
+    private void initEvent() {
         mBinding.vp.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -153,4 +152,5 @@ public class AccountFragment extends LazyLoadFragment {
             }
         });
     }
+
 }

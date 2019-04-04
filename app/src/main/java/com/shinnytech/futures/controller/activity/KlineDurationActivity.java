@@ -96,7 +96,7 @@ public class KlineDurationActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(KlineDurationActivity.this, AddKlineDurationActivity.class);
-                KlineDurationActivity.this.startActivityForResult(intent, CommonConstants.KLINE_DURATION_ACYIVITY_TO_ADD_DURATION_ACTIVITY);
+                KlineDurationActivity.this.startActivityForResult(intent, CommonConstants.KLINE_DURATION_ACTIVITY_TO_ADD_DURATION_ACTIVITY);
             }
         });
     }
@@ -108,7 +108,7 @@ public class KlineDurationActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CommonConstants.KLINE_DURATION_ACYIVITY_TO_ADD_DURATION_ACTIVITY
+        if (requestCode == CommonConstants.KLINE_DURATION_ACTIVITY_TO_ADD_DURATION_ACTIVITY
                 && resultCode == RESULT_OK) {
             String duration = (String) SPUtils.get(BaseApplication.getContext(), CommonConstants.CONFIG_KLINE_DURATION_DEFAULT, "");
             String[] durations = duration.split(",");

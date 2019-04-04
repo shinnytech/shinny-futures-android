@@ -31,10 +31,8 @@ import com.shinnytech.futures.controller.activity.AccountActivity;
 import com.shinnytech.futures.controller.activity.BankTransferActivity;
 import com.shinnytech.futures.controller.activity.ChangePasswordActivity;
 import com.shinnytech.futures.controller.activity.FeedBackActivity;
-import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.controller.activity.SettingActivity;
-import com.shinnytech.futures.controller.activity.TradeActivity;
 import com.shinnytech.futures.controller.fragment.AccountFragment;
 import com.shinnytech.futures.controller.fragment.QuoteFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
@@ -48,7 +46,6 @@ import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
@@ -64,7 +61,6 @@ import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
-import static com.shinnytech.futures.constants.CommonConstants.POSITION_JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.SHANGHAI;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOU;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
@@ -148,12 +144,6 @@ public class MainActivityPresenter {
         NavigationRightEntity menu3 = new NavigationRightEntity();
         menu3.setIcon(R.mipmap.ic_assignment_turned_in_white_18dp);
         menu3.setContent(CommonConstants.PASSWORD);
-        NavigationRightEntity menu4 = new NavigationRightEntity();
-        menu4.setIcon(R.mipmap.ic_donut_large_white_18dp);
-        menu4.setContent(CommonConstants.POSITION);
-        NavigationRightEntity menu5 = new NavigationRightEntity();
-        menu5.setIcon(R.mipmap.ic_description_white_18dp);
-        menu5.setContent(CommonConstants.TRADE);
         NavigationRightEntity menu6 = new NavigationRightEntity();
         menu6.setIcon(R.mipmap.ic_account_balance_white_18dp);
         menu6.setContent(CommonConstants.BANK);
@@ -171,8 +161,6 @@ public class MainActivityPresenter {
         list.add(menu1);
         list.add(menu2);
         list.add(menu3);
-        list.add(menu4);
-        list.add(menu5);
         list.add(menu6);
         list.add(menu7);
         list.add(menu8);
@@ -224,6 +212,7 @@ public class MainActivityPresenter {
                 String title = (String) view.getTag();
                 switch (title) {
                     case CommonConstants.LOGOUT:
+                        DataManager.getInstance().clearAccount();
                         SPUtils.putAndApply(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
                         BaseApplication.getWebSocketService().reConnectTD();
                         mMainActivity.finish();
@@ -239,22 +228,6 @@ public class MainActivityPresenter {
                     case CommonConstants.PASSWORD:
                         Intent intentChange = new Intent(mMainActivity, ChangePasswordActivity.class);
                         mMainActivity.startActivity(intentChange);
-                        break;
-                    case CommonConstants.POSITION:
-                        try {
-                            mIns = DataManager.getInstance().getRtnData().getIns_list();
-                            Intent intentPos = new Intent(mMainActivity, FutureInfoActivity.class);
-                            intentPos.putExtra("nav_position", 1);
-                            String instrument_id = new ArrayList<>(LatestFileManager.getMainInsList().keySet()).get(0);
-                            intentPos.putExtra("instrument_id", instrument_id);
-                            mMainActivity.startActivityForResult(intentPos, POSITION_JUMP_TO_FUTURE_INFO_ACTIVITY);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        break;
-                    case CommonConstants.TRADE:
-                        Intent intentDeal = new Intent(mMainActivity, TradeActivity.class);
-                        mMainActivity.startActivity(intentDeal);
                         break;
                     case CommonConstants.BANK:
                         Intent intentBank = new Intent(mMainActivity, BankTransferActivity.class);
@@ -390,13 +363,13 @@ public class MainActivityPresenter {
             @Override
             public void onPageSelected(int position) {
                 mBinding.vpContent.setCurrentItem(position, false);
-                if (position == 1){
+                if (position == 1) {
                     mBinding.bottomNavigation.setSelectedItemId(R.id.trade);
                     mBinding.rvQuoteNavigation.setVisibility(View.GONE);
                     mBinding.quoteNavLeft.setVisibility(View.GONE);
                     mBinding.quoteNavRight.setVisibility(View.GONE);
                     mToolbarTitle.setText("账户详情");
-                }else {
+                } else {
                     mBinding.bottomNavigation.setSelectedItemId(R.id.market);
                     String title = ((QuoteFragment) mViewPagerFragmentAdapter.getItem(0)).getTitle();
                     if (OPTIONAL.equals(title)) {

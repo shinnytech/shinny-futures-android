@@ -14,7 +14,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
@@ -35,7 +34,6 @@ import com.lzy.okgo.model.HttpHeaders;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.ConfirmActivity;
 import com.shinnytech.futures.controller.activity.LoginActivity;
-import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
@@ -47,7 +45,6 @@ import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.umeng.commonsdk.UMConfigure;
-
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -100,6 +97,7 @@ public class BaseApplication extends Application implements ServiceConnection {
     private static WebSocketService sWebSocketService;
     private static List<String> sMDURLs = new ArrayList<>();
     private static int index = 0;
+    private static LOGClient mLOGClient;
     private boolean mServiceBound = false;
     private boolean mBackGround = false;
     private BroadcastReceiver mReceiverMarket;
@@ -107,7 +105,6 @@ public class BaseApplication extends Application implements ServiceConnection {
     private BroadcastReceiver mReceiverNetwork;
     private BroadcastReceiver mReceiverScreen;
     private MyHandler mMyHandler = new MyHandler();
-    private static LOGClient mLOGClient;
 
     public static int getIndex() {
         return index;
@@ -126,7 +123,7 @@ public class BaseApplication extends Application implements ServiceConnection {
         return sWebSocketService;
     }
 
-    public static LOGClient getLOGClient(){
+    public static LOGClient getLOGClient() {
         return mLOGClient;
     }
 
@@ -163,7 +160,7 @@ public class BaseApplication extends Application implements ServiceConnection {
      * author: chenli
      * description: 配置阿里日志服务
      */
-    private void initAliLog(String ak, String sk){
+    private void initAliLog(String ak, String sk) {
         SLSDatabaseManager.getInstance().setupDB(sContext);
 
         PlainTextAKSKCredentialProvider credentialProvider =
@@ -198,7 +195,7 @@ public class BaseApplication extends Application implements ServiceConnection {
 
         if (!SPUtils.contains(sContext, CONFIG_KLINE_DURATION_DEFAULT)) {
             SPUtils.putAndApply(sContext, CONFIG_KLINE_DURATION_DEFAULT, CommonConstants.KLINE_DURATION_DEFAULT);
-        }else {
+        } else {
             //覆盖之前的配置
             String kline = (String) SPUtils.get(sContext, CONFIG_KLINE_DURATION_DEFAULT, "");
             kline = kline.replace("钟", "");
@@ -422,10 +419,12 @@ public class BaseApplication extends Application implements ServiceConnection {
             public void onActivityDestroyed(Activity activity) {
                 if (activity instanceof LoginActivity) {
                     LogUtils.e("App彻底销毁", true);
-                    if (mReceiverMarket != null)LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverMarket);
-                    if (mReceiverTransaction != null)LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverTransaction);
-                    if (mReceiverNetwork != null)sContext.unregisterReceiver(mReceiverNetwork);
-                    if (mReceiverScreen != null)sContext.unregisterReceiver(mReceiverScreen);
+                    if (mReceiverMarket != null)
+                        LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverMarket);
+                    if (mReceiverTransaction != null)
+                        LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverTransaction);
+                    if (mReceiverNetwork != null) sContext.unregisterReceiver(mReceiverNetwork);
+                    if (mReceiverScreen != null) sContext.unregisterReceiver(mReceiverScreen);
                     if (sWebSocketService != null) {
                         sWebSocketService.disConnectMD();
                         sWebSocketService.disConnectTD();
@@ -463,7 +462,7 @@ public class BaseApplication extends Application implements ServiceConnection {
      */
     private void notifyBackground() {
         //后台
-        if (sWebSocketService != null){
+        if (sWebSocketService != null) {
             sWebSocketService.disConnectTD();
             sWebSocketService.disConnectMD();
             mBackGround = true;

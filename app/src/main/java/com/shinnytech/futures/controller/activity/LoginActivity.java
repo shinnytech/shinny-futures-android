@@ -67,6 +67,8 @@ import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST
  */
 
 public class LoginActivity extends AppCompatActivity {
+    protected Context sContext;
+    protected DataManager sDataManager;
     /**
      * date: 7/7/17
      * description: 用户登录监听广播
@@ -77,8 +79,6 @@ public class LoginActivity extends AppCompatActivity {
     private Handler mHandler;
     private ActivityLoginBinding mBinding;
     private String mPassword;
-    protected Context sContext;
-    protected DataManager sDataManager;
     private long mExitTime = 0;
 
     @Override
@@ -122,29 +122,28 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         //获取用户登录成功后保存在sharedPreference里的用户名
-        if (mRememberAccount){
+        if (mRememberAccount) {
             if (SPUtils.contains(sContext, CONFIG_ACCOUNT)) {
                 String account = (String) SPUtils.get(sContext, CONFIG_ACCOUNT, "");
                 mBinding.account.setText(account);
                 mBinding.account.setSelection(account.length());
                 if (!account.isEmpty()) mBinding.deleteAccount.setVisibility(View.VISIBLE);
             }
-        }else {
+        } else {
             mBinding.account.setText("");
         }
 
 
-        if (mRememberPassword){
+        if (mRememberPassword) {
             if (SPUtils.contains(sContext, CONFIG_PASSWORD)) {
                 String password = (String) SPUtils.get(sContext, CONFIG_PASSWORD, "");
                 mBinding.password.setText(password);
                 mBinding.password.setSelection(password.length());
                 if (!password.isEmpty()) mBinding.deletePassword.setVisibility(View.VISIBLE);
             }
-        }else {
+        } else {
             mBinding.password.setText("");
         }
-
 
 
     }
@@ -422,64 +421,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * date: 6/1/18
-     * author: chenli
-     * description: 点击登录后服务器返回处理
-     * version:
-     * state:
-     */
-    static class MyHandler extends Handler {
-        WeakReference<LoginActivity> mActivityReference;
-
-        MyHandler(LoginActivity activity) {
-            mActivityReference = new WeakReference<>(activity);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            final LoginActivity activity = mActivityReference.get();
-            if (activity != null) {
-                switch (msg.what) {
-                    case 0:
-                        String broker_id = activity.mBinding.broker.getText().toString();
-                        Identify identify = new Identify().set(AMP_USER_BROKER_ID, broker_id);
-                        Amplitude.getInstance().identify(identify);
-                        Amplitude.getInstance().logEvent(AMP_LOGGED);
-                        SPUtils.putAndApply(activity.sContext, CONFIG_LOGIN_DATE, TimeUtils.getNowTime());
-                        SPUtils.putAndApply(activity.sContext, CONFIG_ACCOUNT, activity.mPhoneNumber);
-                        SPUtils.putAndApply(activity.sContext, CONFIG_PASSWORD, activity.mPassword);
-                        SPUtils.putAndApply(activity.sContext, CONFIG_BROKER, broker_id);
-                        //关闭键盘
-                        View view = activity.getWindow().getCurrentFocus();
-                        if (view != null) {
-                            InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-                            if (inputMethodManager != null)
-                                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOT_ALWAYS);
-                        }
-                        Intent intent1 = new Intent(activity, MainActivity.class);
-                        activity.startActivityForResult(intent1, LOGIN_JUMP_TO_MAIN_ACTIVITY);
-                        break;
-                    case 1:
-                        List<String> brokerList = LatestFileManager
-                                .getBrokerIdFromBuildConfig(activity.sDataManager.getBroker().getBrokers());
-                        if (activity.mBinding.broker.getText().toString().isEmpty()
-                                && brokerList != null && brokerList.size() != 0) {
-                            activity.mBinding.broker.setText(brokerList.get(0));
-                        }
-                        break;
-                    case 2:
-                        Intent intent = new Intent(activity, ChangePasswordActivity.class);
-                        activity.startActivityForResult(intent, LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-    }
-
-
-    /**
      * date: 1/16/18
      * author: chenli
      * description: 检查是否第一次启动APP,弹出免责条款框
@@ -536,13 +477,12 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-
     /**
      * date: 2019/3/22
      * author: chenli
      * description: 初始化amp用户属性
      */
-    private void initAmpUserProperties(){
+    private void initAmpUserProperties() {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int height = metrics.heightPixels;
@@ -551,6 +491,63 @@ public class LoginActivity extends AppCompatActivity {
                 .set(AMP_USER_PACKAGE_ID, BuildConfig.FLAVOR)
                 .set(AMP_USER_SCREEN_SIZE, width + "*" + height);
         Amplitude.getInstance().identify(identify);
+    }
+
+    /**
+     * date: 6/1/18
+     * author: chenli
+     * description: 点击登录后服务器返回处理
+     * version:
+     * state:
+     */
+    static class MyHandler extends Handler {
+        WeakReference<LoginActivity> mActivityReference;
+
+        MyHandler(LoginActivity activity) {
+            mActivityReference = new WeakReference<>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final LoginActivity activity = mActivityReference.get();
+            if (activity != null) {
+                switch (msg.what) {
+                    case 0:
+                        String broker_id = activity.mBinding.broker.getText().toString();
+                        Identify identify = new Identify().set(AMP_USER_BROKER_ID, broker_id);
+                        Amplitude.getInstance().identify(identify);
+                        Amplitude.getInstance().logEvent(AMP_LOGGED);
+                        SPUtils.putAndApply(activity.sContext, CONFIG_LOGIN_DATE, TimeUtils.getNowTime());
+                        SPUtils.putAndApply(activity.sContext, CONFIG_ACCOUNT, activity.mPhoneNumber);
+                        SPUtils.putAndApply(activity.sContext, CONFIG_PASSWORD, activity.mPassword);
+                        SPUtils.putAndApply(activity.sContext, CONFIG_BROKER, broker_id);
+                        //关闭键盘
+                        View view = activity.getWindow().getCurrentFocus();
+                        if (view != null) {
+                            InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                            if (inputMethodManager != null)
+                                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOT_ALWAYS);
+                        }
+                        Intent intent1 = new Intent(activity, MainActivity.class);
+                        activity.startActivityForResult(intent1, LOGIN_JUMP_TO_MAIN_ACTIVITY);
+                        break;
+                    case 1:
+                        List<String> brokerList = LatestFileManager
+                                .getBrokerIdFromBuildConfig(activity.sDataManager.getBroker().getBrokers());
+                        if (activity.mBinding.broker.getText().toString().isEmpty()
+                                && brokerList != null && brokerList.size() != 0) {
+                            activity.mBinding.broker.setText(brokerList.get(0));
+                        }
+                        break;
+                    case 2:
+                        Intent intent = new Intent(activity, ChangePasswordActivity.class);
+                        activity.startActivityForResult(intent, LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
 
 }

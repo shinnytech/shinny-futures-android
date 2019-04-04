@@ -23,7 +23,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="?attr/actionBarSize"
-                android:layout_marginBottom="@dimen/margin_45dp"/>
+                android:layout_marginBottom="@dimen/margin_50dp"/>
 
             <ImageView
                 android:id="@+id/quote_nav_left"

@@ -2,9 +2,6 @@ package com.shinnytech.futures.utils;
 
 import android.util.Log;
 
-import com.shinnytech.futures.constants.CommonConstants;
-import com.shinnytech.futures.model.engine.LatestFileManager;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;

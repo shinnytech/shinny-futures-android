@@ -7,6 +7,8 @@
     <dimen name="order_dialog_width1">270dp</dimen>
     <dimen name="order_dialog_height">115dp</dimen>
     <dimen name="order_dialog_height1">120dp</dimen>
+    <dimen name="optional_dialog_height">100dp</dimen>
+    <dimen name="optional_dialog_width">250dp</dimen>
 
     <dimen name="margin_1dp">1dp</dimen>
     <dimen name="margin_2dp">2dp</dimen>
@@ -24,6 +26,7 @@
     <dimen name="margin_45dp">45dp</dimen>
     <dimen name="margin_50dp">50dp</dimen>
     <dimen name="margin_70dp">70dp</dimen>
+    <dimen name="margin_95dp">95dp</dimen>
     <dimen name="margin_100dp">100dp</dimen>
 
     <dimen name="line_width">1dp</dimen>

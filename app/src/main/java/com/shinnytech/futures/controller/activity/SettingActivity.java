@@ -35,11 +35,10 @@ import static com.shinnytech.futures.constants.CommonConstants.SETTING;
 
 public class SettingActivity extends BaseActivity {
 
-    private ActivitySettingBinding mBinding;
-    private SettingAdapter mSettingAdapter;
-
     public final static int HANDLER_MESSAGE_UPLOAD_FAILED = 00011;
     public final static int HANDLER_MESSAGE_UPLOAD_SUCCESS = 00012;
+    private ActivitySettingBinding mBinding;
+    private SettingAdapter mSettingAdapter;
     private MyHandler myHandler;
 
     @Override
@@ -119,12 +118,12 @@ public class SettingActivity extends BaseActivity {
 
     }
 
-    private void upload(){
+    private void upload() {
         /* 创建logGroup */
-        final LogGroup logGroup = new LogGroup("user log", "V"+sDataManager.APP_VERSION + " User Id: " + sDataManager.USER_ID);
+        final LogGroup logGroup = new LogGroup("user log", "V" + sDataManager.APP_VERSION + " User Id: " + sDataManager.USER_ID);
 
         List<LogEntity> list = SLSDatabaseManager.getInstance().queryRecordFromDB();
-        for (LogEntity logEntity: list) {
+        for (LogEntity logEntity : list) {
             Log log = new Log();
             log.PutContent("timeStamp", getDate(logEntity.getTimestamp()));
             log.PutContent("content", logEntity.getJsonString());
@@ -134,7 +133,7 @@ public class SettingActivity extends BaseActivity {
         try {
             PostLogRequest request = new PostLogRequest("kq-xq", "kq-xq", logGroup);
             LOGClient logClient = BaseApplication.getLOGClient();
-            if (logClient == null)return;
+            if (logClient == null) return;
             logClient.asyncPostLog(request, new CompletedCallback<PostLogRequest, PostLogResult>() {
                 @Override
                 public void onSuccess(PostLogRequest request, PostLogResult result) {

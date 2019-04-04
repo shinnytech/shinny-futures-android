@@ -435,9 +435,9 @@ public class WebSocketService extends Service {
         sDataManager.getBroker().setBrokers(brokerInfo.getBrokers());
         sendMessage(TD_MESSAGE_BROKER_INFO, TD_BROADCAST);
 
-        if (sDataManager.IS_FIRST_LOGIN){
+        if (sDataManager.IS_FIRST_LOGIN) {
             sDataManager.IS_FIRST_LOGIN = false;
-        }else {
+        } else {
             Context context = BaseApplication.getContext();
             if (SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
                 String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");

@@ -153,7 +153,6 @@ public class FutureInfoActivityPresenter {
     private Toolbar mToolbar;
     private TextView mToolbarTitle;
     private FragmentManager mFragmentManager;
-    private int mNav_position;
     private Dialog mDialogOptional;
     private RecyclerView mRecyclerViewOptional;
     private DialogAdapter mDialogAdapterOptional;
@@ -178,7 +177,6 @@ public class FutureInfoActivityPresenter {
 
         Intent intent = mFutureInfoActivity.getIntent();
         mInstrumentId = intent.getStringExtra("instrument_id");
-        mNav_position = intent.getIntExtra("nav_position", 0);
 
         mToolbar.setTitle("");
         mToolbar.setTitleTextAppearance(mFutureInfoActivity, R.style.toolBarTitle);
@@ -241,20 +239,9 @@ public class FutureInfoActivityPresenter {
         fragmentList.add(transactionFragment);
         mInfoPagerAdapter = new ViewPagerFragmentAdapter(mFutureInfoActivity.getSupportFragmentManager(), fragmentList);
         mBinding.vpInfoContent.setAdapter(mInfoPagerAdapter);
-        //设置初始化页为盘口页，去除滑动效果
-        if (mNav_position == 1) {
-            mBinding.vpInfoContent.setCurrentItem(1, false);
-            mBinding.rbPositionInfo.setChecked(true);
-            DataManager.getInstance().IS_SHOW_VP_CONTENT = true;
-            mBinding.vpInfoContent.setVisibility(View.VISIBLE);
-            mBinding.rbHandicapInfo.setText(R.string.future_info_activity_handicap_down);
-            mBinding.rbPositionInfo.setText(R.string.future_info_activity_position_down);
-            mBinding.rbOrderInfo.setText(R.string.future_info_activity_order_down);
-            mBinding.rbTransactionInfo.setText(R.string.future_info_activity_transaction_down);
-        } else {
-            mBinding.vpInfoContent.setCurrentItem(0, false);
-            mBinding.rbHandicapInfo.setChecked(true);
-        }
+        //设置初始化页为交易页，去除滑动效果
+        mBinding.vpInfoContent.setCurrentItem(3, false);
+        mBinding.rbTransactionInfo.setChecked(true);
         //由于盘口页和交易页需要通过eventBus实时监听合约代码的改变，当通过toolbar改变合约时，由于默认viewPager保存屏幕外一个页面，
         //盘口页和交易页相差两个页面，所以当显示其中一个的时候，另一个一定会消亡，所以打开时会初始化得到活动的最新合约代码。但是当通过
         //持仓页改变合约代码时会直接跳转到交易页，这个过程和活动更新合约代码同时发生，所以交易页通过初始化可能得不到最新合约代码， 必须
