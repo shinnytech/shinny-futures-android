@@ -131,7 +131,7 @@ public class CombinedChartKline extends CombinedChart {
 //            if (!mViewPortHandler.isInBounds(pos[0], pos[1]))
 //                continue;
 
-            // callbacks to switchQuoteInsList the content
+            // callbacks to initQuotes the content
             mMarker.refreshContent(e, highlight);
 
             // draw the marker

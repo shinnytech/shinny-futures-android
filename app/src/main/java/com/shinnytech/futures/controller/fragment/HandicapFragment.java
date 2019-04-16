@@ -40,7 +40,6 @@ public class HandicapFragment extends LazyLoadFragment {
     private BroadcastReceiver mReceiver;
     private String mInstrumentId;
     private FragmentHandicapBinding mBinding;
-    private Context sContext = BaseApplication.getContext();
 
     /**
      * date: 7/9/17
@@ -55,17 +54,6 @@ public class HandicapFragment extends LazyLoadFragment {
             quoteEntity = LatestFileManager.calculateCombineQuoteFull(quoteEntity);
         }
         mBinding.setHandicap(quoteEntity);
-        setPriceColor(quoteEntity);
-    }
-
-    /**
-     * date: 2019/1/11
-     * author: chenli
-     * description: 设置价格颜色
-     */
-    private void setPriceColor(QuoteEntity quoteEntity) {
-        String pre_settlement = LatestFileManager.saveScaleByPtick(quoteEntity.getPre_settlement(),
-                quoteEntity.getInstrument_id());
     }
 
     @Override

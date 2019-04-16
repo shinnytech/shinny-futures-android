@@ -45,6 +45,7 @@ import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.KlineEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
@@ -73,6 +74,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.DAY_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
 import static java.lang.Float.NaN;
@@ -183,6 +185,9 @@ public class KlineFragment extends BaseChartFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        //k线图控制legend的显示与否
+        mIsAverage = (boolean) SPUtils.get(BaseApplication.getContext(), CONFIG_AVERAGE_LINE, true);
+        if (!mIsAverage) mTopChartViewBase.getLegend().setEnabled(false);
     }
 
     @Override
@@ -859,10 +864,10 @@ public class KlineFragment extends BaseChartFragment {
             LimitLine limitLine = new LimitLine(Float.valueOf(limit), LatestFileManager.saveScaleByPtick(limit, instrument_id));
             limitLine.setLineWidth(0.7f);
             limitLine.enableDashedLine(2f, 2f, 0f);
-            limitLine.setLineColor(ContextCompat.getColor(getActivity(), R.color.black_light_more));
-            limitLine.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_TOP);
+            limitLine.setLineColor(ContextCompat.getColor(getActivity(), R.color.kline_last));
+            limitLine.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
             limitLine.setTextSize(10f);
-            limitLine.setTextColor(ContextCompat.getColor(getActivity(), R.color.black_light_more));
+            limitLine.setTextColor(ContextCompat.getColor(getActivity(), R.color.kline_last));
             mTopChartViewBase.getAxisLeft().addLimitLine(limitLine);
             mLatestLimitLines.put("latest", limitLine);
         } catch (Exception e) {

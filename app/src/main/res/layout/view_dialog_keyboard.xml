@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <import type="com.shinnytech.futures.utils.MathUtils"></import>
+
+        <import type="com.shinnytech.futures.model.engine.LatestFileManager"></import>
+
+        <variable
+            name="quote"
+            type="com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity"></variable>
+
+        <variable
+            name="account"
+            type="com.shinnytech.futures.model.bean.accountinfobean.AccountEntity"></variable>
+    </data>
+
+    <RelativeLayout
+        android:id="@+id/keyboard_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/transaction"
+        android:layout_alignParentBottom="true"
+        android:background="@color/keyboard">
+
+        <android.inputmethodservice.KeyboardView
+            android:paddingStart="@dimen/padding_5dp"
+            android:paddingEnd="@dimen/padding_5dp"
+            android:paddingBottom="@dimen/padding_5dp"
+            android:id="@+id/keyboard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:background="@color/transaction_dark"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
+
+        <LinearLayout
+            android:paddingStart="@dimen/padding_5dp"
+            android:background="@color/transaction_dark"
+            android:id="@+id/upper_lower_limit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/keyboard"
+            android:layout_alignStart="@id/keyboard"
+            android:layout_alignEnd="@id/keyboard"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="涨停："
+                android:textColor="@color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{LatestFileManager.saveScaleByPtick(quote.upper_limit, quote.instrument_id)}"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin_30dp"
+                android:text="跌停："
+                android:textColor="@color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{LatestFileManager.saveScaleByPtick(quote.lower_limit, quote.instrument_id)}"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:paddingTop="@dimen/padding_5dp"
+            android:paddingStart="@dimen/padding_5dp"
+            android:background="@color/transaction_dark"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/upper_lower_limit"
+            android:layout_alignStart="@id/upper_lower_limit"
+            android:layout_alignEnd="@id/upper_lower_limit"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="最小变动价位："
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/min_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</layout>
+

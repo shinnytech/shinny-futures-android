@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.model.engine.DataManager;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -18,8 +19,14 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 /* Create an Intent that will start the Menu-Activity. */
-                Intent mainIntent = new Intent(SplashActivity.this, LoginActivity.class);
-                SplashActivity.this.startActivity(mainIntent);
+                if (DataManager.getInstance().USER_ID.isEmpty()){
+                    Intent mainIntent = new Intent(SplashActivity.this, LoginActivity.class);
+                    SplashActivity.this.startActivity(mainIntent);
+                }else {
+                    Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
+                    SplashActivity.this.startActivity(mainIntent);
+                }
+
                 SplashActivity.this.finish();
             }
         }, 3000);

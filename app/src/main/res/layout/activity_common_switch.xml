@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+    </data>
+
+    <LinearLayout
+        android:keepScreenOn="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black_light"
+        android:orientation="vertical">
+
+        <include layout="@layout/view_toolbar"></include>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:src="@mipmap/ic_watch_later_white_24dp"
+                    android:scaleType="center"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="40dp"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:textSize="@dimen/font_size_normal_more"
+                    android:gravity="left|center"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="@string/future_info_activity_position_set_up"
+                    android:textColor="@color/white" />
+
+                <Switch
+                    android:checked="true"
+                    android:id="@+id/position"
+                    android:gravity="center"
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent" />
+
+            </LinearLayout>
+
+            <View
+                android:background="@color/kline_duration"
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:src="@mipmap/ic_watch_later_white_24dp"
+                    android:scaleType="center"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="40dp"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:textSize="@dimen/font_size_normal_more"
+                    android:gravity="left|center"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="@string/future_info_activity_order_set_up"
+                    android:textColor="@color/white" />
+
+                <Switch
+                    android:checked="true"
+                    android:id="@+id/pending"
+                    android:gravity="center"
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"  />
+
+            </LinearLayout>
+
+            <View
+                android:background="@color/kline_duration"
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:src="@mipmap/ic_watch_later_white_24dp"
+                    android:scaleType="center"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="40dp"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:textSize="@dimen/font_size_normal_more"
+                    android:gravity="left|center"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="@string/future_info_activity_average_set_up"
+                    android:textColor="@color/white" />
+
+                <Switch
+                    android:checked="true"
+                    android:id="@+id/average_line"
+                    android:gravity="center"
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent" />
+
+            </LinearLayout>
+
+            <View
+                android:background="@color/kline_duration"
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginStart="@dimen/margin_5dp"
+                android:layout_marginEnd="@dimen/margin_20dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:src="@mipmap/ic_watch_later_white_24dp"
+                    android:scaleType="center"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="40dp"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:textSize="@dimen/font_size_normal_more"
+                    android:gravity="left|center"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="@string/future_info_activity_md_set_up"
+                    android:textColor="@color/white" />
+
+                <Switch
+                    android:checked="true"
+                    android:id="@+id/md"
+                    android:gravity="center"
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"  />
+
+            </LinearLayout>
+
+            <View
+                android:background="@color/kline_duration"
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"/>
+
+        </LinearLayout>
+    </LinearLayout>
+</layout>

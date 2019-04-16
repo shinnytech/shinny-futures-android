@@ -3,56 +3,17 @@
 
     <data></data>
 
-    <LinearLayout
-        android:keepScreenOn="true"
-        xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:keepScreenOn="true"
         android:orientation="vertical"
         tools:context=".controller.activity.ConfirmActivity">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/black_dark"
-            android:orientation="horizontal"
-            android:padding="@dimen/padding_4dp">
-
-            <Button
-                android:id="@+id/not_now"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/confirm_selector"
-                android:gravity="center"
-                android:text="@string/confirm_activity_not_now"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_normal" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="@string/confirm_activity_title"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_large" />
-
-            <Button
-                android:id="@+id/confirm"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/confirm_selector"
-                android:gravity="center"
-                android:text="@string/confirm_activity_settlement"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_normal" />
-        </LinearLayout>
-
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:background="@color/settlement_background">
 
             <HorizontalScrollView
@@ -70,6 +31,25 @@
             </HorizontalScrollView>
 
         </ScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/black_dark"
+            android:orientation="horizontal"
+            android:padding="@dimen/padding_4dp">
+
+            <Button
+                android:id="@+id/confirm"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/confirm_selector"
+                android:gravity="center"
+                android:text="@string/confirm_activity_settlement"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font_size_normal_high" />
+        </LinearLayout>
 
     </LinearLayout>
 </layout>

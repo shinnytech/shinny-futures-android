@@ -52,7 +52,6 @@ import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PASSWORD;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.LOGIN_JUMP_TO_MAIN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_WEAK_PASSWORD;
@@ -290,7 +289,7 @@ public class LoginActivity extends AppCompatActivity {
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), getString(R.string.main_activity_exit));
                 mExitTime = System.currentTimeMillis();
             } else {
-                LoginActivity.this.finish();
+                System.exit(0);
             }
             return true;
         }
@@ -411,9 +410,6 @@ public class LoginActivity extends AppCompatActivity {
                 case LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY:
                     mBinding.password.setText("");
                     break;
-                case LOGIN_JUMP_TO_MAIN_ACTIVITY:
-                    finish();
-                    break;
                 default:
                     break;
             }
@@ -529,7 +525,8 @@ public class LoginActivity extends AppCompatActivity {
                                 inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOT_ALWAYS);
                         }
                         Intent intent1 = new Intent(activity, MainActivity.class);
-                        activity.startActivityForResult(intent1, LOGIN_JUMP_TO_MAIN_ACTIVITY);
+                        activity.startActivity(intent1);
+                        activity.finish();
                         break;
                     case 1:
                         List<String> brokerList = LatestFileManager

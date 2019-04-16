@@ -34,6 +34,7 @@ import com.lzy.okgo.model.HttpHeaders;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.ConfirmActivity;
 import com.shinnytech.futures.controller.activity.LoginActivity;
+import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
@@ -71,9 +72,6 @@ import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_1;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_2;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_3;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_4;
-import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_5;
-import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_6;
-import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_7;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.MD_ONLINE;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_INS_LIST;
@@ -112,6 +110,10 @@ public class BaseApplication extends Application implements ServiceConnection {
 
     public static void setIndex(int index) {
         BaseApplication.index = index;
+    }
+
+    public static List<String> getsMDURLs() {
+        return sMDURLs;
     }
 
     public static Context getContext() {
@@ -336,12 +338,11 @@ public class BaseApplication extends Application implements ServiceConnection {
         MDUrlGroup.add(MARKET_URL_2);
         MDUrlGroup.add(MARKET_URL_3);
         MDUrlGroup.add(MARKET_URL_4);
-        MDUrlGroup.add(MARKET_URL_5);
-        MDUrlGroup.add(MARKET_URL_6);
-        MDUrlGroup.add(MARKET_URL_7);
-        Collections.shuffle(MDUrlGroup);
         try {
             Class cl = Class.forName("com.shinnytech.futures.constants.LocalCommonConstants");
+            String MARKET_URL_5 = (String) cl.getMethod("getMarketUrl5").invoke(null);
+            String MARKET_URL_6 = (String) cl.getMethod("getMarketUrl6").invoke(null);
+            String MARKET_URL_7 = (String) cl.getMethod("getMarketUrl7").invoke(null);
             String MARKET_URL_8 = (String) cl.getMethod("getMarketUrl8").invoke(null);
             String TRANSACTION_URL_L = (String) cl.getMethod("getTransactionUrl").invoke(null);
             String JSON_FILE_URL_L = (String) cl.getMethod("getJsonFileUrl").invoke(null);
@@ -351,6 +352,10 @@ public class BaseApplication extends Application implements ServiceConnection {
             String AMP_KEY = (String) cl.getMethod("getAmpKey").invoke(null);
             String AK = (String) cl.getMethod("getAK").invoke(null);
             String SK = (String) cl.getMethod("getSK").invoke(null);
+            String user_agent = (String) cl.getMethod("getUserAgent").invoke(null);
+            MDUrlGroup.add(MARKET_URL_5);
+            MDUrlGroup.add(MARKET_URL_6);
+            MDUrlGroup.add(MARKET_URL_7);
             sMDURLs.add(MARKET_URL_8);
             TRANSACTION_URL = TRANSACTION_URL_L;
             JSON_FILE_URL = JSON_FILE_URL_L;
@@ -361,6 +366,7 @@ public class BaseApplication extends Application implements ServiceConnection {
             Amplitude.getInstance().initialize(this, AMP_KEY).enableForegroundTracking(this);
             Amplitude.getInstance().logEvent(AMP_INIT);
             initAliLog(AK, SK);
+            DataManager.getInstance().USER_AGENT = user_agent;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             sMDURLs.add(MARKET_URL_1);
@@ -374,6 +380,7 @@ public class BaseApplication extends Application implements ServiceConnection {
             e.printStackTrace();
             sMDURLs.add(MARKET_URL_1);
         }
+        Collections.shuffle(MDUrlGroup);
         sMDURLs.addAll(MDUrlGroup);
     }
 
@@ -417,7 +424,11 @@ public class BaseApplication extends Application implements ServiceConnection {
 
             @Override
             public void onActivityDestroyed(Activity activity) {
-                if (activity instanceof LoginActivity) {
+                if (activity instanceof MainActivity) {
+                    //退出重登不退出app
+                    String loginDate = (String) SPUtils.get(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
+                    if (loginDate.isEmpty())return;
+
                     LogUtils.e("App彻底销毁", true);
                     if (mReceiverMarket != null)
                         LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverMarket);
@@ -450,8 +461,8 @@ public class BaseApplication extends Application implements ServiceConnection {
         //前台
         if (mServiceBound && mBackGround && sWebSocketService != null) {
             mBackGround = false;
-            sWebSocketService.connectTD();
-            sWebSocketService.connectMD(sMDURLs.get(index));
+            if (!sWebSocketService.isTDConnected()) sWebSocketService.connectTD();
+            if (!sWebSocketService.isMDConnected()) sWebSocketService.connectMD(sMDURLs.get(index));
         }
     }
 
@@ -462,11 +473,7 @@ public class BaseApplication extends Application implements ServiceConnection {
      */
     private void notifyBackground() {
         //后台
-        if (sWebSocketService != null) {
-            sWebSocketService.disConnectTD();
-            sWebSocketService.disConnectMD();
-            mBackGround = true;
-        }
+        mBackGround = true;
         Amplitude.getInstance().logEvent(AMP_BACKGROUND);
     }
 

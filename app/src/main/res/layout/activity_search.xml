@@ -39,7 +39,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:iconifiedByDefault="false"
-                    app:queryHint="@string/search_activity_hint"/>
+                    app:queryHint="@string/search_activity_hint" />
 
             </android.support.v7.widget.Toolbar>
 

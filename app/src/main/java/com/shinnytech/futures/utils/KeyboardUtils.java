@@ -52,7 +52,6 @@ public class KeyboardUtils {
         Keyboard mKeyboard = new Keyboard(mActivity, idKeyboard);
         mView = mActivity.findViewById(R.id.keyboard_layout);
         mKeyboardView = mView.findViewById(R.id.keyboard);
-        TextView hideKeyboard = mView.findViewById(R.id.hide);
         mKeyboardView.setKeyboard(mKeyboard);
         mKeyboardView.setEnabled(true);
         mKeyboardView.setPreviewEnabled(true);
@@ -241,13 +240,7 @@ public class KeyboardUtils {
             }
         });
         mIsInit = true;
-        hideKeyboard.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                hideKeyboard();
-                return false;
-            }
-        });
+
     }
 
     public void refreshInstrumentId(String instrumentId) {

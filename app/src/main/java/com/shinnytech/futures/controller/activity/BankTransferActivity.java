@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.shinnytech.futures.constants.CommonConstants.BANK;
+import static com.shinnytech.futures.constants.CommonConstants.BANK_OUT;
 import static java.lang.Math.abs;
 
 public class BankTransferActivity extends BaseActivity {
@@ -44,7 +44,7 @@ public class BankTransferActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mLayoutID = R.layout.activity_bank_transfer;
-        mTitle = BANK;
+        mTitle = BANK_OUT;
         super.onCreate(savedInstanceState);
     }
 

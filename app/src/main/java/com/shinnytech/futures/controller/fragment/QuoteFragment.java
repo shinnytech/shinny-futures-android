@@ -23,8 +23,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -42,6 +45,7 @@ import com.shinnytech.futures.model.adapter.QuoteAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
@@ -50,6 +54,7 @@ import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -60,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static android.app.Activity.RESULT_OK;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
@@ -82,7 +86,7 @@ import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST
  * version:
  * state: done
  */
-public class QuoteFragment extends Fragment {
+public class QuoteFragment extends LazyLoadFragment {
 
     /**
      * date: 7/9/17
@@ -127,6 +131,7 @@ public class QuoteFragment extends Fragment {
         mTitle = getArguments().getString(KEY_FRAGMENT_TITLE);
         setHasOptionsMenu(true);
         EventBus.getDefault().register(this);
+        registerBroaderCast();
     }
 
     @Nullable
@@ -148,42 +153,31 @@ public class QuoteFragment extends Fragment {
         mBinding.rvQuote.setItemAnimator(new DefaultItemAnimator());
         mAdapter = new QuoteAdapter(getActivity(), mOldData, mTitle);
         mBinding.rvQuote.setAdapter(mAdapter);
-        switchQuoteInsList();
+    }
+
+    @Override
+    public void update() {
+        getQuoteInsList();
+
+        try {
+            if (mInsList.size() <= LOAD_QUOTE_NUM) {
+                sendSubscribeQuotes(mInsList);
+            } else {
+                List<String> insList = mInsList.subList(0, LOAD_QUOTE_NUM);
+                sendSubscribeQuotes(insList);
+            }
+
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
-     * date: 2019/3/29
+     * date: 2019/4/14
      * author: chenli
-     * description: 切换交易所合约
+     * description: 根据标题获取不同合约列表
      */
-    public void switchQuotePage(String title) {
-        mBinding.rvQuote.scrollToPosition(0);
-        mTitle = title;
-        switchQuoteInsList();
-    }
-
-    public String getTitle() {
-        return mTitle;
-    }
-
-    /**
-     * date: 2019/4/4
-     * author: chenli
-     * description: 刷新自选合约
-     */
-    public void refreshOptional(){
-        mNewData = LatestFileManager.getOptionalInsList();
-        mInsList = new ArrayList<>(mNewData.keySet());
-        sendSubscribeQuotes(mInsList);
-    }
-
-    /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 根据标题获取不同的适配器数据
-     */
-    public void switchQuoteInsList() {
-
+    private void getQuoteInsList(){
         if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
             mBinding.tvChangePercent.setText(R.string.quote_fragment_bid_price1);
             mBinding.tvOpenInterest.setText(R.string.quote_fragment_bid_volume1);
@@ -223,23 +217,14 @@ public class QuoteFragment extends Fragment {
             default:
                 break;
         }
-
         mInsList = new ArrayList<>(mNewData.keySet());
-
-        try {
-            if (mInsList.size() <= LOAD_QUOTE_NUM) {
-                sendSubscribeQuotes(mInsList);
-            } else {
-                List<String> insList = mInsList.subList(0, LOAD_QUOTE_NUM);
-                sendSubscribeQuotes(insList);
-            }
-
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
-        }
-
     }
 
+    /**
+     * date: 2019/4/14
+     * author: chenli
+     * description: 订阅行情
+     */
     private void sendSubscribeQuotes(List<String> insList) {
         if (BaseApplication.getWebSocketService() == null) return;
 
@@ -253,7 +238,12 @@ public class QuoteFragment extends Fragment {
     }
 
 
-    protected void initEvent() {
+    /**
+     * date: 2019/4/14
+     * author: chenli
+     * description: 初始化监听器
+     */
+    private void initEvent() {
 
         mBinding.tvChangePercent.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -438,7 +428,7 @@ public class QuoteFragment extends Fragment {
                                     mDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                                         @Override
                                         public void onDismiss(DialogInterface dialog) {
-                                            refreshOptional();
+                                            update();
                                         }
                                     });
                                     mDragDialogAdapter = new DragDialogAdapter(getActivity(), new ArrayList<>(insList.keySet()));
@@ -522,7 +512,7 @@ public class QuoteFragment extends Fragment {
                                 } else {
                                     insList.remove(instrument_id);
                                     LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
-                                    refreshOptional();
+                                    update();
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -540,6 +530,11 @@ public class QuoteFragment extends Fragment {
 
     }
 
+    /**
+     * date: 2019/4/14
+     * author: chenli
+     * description: 注册广播
+     */
     private void registerBroaderCast() {
         mReceiver = new BroadcastReceiver() {
             @Override
@@ -555,7 +550,6 @@ public class QuoteFragment extends Fragment {
             }
         };
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, new IntentFilter(MD_BROADCAST_ACTION));
-
     }
 
     /**
@@ -565,7 +559,7 @@ public class QuoteFragment extends Fragment {
      */
     public void refreshUI(String title) {
         //防止相邻合约列表页面刷新
-        if (!title.equals(mTitle)) return;
+        if (!title.equals(mTitle))return;
         try {
             String[] insList = mDataManager.getRtnData().getIns_list().split(",");
             for (String ins : insList) {
@@ -591,28 +585,11 @@ public class QuoteFragment extends Fragment {
         }
     }
 
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        registerBroaderCast();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
     }
 
     //根据合约导航滑动行情列表
@@ -635,14 +612,22 @@ public class QuoteFragment extends Fragment {
         }
     }
 
-    public void setmIsUpdate(boolean mIsUpdate) {
-        this.mIsUpdate = mIsUpdate;
+    //控制行情是否刷新
+    @Subscribe
+    public void onEvent(UpdateEvent updateEvent) {
+        if (mTitle.equals(mToolbarTitle.getText().toString())) {
+            switch (updateEvent.getState()) {
+                case 1:
+                    mIsUpdate = true;
+                    break;
+                case 2:
+                    mIsUpdate = false;
+                    break;
+                default:
+                    break;
+            }
+        }
     }
-
-    public List<String> getmInsList() {
-        return mInsList;
-    }
-
 
     /**
      * date: 2019/4/2
@@ -669,7 +654,7 @@ public class QuoteFragment extends Fragment {
             dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
-                    QuoteFragment.this.refreshOptional();
+                    QuoteFragment.this.update();
                 }
             });
 
@@ -712,5 +697,38 @@ public class QuoteFragment extends Fragment {
             LatestFileManager.saveInsListToFile(new ArrayList<>(list.subList(0, 4)));
         else LatestFileManager.saveInsListToFile(list);
     }
+
+    public String getTitle() {
+        return mTitle;
+    }
+
+    /**
+     * date: 2019/3/29
+     * author: chenli
+     * description: 自选合约管理菜单返回，刷新自选合约
+     */
+    public void refreshOptional() {
+        getQuoteInsList();
+        mAdapter.setData(new ArrayList<>(mNewData.values()));
+        List<QuoteEntity> newData = new ArrayList<>(mNewData.values());
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new QuoteDiffCallback(mOldData, newData), false);
+        mAdapter.setData(newData);
+        diffResult.dispatchUpdatesTo(mAdapter);
+        mOldData.clear();
+        mOldData.addAll(newData);
+        mBinding.rvQuote.scrollToPosition(0);
+        try {
+            if (mInsList.size() <= LOAD_QUOTE_NUM) {
+                sendSubscribeQuotes(mInsList);
+            } else {
+                List<String> insList = mInsList.subList(0, LOAD_QUOTE_NUM);
+                sendSubscribeQuotes(insList);
+            }
+
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
 

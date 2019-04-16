@@ -247,11 +247,11 @@ public class WebSocketService extends Service {
                         }
 
                     })
-                    .addHeader("User-Agent", "shinnyfutures-Android" + " " + sDataManager.APP_VERSION)
+                    .addHeader("User-Agent", sDataManager.USER_AGENT + " " + sDataManager.APP_VERSION)
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
                     .connectAsynchronously();
             int index = BaseApplication.getIndex() + 1;
-            if (index == 7) index = 0;
+            if (index == BaseApplication.getsMDURLs().size()) index = 0;
             BaseApplication.setIndex(index);
         } catch (Exception e) {
             e.printStackTrace();
@@ -277,6 +277,14 @@ public class WebSocketService extends Service {
 
         if (!sDataManager.CHARTS.isEmpty() && mWebSocketClientMD != null) {
             mWebSocketClientMD.sendText(sDataManager.CHARTS);
+        }
+    }
+
+    public boolean isMDConnected(){
+        if (mWebSocketClientMD != null ) {
+            return mWebSocketClientMD.isOpen();
+        }else {
+            return false;
         }
     }
 
@@ -417,7 +425,7 @@ public class WebSocketService extends Service {
 
                     })
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
-                    .addHeader("User-Agent", "shinnyfutures-Android" + " " + sDataManager.APP_VERSION)
+                    .addHeader("User-Agent", sDataManager.USER_AGENT + " " + sDataManager.APP_VERSION)
                     .connectAsynchronously();
         } catch (Exception e) {
             e.printStackTrace();
@@ -435,21 +443,25 @@ public class WebSocketService extends Service {
         sDataManager.getBroker().setBrokers(brokerInfo.getBrokers());
         sendMessage(TD_MESSAGE_BROKER_INFO, TD_BROADCAST);
 
-        if (sDataManager.IS_FIRST_LOGIN) {
-            sDataManager.IS_FIRST_LOGIN = false;
-        } else {
-            Context context = BaseApplication.getContext();
-            if (SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
-                String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
-                if (TimeUtils.getNowTime().equals(date)) {
-                    String name = (String) SPUtils.get(context, CommonConstants.CONFIG_ACCOUNT, "");
-                    String password = (String) SPUtils.get(context, CommonConstants.CONFIG_PASSWORD, "");
-                    String broker = (String) SPUtils.get(context, CommonConstants.CONFIG_BROKER, "");
-                    sendReqLogin(broker, name, password);
-                }
+        Context context = BaseApplication.getContext();
+        if (SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
+            String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
+            if (!date.isEmpty()) {
+                String name = (String) SPUtils.get(context, CommonConstants.CONFIG_ACCOUNT, "");
+                String password = (String) SPUtils.get(context, CommonConstants.CONFIG_PASSWORD, "");
+                String broker = (String) SPUtils.get(context, CommonConstants.CONFIG_BROKER, "");
+                sendReqLogin(broker, name, password);
             }
         }
 
+    }
+
+    public boolean isTDConnected(){
+        if (mWebSocketClientTD != null ) {
+            return mWebSocketClientTD.isOpen();
+        }else {
+            return false;
+        }
     }
 
     public void reConnectTD() {
@@ -460,6 +472,7 @@ public class WebSocketService extends Service {
     public void disConnectTD() {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
             mWebSocketClientTD.disconnect();
+            DataManager.getInstance().clearAccount();
         }
     }
 

@@ -27,6 +27,8 @@ import com.shinnytech.futures.model.bean.eventbusbean.VisibilityEvent;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.LogUtils;
+import com.shinnytech.futures.utils.SPUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -36,6 +38,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
@@ -181,10 +185,8 @@ public class BaseChartFragment extends LazyLoadFragment {
             instrument_id_transaction = searchEntity.getUnderlying_symbol();
         else instrument_id_transaction = instrument_id;
 
-        mIsAverage = ((FutureInfoActivity) getActivity()).isAverage();
-        if (!mIsAverage) mTopChartViewBase.getLegend().setEnabled(false);
-        mIsPosition = ((FutureInfoActivity) getActivity()).isPosition();
-        mIsPending = ((FutureInfoActivity) getActivity()).isPending();
+        mIsPosition = (boolean) SPUtils.get(BaseApplication.getContext(), CONFIG_POSITION_LINE, true);
+        mIsPending = (boolean) SPUtils.get(BaseApplication.getContext(), CONFIG_ORDER_LINE, true);
         if (mIsPosition) addPositionLimitLines();
         if (mIsPending) addOrderLimitLines();
     }
@@ -254,10 +256,10 @@ public class BaseChartFragment extends LazyLoadFragment {
         //切换周期时控制图表显示
         if (sDataManager.IS_SHOW_VP_CONTENT) {
             mMiddleChartViewBase.setVisibility(View.GONE);
-//            mBottomChartViewBase.setVisibility(View.GONE);
+            mBottomChartViewBase.setVisibility(View.GONE);
         } else {
             mMiddleChartViewBase.setVisibility(View.VISIBLE);
-//            mBottomChartViewBase.setVisibility(View.VISIBLE);
+            mBottomChartViewBase.setVisibility(View.VISIBLE);
         }
 
     }
@@ -656,10 +658,10 @@ public class BaseChartFragment extends LazyLoadFragment {
     public void onEventBase(VisibilityEvent data) {
         if (data.isVisible()) {
             mMiddleChartViewBase.setVisibility(View.VISIBLE);
-//            mBottomChartViewBase.setVisibility(View.VISIBLE);
+            mBottomChartViewBase.setVisibility(View.VISIBLE);
         } else {
             mMiddleChartViewBase.setVisibility(View.GONE);
-//            mBottomChartViewBase.setVisibility(View.GONE);
+            mBottomChartViewBase.setVisibility(View.GONE);
         }
     }
 

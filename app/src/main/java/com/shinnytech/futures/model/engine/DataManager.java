@@ -67,6 +67,11 @@ public class DataManager {
      */
     public int APP_CODE = 0;
     /**
+     * date: 2019/4/16
+     * description: user_agent
+     */
+    public String USER_AGENT = "";
+    /**
      * date: 2018/11/7
      * description: 用户下单价格类型
      */
@@ -87,12 +92,6 @@ public class DataManager {
      */
     public String QUOTES = "";
     public String CHARTS = "";
-
-    /**
-     * date: 2019/3/28
-     * description: 判断是否首次登录
-     */
-    public boolean IS_FIRST_LOGIN = true;
 
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
     /**

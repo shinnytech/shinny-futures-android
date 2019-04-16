@@ -37,7 +37,6 @@ public class ConfirmActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void initEvent() {
-        mBinding.notNow.setOnClickListener(this);
         mBinding.confirm.setOnClickListener(this);
     }
 
@@ -45,9 +44,6 @@ public class ConfirmActivity extends AppCompatActivity implements View.OnClickLi
     public void onClick(View v) {
         if (BaseApplication.getWebSocketService() != null)
             switch (v.getId()) {
-                case R.id.not_now:
-                    finish();
-                    break;
                 case R.id.confirm:
                     if (BaseApplication.getWebSocketService() != null)
                         BaseApplication.getWebSocketService().sendReqConfirmSettlement();

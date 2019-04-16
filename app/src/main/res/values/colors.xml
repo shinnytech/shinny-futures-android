@@ -112,6 +112,8 @@
     <color name="kline_ma5">#b2b2b2</color>
     <!--均线6-->
     <color name="kline_ma6">#ff3c3c</color>
+    <!--最新价线-->
+    <color name="kline_last">#005480</color>
     ---------------------------------------------------------------
     <!--确认结算单按钮框色-->
     <color name="settlement_border">#797979</color>
@@ -138,4 +140,7 @@
     <color name="kline_duration">#333333</color>
     <color name="add_duration_select">#cdcdcd</color>
     <color name="add_duration_add">#999999</color>
+
+    <!--键盘背景色-->
+    <color name="keyboard">#00000000</color>
 </resources>

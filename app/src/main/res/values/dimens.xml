@@ -9,6 +9,7 @@
     <dimen name="order_dialog_height1">120dp</dimen>
     <dimen name="optional_dialog_height">100dp</dimen>
     <dimen name="optional_dialog_width">250dp</dimen>
+    <dimen name="keyboard_dialog_height">400dp</dimen>
 
     <dimen name="margin_1dp">1dp</dimen>
     <dimen name="margin_2dp">2dp</dimen>
@@ -62,6 +63,7 @@
     <dimen name="font_size_small_high">12sp</dimen>
     <dimen name="font_size_small">13sp</dimen>
     <dimen name="font_size_normal">15sp</dimen>
+    <dimen name="font_size_normal_more">17sp</dimen>
     <dimen name="font_size_normal_high">20sp</dimen>
     <dimen name="font_size_large">25sp</dimen>
     <dimen name="font_size_large_high">30sp</dimen>

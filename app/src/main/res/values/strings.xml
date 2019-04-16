@@ -13,16 +13,23 @@
     <string name="future_info_activity_set">设置</string>
     <string name="future_info_activity_handicap_up">盘口▴</string>
     <string name="future_info_activity_position_up">持仓▴</string>
+    <string name="future_info_activity_order_up_alive">挂单▴</string>
     <string name="future_info_activity_order_up">委托▴</string>
     <string name="future_info_activity_transaction_up">交易▴</string>
     <string name="future_info_activity_handicap_down">盘口▾</string>
     <string name="future_info_activity_position_down">持仓▾</string>
+    <string name="future_info_activity_order_down_alive">挂单▾</string>
     <string name="future_info_activity_order_down">委托▾</string>
     <string name="future_info_activity_transaction_down">交易▾</string>
-    <string name="future_info_activity_position_set_up">持仓</string>
-    <string name="future_info_activity_order_set_up">挂单</string>
+    <string name="future_info_activity_position_set_up">持仓线</string>
+    <string name="future_info_activity_order_set_up">挂单线</string>
     <string name="future_info_activity_average_set_up">均线</string>
-    <string name="future_info_activity_md_set_up">五档</string>
+    <string name="future_info_activity_md_set_up">五档行情</string>
+    <string name="future_info_activity_bid">买</string>
+    <string name="future_info_activity_ask">卖</string>
+    <string name="future_info_activity_position">仓</string>
+    <string name="future_info_activity_slash">/</string>
+    <string name="future_info_activity_percent">%</string>
 
     <!--Strings related to change password activity-->
     <string name="change_password_activity_btn_change">修改</string>

@@ -29,7 +29,6 @@ import com.shinnytech.futures.model.listener.PositionDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
-import com.shinnytech.futures.utils.LogUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -110,7 +109,7 @@ public class PositionFragment extends LazyLoadFragment {
                                 IdEvent idEvent = new IdEvent();
                                 idEvent.setInstrument_id(instrument_id);
                                 EventBus.getDefault().post(idEvent);
-                                ((FutureInfoActivity) getActivity()).getViewPager().setCurrentItem(3, false);
+                                ((FutureInfoActivity) getActivity()).getViewPager().setCurrentItem(4, false);
                             }
                         }
                     }
@@ -141,27 +140,29 @@ public class PositionFragment extends LazyLoadFragment {
     }
 
     protected void refreshPosition() {
-
         try {
+            if (!mIsUpdate)return;
             UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
             mNewData.clear();
-            if (mIsPositionsAll){
-                for (PositionEntity positionEntity :
-                        userEntity.getPositions().values()) {
-                    int volume_long = Integer.parseInt(positionEntity.getVolume_long());
-                    int volume_short = Integer.parseInt(positionEntity.getVolume_short());
-                    if (volume_long != 0 && volume_short != 0) {
-                        PositionEntity positionEntityLong = positionEntity.cloneLong();
-                        PositionEntity positionEntityShort = positionEntity.cloneShort();
-                        mNewData.add(positionEntityLong);
-                        mNewData.add(positionEntityShort);
-                    } else if (!(volume_long == 0 && volume_short == 0)) {
-                        mNewData.add(CloneUtils.clone(positionEntity));
-                    }
-                }
-            }else {
 
+            for (PositionEntity positionEntity :
+                    userEntity.getPositions().values()) {
+                if (!mIsPositionsAll){
+                    String ins = ((FutureInfoActivity)getActivity()).getInstrument_id();
+                    String ins_ = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
+                    if (!ins_.equals(ins))continue;
+                }
+                int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+                int volume_short = Integer.parseInt(positionEntity.getVolume_short());
+                if (volume_long != 0 && volume_short != 0) {
+                    PositionEntity positionEntityLong = positionEntity.cloneLong();
+                    PositionEntity positionEntityShort = positionEntity.cloneShort();
+                    mNewData.add(positionEntityLong);
+                    mNewData.add(positionEntityShort);
+                } else if (!(volume_long == 0 && volume_short == 0)) {
+                    mNewData.add(CloneUtils.clone(positionEntity));
+                }
             }
 
             Collections.sort(mNewData);
@@ -183,12 +184,7 @@ public class PositionFragment extends LazyLoadFragment {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case TD_MESSAGE:
-                        if (!mIsPositionsAll) {
-                            if ((R.id.rb_position_info ==
-                                    ((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId()) && mIsUpdate) {
-                                refreshPosition();
-                            }
-                        } else refreshPosition();
+                        refreshPosition();
                         break;
                     default:
                         break;

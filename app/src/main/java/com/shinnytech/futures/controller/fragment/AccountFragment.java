@@ -106,8 +106,8 @@ public class AccountFragment extends LazyLoadFragment {
         //初始化盘口、持仓、挂单、交易切换容器，fragment实例保存，有生命周期的变化，默认情况下屏幕外初始化两个fragment
         List<Fragment> fragmentList = new ArrayList<>();
         PositionFragment positionFragment = new PositionFragment();
-        OrderFragment orderFragment = OrderFragment.newInstance(true);
-        OrderFragment orderFragmentAlive = OrderFragment.newInstance(false);
+        OrderFragment orderFragmentAlive = OrderFragment.newInstance(true);
+        OrderFragment orderFragment = OrderFragment.newInstance(false);
         TradeFragment tradeFragment = new TradeFragment();
         fragmentList.add(positionFragment);
         fragmentList.add(orderFragmentAlive);

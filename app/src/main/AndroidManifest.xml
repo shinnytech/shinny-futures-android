@@ -67,8 +67,7 @@
             android:label="@string/login_activity_title_login"
             android:screenOrientation="portrait"
             android:theme="@style/LoginActivityTheme"
-            android:windowSoftInputMode="adjustResize|stateHidden">
-        </activity>
+            android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
             android:name=".controller.activity.SearchActivity"
             android:label="@string/search_activity_name"
@@ -119,6 +118,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".controller.activity.SubSettingActivity" />
+        <activity android:name=".controller.activity.OptionalActivity" />
+        <activity android:name=".controller.activity.CommonSwitchActivity"></activity>
     </application>
 
 </manifest>

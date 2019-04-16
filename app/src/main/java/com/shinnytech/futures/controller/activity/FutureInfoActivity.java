@@ -17,13 +17,16 @@ import android.widget.RadioGroup;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.FutureInfoActivityPresenter;
+import com.shinnytech.futures.controller.fragment.LazyLoadFragment;
 import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
+import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -32,12 +35,13 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static com.shinnytech.futures.constants.CommonConstants.LOG_OUT;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
+import static com.shinnytech.futures.constants.CommonConstants.FUTURE_INFO_ACTIVITY_TO_COMMON_SWITCH_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
-import static com.shinnytech.futures.constants.CommonConstants.ORDER_JUMP_TO_LOG_IN_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.POSITION_JUMP_TO_LOG_IN_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_JUMP_TO_LOG_IN_ACTIVITY;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
 
@@ -80,15 +84,13 @@ public class FutureInfoActivity extends BaseActivity {
     }
 
     private void refreshMD() {
-        if (mInstrumentId.contains("SHFE") || mInstrumentId.contains("INE")) {
-            QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
-            if (quoteEntity == null) return;
-            if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")) {
-                quoteEntity = CloneUtils.clone(quoteEntity);
-                quoteEntity = LatestFileManager.calculateCombineQuoteFull(quoteEntity);
-            }
-            mBinding.setQuote(quoteEntity);
+        QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
+        if (quoteEntity == null) return;
+        if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")) {
+            quoteEntity = CloneUtils.clone(quoteEntity);
+            quoteEntity = LatestFileManager.calculateCombineQuoteFull(quoteEntity);
         }
+        mBinding.setQuote(quoteEntity);
 
     }
 
@@ -212,7 +214,6 @@ public class FutureInfoActivity extends BaseActivity {
                 }
                 break;
             case android.R.id.home:
-                if (mFutureInfoActivityPresenter.closeKeyboard()) break;
                 Intent intent = new Intent();
                 setResult(RESULT_OK, intent);
                 finish();
@@ -234,49 +235,10 @@ public class FutureInfoActivity extends BaseActivity {
      */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mFutureInfoActivityPresenter.closeKeyboard()) return true;
         Intent intent = new Intent();
         setResult(RESULT_OK, intent);
         finish();
         return super.onKeyDown(keyCode, event);
-    }
-
-    /**
-     * date: 7/12/17
-     * author: chenli
-     * description: 登录页销毁返回判断逻辑，处理盘口、持仓、挂单、交易页的显示状态
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (resultCode) {
-            //登录页返回
-            case RESULT_CANCELED:
-                //未登录返回后，跳转到盘口页，重新点击登录，不使持仓页、挂单页、交易页暴露
-                mBinding.vpInfoContent.setCurrentItem(0, false);
-                mBinding.rbHandicapInfo.setChecked(true);
-                break;
-            case RESULT_OK:
-                switch (requestCode) {
-                    //登陆成功后跳转到相应页
-                    case POSITION_JUMP_TO_LOG_IN_ACTIVITY:
-                        mBinding.vpInfoContent.setCurrentItem(1, false);
-                        mBinding.rbPositionInfo.setChecked(true);
-                        break;
-                    case ORDER_JUMP_TO_LOG_IN_ACTIVITY:
-                        mBinding.vpInfoContent.setCurrentItem(2, false);
-                        mBinding.rbOrderInfo.setChecked(true);
-                        break;
-                    case TRANSACTION_JUMP_TO_LOG_IN_ACTIVITY:
-                        mBinding.vpInfoContent.setCurrentItem(3, false);
-                        mBinding.rbTransactionInfo.setChecked(true);
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
-        }
     }
 
     /**
@@ -300,7 +262,11 @@ public class FutureInfoActivity extends BaseActivity {
             } else {
                 mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
             }
+            //切换合约判断是否有五档行情
             mFutureInfoActivityPresenter.updateMD5ViewVisibility();
+            ((LazyLoadFragment)mFutureInfoActivityPresenter.getmInfoPagerAdapter().getItem(1)).update();
+            ((LazyLoadFragment)mFutureInfoActivityPresenter.getmInfoPagerAdapter().getItem(2)).update();
+            ((LazyLoadFragment)mFutureInfoActivityPresenter.getmInfoPagerAdapter().getItem(3)).update();
         }
     }
 
@@ -322,32 +288,6 @@ public class FutureInfoActivity extends BaseActivity {
             BaseApplication.getWebSocketService().sendSubscribeQuote(ins);
     }
 
-    //交易服务器断开连接后发送一条信息，使信息页显示
-    @Subscribe
-    public void onEvent(String msg) {
-        if (LOG_OUT.equals(msg)) {
-            mBinding.vpInfoContent.setCurrentItem(0, false);
-            mBinding.rbHandicapInfo.setChecked(true);
-        }
-    }
-
-    /**
-     * date: 7/7/17
-     * author: chenli
-     * description: 获取持仓、挂单、均线开关状态值
-     */
-    public boolean isPosition() {
-        return mFutureInfoActivityPresenter.isPosition();
-    }
-
-    public boolean isPending() {
-        return mFutureInfoActivityPresenter.isPending();
-    }
-
-    public boolean isAverage() {
-        return mFutureInfoActivityPresenter.isAverage();
-    }
-
     public ViewPager getViewPager() {
         return mBinding.vpInfoContent;
     }
@@ -358,5 +298,20 @@ public class FutureInfoActivity extends BaseActivity {
 
     public RadioGroup getTabsInfo() {
         return mBinding.rgTabInfo;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == FUTURE_INFO_ACTIVITY_TO_COMMON_SWITCH_ACTIVITY){
+            boolean mIsPosition = (boolean) SPUtils.get(sContext, CONFIG_POSITION_LINE, true);
+            boolean mIsPending = (boolean) SPUtils.get(sContext, CONFIG_ORDER_LINE, true);
+            boolean mIsAverage = (boolean) SPUtils.get(sContext, CONFIG_AVERAGE_LINE, true);
+            SetUpEvent setUpEvent = new SetUpEvent();
+            setUpEvent.setAverage(mIsAverage);
+            setUpEvent.setPending(mIsPending);
+            setUpEvent.setPosition(mIsPosition);
+            EventBus.getDefault().post(setUpEvent);
+            mFutureInfoActivityPresenter.updateMD5ViewVisibility();
+        }
     }
 }

@@ -2,17 +2,8 @@ package com.shinnytech.futures.model.bean.settingbean;
 
 public class SettingEntity {
     boolean jump;
-    private String title;
     private int icon;
     private String content;
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
 
     public int getIcon() {
         return icon;

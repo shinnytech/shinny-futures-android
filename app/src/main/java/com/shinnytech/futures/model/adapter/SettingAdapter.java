@@ -87,13 +87,9 @@ public class SettingAdapter extends RecyclerView.Adapter<SettingAdapter.ItemView
         public void update() {
             SettingEntity settingEntity = mData.get(getLayoutPosition());
             if (settingEntity == null) return;
-            String title = settingEntity.getTitle();
             int icon = settingEntity.getIcon();
             final String content = settingEntity.getContent();
             boolean jump = settingEntity.isJump();
-
-            if ("".equals(title)) mBinding.title.setVisibility(View.GONE);
-            else mBinding.title.setText(title);
 
             if (jump) mBinding.settingToggle.setVisibility(View.GONE);
             else {
@@ -144,6 +140,11 @@ public class SettingAdapter extends RecyclerView.Adapter<SettingAdapter.ItemView
             }
         }
 
+        /**
+         * date: 2019/4/12
+         * author: chenli
+         * description: 下单确认框
+         */
         public void saveSettingConfig() {
             switch (mBinding.content.getText().toString()) {
                 case CommonConstants.ORDER_CONFIRM:

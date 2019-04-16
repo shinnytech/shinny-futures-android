@@ -8,18 +8,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <TextView
-            android:gravity="center_vertical"
-            android:layout_gravity="center_vertical"
-            android:paddingStart="@dimen/margin_5dp"
-            android:paddingEnd="@dimen/margin_5dp"
-            android:id="@+id/title"
-            android:text="图表设置"
-            android:textColor="@color/bg_gray_light"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/setting_header"/>
-
         <LinearLayout
             android:id="@+id/setting_item"
             android:clickable="true"
@@ -38,7 +26,7 @@
                 android:layout_height="40dp" />
             <TextView
                 android:textColor="@color/white"
-                android:textSize="17sp"
+                android:textSize="@dimen/font_size_normal_more"
                 android:layout_gravity="center_vertical"
                 android:gravity="center_vertical"
                 android:id="@+id/content"
@@ -67,7 +55,7 @@
         <View
             android:id="@+id/divider"
             android:layout_width="match_parent"
-            android:layout_height="0.5dp"
+            android:layout_height="2dp"
             android:background="@color/navigation_divider"/>
 
     </LinearLayout>

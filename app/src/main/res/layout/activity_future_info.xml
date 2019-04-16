@@ -3,11 +3,17 @@
 
     <data>
 
+        <import type="com.shinnytech.futures.utils.MathUtils"></import>
+
         <import type="com.shinnytech.futures.model.engine.LatestFileManager"></import>
 
         <variable
             name="quote"
             type="com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity"></variable>
+
+        <variable
+            name="account"
+            type="com.shinnytech.futures.model.bean.accountinfobean.AccountEntity"></variable>
     </data>
 
     <android.support.design.widget.CoordinatorLayout
@@ -32,6 +38,199 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             tools:context=".controller.activity.FutureInfoActivity"
             tools:showIn="@layout/activity_future_info">
+
+            <LinearLayout
+                android:background="@color/black"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="60dp">
+
+                <LinearLayout
+                    android:background="@drawable/rectangle_border_handicap_"
+                    android:orientation="vertical"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/future_info_activity_last"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="2"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="@{LatestFileManager.saveScaleByPtick(quote.last_price, quote.instrument_id)}"
+                        android:textColor='@{MathUtils.lower(quote.last_price, quote.pre_settlement) ? @color/marker_green : MathUtils.upper(quote.last_price, quote.pre_settlement) ? @color/marker_red : @color/white}'
+                        android:textSize="@dimen/font_size_large_high" />
+
+                    <TextView
+                        android:id="@+id/future_info_activity_change"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text='@{LatestFileManager.saveScaleByPtick(MathUtils.subtract(quote.last_price, quote.pre_settlement), quote.instrument_id)+@string/future_info_activity_slash+MathUtils.round(LatestFileManager.getUpDownRate(quote.getLast_price(), quote.getPre_settlement()), 2)+@string/future_info_activity_percent}'
+                        android:textColor='@{MathUtils.lower(quote.last_price, quote.pre_settlement) ? @color/marker_green : MathUtils.upper(quote.last_price, quote.pre_settlement) ? @color/marker_red : @color/white}'
+                        android:textSize="@dimen/font_size_normal" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:background="@drawable/rectangle_border_handicap_"
+                    android:orientation="vertical"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent">
+
+                    <LinearLayout
+                        android:paddingStart="2dp"
+                        android:paddingEnd="2dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="start"
+                            android:text="@string/future_info_activity_ask"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal" />
+
+                        <TextView
+                            android:id="@+id/future_info_activity_ask_price1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:ellipsize="end"
+                            android:gravity="left"
+                            android:maxLines="1"
+                            android:text="@{LatestFileManager.saveScaleByPtick(quote.ask_price1, quote.instrument_id)}"
+                            android:textColor='@{MathUtils.lower(quote.ask_price1, quote.pre_settlement) ? @color/marker_green : MathUtils.upper(quote.ask_price1, quote.pre_settlement) ? @color/marker_red : @color/white}'
+                            android:textSize="@dimen/font_size_normal" />
+
+                        <TextView
+                            android:id="@+id/future_info_activity_ask_volume1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:ellipsize="end"
+                            android:gravity="right"
+                            android:maxLines="1"
+                            android:text="@{quote.ask_volume1}"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:background="@color/kline_grid"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"/>
+
+                    <LinearLayout
+                        android:paddingStart="2dp"
+                        android:paddingEnd="2dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="start"
+                            android:text="@string/future_info_activity_bid"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal" />
+
+                        <TextView
+                            android:id="@+id/future_info_activity_bid_price1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:ellipsize="end"
+                            android:gravity="left"
+                            android:maxLines="1"
+                            android:text="@{LatestFileManager.saveScaleByPtick(quote.bid_price1, quote.instrument_id)}"
+                            android:textColor='@{MathUtils.lower(quote.bid_price1, quote.pre_settlement) ? @color/marker_green : MathUtils.upper(quote.bid_price1, quote.pre_settlement) ? @color/marker_red : @color/white}'
+                            android:textSize="@dimen/font_size_normal" />
+
+                        <TextView
+                            android:id="@+id/future_info_activity_bid_volume1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:ellipsize="end"
+                            android:gravity="right"
+                            android:maxLines="1"
+                            android:text="@{quote.bid_volume1}"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:background="@color/kline_grid"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"/>
+
+                    <LinearLayout
+                        android:paddingStart="2dp"
+                        android:paddingEnd="2dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="start"
+                            android:text="@string/future_info_activity_position"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal" />
+
+                        <TextView
+                            android:id="@+id/future_info_activity_open_interest"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:ellipsize="end"
+                            android:gravity="left"
+                            android:maxLines="1"
+                            android:text="@{quote.open_interest}"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal" />
+
+                        <TextView
+                            android:id="@+id/future_info_activity_open_interest_day"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:ellipsize="end"
+                            android:gravity="right"
+                            android:maxLines="1"
+                            android:text="@{MathUtils.subtract(quote.open_interest, quote.pre_open_interest)}"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal" />
+
+                    </LinearLayout>
+
+
+                </LinearLayout>
+
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/rg_tab_up"
@@ -67,57 +266,58 @@
 
             <LinearLayout
                 android:id="@+id/kline_content"
-                android:background="@color/black"
-                android:orientation="horizontal"
-                android:layout_weight="1.5"
                 android:layout_width="match_parent"
-                android:layout_height="0dp">
+                android:layout_height="0dp"
+                android:layout_weight="1.5"
+                android:background="@color/black"
+                android:orientation="horizontal">
 
                 <FrameLayout
-                    android:layout_weight="1"
                     android:id="@+id/fl_content_up"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent" />
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
 
                 <LinearLayout
                     android:id="@+id/md"
-                    android:background="@drawable/rectangle_border_handicap"
-                    android:orientation="vertical"
                     android:layout_width="100dp"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:background="@drawable/rectangle_border_handicap"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:textColor="@color/white"
+                        android:layout_width="match_parent"
+                        android:layout_height="13dp"
                         android:gravity="center"
                         android:text="五档"
-                        android:textSize="10sp"
-                        android:layout_width="match_parent"
-                        android:layout_height="13dp" />
+                        android:textColor="@color/white"
+                        android:textSize="10sp" />
+
                     <View
-                        android:background="@color/kline_grid"
                         android:layout_width="match_parent"
-                        android:layout_height="0.7dp"/>
+                        android:layout_height="0.7dp"
+                        android:background="@color/kline_grid" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:layout_margin="@dimen/margin_5dp">
+                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_weight="1">
 
                         <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_gravity="center"
+                            android:layout_weight="1"
                             android:gravity="center"
                             android:maxLines="1"
-                            app:autoSizeTextType="uniform"
-                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
-                            app:autoSizeStepGranularity="1sp"
-                            android:textSize="@dimen/font_size_normal"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="match_parent"
                             android:text="卖5"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal"
+                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                            app:autoSizeStepGranularity="1sp"
+                            app:autoSizeTextType="uniform" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -153,23 +353,23 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:layout_margin="@dimen/margin_5dp">
+                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_weight="1">
 
                         <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_gravity="center"
+                            android:layout_weight="1"
                             android:gravity="center"
                             android:maxLines="1"
-                            app:autoSizeTextType="uniform"
-                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
-                            app:autoSizeStepGranularity="1sp"
-                            android:textSize="@dimen/font_size_normal"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="match_parent"
                             android:text="卖4"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal"
+                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                            app:autoSizeStepGranularity="1sp"
+                            app:autoSizeTextType="uniform" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -205,23 +405,23 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:layout_margin="@dimen/margin_5dp">
+                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_weight="1">
 
                         <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_gravity="center"
+                            android:layout_weight="1"
                             android:gravity="center"
                             android:maxLines="1"
-                            app:autoSizeTextType="uniform"
-                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
-                            app:autoSizeStepGranularity="1sp"
-                            android:textSize="@dimen/font_size_normal"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="match_parent"
                             android:text="卖3"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal"
+                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                            app:autoSizeStepGranularity="1sp"
+                            app:autoSizeTextType="uniform" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -257,23 +457,23 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:layout_margin="@dimen/margin_5dp">
+                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_weight="1">
 
                         <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_gravity="center"
+                            android:layout_weight="1"
                             android:gravity="center"
                             android:maxLines="1"
-                            app:autoSizeTextType="uniform"
-                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
-                            app:autoSizeStepGranularity="1sp"
-                            android:textSize="@dimen/font_size_normal"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="match_parent"
                             android:text="卖2"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal"
+                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                            app:autoSizeStepGranularity="1sp"
+                            app:autoSizeTextType="uniform" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -309,23 +509,23 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:layout_margin="@dimen/margin_5dp">
+                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_weight="1">
 
                         <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_gravity="center"
+                            android:layout_weight="1"
                             android:gravity="center"
                             android:maxLines="1"
-                            app:autoSizeTextType="uniform"
-                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
-                            app:autoSizeStepGranularity="1sp"
-                            android:textSize="@dimen/font_size_normal"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="match_parent"
                             android:text="卖1"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal"
+                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                            app:autoSizeStepGranularity="1sp"
+                            app:autoSizeTextType="uniform" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -361,28 +561,28 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="0.7dp"
-                        android:background="@color/kline_grid"/>
+                        android:background="@color/kline_grid" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:layout_margin="@dimen/margin_5dp">
+                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_weight="1">
 
                         <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_gravity="center"
+                            android:layout_weight="1"
                             android:gravity="center"
                             android:maxLines="1"
-                            app:autoSizeTextType="uniform"
-                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
-                            app:autoSizeStepGranularity="1sp"
-                            android:textSize="@dimen/font_size_normal"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="match_parent"
                             android:text="买1"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal"
+                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                            app:autoSizeStepGranularity="1sp"
+                            app:autoSizeTextType="uniform" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -418,23 +618,23 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:layout_margin="@dimen/margin_5dp">
+                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_weight="1">
 
                         <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_gravity="center"
+                            android:layout_weight="1"
                             android:gravity="center"
                             android:maxLines="1"
-                            app:autoSizeTextType="uniform"
-                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
-                            app:autoSizeStepGranularity="1sp"
-                            android:textSize="@dimen/font_size_normal"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="match_parent"
                             android:text="买2"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal"
+                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                            app:autoSizeStepGranularity="1sp"
+                            app:autoSizeTextType="uniform" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -470,23 +670,23 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:layout_margin="@dimen/margin_5dp">
+                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_weight="1">
 
                         <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_gravity="center"
+                            android:layout_weight="1"
                             android:gravity="center"
                             android:maxLines="1"
-                            app:autoSizeTextType="uniform"
-                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
-                            app:autoSizeStepGranularity="1sp"
-                            android:textSize="@dimen/font_size_normal"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="match_parent"
                             android:text="买3"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal"
+                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                            app:autoSizeStepGranularity="1sp"
+                            app:autoSizeTextType="uniform" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -522,23 +722,23 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:layout_margin="@dimen/margin_5dp">
+                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_weight="1">
 
                         <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_gravity="center"
+                            android:layout_weight="1"
                             android:gravity="center"
                             android:maxLines="1"
-                            app:autoSizeTextType="uniform"
-                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
-                            app:autoSizeStepGranularity="1sp"
-                            android:textSize="@dimen/font_size_normal"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="match_parent"
                             android:text="买4"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal"
+                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                            app:autoSizeStepGranularity="1sp"
+                            app:autoSizeTextType="uniform" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -574,23 +774,23 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:layout_margin="@dimen/margin_5dp">
+                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_weight="1">
 
                         <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_gravity="center"
+                            android:layout_weight="1"
                             android:gravity="center"
                             android:maxLines="1"
-                            app:autoSizeTextType="uniform"
-                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
-                            app:autoSizeStepGranularity="1sp"
-                            android:textSize="@dimen/font_size_normal"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="match_parent"
                             android:text="买5"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/font_size_normal"
+                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                            app:autoSizeStepGranularity="1sp"
+                            app:autoSizeTextType="uniform" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -656,9 +856,9 @@
                     android:textSize="@dimen/font_size_normal" />
 
                 <RadioButton
-                    android:id="@+id/rb_order_info"
+                    android:id="@+id/rb_order_info_alive"
                     style="@style/RadioButtonTabDown"
-                    android:text="@string/future_info_activity_order_up"
+                    android:text="@string/future_info_activity_order_up_alive"
                     android:textSize="@dimen/font_size_normal" />
 
                 <RadioButton

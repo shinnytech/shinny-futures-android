@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -31,21 +30,25 @@ import com.shinnytech.futures.controller.activity.AccountActivity;
 import com.shinnytech.futures.controller.activity.BankTransferActivity;
 import com.shinnytech.futures.controller.activity.ChangePasswordActivity;
 import com.shinnytech.futures.controller.activity.FeedBackActivity;
+import com.shinnytech.futures.controller.activity.LoginActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
+import com.shinnytech.futures.controller.activity.OptionalActivity;
 import com.shinnytech.futures.controller.activity.SettingActivity;
 import com.shinnytech.futures.controller.fragment.AccountFragment;
 import com.shinnytech.futures.controller.fragment.QuoteFragment;
+import com.shinnytech.futures.controller.fragment.QuotePagerFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
 import com.shinnytech.futures.model.adapter.DialogAdapter;
 import com.shinnytech.futures.model.adapter.NavigationRightAdapter;
 import com.shinnytech.futures.model.adapter.QuoteNavAdapter;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
 import com.shinnytech.futures.model.bean.settingbean.NavigationRightEntity;
-import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
@@ -56,9 +59,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT_DETAIL;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
+import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.SHANGHAI;
@@ -116,13 +121,16 @@ public class MainActivityPresenter {
 
         //添加合约页，设置首页是自选合约列表页
         List<Fragment> fragmentList = new ArrayList<>();
-        fragmentList.add(QuoteFragment.newInstance(title));
+        fragmentList.add(new QuotePagerFragment());
         fragmentList.add(AccountFragment.newInstance());
         //初始化适配器类
         mViewPagerFragmentAdapter = new ViewPagerFragmentAdapter(mMainActivity.getSupportFragmentManager(), fragmentList);
         mBinding.vpContent.setAdapter(mViewPagerFragmentAdapter);
         mBinding.vpContent.setCurrentItem(0);
+        mBinding.vpContent.setPagingEnabled(false);
         switchQuotesNavigation(title);
+        //保证lazyLoad的效用,每次加载一个fragment
+        mBinding.vpContent.setOffscreenPageLimit(7);
 
         //设置右导航宽度
         ViewGroup.LayoutParams paramsR = mBinding.nvMenuRight.getLayoutParams();
@@ -138,33 +146,41 @@ public class MainActivityPresenter {
         NavigationRightEntity menu1 = new NavigationRightEntity();
         menu1.setIcon(R.mipmap.ic_settings_white_18dp);
         menu1.setContent(CommonConstants.SETTING);
+        NavigationRightEntity menu9 = new NavigationRightEntity();
+        menu9.setIcon(R.mipmap.ic_settings_white_18dp);
+        menu9.setContent(CommonConstants.OPTIONAL_SETTING);
         NavigationRightEntity menu2 = new NavigationRightEntity();
         menu2.setIcon(R.mipmap.ic_assessment_white_18dp);
         menu2.setContent(CommonConstants.ACCOUNT);
         NavigationRightEntity menu3 = new NavigationRightEntity();
         menu3.setIcon(R.mipmap.ic_assignment_turned_in_white_18dp);
         menu3.setContent(CommonConstants.PASSWORD);
+        NavigationRightEntity menu4 = new NavigationRightEntity();
+        menu4.setIcon(R.mipmap.ic_account_balance_white_18dp);
+        menu4.setContent(CommonConstants.BANK_IN);
+        NavigationRightEntity menu5 = new NavigationRightEntity();
+        menu5.setIcon(R.mipmap.ic_account_balance_white_18dp);
+        menu5.setContent(CommonConstants.BANK_OUT);
         NavigationRightEntity menu6 = new NavigationRightEntity();
-        menu6.setIcon(R.mipmap.ic_account_balance_white_18dp);
-        menu6.setContent(CommonConstants.BANK);
+        menu6.setIcon(R.mipmap.ic_supervisor_account_white_18dp);
+        menu6.setContent(CommonConstants.OPEN_ACCOUNT);
         NavigationRightEntity menu7 = new NavigationRightEntity();
-        menu7.setIcon(R.mipmap.ic_supervisor_account_white_18dp);
-        menu7.setContent(CommonConstants.OPEN_ACCOUNT);
+        menu7.setIcon(R.mipmap.ic_find_in_page_white_18dp);
+        menu7.setContent(CommonConstants.FEEDBACK);
         NavigationRightEntity menu8 = new NavigationRightEntity();
-        menu8.setIcon(R.mipmap.ic_find_in_page_white_18dp);
-        menu8.setContent(CommonConstants.FEEDBACK);
-        NavigationRightEntity menu9 = new NavigationRightEntity();
-        menu9.setIcon(R.mipmap.ic_info_white_18dp);
-        menu9.setContent(CommonConstants.ABOUT);
+        menu8.setIcon(R.mipmap.ic_info_white_18dp);
+        menu8.setContent(CommonConstants.ABOUT);
         List<NavigationRightEntity> list = new ArrayList<>();
         list.add(menu0);
         list.add(menu1);
+        list.add(menu9);
         list.add(menu2);
         list.add(menu3);
+        list.add(menu4);
+        list.add(menu5);
         list.add(menu6);
         list.add(menu7);
         list.add(menu8);
-        list.add(menu9);
         mNavigationRightAdapter = new NavigationRightAdapter(mainActivity, list);
         mBinding.navigationRightRv.setAdapter(mNavigationRightAdapter);
 
@@ -212,14 +228,18 @@ public class MainActivityPresenter {
                 String title = (String) view.getTag();
                 switch (title) {
                     case CommonConstants.LOGOUT:
-                        DataManager.getInstance().clearAccount();
                         SPUtils.putAndApply(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
                         BaseApplication.getWebSocketService().reConnectTD();
+                        mMainActivity.startActivity(new Intent(mMainActivity, LoginActivity.class));
                         mMainActivity.finish();
                         break;
                     case CommonConstants.SETTING:
                         Intent intentSetting = new Intent(mMainActivity, SettingActivity.class);
                         mMainActivity.startActivity(intentSetting);
+                        break;
+                    case CommonConstants.OPTIONAL_SETTING:
+                        Intent intentSettingOptional = new Intent(mMainActivity, OptionalActivity.class);
+                        mMainActivity.startActivityForResult(intentSettingOptional, MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY);
                         break;
                     case CommonConstants.ACCOUNT:
                         Intent intentAcc = new Intent(mMainActivity, AccountActivity.class);
@@ -229,9 +249,13 @@ public class MainActivityPresenter {
                         Intent intentChange = new Intent(mMainActivity, ChangePasswordActivity.class);
                         mMainActivity.startActivity(intentChange);
                         break;
-                    case CommonConstants.BANK:
+                    case CommonConstants.BANK_IN:
                         Intent intentBank = new Intent(mMainActivity, BankTransferActivity.class);
                         mMainActivity.startActivity(intentBank);
+                        break;
+                    case CommonConstants.BANK_OUT:
+                        Intent intentBankOut = new Intent(mMainActivity, BankTransferActivity.class);
+                        mMainActivity.startActivity(intentBankOut);
                         break;
                     case CommonConstants.OPEN_ACCOUNT:
 //                        Intent intentOpenAccount = new Intent(mMainActivity, OpenAccountActivity.class);
@@ -299,8 +323,8 @@ public class MainActivityPresenter {
                                         public void onItemClick(View view, int position) {
                                             String title = mTitleList.get(position);
                                             switchQuotesNavigation(title);
-                                            ((QuoteFragment) mViewPagerFragmentAdapter.getItem(0))
-                                                    .switchQuotePage(title);
+                                            ((QuotePagerFragment) mViewPagerFragmentAdapter.
+                                                    getItem(0)).setCurrentItem(position);
                                             mTitleDialog.dismiss();
                                         }
 
@@ -321,7 +345,7 @@ public class MainActivityPresenter {
                 switch (item.getItemId()) {
                     case R.id.market:
                         mBinding.vpContent.setCurrentItem(0, false);
-                        String title = ((QuoteFragment) mViewPagerFragmentAdapter.getItem(0)).getTitle();
+                        String title = ((QuotePagerFragment) mViewPagerFragmentAdapter.getItem(0)).getmTitle();
                         if (OPTIONAL.equals(title)) {
                             mBinding.rvQuoteNavigation.setVisibility(View.GONE);
                             mBinding.quoteNavLeft.setVisibility(View.GONE);
@@ -338,7 +362,7 @@ public class MainActivityPresenter {
                         mBinding.quoteNavLeft.setVisibility(View.GONE);
                         mBinding.quoteNavRight.setVisibility(View.GONE);
                         mBinding.vpContent.setCurrentItem(1, false);
-                        mToolbarTitle.setText("账户详情");
+                        mToolbarTitle.setText(ACCOUNT_DETAIL);
                         break;
                     default:
                         break;
@@ -352,41 +376,6 @@ public class MainActivityPresenter {
             @Override
             public void onNavigationItemReselected(@NonNull MenuItem item) {
 
-            }
-        });
-
-        mBinding.vpContent.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                mBinding.vpContent.setCurrentItem(position, false);
-                if (position == 1) {
-                    mBinding.bottomNavigation.setSelectedItemId(R.id.trade);
-                    mBinding.rvQuoteNavigation.setVisibility(View.GONE);
-                    mBinding.quoteNavLeft.setVisibility(View.GONE);
-                    mBinding.quoteNavRight.setVisibility(View.GONE);
-                    mToolbarTitle.setText("账户详情");
-                } else {
-                    mBinding.bottomNavigation.setSelectedItemId(R.id.market);
-                    String title = ((QuoteFragment) mViewPagerFragmentAdapter.getItem(0)).getTitle();
-                    if (OPTIONAL.equals(title)) {
-                        mBinding.rvQuoteNavigation.setVisibility(View.GONE);
-                        mBinding.quoteNavLeft.setVisibility(View.GONE);
-                        mBinding.quoteNavRight.setVisibility(View.GONE);
-                    } else {
-                        mBinding.rvQuoteNavigation.setVisibility(View.VISIBLE);
-                        mBinding.quoteNavLeft.setVisibility(View.VISIBLE);
-                        mBinding.quoteNavRight.setVisibility(View.VISIBLE);
-                    }
-                    mToolbarTitle.setText(title);
-                }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
             }
         });
 
@@ -404,12 +393,16 @@ public class MainActivityPresenter {
 
             @Override
             public void onDrawerClosed(View drawerView) {
-                ((QuoteFragment) mViewPagerFragmentAdapter.getItem(0)).setmIsUpdate(true);
+                UpdateEvent updateEvent = new UpdateEvent();
+                updateEvent.setState(1);
+                EventBus.getDefault().post(updateEvent);
             }
 
             @Override
             public void onDrawerStateChanged(int newState) {
-                ((QuoteFragment) mViewPagerFragmentAdapter.getItem(0)).setmIsUpdate(false);
+                UpdateEvent updateEvent = new UpdateEvent();
+                updateEvent.setState(newState);
+                EventBus.getDefault().post(updateEvent);
             }
         });
     }
@@ -526,6 +519,10 @@ public class MainActivityPresenter {
 
     public ViewPagerFragmentAdapter getmViewPagerFragmentAdapter() {
         return mViewPagerFragmentAdapter;
+    }
+
+    public TextView getmToolbarTitle() {
+        return mToolbarTitle;
     }
 
     /**

@@ -586,10 +586,6 @@ public class LatestFileManager {
         String bid_volume_leg2 = quoteEntity_leg2.getBid_volume1();
         String open_leg1 = quoteEntity_leg1.getOpen();
         String open_leg2 = quoteEntity_leg2.getOpen();
-        String high_leg1 = quoteEntity_leg1.getHighest();
-        String high_leg2 = quoteEntity_leg2.getHighest();
-        String low_leg1 = quoteEntity_leg1.getLowest();
-        String low_leg2 = quoteEntity_leg2.getLowest();
         String average_leg1 = quoteEntity_leg1.getAverage();
         String average_leg2 = quoteEntity_leg2.getAverage();
         String pre_close_leg1 = quoteEntity_leg1.getPre_close();
@@ -608,8 +604,6 @@ public class LatestFileManager {
         String bid_price = MathUtils.subtract(bid_price_leg1, ask_price_leg2);
         String bid_volume = MathUtils.min(bid_volume_leg1, ask_volume_leg2);
         String open = MathUtils.subtract(open_leg1, open_leg2);
-        String high = MathUtils.subtract(high_leg1, high_leg2);
-        String low = MathUtils.subtract(low_leg1, low_leg2);
         String average = MathUtils.subtract(average_leg1, average_leg2);
         String pre_close = MathUtils.subtract(pre_close_leg1, pre_close_leg2);
         String pre_settlement = MathUtils.subtract(pre_settlement_leg1, pre_settlement_leg2);
@@ -622,8 +616,6 @@ public class LatestFileManager {
         quoteEntity.setAsk_volume1(ask_volume);
         quoteEntity.setBid_volume1(bid_volume);
         quoteEntity.setOpen(open);
-        quoteEntity.setHighest(high);
-        quoteEntity.setLowest(low);
         quoteEntity.setAverage(average);
         quoteEntity.setPre_close(pre_close);
         quoteEntity.setSettlement(settlement);

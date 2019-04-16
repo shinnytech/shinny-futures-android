@@ -6,13 +6,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
+import android.graphics.Rect;
+import android.inputmethodservice.Keyboard;
+import android.inputmethodservice.KeyboardView;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.PopupMenu;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -21,6 +27,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
@@ -28,24 +36,26 @@ import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.databinding.FragmentTransactionBinding;
+import com.shinnytech.futures.databinding.ViewDialogKeyboardBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
-import com.shinnytech.futures.model.bean.eventbusbean.VisibilityEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.CloneUtils;
-import com.shinnytech.futures.utils.KeyboardUtils;
+import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.TimeUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
 import static com.shinnytech.futures.constants.CommonConstants.COUNTERPARTY_PRICE;
 import static com.shinnytech.futures.constants.CommonConstants.LATEST_PRICE;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_PRICE;
@@ -74,16 +84,6 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     private Context sContext = BaseApplication.getContext();
     private BroadcastReceiver mReceiverAccount;
     private BroadcastReceiver mReceiverPrice;
-    /**
-     * date: 7/9/17
-     * description: 价格键盘
-     */
-    private KeyboardUtils mKeyboardUtilsPrice;
-    /**
-     * date: 7/9/17
-     * description: 手数键盘
-     */
-    private KeyboardUtils mKeyboardUtilsVolume;
     /**
      * date: 7/9/17
      * description: 平仓状态是否为实时数字标志
@@ -123,11 +123,19 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         mBinding.price.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                mKeyboardUtilsPrice = new KeyboardUtils(getActivity(),
-                        R.xml.future_price, mInstrumentId);
-                mKeyboardUtilsPrice.attachTo(mBinding.price);
-                if (!mKeyboardUtilsPrice.isVisible()) {
-                    mKeyboardUtilsPrice.showKeyboard();
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    mBinding.price.requestFocus();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        mBinding.price.setShowSoftInputOnFocus(false);
+                    } else {
+                        View view1 = getActivity().findViewById(android.R.id.content);
+                        if (view1 != null) {
+                            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                        }
+                    }
+                    mBinding.price.setSelection(0, mBinding.price.getText().length());
+                    popupKeyboardDialog(mBinding.price, R.xml.future_price);
                 }
                 return true;
             }
@@ -138,11 +146,19 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         mBinding.volume.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                mKeyboardUtilsVolume = new KeyboardUtils(getActivity(),
-                        R.xml.future_volume, mInstrumentId);
-                mKeyboardUtilsVolume.attachTo(mBinding.volume);
-                if (!mKeyboardUtilsVolume.isVisible()) {
-                    mKeyboardUtilsVolume.showKeyboard();
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    mBinding.volume.requestFocus();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        mBinding.volume.setShowSoftInputOnFocus(false);
+                    } else {
+                        View view1 = getActivity().findViewById(android.R.id.content);
+                        if (view1 != null) {
+                            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                        }
+                    }
+                    mBinding.volume.setSelection(0, mBinding.volume.getText().length());
+                    popupKeyboardDialog(mBinding.volume, R.xml.future_volume);
                 }
                 return true;
             }
@@ -268,7 +284,6 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      */
     private void initPosition() {
         try {
-            mBinding.minPrice.setText(LatestFileManager.getSearchEntities().get(mInstrumentIdTransaction).getpTick());
             if (USER_PRICE.equals(sDataManager.PRICE_TYPE))
                 mBinding.price.setText(COUNTERPARTY_PRICE);
             else mBinding.price.setText(sDataManager.PRICE_TYPE);
@@ -404,33 +419,6 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     }
 
     /**
-     * date: 2019/1/11
-     * author: chenli
-     * description: 设置价格颜色
-     */
-    private void setPriceColor(QuoteEntity quoteEntity) {
-        String pre_settlement = LatestFileManager.saveScaleByPtick(quoteEntity.getPre_settlement(),
-                quoteEntity.getInstrument_id());
-        setTextViewColor(mBinding.tvIdTransactionLastPrice, pre_settlement);
-        setTextViewColor(mBinding.tvIdTransactionAskPrice1, pre_settlement);
-        setTextViewColor(mBinding.tvIdTransactionBidPrice1, pre_settlement);
-    }
-
-    private void setTextViewColor(TextView textView, String pre_settlement) {
-        try {
-            String data = textView.getText().toString();
-            if ("".equals(data)) return;
-            float value = Float.parseFloat(data) - Float.parseFloat(pre_settlement);
-            if (value < 0) textView.setTextColor(ContextCompat.getColor(sContext, R.color.ask));
-            else if (value > 0)
-                textView.setTextColor(ContextCompat.getColor(sContext, R.color.bid));
-            else textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * date: 7/9/17
      * author: chenli
      * description: 刷新价格信息
@@ -443,7 +431,6 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
         }
         mBinding.setQuote(quoteEntity);
-        setPriceColor(quoteEntity);
         //控制下单板的显示模式
         switch (sDataManager.PRICE_TYPE) {
             case QUEUED_PRICE:
@@ -555,29 +542,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      */
     @Override
     public void onClick(final View v) {
-        switch (v.getId()) {
-            case R.id.bid_open_position:
-                buyOpenPosition();
-                break;
-            case R.id.ask_open_position:
-                sellOpenPosition();
-                break;
-            case R.id.close_position:
-                switch (mBinding.closePrice.getText().toString()) {
-                    case "锁仓状态":
-                        lockClosePosition(v);
-                        break;
-                    case "先开先平":
-                        firstClosePosition(v);
-                        break;
-                    default:
-                        defaultClosePosition(v);
-                        break;
-                }
-                break;
-            default:
-                break;
-        }
+        checkPassword(v);
     }
 
     /**
@@ -920,24 +885,6 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         else mInstrumentIdTransaction = mInstrumentId;
         mExchangeId = mInstrumentIdTransaction.split("\\.")[0];
         if (sDataManager.POSITION_DIRECTION.isEmpty()) update();
-        if (mKeyboardUtilsPrice != null) mKeyboardUtilsPrice.refreshInstrumentId(mInstrumentId);
-        if (mKeyboardUtilsVolume != null) mKeyboardUtilsVolume.refreshInstrumentId(mInstrumentId);
-    }
-
-
-    /**
-     * date: 2019/2/20
-     * author: chenli
-     * description: 当用户弹出软键盘后，想直接隐藏底部信息页时，需要隐藏软键盘
-     */
-    @Subscribe
-    public void onEventBase(VisibilityEvent data) {
-        if (data.isVisible()) {
-            if (mKeyboardUtilsPrice != null && mKeyboardUtilsPrice.isVisible())
-                mKeyboardUtilsPrice.hideKeyboard();
-            if (mKeyboardUtilsVolume != null && mKeyboardUtilsVolume.isVisible())
-                mKeyboardUtilsVolume.hideKeyboard();
-        }
     }
 
     /**
@@ -1079,11 +1026,339 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
 
     }
 
-    public KeyboardUtils getKeyboardUtilsPrice() {
-        return mKeyboardUtilsPrice;
+    /**
+     * date: 2019/4/9
+     * author: chenli
+     * description: 下单确认密码
+     */
+    private void checkPassword(final View view) {
+        String date = (String) SPUtils.get(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
+        if (TimeUtils.getNowTime().equals(date)) {
+            switch (view.getId()) {
+                case R.id.bid_open_position:
+                    buyOpenPosition();
+                    break;
+                case R.id.ask_open_position:
+                    sellOpenPosition();
+                    break;
+                case R.id.close_position:
+                    switch (mBinding.closePrice.getText().toString()) {
+                        case "锁仓状态":
+                            lockClosePosition(view);
+                            break;
+                        case "先开先平":
+                            firstClosePosition(view);
+                            break;
+                        default:
+                            defaultClosePosition(view);
+                            break;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
+            View viewDialog = View.inflate(getActivity(), R.layout.view_dialog_check_password, null);
+            Window dialogWindow = dialog.getWindow();
+            if (dialogWindow != null) {
+                dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+                WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+                dialogWindow.setGravity(Gravity.CENTER);
+                lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                dialogWindow.setAttributes(lp);
+            }
+            final EditText editText = viewDialog.findViewById(R.id.password);
+            viewDialog.findViewById(R.id.tv_password_check).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String password = editText.getText().toString();
+                    String passwordLocal = (String) SPUtils.get(sContext, CommonConstants.CONFIG_PASSWORD, "");
+                    if (passwordLocal.equals(password)) {
+                        dialog.dismiss();
+                        SPUtils.putAndApply(sContext, CONFIG_LOGIN_DATE, TimeUtils.getNowTime());
+
+                        switch (view.getId()) {
+                            case R.id.bid_open_position:
+                                buyOpenPosition();
+                                break;
+                            case R.id.ask_open_position:
+                                sellOpenPosition();
+                                break;
+                            case R.id.close_position:
+                                switch (mBinding.closePrice.getText().toString()) {
+                                    case "锁仓状态":
+                                        lockClosePosition(view);
+                                        break;
+                                    case "先开先平":
+                                        firstClosePosition(view);
+                                        break;
+                                    default:
+                                        defaultClosePosition(view);
+                                        break;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    } else ToastNotificationUtils.showToast(sContext, "密码输入错误");
+                }
+            });
+            dialog.setContentView(viewDialog);
+            dialog.show();
+        }
     }
 
-    public KeyboardUtils getKeyboardUtilsVolume() {
-        return mKeyboardUtilsVolume;
+    /**
+     * date: 2019/4/15
+     * author: chenli
+     * description: 软键盘弹出框
+     */
+    private void popupKeyboardDialog(final EditText mEditText, final int idKeyboard) {
+        final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
+        ViewDialogKeyboardBinding binding = DataBindingUtil.inflate(LayoutInflater.from(getContext()), R.layout. view_dialog_keyboard, null, false);
+        Window dialogWindow = dialog.getWindow();
+        if (dialogWindow != null) {
+            dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+            WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+            dialogWindow.setGravity(Gravity.TOP);
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            int height = getRootViewHeight() - getToolBarHeight() - DensityUtils.dp2px(sContext, 130);
+            int klineViewHeight = (int) (height / 2.5 * 1.5);
+            lp.height = getToolBarHeight() + DensityUtils.dp2px(sContext, 90) + klineViewHeight;
+            dialogWindow.setAttributes(lp);
+        }
+        Keyboard mKeyboard = new Keyboard(getActivity(), idKeyboard);
+        KeyboardView keyboardView = binding.getRoot().findViewById(R.id.keyboard);
+        keyboardView.setKeyboard(mKeyboard);
+        keyboardView.setEnabled(true);
+        keyboardView.setPreviewEnabled(false);
+        keyboardView.setOnKeyboardActionListener(new KeyboardView.OnKeyboardActionListener() {
+            boolean mIsInit = true;
+
+            @Override
+            public void onPress(int primaryCode) {
+
+            }
+
+            @Override
+            public void onRelease(int primaryCode) {
+
+            }
+
+            @Override
+            public void onKey(int primaryCode, int[] keyCodes) {
+                if (mEditText != null) {
+                    Editable editable = mEditText.getText();
+                    String text = mEditText.getText().toString();
+                    int start = mEditText.length();
+                    if (primaryCode == Keyboard.KEYCODE_DELETE) {
+                        if (editable.length() > 0) {
+                            if (!QUEUED_PRICE.equals(text) && !COUNTERPARTY_PRICE.equals(text) && !MARKET_PRICE.equals(text) && !LATEST_PRICE.equals(text)) {
+                                editable.delete(start - 1, start);
+                            } else {
+                                editable.clear();
+                            }
+                        }
+                    } else if (primaryCode == mEditText.getContext().getResources().getInteger(R.integer.keycode_empty_text)) {
+                        editable.clear();
+                    } else if (primaryCode == Keyboard.KEYCODE_DONE) {
+                        dialog.dismiss();
+                    } else if (primaryCode == mEditText.getContext().getResources().getInteger(R.integer.keycode_line_up_price)) {
+                        editable.clear();
+                        editable.insert(0, QUEUED_PRICE);
+                    } else if (primaryCode == mEditText.getContext().getResources().getInteger(R.integer.keycode_opponent_price)) {
+                        editable.clear();
+                        editable.insert(0, COUNTERPARTY_PRICE);
+                    } else if (primaryCode == mEditText.getContext().getResources().getInteger(R.integer.keycode_last_price)) {
+                        editable.clear();
+                        editable.insert(0, LATEST_PRICE);
+                    } else if (primaryCode == mEditText.getContext().getResources().getInteger(R.integer.keycode_market_price)) {
+                        editable.clear();
+                        editable.insert(0, MARKET_PRICE);
+                    } else if (primaryCode == mEditText.getContext().getResources().getInteger(R.integer.keycode_add)) {
+                        QuoteEntity quoteEntity = DataManager.getInstance().getRtnData().getQuotes().get(mInstrumentId);
+                        switch (text) {
+                            case QUEUED_PRICE:
+                                if (quoteEntity != null) {
+                                    String ask_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(), mInstrumentId);
+                                    String bid_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(), mInstrumentId);
+                                    editable.clear();
+                                    editable.insert(0, MathUtils.subtract(bid_price1, ask_price1).contains("-") ? bid_price1 : ask_price1);
+                                }
+                                break;
+                            case COUNTERPARTY_PRICE:
+                                if (quoteEntity != null) {
+                                    String ask_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(), mInstrumentId);
+                                    String bid_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(), mInstrumentId);
+                                    editable.clear();
+                                    editable.insert(0, MathUtils.subtract(bid_price1, ask_price1).contains("-") ? ask_price1 : bid_price1);
+                                }
+                                break;
+                            case LATEST_PRICE:
+                                if (quoteEntity != null) {
+                                    String last_price = LatestFileManager.saveScaleByPtick(quoteEntity.getLast_price(), mInstrumentId);
+                                    editable.clear();
+                                    editable.insert(0, last_price);
+                                }
+                                break;
+                            case MARKET_PRICE:
+                                if (quoteEntity != null) {
+                                    String last_price = LatestFileManager.saveScaleByPtick(quoteEntity.getLast_price(), mInstrumentId);
+                                    editable.clear();
+                                    editable.insert(0, last_price);
+                                }
+                                break;
+                            default:
+                                String data;
+                                if (idKeyboard == R.xml.future_price) {
+                                    SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
+                                    String price_tick = searchEntity == null ? "0" : searchEntity.getpTick();
+                                    data = MathUtils.add(editable.toString(), price_tick);
+                                } else {
+                                    data = MathUtils.add(editable.toString(), "1");
+                                }
+                                editable.clear();
+                                editable.insert(0, data);
+                                break;
+                        }
+                    } else if (primaryCode == mEditText.getContext().getResources().getInteger(R.integer.keycode_sub)) {
+                        QuoteEntity quoteEntity = DataManager.getInstance().getRtnData().getQuotes().get(mInstrumentId);
+                        switch (text) {
+                            case QUEUED_PRICE:
+                                if (quoteEntity != null) {
+                                    String ask_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(), mInstrumentId);
+                                    String bid_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(), mInstrumentId);
+                                    editable.clear();
+                                    editable.insert(0, MathUtils.subtract(bid_price1, ask_price1).contains("-") ? bid_price1 : ask_price1);
+                                }
+                                break;
+                            case COUNTERPARTY_PRICE:
+                                if (quoteEntity != null) {
+                                    String ask_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(), mInstrumentId);
+                                    String bid_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(), mInstrumentId);
+                                    editable.clear();
+                                    editable.insert(0, MathUtils.subtract(bid_price1, ask_price1).contains("-") ? ask_price1 : bid_price1);
+                                }
+                                break;
+                            case LATEST_PRICE:
+                                if (quoteEntity != null) {
+                                    String last_price = LatestFileManager.saveScaleByPtick(quoteEntity.getLast_price(), mInstrumentId);
+                                    editable.clear();
+                                    editable.insert(0, last_price);
+                                }
+                                break;
+                            case MARKET_PRICE:
+                                if (quoteEntity != null) {
+                                    String last_price = LatestFileManager.saveScaleByPtick(quoteEntity.getLast_price(), mInstrumentId);
+                                    editable.clear();
+                                    editable.insert(0, last_price);
+                                }
+                                break;
+                            default:
+                                String data;
+                                if (idKeyboard == R.xml.future_price) {
+                                    //添加负号功能
+                                    if (mEditText.getSelectionStart() == 0 && mEditText.getSelectionEnd() == 0) {
+                                        editable.insert(0, "-");
+                                        break;
+                                    } else {
+                                        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
+                                        String price_tick = searchEntity == null ? "0" : searchEntity.getpTick();
+                                        data = MathUtils.subtract(editable.toString(), price_tick);
+                                    }
+                                } else {
+                                    data = MathUtils.subtract(editable.toString(), "1");
+                                }
+                                editable.clear();
+                                editable.insert(0, data);
+                                break;
+                        }
+                    } else {
+                        String insertStr = Character.toString((char) primaryCode);
+                        String str = editable.toString();
+                        if (QUEUED_PRICE.equals(text) || COUNTERPARTY_PRICE.equals(text) || MARKET_PRICE.equals(text) || LATEST_PRICE.equals(text) || mIsInit) {
+                            //添加负号功能
+                            if ("-".equals(str)) {
+                                if ((!".".equals(insertStr)) || (".".equals(insertStr) && !text.contains(".")))
+                                    editable.insert(start, insertStr);
+                            } else {
+                                editable.clear();
+                                editable.insert(0, insertStr);
+                            }
+                            mIsInit = false;
+                        } else if ((!".".equals(insertStr)) || (".".equals(insertStr) && !text.contains(".")))
+                            editable.insert(start, insertStr);
+                    }
+                }
+            }
+
+            @Override
+            public void onText(CharSequence text) {
+
+            }
+
+            @Override
+            public void swipeLeft() {
+
+            }
+
+            @Override
+            public void swipeRight() {
+
+            }
+
+            @Override
+            public void swipeDown() {
+
+            }
+
+            @Override
+            public void swipeUp() {
+
+            }
+        });
+        dialog.setContentView(binding.getRoot());
+        QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
+        if (quoteEntity != null){
+            if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")){
+                quoteEntity = CloneUtils.clone(quoteEntity);
+                quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
+            }
+            binding.setQuote(quoteEntity);
+        }
+        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentIdTransaction);
+        if (searchEntity != null) binding.minPrice.setText(searchEntity.getpTick());
+
+        if (!dialog.isShowing()) dialog.show();
     }
+
+
+    private int getRootViewHeight() {
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        display.getMetrics(outMetrics);
+
+        float dpHeight = outMetrics.heightPixels - getStatusBarHeight();
+        return (int) dpHeight;
+    }
+
+    private int getStatusBarHeight() {
+        Rect rectangle = new Rect();
+        Window window = getActivity().getWindow();
+        window.getDecorView().getWindowVisibleDisplayFrame(rectangle);
+        int statusBarHeight = rectangle.top;
+        return statusBarHeight;
+    }
+
+    private int getToolBarHeight() {
+        TypedValue tv = new TypedValue();
+        if (getActivity().getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            return TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
+        }
+        return DensityUtils.dp2px(sContext, 56);
+    }
+
+
 }

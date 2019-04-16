@@ -164,7 +164,7 @@ public final class MD5 extends MessageDigest implements Cloneable {
      * Overrides the protected abstract method of
      * <code>java.security.MessageDigestSpi</code>.
      *
-     * @param input the byte to use for the switchQuoteInsList.
+     * @param input the byte to use for the initQuotes.
      * @modifies this
      */
     public void engineUpdate(final byte input) {
@@ -188,7 +188,7 @@ public final class MD5 extends MessageDigest implements Cloneable {
      * Overrides the protected abstract method of
      * <code>java.security.MessageDigestSpi</code>.
      *
-     * @param input  the array of bytes to use for the switchQuoteInsList.
+     * @param input  the array of bytes to use for the initQuotes.
      * @param offset the offset to start from in the array of bytes.
      * @param length the number of bytes to use, starting at offset.
      * @modifies this
@@ -429,7 +429,7 @@ public final class MD5 extends MessageDigest implements Cloneable {
      * Requires no internal buffering, but assumes a fixed input size,
      * in which the required padding bytes must have been added.
      *
-     * @param input  the array of bytes to use for the switchQuoteInsList.
+     * @param input  the array of bytes to use for the initQuotes.
      * @param offset the offset to start from in the array of bytes.
      * @modifies this
      */

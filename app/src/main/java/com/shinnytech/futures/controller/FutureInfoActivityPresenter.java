@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.controller.activity.CommonSwitchActivity;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.fragment.BaseChartFragment;
 import com.shinnytech.futures.controller.fragment.CurrentDayFragment;
@@ -62,6 +63,7 @@ import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.DAY_FRAGMENT;
+import static com.shinnytech.futures.constants.CommonConstants.FUTURE_INFO_ACTIVITY_TO_COMMON_SWITCH_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.HOUR_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_10_MINUTE;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_10_SECOND;
@@ -100,47 +102,6 @@ public class FutureInfoActivityPresenter {
      * description: 合约代码
      */
     private String mInstrumentId;
-    /**
-     * date: 7/7/17
-     * description: “设置”弹出框
-     */
-    private PopupWindow mPopupWindow;
-    /**
-     * date: 7/7/17
-     * description: 持仓开关
-     */
-    private Switch mPosition;
-    /**
-     * date: 7/7/17
-     * description: 挂单开关
-     */
-    private Switch mPending;
-    /**
-     * date: 7/7/17
-     * description: 均线开关
-     */
-    private Switch mAverage;
-    /**
-     * date: 2019/2/27
-     * author: chenli
-     * description: 五档行情开关
-     */
-    private Switch mMD5;
-    /**
-     * date: 7/3/17
-     * description: 持仓开关状态
-     */
-    private boolean mIsPosition;
-    /**
-     * date: 7/7/17
-     * description: 挂单开关状态
-     */
-    private boolean mIsPending;
-    /**
-     * date: 7/7/17
-     * description: 均线开关状态
-     */
-    private boolean mIsAverage;
     /**
      * date: 2019/2/27
      * author: chenli
@@ -191,12 +152,6 @@ public class FutureInfoActivityPresenter {
         if (mRightDrawable != null)
             mRightDrawable.setBounds(0, 0, mRightDrawable.getMinimumWidth(), mRightDrawable.getMinimumHeight());
 
-
-        //初始化开关状态
-        mIsPosition = (boolean) SPUtils.get(sContext, CONFIG_POSITION_LINE, true);
-        mIsPending = (boolean) SPUtils.get(sContext, CONFIG_ORDER_LINE, true);
-        mIsAverage = (boolean) SPUtils.get(sContext, CONFIG_AVERAGE_LINE, true);
-
         //初始化五档行情控制
         initMD5ViewVisibility();
 
@@ -205,13 +160,13 @@ public class FutureInfoActivityPresenter {
             mBinding.vpInfoContent.setVisibility(View.VISIBLE);
             mBinding.rbHandicapInfo.setText(R.string.future_info_activity_handicap_down);
             mBinding.rbPositionInfo.setText(R.string.future_info_activity_position_down);
-            mBinding.rbOrderInfo.setText(R.string.future_info_activity_order_down);
+            mBinding.rbOrderInfoAlive.setText(R.string.future_info_activity_order_down);
             mBinding.rbTransactionInfo.setText(R.string.future_info_activity_transaction_down);
         } else {
             mBinding.vpInfoContent.setVisibility(View.GONE);
             mBinding.rbHandicapInfo.setText(R.string.future_info_activity_handicap_up);
             mBinding.rbPositionInfo.setText(R.string.future_info_activity_position_up);
-            mBinding.rbOrderInfo.setText(R.string.future_info_activity_order_up);
+            mBinding.rbOrderInfoAlive.setText(R.string.future_info_activity_order_up);
             mBinding.rbTransactionInfo.setText(R.string.future_info_activity_transaction_up);
         }
 
@@ -224,18 +179,19 @@ public class FutureInfoActivityPresenter {
             list.add(data);
         }
         mKlineDurationTitleAdapter = new KlineDurationTitleAdapter(sContext, list);
-        mBinding.rvDurationTitle.setLayoutManager(new LinearLayoutManager(sContext, LinearLayoutManager.HORIZONTAL, false));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(sContext, LinearLayoutManager.HORIZONTAL, false);
+        mBinding.rvDurationTitle.setLayoutManager(linearLayoutManager);
         mBinding.rvDurationTitle.setAdapter(mKlineDurationTitleAdapter);
 
         //初始化盘口、持仓、挂单、交易切换容器，fragment实例保存，有生命周期的变化，默认情况下屏幕外初始化两个fragment
         List<Fragment> fragmentList = new ArrayList<>();
         PositionFragment positionFragment = new PositionFragment();
-        OrderFragment orderFragment = OrderFragment.newInstance(true);
+        OrderFragment orderFragmentAlive = OrderFragment.newInstance(true);
         HandicapFragment handicapFragment = new HandicapFragment();
         TransactionFragment transactionFragment = new TransactionFragment();
         fragmentList.add(handicapFragment);
         fragmentList.add(positionFragment);
-        fragmentList.add(orderFragment);
+        fragmentList.add(orderFragmentAlive);
         fragmentList.add(transactionFragment);
         mInfoPagerAdapter = new ViewPagerFragmentAdapter(mFutureInfoActivity.getSupportFragmentManager(), fragmentList);
         mBinding.vpInfoContent.setAdapter(mInfoPagerAdapter);
@@ -374,76 +330,8 @@ public class FutureInfoActivityPresenter {
         mBinding.rbSetUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mPopupWindow == null) {
-                    //构造一个“设置”按钮的PopupWindow
-                    View view = View.inflate(sContext, R.layout.popup_set_up, null);
-                    mPosition = view.findViewById(R.id.position);
-                    mPending = view.findViewById(R.id.pending);
-                    mAverage = view.findViewById(R.id.average_line);
-                    mMD5 = view.findViewById(R.id.md);
-                    mPopupWindow = new PopupWindow(view,
-                            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-                    //点击空白处popupWindow消失
-                    mPopupWindow.setBackgroundDrawable(new ColorDrawable(0x00000000));
-                    //设置动画，左进右出
-                    mPopupWindow.setAnimationStyle(R.style.anim_menu_set_up);
-
-                    //初始化开关状态
-                    mPosition.setChecked(mIsPosition);
-                    mPending.setChecked(mIsPending);
-                    mAverage.setChecked(mIsAverage);
-                    mMD5.setChecked(mIsMD5);
-
-                    mPosition.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            SPUtils.putAndApply(sContext, CONFIG_POSITION_LINE, isChecked);
-                            mIsPosition = isChecked;
-                            SetUpEvent setUpEvent = new SetUpEvent();
-                            setUpEvent.setPosition(mIsPosition);
-                            setUpEvent.setPending(mIsPending);
-                            setUpEvent.setAverage(mIsAverage);
-                            EventBus.getDefault().post(setUpEvent);
-                        }
-                    });
-
-                    mPending.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            SPUtils.putAndApply(sContext, CONFIG_ORDER_LINE, isChecked);
-                            mIsPending = isChecked;
-                            SetUpEvent setUpEvent = new SetUpEvent();
-                            setUpEvent.setPending(mIsPending);
-                            setUpEvent.setPosition(mIsPosition);
-                            setUpEvent.setAverage(mIsAverage);
-                            EventBus.getDefault().post(setUpEvent);
-                        }
-                    });
-
-                    mAverage.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            SPUtils.putAndApply(sContext, CONFIG_AVERAGE_LINE, isChecked);
-                            mIsAverage = isChecked;
-                            SetUpEvent setUpEvent = new SetUpEvent();
-                            setUpEvent.setAverage(mIsAverage);
-                            setUpEvent.setPending(mIsPending);
-                            setUpEvent.setPosition(mIsPosition);
-                            EventBus.getDefault().post(setUpEvent);
-                        }
-                    });
-
-                    mMD5.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            SPUtils.putAndApply(sContext, CONFIG_MD5, isChecked);
-                            mIsMD5 = isChecked;
-                            updateMD5ViewVisibility();
-                        }
-                    });
-                }
-                //设置popupWindow显示的位置，参数依次是参照View，x轴的偏移量，y轴的偏移量
-                mPopupWindow.showAsDropDown(v, -20, 0);
+                Intent intent = new Intent(mFutureInfoActivity, CommonSwitchActivity.class);
+                mFutureInfoActivity.startActivityForResult(intent, FUTURE_INFO_ACTIVITY_TO_COMMON_SWITCH_ACTIVITY);
             }
         });
 
@@ -460,15 +348,12 @@ public class FutureInfoActivityPresenter {
                 switch (position) {
                     case 0:
                         mBinding.rbHandicapInfo.setChecked(true);
-                        closeKeyboard();
                         break;
                     case 1:
                         mBinding.rbPositionInfo.setChecked(true);
-                        closeKeyboard();
                         break;
                     case 2:
-                        mBinding.rbOrderInfo.setChecked(true);
-                        closeKeyboard();
+                        mBinding.rbOrderInfoAlive.setChecked(true);
                         break;
                     case 3:
                         mBinding.rbTransactionInfo.setChecked(true);
@@ -497,7 +382,7 @@ public class FutureInfoActivityPresenter {
             }
         });
 
-        mBinding.rbOrderInfo.setOnClickListener(new View.OnClickListener() {
+        mBinding.rbOrderInfoAlive.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 controlTransactionPageVisibility(2);
@@ -525,7 +410,7 @@ public class FutureInfoActivityPresenter {
                 mBinding.vpInfoContent.setVisibility(View.VISIBLE);
                 mBinding.rbHandicapInfo.setText(R.string.future_info_activity_handicap_down);
                 mBinding.rbPositionInfo.setText(R.string.future_info_activity_position_down);
-                mBinding.rbOrderInfo.setText(R.string.future_info_activity_order_down);
+                mBinding.rbOrderInfoAlive.setText(R.string.future_info_activity_order_down_alive);
                 mBinding.rbTransactionInfo.setText(R.string.future_info_activity_transaction_down);
                 data.setVisible(false);
                 EventBus.getDefault().post(data);
@@ -534,7 +419,7 @@ public class FutureInfoActivityPresenter {
                 mBinding.vpInfoContent.setVisibility(View.GONE);
                 mBinding.rbHandicapInfo.setText(R.string.future_info_activity_handicap_up);
                 mBinding.rbPositionInfo.setText(R.string.future_info_activity_position_up);
-                mBinding.rbOrderInfo.setText(R.string.future_info_activity_order_up);
+                mBinding.rbOrderInfoAlive.setText(R.string.future_info_activity_order_up_alive);
                 mBinding.rbTransactionInfo.setText(R.string.future_info_activity_transaction_up);
                 data.setVisible(true);
                 EventBus.getDefault().post(data);
@@ -545,7 +430,7 @@ public class FutureInfoActivityPresenter {
                 mBinding.vpInfoContent.setVisibility(View.VISIBLE);
                 mBinding.rbHandicapInfo.setText(R.string.future_info_activity_handicap_down);
                 mBinding.rbPositionInfo.setText(R.string.future_info_activity_position_down);
-                mBinding.rbOrderInfo.setText(R.string.future_info_activity_order_down);
+                mBinding.rbOrderInfoAlive.setText(R.string.future_info_activity_order_down_alive);
                 mBinding.rbTransactionInfo.setText(R.string.future_info_activity_transaction_down);
                 data.setVisible(false);
                 EventBus.getDefault().post(data);
@@ -572,39 +457,12 @@ public class FutureInfoActivityPresenter {
         } else mToolbarTitle.setText(mInstrumentId);
     }
 
-    public boolean closeKeyboard() {
-        TransactionFragment transactionFragment = ((TransactionFragment) mInfoPagerAdapter.getItem(3));
-        KeyboardUtils keyboardUtilsPrice = transactionFragment.getKeyboardUtilsPrice();
-        KeyboardUtils keyboardUtilsVolume = transactionFragment.getKeyboardUtilsVolume();
-        if (keyboardUtilsPrice != null) {
-            if (keyboardUtilsPrice.isVisible()) {
-                keyboardUtilsPrice.hideKeyboard();
-                return true;
-            }
-        }
-        if (keyboardUtilsVolume != null) {
-            if (keyboardUtilsVolume.isVisible()) {
-                keyboardUtilsVolume.hideKeyboard();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean isPosition() {
-        return mIsPosition;
-    }
-
-    public boolean isPending() {
-        return mIsPending;
-    }
-
-    public boolean isAverage() {
-        return mIsAverage;
-    }
-
     public String getInstrumentId() {
         return mInstrumentId;
+    }
+
+    public ViewPagerFragmentAdapter getmInfoPagerAdapter() {
+        return mInfoPagerAdapter;
     }
 
     public void setInstrumentId(String instrumentId) {

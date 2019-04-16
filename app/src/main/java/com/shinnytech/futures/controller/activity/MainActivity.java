@@ -16,12 +16,12 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.MainActivityPresenter;
 import com.shinnytech.futures.controller.fragment.QuoteFragment;
+import com.shinnytech.futures.controller.fragment.QuotePagerFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
-import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_SEARCH_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
@@ -157,7 +157,6 @@ public class MainActivity extends BaseActivity {
                     ToastNotificationUtils.showToast(BaseApplication.getContext(), getString(R.string.main_activity_exit));
                     mExitTime = System.currentTimeMillis();
                 } else {
-                    setResult(RESULT_OK);
                     finish();
                 }
                 return true;
@@ -169,32 +168,27 @@ public class MainActivity extends BaseActivity {
     /**
      * date: 6/21/17
      * author: chenli
-     * description: 合约详情页返回,发送原来订阅合约
+     * description: 合约详情页返回,发送原来订阅合约:搜索页、合约详情页、自选管理菜单返回刷新行情列表
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        QuoteFragment quoteFragment = ((QuotePagerFragment) mMainActivityPresenter.
+                getmViewPagerFragmentAdapter().getItem(0)).getCurrentItem();
         if (BaseApplication.getWebSocketService() == null) return;
-        String mIns = mMainActivityPresenter.getPreSubscribedQuotes();
-        refreshQuotesAfterBack(mIns);
-    }
 
-    /**
-     * date: 2019/3/30
-     * author: chenli
-     * description: 搜索页、合约详情页返回刷新行情列表
-     */
-    private void refreshQuotesAfterBack(String mIns) {
-        QuoteFragment quoteFragment = (QuoteFragment) mMainActivityPresenter.getmViewPagerFragmentAdapter().getItem(0);
-        if (quoteFragment == null) return;
-        if (OPTIONAL.equals(quoteFragment.getTitle())
-                && quoteFragment.getmInsList().size() != LatestFileManager.getOptionalInsList().size()){
-            quoteFragment.refreshOptional();
-        }
-        else {
+        String mIns = mMainActivityPresenter.getPreSubscribedQuotes();
+
+        if (OPTIONAL.equals(quoteFragment.getTitle())) {
+            //自选合约管理菜单
+            if (requestCode == MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY)
+                quoteFragment.refreshOptional();
+            else quoteFragment.update();
+        } else {
             if (mIns != null && !mIns.equals(sDataManager.getRtnData().getIns_list())) {
                 BaseApplication.getWebSocketService().sendSubscribeQuote(mIns);
             }
         }
+
     }
 
     public MainActivityPresenter getmMainActivityPresenter() {

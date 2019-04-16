@@ -114,7 +114,7 @@ public class CurrentDayFragment extends BaseChartFragment {
 
         QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(instrument_id);
         try {
-            preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
+            if (quoteEntity != null) preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
