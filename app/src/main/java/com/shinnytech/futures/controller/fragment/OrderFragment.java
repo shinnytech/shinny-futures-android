@@ -3,16 +3,17 @@ package com.shinnytech.futures.controller.fragment;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
@@ -35,7 +37,9 @@ import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.listener.OrderDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.CloneUtils;
+import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
@@ -68,7 +72,7 @@ public class OrderFragment extends LazyLoadFragment {
     private List<OrderEntity> mNewData = new ArrayList<>();
     private FragmentOrderBinding mBinding;
     private boolean mIsUpdate;
-    private boolean mIsShowDialog;
+    private boolean mIsShowCancelPop;
     private boolean mIsOrdersAlive;
     private boolean mIsOrdersAll;
 
@@ -109,7 +113,7 @@ public class OrderFragment extends LazyLoadFragment {
                 new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
         mAdapter = new OrderAdapter(getActivity(), mOldData);
         mBinding.rv.setAdapter(mAdapter);
-        mIsShowDialog = (boolean) SPUtils.get(BaseApplication.getContext(), CommonConstants.CONFIG_ORDER_CONFIRM, true);
+        mIsShowCancelPop = (boolean) SPUtils.get(BaseApplication.getContext(), CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM, true);
     }
 
     protected void initEvent() {
@@ -238,52 +242,6 @@ public class OrderFragment extends LazyLoadFragment {
     }
 
     /**
-     * date: 7/14/17
-     * author: chenli
-     * description: 撤单弹出框，根据固定宽高值自定义dialog，注意宽高值从dimens.xml文件中得到
-     */
-    private void initDialog(final String order_id, String instrument_id, String direction_title, String volume, String price) {
-        final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
-        View view = View.inflate(getActivity(), R.layout.view_dialog_cancel_order, null);
-        Window dialogWindow = dialog.getWindow();
-        if (dialogWindow != null) {
-            dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
-            WindowManager.LayoutParams lp = dialogWindow.getAttributes();
-            dialogWindow.setGravity(Gravity.CENTER);
-            lp.width = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_width);
-            lp.height = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_height);
-            dialogWindow.setAttributes(lp);
-        }
-        dialog.setContentView(view);
-        dialog.setCancelable(false);
-        TextView info = view.findViewById(R.id.order_instrument_id);
-        TextView ok = view.findViewById(R.id.order_ok);
-        TextView cancel = view.findViewById(R.id.order_cancel);
-        String information = instrument_id + ", " + price + ", " + direction_title + ", " + volume + "手";
-        info.setText(information);
-        ok.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    if (BaseApplication.getWebSocketService() != null)
-                        BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
-                } catch (NumberFormatException ex) {
-                    ex.printStackTrace();
-                }
-                dialog.dismiss();
-            }
-        });
-        cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-        dialog.show();
-    }
-
-
-    /**
      * date: 2019/4/9
      * author: chenli
      * description: 撤单确认密码
@@ -293,12 +251,8 @@ public class OrderFragment extends LazyLoadFragment {
         String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
         if (TimeUtils.getNowTime().equals(date)) {
             String order_id = orderEntity.getOrder_id();
-            if (mIsShowDialog) {
-                String instrument_id = orderEntity.getInstrument_id();
-                String direction_title = ((TextView) view.findViewById(R.id.order_offset)).getText().toString();
-                String volume = orderEntity.getVolume_left();
-                String price = ((TextView) view.findViewById(R.id.order_price)).getText().toString();
-                initDialog(order_id, instrument_id, direction_title, volume, price);
+            if (mIsShowCancelPop) {
+                initPopUp(view, order_id);
             } else {
                 BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
             }
@@ -325,12 +279,8 @@ public class OrderFragment extends LazyLoadFragment {
                         SPUtils.putAndApply(context, CONFIG_LOGIN_DATE, TimeUtils.getNowTime());
 
                         String order_id = orderEntity.getOrder_id();
-                        if (mIsShowDialog) {
-                            String instrument_id = orderEntity.getInstrument_id();
-                            String direction_title = ((TextView) view.findViewById(R.id.order_offset)).getText().toString();
-                            String volume = orderEntity.getVolume_left();
-                            String price = ((TextView) view.findViewById(R.id.order_price)).getText().toString();
-                            initDialog(order_id, instrument_id, direction_title, volume, price);
+                        if (mIsShowCancelPop) {
+                            initPopUp(view, order_id);
                         } else {
                             BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
                         }
@@ -341,6 +291,35 @@ public class OrderFragment extends LazyLoadFragment {
             dialog.show();
 
         }
+    }
+
+
+    /**
+     * date: 2019/4/17
+     * author: chenli
+     * description: 构造一个撤单的PopupWindow
+     */
+    private void initPopUp(View view, final String order_id) {
+        final View popUpView = View.inflate(getActivity(), R.layout.popup_fragment_order, null);
+        final PopupWindow popWindow = new PopupWindow(popUpView,
+                ViewGroup.LayoutParams.MATCH_PARENT, DensityUtils.dp2px(getActivity(), 42), true);
+        //设置动画，淡入淡出
+        popWindow.setAnimationStyle(R.style.anim_menu_quote);
+        //点击空白处popupWindow消失
+        popWindow.setBackgroundDrawable(new ColorDrawable(0x00000000));
+        TextView cancel = popUpView.findViewById(R.id.cancel_order);
+        //设置popupWindow显示的位置，参数依次是参照View，x轴的偏移量，y轴的偏移量
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
+        popWindow.showAsDropDown(view, outMetrics.widthPixels / 4 * 3, 0);
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
+                popWindow.dismiss();
+            }
+        });
     }
 
 }

@@ -33,7 +33,6 @@ import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.ConfirmActivity;
-import com.shinnytech.futures.controller.activity.LoginActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.DataManager;
@@ -61,9 +60,10 @@ import okhttp3.OkHttpClient;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_BACKGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_INIT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_DURATION_DEFAULT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_CONFIRM;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_INSERT_ORDER_CONFIRM;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PARA_MA;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
@@ -209,8 +209,12 @@ public class BaseApplication extends Application implements ServiceConnection {
             SPUtils.putAndApply(sContext, CONFIG_PARA_MA, CommonConstants.PARA_MA);
         }
 
-        if (!SPUtils.contains(sContext, CONFIG_ORDER_CONFIRM)) {
-            SPUtils.putAndApply(sContext, CONFIG_ORDER_CONFIRM, true);
+        if (!SPUtils.contains(sContext, CONFIG_INSERT_ORDER_CONFIRM)) {
+            SPUtils.putAndApply(sContext, CONFIG_INSERT_ORDER_CONFIRM, true);
+        }
+
+        if (!SPUtils.contains(sContext, CONFIG_CANCEL_ORDER_CONFIRM)) {
+            SPUtils.putAndApply(sContext, CONFIG_CANCEL_ORDER_CONFIRM, true);
         }
 
         if (!SPUtils.contains(sContext, CONFIG_POSITION_LINE)) {

@@ -80,9 +80,14 @@ public class SubSettingActivity extends BaseActivity {
             case TRANSACTION_SETTING:
                 SettingEntity settingEntity2 = new SettingEntity();
                 settingEntity2.setIcon(R.mipmap.ic_speaker_notes_white_24dp);
-                settingEntity2.setContent(CommonConstants.ORDER_CONFIRM);
+                settingEntity2.setContent(CommonConstants.INSERT_ORDER_CONFIRM);
                 settingEntity2.setJump(false);
                 settingEntities.add(settingEntity2);
+                SettingEntity settingEntity5 = new SettingEntity();
+                settingEntity5.setIcon(R.mipmap.ic_speaker_notes_white_24dp);
+                settingEntity5.setContent(CommonConstants.CANCEL_ORDER_CONFIRM);
+                settingEntity5.setJump(false);
+                settingEntities.add(settingEntity5);
                 break;
             case SYSTEM_SETTING:
                 SettingEntity settingEntity3 = new SettingEntity();

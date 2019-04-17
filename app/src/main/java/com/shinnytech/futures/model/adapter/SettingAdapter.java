@@ -11,6 +11,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ItemActivitySettingBinding;
 import com.shinnytech.futures.model.bean.settingbean.SettingEntity;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
 import java.util.List;
@@ -94,8 +95,8 @@ public class SettingAdapter extends RecyclerView.Adapter<SettingAdapter.ItemView
             if (jump) mBinding.settingToggle.setVisibility(View.GONE);
             else {
                 switch (content) {
-                    case CommonConstants.ORDER_CONFIRM:
-                        boolean check = (boolean) SPUtils.get(sContext, CommonConstants.CONFIG_ORDER_CONFIRM, false);
+                    case CommonConstants.INSERT_ORDER_CONFIRM:
+                        boolean check = (boolean) SPUtils.get(sContext, CommonConstants.CONFIG_INSERT_ORDER_CONFIRM, false);
                         mBinding.settingToggle.setChecked(check);
                         break;
                     default:
@@ -147,8 +148,11 @@ public class SettingAdapter extends RecyclerView.Adapter<SettingAdapter.ItemView
          */
         public void saveSettingConfig() {
             switch (mBinding.content.getText().toString()) {
-                case CommonConstants.ORDER_CONFIRM:
-                    SPUtils.putAndApply(sContext, CommonConstants.CONFIG_ORDER_CONFIRM, mBinding.settingToggle.isChecked());
+                case CommonConstants.INSERT_ORDER_CONFIRM:
+                    SPUtils.putAndApply(sContext, CommonConstants.CONFIG_INSERT_ORDER_CONFIRM, mBinding.settingToggle.isChecked());
+                    break;
+                case CommonConstants.CANCEL_ORDER_CONFIRM:
+                    SPUtils.putAndApply(sContext, CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM, mBinding.settingToggle.isChecked());
                     break;
                 default:
                     break;

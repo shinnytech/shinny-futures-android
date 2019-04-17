@@ -214,13 +214,13 @@ android {
 //            dimension "shinny"
 //        }
 //
-        htfutures_sim {
-            buildConfigField "String", "BROKER_ID", "\"海通股指仿真\""
-            resValue("string", "app_name", "海通股指仿真")
-            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
-            applicationIdSuffix ".htfutures_sim"
-            dimension "shinny"
-        }
+//        htfutures_sim {
+//            buildConfigField "String", "BROKER_ID", "\"海通股指仿真\""
+//            resValue("string", "app_name", "海通股指仿真")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+//            applicationIdSuffix ".htfutures_sim"
+//            dimension "shinny"
+//        }
 //
 //        hzqh {
 //            buildConfigField "String", "BROKER_ID", "\"海证期货\""
@@ -358,13 +358,13 @@ android {
 //            dimension "shinny"
 //        }
 //
-        qhqh {
-            buildConfigField "String", "BROKER_ID", "\"前海期货\""
-            resValue("string", "app_name", "前海快期小Q")
-            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher_qhqh"]
-            applicationIdSuffix ".qhqh"
-            dimension "shinny"
-        }
+//        qhqh {
+//            buildConfigField "String", "BROKER_ID", "\"前海期货\""
+//            resValue("string", "app_name", "前海快期小Q")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher_qhqh"]
+//            applicationIdSuffix ".qhqh"
+//            dimension "shinny"
+//        }
 //
 //        rdqh {
 //            buildConfigField "String", "BROKER_ID", "\"瑞达期货\""
@@ -590,6 +590,101 @@ android {
             dimension "shinny"
         }
 
+//        tencent_store {
+//            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
+//            resValue("string", "app_name", "快期小Q")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+//            applicationIdSuffix ".tencent_store"
+//            dimension "shinny"
+//        }
+//
+//        huawei_store {
+//            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
+//            resValue("string", "app_name", "快期小Q")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+//            applicationIdSuffix ".huawei_store"
+//            dimension "shinny"
+//        }
+//
+//        xiaomi_store {
+//            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
+//            resValue("string", "app_name", "快期小Q")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+//            applicationIdSuffix ".xiaomi_store"
+//            dimension "shinny"
+//        }
+//
+//        oppo_store {
+//            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
+//            resValue("string", "app_name", "快期小Q")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+//            applicationIdSuffix ".oppo_store"
+//            dimension "shinny"
+//        }
+//
+//        vivo_store {
+//            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
+//            resValue("string", "app_name", "快期小Q")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+//            applicationIdSuffix ".vivo_store"
+//            dimension "shinny"
+//        }
+//
+//        baidu_store {
+//            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
+//            resValue("string", "app_name", "快期小Q")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+//            applicationIdSuffix ".baidu_store"
+//            dimension "shinny"
+//        }
+//
+//        alibaba_store {
+//            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
+//            resValue("string", "app_name", "快期小Q")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+//            applicationIdSuffix ".alibaba_store"
+//            dimension "shinny"
+//        }
+//
+//        sumsung_store {
+//            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
+//            resValue("string", "app_name", "快期小Q")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+//            applicationIdSuffix ".sumsung_store"
+//            dimension "shinny"
+//        }
+//
+//        qihu360_store {
+//            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
+//            resValue("string", "app_name", "快期小Q")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+//            applicationIdSuffix ".qihu360_store"
+//            dimension "shinny"
+//        }
+//
+//        meizu_store {
+//            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
+//            resValue("string", "app_name", "快期小Q")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+//            applicationIdSuffix ".meizu_store"
+//            dimension "shinny"
+//        }
+//
+//        sogou_store {
+//            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
+//            resValue("string", "app_name", "快期小Q")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+//            applicationIdSuffix ".sogou_store"
+//            dimension "shinny"
+//        }
+//
+//        kuan_store {
+//            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
+//            resValue("string", "app_name", "快期小Q")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+//            applicationIdSuffix ".kuan_store"
+//            dimension "shinny"
+//        }
     }
 
     packagingOptions {

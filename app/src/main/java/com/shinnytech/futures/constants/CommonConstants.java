@@ -100,7 +100,8 @@ public final class CommonConstants {
     //默认配置
     public static final String CONFIG_KLINE_DURATION_DEFAULT = "klineDurationDefault";
     public static final String CONFIG_PARA_MA = "ma";
-    public static final String CONFIG_ORDER_CONFIRM = "orderConfirm";
+    public static final String CONFIG_INSERT_ORDER_CONFIRM = "orderConfirm";
+    public static final String CONFIG_CANCEL_ORDER_CONFIRM = "cancelOrderConfirm";
     public static final String CONFIG_POSITION_LINE = "isPosition";
     public static final String CONFIG_ORDER_LINE = "isPending";
     public static final String CONFIG_AVERAGE_LINE = "isAverage";
@@ -120,7 +121,8 @@ public final class CommonConstants {
     public static final String KLINE_DURATION_SETTING = "K线周期设置";
     public static final String COMMON_SWITCH_SETTING = "常用开关";
     public static final String KLINE_DURATION_ADD = "添加常用周期";
-    public static final String ORDER_CONFIRM = "下单、撤单确认";
+    public static final String INSERT_ORDER_CONFIRM = "下单确认";
+    public static final String CANCEL_ORDER_CONFIRM = "撤单确认";
     public static final String UPLOAD_LOG = "上传运行日志";
     public static final String COMMON_SWITCH = "常用开关";
     public static final String PARA_MA = "5,10,20,60,0,0";
@@ -128,6 +130,30 @@ public final class CommonConstants {
     public static final String KLINE_DURATION_ALL = "3秒,5秒,10秒,15秒,20秒,30秒,1分,2分," +
             "3分,5分,10分,15分,30分,1时,2时,4时,1日,1周,4周";
     public static final String KLINE_DURATION_DAY = "分时";
+
+    //下单页
+    public static final String DIRECTION_BUY_ZN = "多";
+    public static final String DIRECTION_SELL_ZN = "空";
+    public static final String DIRECTION_BOTH_ZN = "双向";
+    public static final String DIRECTION_BUY_BID = "买多";
+    public static final String DIRECTION_ADD_BID = "加多";
+    public static final String DIRECTION_SELL_ASK = "卖空";
+    public static final String DIRECTION_ADD_ASK = "加空";
+    public static final String DIRECTION_DEFAULT_CLOSE = "平仓";
+    public static final String DIRECTION_FIRST_CLOSE = "先开先平";
+    public static final String DIRECTION_LOCK_CLOSE = "锁仓状态";
+    public static final String DIRECTION_LOCK = "锁仓";
+    public static final String DIRECTION_BUY_OPEN = "买开";
+    public static final String DIRECTION_BUY = "BUY";
+    public static final String DIRECTION_SELL_OPEN = "卖开";
+    public static final String DIRECTION_SELL = "SELL";
+    public static final String DIRECTION_CLOSE_TODAY = "平今";
+    public static final String DIRECTION_CLOSE_YESTODAY = "平昨";
+    public static final String OFFSET_OPEN = "OPEN";
+    public static final String OFFSET_CLOSE = "CLOSE";
+    public static final String OFFSET_CLOSETODAY = "CLOSETODAY";
+    public static final String PRICE_TYPE_LIMIT = "LIMIT";
+
     //amp event type
     public static final String AMP_INIT = "amp_init";
     public static final String AMP_BACKGROUND = "amp_background";
