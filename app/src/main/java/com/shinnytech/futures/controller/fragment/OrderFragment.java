@@ -50,6 +50,7 @@ import java.util.List;
 
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
@@ -219,7 +220,7 @@ public class OrderFragment extends LazyLoadFragment {
 
                 if (!mIsOrdersAlive) {
                     mNewData.add(o);
-                } else if (("ALIVE").equals(orderEntity.getStatus())) {
+                } else if (STATUS_ALIVE.equals(orderEntity.getStatus())) {
                     mNewData.add(o);
                 }
             }

@@ -18,6 +18,9 @@ import com.shinnytech.futures.utils.MathUtils;
 
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_SELL_ZN;
+
 /**
  * date: 7/9/17
  * author: chenli
@@ -107,7 +110,7 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                 int volume_short = Integer.parseInt(positionEntity.getVolume_short());
                 float profit = 0;
                 if (volume_long != 0 && volume_short == 0) {
-                    mBinding.positionDirection.setText("多");
+                    mBinding.positionDirection.setText(DIRECTION_BUY_ZN);
                     mBinding.positionDirection.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
                     mBinding.positionAvailable.setText(available_long);
                     mBinding.positionVolume.setText(volume_long + "");
@@ -115,7 +118,7 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                     mBinding.positionProfit.setText(MathUtils.round(positionEntity.getFloat_profit_long(), 2));
                     profit = Float.valueOf(positionEntity.getFloat_profit_long());
                 } else if (volume_long == 0 && volume_short != 0) {
-                    mBinding.positionDirection.setText("空");
+                    mBinding.positionDirection.setText(DIRECTION_SELL_ZN);
                     mBinding.positionDirection.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
                     mBinding.positionAvailable.setText(available_short);
                     mBinding.positionVolume.setText(volume_short + "");
@@ -142,9 +145,9 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                 String value = bundle.getString(key);
                 switch (key) {
                     case "direction":
-                        if ("多".equals(value)) {
+                        if (DIRECTION_BUY_ZN.equals(value)) {
                             mBinding.positionDirection.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
-                        } else if ("空".equals(value)) {
+                        } else if (DIRECTION_SELL_ZN.equals(value)) {
                             mBinding.positionDirection.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
                         }
                         mBinding.positionDirection.setText(value);

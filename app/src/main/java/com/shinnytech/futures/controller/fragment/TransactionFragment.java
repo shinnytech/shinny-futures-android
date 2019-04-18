@@ -38,6 +38,7 @@ import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.databinding.FragmentTransactionBinding;
 import com.shinnytech.futures.databinding.ViewDialogKeyboardBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
@@ -55,17 +56,40 @@ import com.shinnytech.futures.utils.ToastNotificationUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
 import static com.shinnytech.futures.constants.CommonConstants.COUNTERPARTY_PRICE;
-import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY_BID;
+import static com.shinnytech.futures.constants.CommonConstants.ACTION_ADD_SELL;
+import static com.shinnytech.futures.constants.CommonConstants.ACTION_ADD_BUY;
+import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BOTH_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY;
+import static com.shinnytech.futures.constants.CommonConstants.ACTION_OPEN_BUY;
 import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_FIRST_CLOSE;
-import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_SELL_ASK;
+import static com.shinnytech.futures.constants.CommonConstants.ACTION_CLOSE_SELL;
+import static com.shinnytech.futures.constants.CommonConstants.ACTION_CLOSE_BUY;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_HISTORY;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_TODAY_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_HISTORY_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_FIRST_OPEN_FIRST_CLOSE;
+import static com.shinnytech.futures.constants.CommonConstants.ACTION_LOCK;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_LOCK;
+import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_SELL;
+import static com.shinnytech.futures.constants.CommonConstants.ACTION_OPEN_SELL;
 import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_SELL_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.INE_ZN;
 import static com.shinnytech.futures.constants.CommonConstants.LATEST_PRICE;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_PRICE;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_TODAY;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_OPEN;
+import static com.shinnytech.futures.constants.CommonConstants.PRICE_TYPE_LIMIT;
 import static com.shinnytech.futures.constants.CommonConstants.QUEUED_PRICE;
+import static com.shinnytech.futures.constants.CommonConstants.SHFE_ZN;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.USER_PRICE;
 import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
@@ -95,6 +119,11 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      */
     private boolean mIsClosePriceShow = false;
     private boolean mIsRefreshPosition = true;
+    /**
+     * date: 2019/4/18
+     * description: 是否重新平仓
+     */
+    private boolean mIsReClose = false;
     private FragmentTransactionBinding mBinding;
     private boolean mIsShowDialog;
 
@@ -300,52 +329,52 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 this.mDirection = "";
                 mBinding.volume.setText("1");
                 mIsClosePriceShow = false;
-                mBinding.bidPrice1Direction.setText(DIRECTION_BUY_BID);
-                mBinding.askPrice1Direction.setText(DIRECTION_SELL_ASK);
-                mBinding.closePrice.setText(DIRECTION_FIRST_CLOSE);
+                mBinding.bidPrice1Direction.setText(ACTION_OPEN_BUY);
+                mBinding.askPrice1Direction.setText(ACTION_OPEN_SELL);
+                mBinding.closePrice.setText(STATUS_FIRST_OPEN_FIRST_CLOSE);
             } else {
                 String volume_available_long = MathUtils.add(positionEntity.getVolume_long_his(), positionEntity.getVolume_long_today());
                 int volume_long = Integer.parseInt(MathUtils.add(volume_available_long, positionEntity.getVolume_long_frozen_his()));
                 String volume_available_short = MathUtils.add(positionEntity.getVolume_short_his(), positionEntity.getVolume_short_today());
                 int volume_short = Integer.parseInt(MathUtils.add(volume_available_short, positionEntity.getVolume_short_frozen_his()));
                 if (volume_long != 0 && volume_short == 0) {
-                    this.mDirection = "多";
+                    this.mDirection = DIRECTION_BUY_ZN;
                     mBinding.volume.setText(volume_available_long);
                     mIsClosePriceShow = true;
-                    mBinding.bidPrice1Direction.setText("加多");
-                    mBinding.askPrice1Direction.setText("锁仓");
+                    mBinding.bidPrice1Direction.setText(ACTION_ADD_BUY);
+                    mBinding.askPrice1Direction.setText(ACTION_LOCK);
                     mBinding.closePrice.setText(mBinding.askPrice11.getText().toString());
                 } else if (volume_long == 0 && volume_short != 0) {
-                    this.mDirection = "空";
+                    this.mDirection = DIRECTION_SELL_ZN;
                     mBinding.volume.setText(volume_available_short);
                     mIsClosePriceShow = true;
-                    mBinding.bidPrice1Direction.setText("锁仓");
-                    mBinding.askPrice1Direction.setText("加空");
+                    mBinding.bidPrice1Direction.setText(ACTION_LOCK);
+                    mBinding.askPrice1Direction.setText(ACTION_ADD_SELL);
                     mBinding.closePrice.setText(mBinding.bidPrice11.getText().toString());
                 } else if (volume_long != 0 && volume_short != 0) {
                     if (sDataManager.POSITION_DIRECTION.isEmpty()) {
-                        this.mDirection = "双向";
+                        this.mDirection = DIRECTION_BOTH_ZN;
                         mBinding.volume.setText("1");
                         mIsClosePriceShow = false;
-                        mBinding.bidPrice1Direction.setText(DIRECTION_BUY_BID);
-                        mBinding.askPrice1Direction.setText(DIRECTION_SELL_ASK);
-                        mBinding.closePrice.setText("锁仓状态");
+                        mBinding.bidPrice1Direction.setText(ACTION_OPEN_BUY);
+                        mBinding.askPrice1Direction.setText(ACTION_OPEN_SELL);
+                        mBinding.closePrice.setText(STATUS_LOCK);
                     } else {
                         switch (sDataManager.POSITION_DIRECTION) {
-                            case "多":
-                                this.mDirection = "多";
+                            case DIRECTION_BUY_ZN:
+                                this.mDirection = DIRECTION_BUY_ZN;
                                 mBinding.volume.setText(volume_available_long);
                                 mIsClosePriceShow = true;
-                                mBinding.bidPrice1Direction.setText("加多");
-                                mBinding.askPrice1Direction.setText("锁仓");
+                                mBinding.bidPrice1Direction.setText(ACTION_ADD_BUY);
+                                mBinding.askPrice1Direction.setText(ACTION_LOCK);
                                 mBinding.closePrice.setText(mBinding.askPrice11.getText().toString());
                                 break;
-                            case "空":
-                                this.mDirection = "空";
+                            case DIRECTION_SELL_ZN:
+                                this.mDirection = DIRECTION_SELL_ZN;
                                 mBinding.volume.setText(volume_available_short);
                                 mIsClosePriceShow = true;
-                                mBinding.bidPrice1Direction.setText("锁仓");
-                                mBinding.askPrice1Direction.setText("加空");
+                                mBinding.bidPrice1Direction.setText(ACTION_LOCK);
+                                mBinding.askPrice1Direction.setText(ACTION_ADD_SELL);
                                 mBinding.closePrice.setText(mBinding.bidPrice11.getText().toString());
                                 break;
                             default:
@@ -358,12 +387,12 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                     this.mDirection = "";
                     mBinding.volume.setText("1");
                     mIsClosePriceShow = false;
-                    mBinding.bidPrice1Direction.setText(DIRECTION_BUY_BID);
-                    mBinding.askPrice1Direction.setText(DIRECTION_SELL_ASK);
-                    mBinding.closePrice.setText(DIRECTION_FIRST_CLOSE);
+                    mBinding.bidPrice1Direction.setText(ACTION_OPEN_BUY);
+                    mBinding.askPrice1Direction.setText(ACTION_OPEN_SELL);
+                    mBinding.closePrice.setText(STATUS_FIRST_OPEN_FIRST_CLOSE);
                 }
             }
-            mBinding.closeDirection.setText("平仓");
+            mBinding.closeDirection.setText(OFFSET_CLOSE_ZN);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -383,41 +412,41 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             if (positionEntity == null) {
                 this.mDirection = "";
                 mIsClosePriceShow = false;
-                mBinding.bidPrice1Direction.setText(DIRECTION_BUY_BID);
-                mBinding.askPrice1Direction.setText(DIRECTION_SELL_ASK);
-                mBinding.closePrice.setText(DIRECTION_FIRST_CLOSE);
+                mBinding.bidPrice1Direction.setText(ACTION_OPEN_BUY);
+                mBinding.askPrice1Direction.setText(ACTION_OPEN_SELL);
+                mBinding.closePrice.setText(STATUS_FIRST_OPEN_FIRST_CLOSE);
             } else {
                 String volume_available_long = MathUtils.add(positionEntity.getVolume_long_his(), positionEntity.getVolume_long_today());
                 int volume_long = Integer.parseInt(MathUtils.add(volume_available_long, positionEntity.getVolume_long_frozen_his()));
                 String volume_available_short = MathUtils.add(positionEntity.getVolume_short_his(), positionEntity.getVolume_short_today());
                 int volume_short = Integer.parseInt(MathUtils.add(volume_available_short, positionEntity.getVolume_short_frozen_his()));
                 if (volume_long != 0 && volume_short == 0) {
-                    this.mDirection = "多";
+                    this.mDirection = DIRECTION_BUY_ZN;
                     mIsClosePriceShow = true;
-                    mBinding.bidPrice1Direction.setText("加多");
-                    mBinding.askPrice1Direction.setText("锁仓");
+                    mBinding.bidPrice1Direction.setText(ACTION_ADD_BUY);
+                    mBinding.askPrice1Direction.setText(ACTION_LOCK);
                     mBinding.closePrice.setText(mBinding.askPrice11.getText().toString());
                 } else if (volume_long == 0 && volume_short != 0) {
-                    this.mDirection = "空";
+                    this.mDirection = DIRECTION_SELL_ZN;
                     mIsClosePriceShow = true;
-                    mBinding.bidPrice1Direction.setText("锁仓");
-                    mBinding.askPrice1Direction.setText("加空");
+                    mBinding.bidPrice1Direction.setText(ACTION_LOCK);
+                    mBinding.askPrice1Direction.setText(ACTION_ADD_SELL);
                     mBinding.closePrice.setText(mBinding.bidPrice11.getText().toString());
                 } else if (volume_long != 0 && volume_short != 0) {
-                    this.mDirection = "双向";
+                    this.mDirection = DIRECTION_BOTH_ZN;
                     mIsClosePriceShow = false;
-                    mBinding.bidPrice1Direction.setText(DIRECTION_BUY_BID);
-                    mBinding.askPrice1Direction.setText(DIRECTION_SELL_ASK);
-                    mBinding.closePrice.setText("锁仓状态");
+                    mBinding.bidPrice1Direction.setText(ACTION_OPEN_BUY);
+                    mBinding.askPrice1Direction.setText(ACTION_OPEN_SELL);
+                    mBinding.closePrice.setText(STATUS_LOCK);
                 } else {
                     this.mDirection = "";
                     mIsClosePriceShow = false;
-                    mBinding.bidPrice1Direction.setText(DIRECTION_BUY_BID);
-                    mBinding.askPrice1Direction.setText(DIRECTION_SELL_ASK);
-                    mBinding.closePrice.setText(DIRECTION_FIRST_CLOSE);
+                    mBinding.bidPrice1Direction.setText(ACTION_OPEN_BUY);
+                    mBinding.askPrice1Direction.setText(ACTION_OPEN_SELL);
+                    mBinding.closePrice.setText(STATUS_FIRST_OPEN_FIRST_CLOSE);
                 }
             }
-            mBinding.closeDirection.setText("平仓");
+            mBinding.closeDirection.setText(OFFSET_CLOSE_ZN);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -446,9 +475,9 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 mBinding.bidPrice11.setText(bid_price1);
                 mBinding.askPrice11.setText(ask_price1);
                 if (mIsClosePriceShow) {
-                    if ("多".equals(mDirection))
+                    if (DIRECTION_BUY_ZN.equals(mDirection))
                         mBinding.closePrice.setText(ask_price1);
-                    else if ("空".equals(mDirection))
+                    else if (DIRECTION_SELL_ZN.equals(mDirection))
                         mBinding.closePrice.setText(bid_price1);
                 }
                 break;
@@ -460,9 +489,9 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 mBinding.bidPrice11.setText(ask_price1_1);
                 mBinding.askPrice11.setText(bid_price1_1);
                 if (mIsClosePriceShow) {
-                    if ("多".equals(mDirection))
+                    if (DIRECTION_BUY_ZN.equals(mDirection))
                         mBinding.closePrice.setText(bid_price1_1);
-                    else if ("空".equals(mDirection))
+                    else if (DIRECTION_SELL_ZN.equals(mDirection))
                         mBinding.closePrice.setText(ask_price1_1);
                 }
                 break;
@@ -474,9 +503,9 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 mBinding.bidPrice11.setText(upper_limit);
                 mBinding.askPrice11.setText(lower_limit);
                 if (mIsClosePriceShow) {
-                    if ("多".equals(mDirection))
+                    if (DIRECTION_BUY_ZN.equals(mDirection))
                         mBinding.closePrice.setText(lower_limit);
-                    else if ("空".equals(mDirection))
+                    else if (DIRECTION_SELL_ZN.equals(mDirection))
                         mBinding.closePrice.setText(upper_limit);
                 }
                 break;
@@ -512,9 +541,14 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case TD_MESSAGE:
-                        if (((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId() == R.id.rb_transaction_info) {
-                            refreshAccount();
-                            if (mIsRefreshPosition) refreshPosition();
+                        refreshAccount();
+                        if (mIsRefreshPosition) refreshPosition();
+                        //撤单平仓
+                        if (mIsReClose){
+                            if (detectCloseVolumeEnough()){
+                                defaultClosePosition(mBinding.closePosition);
+                                mIsReClose = false;
+                            }
                         }
                         break;
                     default:
@@ -529,8 +563,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case MD_MESSAGE:
-                        if (((FutureInfoActivity) getActivity()).getTabsInfo().getCheckedRadioButtonId() == R.id.rb_transaction_info)
-                            refreshPrice();
+                        refreshPrice();
                     default:
                         break;
                 }
@@ -583,7 +616,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 final int volumeN = Integer.parseInt(volume);
                 final double priceN = Double.parseDouble(price);
                 initDialog(mExchangeId, mInstrumentIdTransaction.split("\\.")[1],
-                        "买开", "BUY", "OPEN", volumeN, "LIMIT", priceN);
+                        ACTION_OPEN_BUY, DIRECTION_BUY, OFFSET_OPEN, volumeN, PRICE_TYPE_LIMIT, priceN);
             } catch (NumberFormatException ex) {
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "价格或手数输入不合法");
             }
@@ -625,7 +658,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 final int volumeN = Integer.parseInt(volume);
                 final double priceN = Double.parseDouble(price);
                 initDialog(mExchangeId, mInstrumentIdTransaction.split("\\.")[1],
-                        "卖开", "SELL", "OPEN", volumeN, "LIMIT", priceN);
+                        ACTION_OPEN_SELL, DIRECTION_SELL, OFFSET_OPEN, volumeN, PRICE_TYPE_LIMIT, priceN);
             } catch (NumberFormatException ex) {
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "价格或手数输入不合法");
             }
@@ -648,20 +681,20 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.bid_position:
-                        mDirection = "多";
+                        mDirection = DIRECTION_BUY_ZN;
                         mIsClosePriceShow = true;
-                        mBinding.closeDirection.setText("平多");
-                        mBinding.bidPrice1Direction.setText("加多");
-                        mBinding.askPrice1Direction.setText("锁仓");
+                        mBinding.closeDirection.setText(ACTION_CLOSE_BUY);
+                        mBinding.bidPrice1Direction.setText(ACTION_ADD_BUY);
+                        mBinding.askPrice1Direction.setText(ACTION_LOCK);
                         refreshCloseBidPrice();
                         defaultClosePosition(v);
                         break;
                     case R.id.ask_position:
-                        mDirection = "空";
+                        mDirection = DIRECTION_SELL_ZN;
                         mIsClosePriceShow = true;
-                        mBinding.closeDirection.setText("平空");
-                        mBinding.bidPrice1Direction.setText("锁仓");
-                        mBinding.askPrice1Direction.setText("加空");
+                        mBinding.closeDirection.setText(ACTION_CLOSE_SELL);
+                        mBinding.bidPrice1Direction.setText(ACTION_LOCK);
+                        mBinding.askPrice1Direction.setText(ACTION_ADD_SELL);
                         refreshCloseAskPrice();
                         defaultClosePosition(v);
                         break;
@@ -689,16 +722,16 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 public boolean onMenuItemClick(MenuItem item) {
                     switch (item.getItemId()) {
                         case R.id.bid_position:
-                            mDirection = "多";
+                            mDirection = DIRECTION_BUY_ZN;
                             mIsClosePriceShow = true;
-                            mBinding.closeDirection.setText("平多");
+                            mBinding.closeDirection.setText(ACTION_CLOSE_BUY);
                             refreshCloseBidPrice();
                             defaultClosePosition(v);
                             break;
                         case R.id.ask_position:
-                            mDirection = "空";
+                            mDirection = DIRECTION_SELL_ZN;
                             mIsClosePriceShow = true;
-                            mBinding.closeDirection.setText("平空");
+                            mBinding.closeDirection.setText(ACTION_CLOSE_SELL);
                             refreshCloseAskPrice();
                             defaultClosePosition(v);
                             break;
@@ -785,7 +818,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         if (mBinding.closePrice.getText() != null && mBinding.volume.getText() != null && !"".equals(mDirection)) {
             String price = mBinding.closePrice.getText().toString();
             String volume = mBinding.volume.getText().toString();
-            final String direction = "多".equals(mDirection) ? "SELL" : "BUY";
+            final String direction = DIRECTION_BUY_ZN.equals(mDirection) ? DIRECTION_SELL : DIRECTION_BUY;
             if (price.length() == 0) {
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "价格不能为空");
                 return;
@@ -811,18 +844,31 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 final double priceN = Double.parseDouble(price);
                 final String instrumentId = mInstrumentIdTransaction.split("\\.")[1];
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentIdTransaction);
-                if (searchEntity != null && ("上海国际能源交易中心".equals(searchEntity.getExchangeName())
-                        || "上海期货交易所".equals(searchEntity.getExchangeName()))) {
+                if (searchEntity != null && (INE_ZN.equals(searchEntity.getExchangeName())
+                        || SHFE_ZN.equals(searchEntity.getExchangeName()))) {
                     UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
                     if (userEntity == null) return;
                     PositionEntity positionEntity = userEntity.getPositions().get(mInstrumentIdTransaction);
                     if (positionEntity == null) return;
+
+                    int available_long = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_long(),
+                            MathUtils.add(positionEntity.getVolume_long_frozen_his(), positionEntity.getVolume_long_frozen_today())));
+                    int available_short = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_short(),
+                            MathUtils.add(positionEntity.getVolume_short_frozen_his(), positionEntity.getVolume_short_frozen_today())));
                     int volume_today = 0;
                     int volume_history = 0;
-                    if ("SELL".equals(direction)) {
+                    if (DIRECTION_SELL.equals(direction)) {
+                        if (volumeN > available_long){
+                            initDialog(userEntity, mExchangeId, instrumentId);
+                            return;
+                        }
                         volume_today = Integer.parseInt(positionEntity.getVolume_long_today());
                         volume_history = Integer.parseInt(positionEntity.getVolume_long_his());
-                    } else if ("BUY".equals(direction)) {
+                    } else if (DIRECTION_BUY.equals(direction)) {
+                        if (volumeN > available_short){
+                            initDialog(userEntity, mExchangeId, instrumentId);
+                            return;
+                        }
                         volume_today = Integer.parseInt(positionEntity.getVolume_short_today());
                         volume_history = Integer.parseInt(positionEntity.getVolume_short_his());
                     }
@@ -836,12 +882,12 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                                 public boolean onMenuItemClick(MenuItem item) {
                                     switch (item.getItemId()) {
                                         case R.id.close_today:
-                                            initDialog(mExchangeId, instrumentId, "平今",
-                                                    direction, "CLOSETODAY", volumeN, "LIMIT", priceN);
+                                            initDialog(mExchangeId, instrumentId, OFFSET_CLOSE_TODAY_ZN,
+                                                    direction, OFFSET_CLOSE_TODAY, volumeN, PRICE_TYPE_LIMIT, priceN);
                                             break;
                                         case R.id.close_history:
-                                            initDialog(mExchangeId, instrumentId, "平昨",
-                                                    direction, "CLOSE", volumeN, "LIMIT", priceN);
+                                            initDialog(mExchangeId, instrumentId, OFFSET_CLOSE_HISTORY_ZN,
+                                                    direction, OFFSET_CLOSE, volumeN, PRICE_TYPE_LIMIT, priceN);
                                             break;
                                         default:
                                             break;
@@ -852,21 +898,21 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                             popup.show();
                         } else if (volumeN > volume_today || volumeN > volume_history) {
                             int volume_sub = volumeN - volume_today;
-                            initDialog(mExchangeId, instrumentId, "平今", "平昨",
-                                    direction, "CLOSETODAY", "CLOSE", volume_today, volume_sub,
-                                    "LIMIT", priceN);
+                            initDialog(mExchangeId, instrumentId, OFFSET_CLOSE_TODAY_ZN, OFFSET_CLOSE_HISTORY_ZN,
+                                    direction, OFFSET_CLOSE_TODAY, OFFSET_CLOSE, volume_today, volume_sub,
+                                    PRICE_TYPE_LIMIT, priceN);
                         }
                     } else if (volume_today == 0 && volume_history > 0) {
-                        initDialog(mExchangeId, instrumentId, "平昨", direction,
-                                "CLOSE", volumeN, "LIMIT", priceN);
+                        initDialog(mExchangeId, instrumentId, OFFSET_CLOSE_HISTORY_ZN, direction,
+                                OFFSET_CLOSE, volumeN, PRICE_TYPE_LIMIT, priceN);
                     } else if (volume_today > 0 && volume_history == 0) {
-                        initDialog(mExchangeId, instrumentId, "平今", direction,
-                                "CLOSETODAY", volumeN, "LIMIT", priceN);
+                        initDialog(mExchangeId, instrumentId, OFFSET_CLOSE_TODAY_ZN, direction,
+                                OFFSET_CLOSE_TODAY, volumeN, PRICE_TYPE_LIMIT, priceN);
                     }
 
                 } else
-                    initDialog(mExchangeId, instrumentId, "平仓", direction,
-                            "CLOSE", volumeN, "LIMIT", priceN);
+                    initDialog(mExchangeId, instrumentId, OFFSET_CLOSE_ZN, direction,
+                            OFFSET_CLOSE, volumeN, PRICE_TYPE_LIMIT, priceN);
             } catch (NumberFormatException ex) {
                 ToastNotificationUtils.showToast(BaseApplication.getContext(), "价格或手数输入不合法");
             }
@@ -1030,6 +1076,93 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     }
 
     /**
+     * date: 2019/4/18
+     * author: chenli
+     * description: 仓位手数不足：撤单下单
+     */
+    private void initDialog(UserEntity userEntity, final String exchange_id, final String instrument_id) {
+        try {
+            mIsReClose = true;
+            final List<String> orderIds = new ArrayList<>();
+            for (OrderEntity orderEntity :
+                    userEntity.getOrders().values()) {
+                String order_id = orderEntity.getOrder_id();
+                String exId = orderEntity.getExchange_id();
+                String insId = orderEntity.getInstrument_id();
+                String offset = orderEntity.getOffset();
+                String status = orderEntity.getStatus();
+                if (STATUS_ALIVE.equals(status) && exchange_id.equals(exId) && instrument_id.equals(insId)
+                        && (OFFSET_CLOSE.equals(offset) || OFFSET_CLOSE_HISTORY.equals(offset) || OFFSET_CLOSE_TODAY.equals(offset))){
+                    orderIds.add(order_id);
+                }
+            }
+            final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
+            View view = View.inflate(getActivity(), R.layout.view_dialog_cancel_insert_order, null);
+            Window dialogWindow = dialog.getWindow();
+            if (dialogWindow != null) {
+                dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+                WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+                dialogWindow.setGravity(Gravity.CENTER);
+                lp.width = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_width);
+                lp.height = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_height);
+                dialogWindow.setAttributes(lp);
+            }
+            dialog.setContentView(view);
+            dialog.setCancelable(false);
+            TextView ok = view.findViewById(R.id.order_ok);
+            TextView cancel = view.findViewById(R.id.order_cancel);
+            ok.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    for (String order_id: orderIds) {
+                        BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
+                    }
+                }
+            });
+            cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                }
+            });
+            if (!dialog.isShowing())dialog.show();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * date: 2019/4/18
+     * author: chenli
+     * description: 检测平仓手数是否满足
+     */
+    private boolean detectCloseVolumeEnough(){
+        String volume = mBinding.volume.getText().toString();
+        final String direction = DIRECTION_BUY_ZN.equals(mDirection) ? DIRECTION_SELL : DIRECTION_BUY;
+        final int volumeN = Integer.parseInt(volume);
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        if (userEntity == null) return false;
+        PositionEntity positionEntity = userEntity.getPositions().get(mInstrumentIdTransaction);
+        if (positionEntity == null) return false;
+
+        int available_long = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_long(),
+                MathUtils.add(positionEntity.getVolume_long_frozen_his(), positionEntity.getVolume_long_frozen_today())));
+        int available_short = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_short(),
+                MathUtils.add(positionEntity.getVolume_short_frozen_his(), positionEntity.getVolume_short_frozen_today())));
+
+        if (DIRECTION_SELL.equals(direction)) {
+            if (volumeN <= available_long){
+                return true;
+            }
+        } else if (DIRECTION_BUY.equals(direction)) {
+            if (volumeN <= available_short){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * date: 2019/4/9
      * author: chenli
      * description: 下单确认密码
@@ -1046,10 +1179,10 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                     break;
                 case R.id.close_position:
                     switch (mBinding.closePrice.getText().toString()) {
-                        case "锁仓状态":
+                        case STATUS_LOCK:
                             lockClosePosition(view);
                             break;
-                        case "先开先平":
+                        case STATUS_FIRST_OPEN_FIRST_CLOSE:
                             firstClosePosition(view);
                             break;
                         default:
@@ -1091,10 +1224,10 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                                 break;
                             case R.id.close_position:
                                 switch (mBinding.closePrice.getText().toString()) {
-                                    case "锁仓状态":
+                                    case STATUS_LOCK:
                                         lockClosePosition(view);
                                         break;
-                                    case "先开先平":
+                                    case STATUS_FIRST_OPEN_FIRST_CLOSE:
                                         firstClosePosition(view);
                                         break;
                                     default:

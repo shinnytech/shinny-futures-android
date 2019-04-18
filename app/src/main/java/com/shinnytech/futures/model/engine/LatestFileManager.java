@@ -40,7 +40,17 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.shinnytech.futures.constants.CommonConstants.CFFEX;
+import static com.shinnytech.futures.constants.CommonConstants.CFFEX_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.CZCE;
+import static com.shinnytech.futures.constants.CommonConstants.CZCE_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.DCE;
+import static com.shinnytech.futures.constants.CommonConstants.DCE_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.INE;
+import static com.shinnytech.futures.constants.CommonConstants.INE_ZN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_INS_LIST;
+import static com.shinnytech.futures.constants.CommonConstants.SHFE;
+import static com.shinnytech.futures.constants.CommonConstants.SHFE_ZN;
 
 /**
  * date: 3/30/17
@@ -261,35 +271,35 @@ public class LatestFileManager {
 
                 if ("FUTURE".equals(classN)) {
                     switch (exchange_id) {
-                        case "SHFE"://上期所
+                        case SHFE://上期所
                             if (!expired) sShangqiInsList.put(instrument_id, quoteEntity);
                             if (!sShangqiInsListNameNav.containsValue(product_short_name))
                                 sShangqiInsListNameNav.put(instrument_id, product_short_name);
-                            searchEntity.setExchangeName("上海期货交易所");
+                            searchEntity.setExchangeName(SHFE_ZN);
                             break;
-                        case "CZCE"://郑商所
+                        case CZCE://郑商所
                             if (!expired) sZhengzhouInsList.put(instrument_id, quoteEntity);
                             if (!sZhengzhouInsListNameNav.containsValue(product_short_name))
                                 sZhengzhouInsListNameNav.put(instrument_id, product_short_name);
-                            searchEntity.setExchangeName("郑州商品交易所");
+                            searchEntity.setExchangeName(CZCE_ZN);
                             break;
-                        case "DCE"://大商所
+                        case DCE://大商所
                             if (!expired) sDalianInsList.put(instrument_id, quoteEntity);
                             if (!sDalianInsListNameNav.containsValue(product_short_name))
                                 sDalianInsListNameNav.put(instrument_id, product_short_name);
-                            searchEntity.setExchangeName("大连商品交易所");
+                            searchEntity.setExchangeName(DCE_ZN);
                             break;
-                        case "CFFEX"://中金所
+                        case CFFEX://中金所
                             if (!expired) sZhongjinInsList.put(instrument_id, quoteEntity);
                             if (!sZhongjinInsListNameNav.containsValue(product_short_name))
                                 sZhongjinInsListNameNav.put(instrument_id, product_short_name);
-                            searchEntity.setExchangeName("中国金融期货交易所");
+                            searchEntity.setExchangeName(CFFEX_ZN);
                             break;
-                        case "INE"://上期能源
+                        case INE://上期能源
                             if (!expired) sNengyuanInsList.put(instrument_id, quoteEntity);
                             if (!sNengyuanInsListNameNav.containsValue(product_short_name))
                                 sNengyuanInsListNameNav.put(instrument_id, product_short_name);
-                            searchEntity.setExchangeName("上海国际能源交易中心");
+                            searchEntity.setExchangeName(INE_ZN);
                             break;
                         default:
                             break;
@@ -306,17 +316,17 @@ public class LatestFileManager {
                     String py_leg = subObjectFuture.optString("py");
                     searchEntity.setPy(py_leg);
                     switch (exchange_id) {
-                        case "CZCE":
+                        case CZCE:
                             if (!expired) sZhengzhouzuheInsList.put(instrument_id, quoteEntity);
                             if (!sZhengzhouzuheInsListNameNav.containsValue(product_short_name_leg))
                                 sZhengzhouzuheInsListNameNav.put(instrument_id, product_short_name_leg);
-                            searchEntity.setExchangeName("郑州商品交易所");
+                            searchEntity.setExchangeName(CZCE_ZN);
                             break;
-                        case "DCE":
+                        case DCE:
                             if (!expired) sDalianzuheInsList.put(instrument_id, quoteEntity);
                             if (!sDalianzuheInsListNameNav.containsValue(product_short_name_leg))
                                 sDalianzuheInsListNameNav.put(instrument_id, product_short_name_leg);
-                            searchEntity.setExchangeName("大连商品交易所");
+                            searchEntity.setExchangeName(DCE_ZN);
                             break;
                         default:
                             break;

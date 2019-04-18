@@ -20,6 +20,19 @@ import com.shinnytech.futures.utils.MathUtils;
 import java.util.Date;
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_FORCE_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_HISTORY_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_TODAY_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_OPEN_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_SELL;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_FORCE;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_HISTORY;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_TODAY;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_OPEN;
+
 /**
  * date: 7/9/17
  * author: chenli
@@ -104,30 +117,30 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemViewHold
                 mBinding.orderName.setText(insName == null ? orderEntity.getInstrument_id() : insName.getInstrumentName());
                 mBinding.orderStatus.setText(orderEntity.getLast_msg());
                 switch (orderEntity.getOffset()) {
-                    case "OPEN":
-                        mBinding.orderOffset.setText("开仓");
+                    case OFFSET_OPEN:
+                        mBinding.orderOffset.setText(OFFSET_OPEN_ZN);
                         break;
-                    case "CLOSETODAY":
-                        mBinding.orderOffset.setText("平今");
+                    case OFFSET_CLOSE_TODAY:
+                        mBinding.orderOffset.setText(OFFSET_CLOSE_TODAY_ZN);
                         break;
-                    case "CLOSEHISTORY":
-                        mBinding.orderOffset.setText("平昨");
+                    case OFFSET_CLOSE_HISTORY:
+                        mBinding.orderOffset.setText(OFFSET_CLOSE_HISTORY_ZN);
                         break;
-                    case "CLOSE":
-                        mBinding.orderOffset.setText("平仓");
+                    case OFFSET_CLOSE:
+                        mBinding.orderOffset.setText(OFFSET_CLOSE_ZN);
                         break;
-                    case "FORCECLOSE":
-                        mBinding.orderOffset.setText("强平");
+                    case OFFSET_CLOSE_FORCE:
+                        mBinding.orderOffset.setText(OFFSET_CLOSE_FORCE_ZN);
                         break;
                     default:
                         mBinding.orderOffset.setText("");
                         break;
                 }
                 switch (orderEntity.getDirection()) {
-                    case "BUY":
+                    case DIRECTION_BUY:
                         mBinding.orderOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
                         break;
-                    case "SELL":
+                    case DIRECTION_SELL:
                         mBinding.orderOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
                         break;
                     default:

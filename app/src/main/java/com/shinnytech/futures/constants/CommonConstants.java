@@ -9,7 +9,6 @@ public final class CommonConstants {
     public static final String MARKET_URL_3 = "ws://139.198.122.80/t/md/front/mobile";
     public static final String MARKET_URL_4 = "ws://139.198.123.206/t/md/front/mobile";
     public static final String FEED_BACK_URL = "https://ask.shinnytech.com/src/indexm.html";
-
     //广播信息类型
     public static final String MD_ONLINE = "MD_ONLINE";
     public static final String MD_OFFLINE = "MD_OFFLINE";
@@ -91,12 +90,6 @@ public final class CommonConstants {
     public static final String KUAI_QI_XIAO_Q = "快期小Q";
     //本地自选合约文件名
     public static final String OPTIONAL_INS_LIST = "optionalInsList";
-    //下单版价格类型
-    public static final String LATEST_PRICE = "最新价";
-    public static final String COUNTERPARTY_PRICE = "对手价";
-    public static final String MARKET_PRICE = "市价";
-    public static final String QUEUED_PRICE = "排队价";
-    public static final String USER_PRICE = "用户设置价";
     //默认配置
     public static final String CONFIG_KLINE_DURATION_DEFAULT = "klineDurationDefault";
     public static final String CONFIG_PARA_MA = "ma";
@@ -132,27 +125,55 @@ public final class CommonConstants {
     public static final String KLINE_DURATION_DAY = "分时";
 
     //下单页
+
+    public static final String ACTION_OPEN_BUY = "买多";
+    public static final String ACTION_ADD_BUY = "加多";
+    public static final String ACTION_OPEN_SELL = "卖空";
+    public static final String ACTION_ADD_SELL = "加空";
+    public static final String ACTION_CLOSE_BUY = "平多";
+    public static final String ACTION_CLOSE_SELL = "平空";
+    public static final String ACTION_LOCK = "锁仓";
+    public static final String STATUS_FIRST_OPEN_FIRST_CLOSE = "先开先平";
+    public static final String STATUS_LOCK = "锁仓状态";
+    public static final String STATUS_ALIVE = "ALIVE";
+    public static final String PRICE_TYPE_LIMIT = "LIMIT";
+
+    public static final String DIRECTION_BUY = "BUY";
+    public static final String DIRECTION_SELL = "SELL";
     public static final String DIRECTION_BUY_ZN = "多";
     public static final String DIRECTION_SELL_ZN = "空";
     public static final String DIRECTION_BOTH_ZN = "双向";
-    public static final String DIRECTION_BUY_BID = "买多";
-    public static final String DIRECTION_ADD_BID = "加多";
-    public static final String DIRECTION_SELL_ASK = "卖空";
-    public static final String DIRECTION_ADD_ASK = "加空";
-    public static final String DIRECTION_DEFAULT_CLOSE = "平仓";
-    public static final String DIRECTION_FIRST_CLOSE = "先开先平";
-    public static final String DIRECTION_LOCK_CLOSE = "锁仓状态";
-    public static final String DIRECTION_LOCK = "锁仓";
-    public static final String DIRECTION_BUY_OPEN = "买开";
-    public static final String DIRECTION_BUY = "BUY";
-    public static final String DIRECTION_SELL_OPEN = "卖开";
-    public static final String DIRECTION_SELL = "SELL";
-    public static final String DIRECTION_CLOSE_TODAY = "平今";
-    public static final String DIRECTION_CLOSE_YESTODAY = "平昨";
+
     public static final String OFFSET_OPEN = "OPEN";
     public static final String OFFSET_CLOSE = "CLOSE";
-    public static final String OFFSET_CLOSETODAY = "CLOSETODAY";
-    public static final String PRICE_TYPE_LIMIT = "LIMIT";
+    public static final String OFFSET_CLOSE_TODAY = "CLOSETODAY";
+    public static final String OFFSET_CLOSE_HISTORY = "CLOSEHISTORY";
+    public static final String OFFSET_CLOSE_FORCE = "FORCECLOSE";
+    public static final String OFFSET_OPEN_ZN = "开仓";
+    public static final String OFFSET_CLOSE_ZN = "平仓";
+    public static final String OFFSET_CLOSE_TODAY_ZN = "平今";
+    public static final String OFFSET_CLOSE_HISTORY_ZN = "平昨";
+    public static final String OFFSET_CLOSE_FORCE_ZN = "强平";
+
+
+    //下单版价格类型
+    public static final String LATEST_PRICE = "最新价";
+    public static final String COUNTERPARTY_PRICE = "对手价";
+    public static final String MARKET_PRICE = "市价";
+    public static final String QUEUED_PRICE = "排队价";
+    public static final String USER_PRICE = "用户设置价";
+
+    //交易所
+    public static final String SHFE = "SHFE";
+    public static final String SHFE_ZN = "上海期货交易所";
+    public static final String CZCE = "CZCE";
+    public static final String CZCE_ZN = "郑州商品交易所";
+    public static final String DCE = "DCE";
+    public static final String DCE_ZN = "大连商品交易所";
+    public static final String CFFEX = "CFFEX";
+    public static final String CFFEX_ZN = "中国金融期货交易所";
+    public static final String INE = "INE";
+    public static final String INE_ZN = "上海国际能源交易中心";
 
     //amp event type
     public static final String AMP_INIT = "amp_init";

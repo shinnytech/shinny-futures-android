@@ -19,6 +19,19 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import java.util.Date;
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_FORCE_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_HISTORY_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_TODAY_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_OPEN_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_SELL;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_FORCE;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_HISTORY;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_TODAY;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_OPEN;
+
 /**
  * date: 7/9/17
  * author: chenli
@@ -89,30 +102,30 @@ public class TradeAdapter extends RecyclerView.Adapter<TradeAdapter.ItemViewHold
                     SearchEntity insName = LatestFileManager.getSearchEntities().get(instrument_id);
                     mBinding.tvTradeName.setText(insName == null ? instrument_id : insName.getInstrumentName());
                     switch (tradeEntity.getOffset()) {
-                        case "OPEN":
-                            mBinding.tvTradeOffset.setText("开仓");
+                        case OFFSET_OPEN:
+                            mBinding.tvTradeOffset.setText(OFFSET_OPEN_ZN);
                             break;
-                        case "CLOSETODAY":
-                            mBinding.tvTradeOffset.setText("平今");
+                        case OFFSET_CLOSE_TODAY:
+                            mBinding.tvTradeOffset.setText(OFFSET_CLOSE_TODAY_ZN);
                             break;
-                        case "CLOSEHISTORY":
-                            mBinding.tvTradeOffset.setText("平昨");
+                        case OFFSET_CLOSE_HISTORY:
+                            mBinding.tvTradeOffset.setText(OFFSET_CLOSE_HISTORY_ZN);
                             break;
-                        case "CLOSE":
-                            mBinding.tvTradeOffset.setText("平仓");
+                        case OFFSET_CLOSE:
+                            mBinding.tvTradeOffset.setText(OFFSET_CLOSE_ZN);
                             break;
-                        case "FORCECLOSE":
-                            mBinding.tvTradeOffset.setText("强平");
+                        case OFFSET_CLOSE_FORCE:
+                            mBinding.tvTradeOffset.setText(OFFSET_CLOSE_FORCE_ZN);
                             break;
                         default:
                             mBinding.tvTradeOffset.setText("");
                             break;
                     }
                     switch (tradeEntity.getDirection()) {
-                        case "BUY":
+                        case DIRECTION_BUY:
                             mBinding.tvTradeOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
                             break;
-                        case "SELL":
+                        case DIRECTION_SELL:
                             mBinding.tvTradeOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
                             break;
                         default:
