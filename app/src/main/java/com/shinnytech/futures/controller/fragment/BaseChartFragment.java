@@ -239,19 +239,19 @@ public class BaseChartFragment extends LazyLoadFragment {
         mMiddleChartViewBase.setHighlightPerTapEnabled(false);
         mMiddleChartViewBase.setHighlightPerDragEnabled(false);
 
-//        mBottomChartViewBase.getDescription().setEnabled(false);
-//        mBottomChartViewBase.setDrawGridBackground(true);
-//        mBottomChartViewBase.setBackgroundColor(mColorHomeBg);
-//        mBottomChartViewBase.setGridBackgroundColor(mColorHomeBg);
-//        mBottomChartViewBase.setDrawValueAboveBar(false);
-//        mBottomChartViewBase.setNoDataText("数据申请中");
-//        mBottomChartViewBase.setAutoScaleMinMaxEnabled(true);
-//        mBottomChartViewBase.setDragEnabled(true);
-//        mBottomChartViewBase.setDrawBorders(false);
-//        mBottomChartViewBase.setViewPortOffsets(0, 0, 0, 1);
-//        mBottomChartViewBase.setDoubleTapToZoomEnabled(false);
-//        mBottomChartViewBase.setHighlightPerTapEnabled(false);
-//        mBottomChartViewBase.setHighlightPerDragEnabled(false);
+        mBottomChartViewBase.getDescription().setEnabled(false);
+        mBottomChartViewBase.setDrawGridBackground(true);
+        mBottomChartViewBase.setBackgroundColor(mColorHomeBg);
+        mBottomChartViewBase.setGridBackgroundColor(mColorHomeBg);
+        mBottomChartViewBase.setDrawValueAboveBar(false);
+        mBottomChartViewBase.setNoDataText("数据申请中");
+        mBottomChartViewBase.setAutoScaleMinMaxEnabled(true);
+        mBottomChartViewBase.setDragEnabled(true);
+        mBottomChartViewBase.setDrawBorders(false);
+        mBottomChartViewBase.setViewPortOffsets(0, 0, 0, 1);
+        mBottomChartViewBase.setDoubleTapToZoomEnabled(false);
+        mBottomChartViewBase.setHighlightPerTapEnabled(false);
+        mBottomChartViewBase.setHighlightPerDragEnabled(false);
 
         //切换周期时控制图表显示
         if (sDataManager.IS_SHOW_VP_CONTENT) {
