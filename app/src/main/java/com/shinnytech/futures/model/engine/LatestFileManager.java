@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMULATION;
 import static com.shinnytech.futures.constants.CommonConstants.CFFEX;
 import static com.shinnytech.futures.constants.CommonConstants.CFFEX_ZN;
 import static com.shinnytech.futures.constants.CommonConstants.CZCE;
@@ -765,15 +766,15 @@ public class LatestFileManager {
     public static List<String> getBrokerIdFromBuildConfig(String[] brokerIdOrigin) {
         List<String> brokerList = new ArrayList<>();
         if (brokerIdOrigin != null) {
-            if (CommonConstants.KUAI_QI_XIAO_Q.equals(BuildConfig.BROKER_ID)) {
-                brokerList.addAll(Arrays.asList(brokerIdOrigin));
-            } else {
-                for (int i = 0; i < brokerIdOrigin.length; i++) {
-                    if (brokerIdOrigin[i] != null && brokerIdOrigin[i].contains(BuildConfig.BROKER_ID)) {
-                        brokerList.add(brokerIdOrigin[i]);
-                    }
+            for (int i = 0; i < brokerIdOrigin.length; i++) {
+                if (CommonConstants.KUAI_QI_XIAO_Q.equals(BuildConfig.BROKER_ID)
+                        && !BROKER_ID_SIMULATION.equals(brokerIdOrigin[i])) {
+                    brokerList.add(brokerIdOrigin[i]);
+                }else if (brokerIdOrigin[i] != null && brokerIdOrigin[i].contains(BuildConfig.BROKER_ID)) {
+                    brokerList.add(brokerIdOrigin[i]);
                 }
             }
+
         } else if (BaseApplication.getWebSocketService() != null)
             BaseApplication.getWebSocketService().reConnectTD();
 

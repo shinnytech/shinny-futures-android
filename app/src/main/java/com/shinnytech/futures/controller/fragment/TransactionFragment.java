@@ -1,5 +1,6 @@
 package com.shinnytech.futures.controller.fragment;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -59,6 +60,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.BACK_TO_ACCOUNT_DETAIL;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
 import static com.shinnytech.futures.constants.CommonConstants.COUNTERPARTY_PRICE;
 import static com.shinnytech.futures.constants.CommonConstants.ACTION_ADD_SELL;
@@ -69,6 +71,7 @@ import static com.shinnytech.futures.constants.CommonConstants.ACTION_OPEN_BUY;
 import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY_ZN;
 import static com.shinnytech.futures.constants.CommonConstants.ACTION_CLOSE_SELL;
 import static com.shinnytech.futures.constants.CommonConstants.ACTION_CLOSE_BUY;
+import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_HISTORY;
 import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_TODAY_ZN;
 import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_HISTORY_ZN;
@@ -282,6 +285,16 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             }
         });
 
+        mBinding.transactionFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.putExtra(BACK_TO_ACCOUNT_DETAIL, true);
+                intent.putExtra(INS_BETWEEN_ACTIVITY, mInstrumentId);
+                getActivity().setResult(Activity.RESULT_OK, intent);
+                getActivity().finish();
+            }
+        });
     }
 
     @Override
@@ -333,20 +346,18 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 mBinding.askPrice1Direction.setText(ACTION_OPEN_SELL);
                 mBinding.closePrice.setText(STATUS_FIRST_OPEN_FIRST_CLOSE);
             } else {
-                String volume_available_long = MathUtils.add(positionEntity.getVolume_long_his(), positionEntity.getVolume_long_today());
-                int volume_long = Integer.parseInt(MathUtils.add(volume_available_long, positionEntity.getVolume_long_frozen_his()));
-                String volume_available_short = MathUtils.add(positionEntity.getVolume_short_his(), positionEntity.getVolume_short_today());
-                int volume_short = Integer.parseInt(MathUtils.add(volume_available_short, positionEntity.getVolume_short_frozen_his()));
+                int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+                int volume_short = Integer.parseInt(positionEntity.getVolume_short());
                 if (volume_long != 0 && volume_short == 0) {
                     this.mDirection = DIRECTION_BUY_ZN;
-                    mBinding.volume.setText(volume_available_long);
+                    mBinding.volume.setText(volume_long+"");
                     mIsClosePriceShow = true;
                     mBinding.bidPrice1Direction.setText(ACTION_ADD_BUY);
                     mBinding.askPrice1Direction.setText(ACTION_LOCK);
                     mBinding.closePrice.setText(mBinding.askPrice11.getText().toString());
                 } else if (volume_long == 0 && volume_short != 0) {
                     this.mDirection = DIRECTION_SELL_ZN;
-                    mBinding.volume.setText(volume_available_short);
+                    mBinding.volume.setText(volume_short+"");
                     mIsClosePriceShow = true;
                     mBinding.bidPrice1Direction.setText(ACTION_LOCK);
                     mBinding.askPrice1Direction.setText(ACTION_ADD_SELL);
@@ -363,7 +374,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         switch (sDataManager.POSITION_DIRECTION) {
                             case DIRECTION_BUY_ZN:
                                 this.mDirection = DIRECTION_BUY_ZN;
-                                mBinding.volume.setText(volume_available_long);
+                                mBinding.volume.setText(volume_long+"");
                                 mIsClosePriceShow = true;
                                 mBinding.bidPrice1Direction.setText(ACTION_ADD_BUY);
                                 mBinding.askPrice1Direction.setText(ACTION_LOCK);
@@ -371,7 +382,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                                 break;
                             case DIRECTION_SELL_ZN:
                                 this.mDirection = DIRECTION_SELL_ZN;
-                                mBinding.volume.setText(volume_available_short);
+                                mBinding.volume.setText(volume_short+"");
                                 mIsClosePriceShow = true;
                                 mBinding.bidPrice1Direction.setText(ACTION_LOCK);
                                 mBinding.askPrice1Direction.setText(ACTION_ADD_SELL);
@@ -416,10 +427,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 mBinding.askPrice1Direction.setText(ACTION_OPEN_SELL);
                 mBinding.closePrice.setText(STATUS_FIRST_OPEN_FIRST_CLOSE);
             } else {
-                String volume_available_long = MathUtils.add(positionEntity.getVolume_long_his(), positionEntity.getVolume_long_today());
-                int volume_long = Integer.parseInt(MathUtils.add(volume_available_long, positionEntity.getVolume_long_frozen_his()));
-                String volume_available_short = MathUtils.add(positionEntity.getVolume_short_his(), positionEntity.getVolume_short_today());
-                int volume_short = Integer.parseInt(MathUtils.add(volume_available_short, positionEntity.getVolume_short_frozen_his()));
+                int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+                int volume_short = Integer.parseInt(positionEntity.getVolume_short());
                 if (volume_long != 0 && volume_short == 0) {
                     this.mDirection = DIRECTION_BUY_ZN;
                     mIsClosePriceShow = true;
@@ -544,11 +553,9 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         refreshAccount();
                         if (mIsRefreshPosition) refreshPosition();
                         //撤单平仓
-                        if (mIsReClose){
-                            if (detectCloseVolumeEnough()){
-                                defaultClosePosition(mBinding.closePosition);
-                                mIsReClose = false;
-                            }
+                        if (mIsReClose && detectCloseVolumeEnough()){
+                            mIsReClose = false;
+                            defaultClosePosition(mBinding.closePosition);
                         }
                         break;
                     default:
@@ -843,32 +850,35 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 final int volumeN = Integer.parseInt(volume);
                 final double priceN = Double.parseDouble(price);
                 final String instrumentId = mInstrumentIdTransaction.split("\\.")[1];
+                UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+                if (userEntity == null) return;
+                PositionEntity positionEntity = userEntity.getPositions().get(mInstrumentIdTransaction);
+                if (positionEntity == null) return;
+                int available_long = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_long(), positionEntity.getVolume_long_frozen()));
+                int available_short = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_short(), positionEntity.getVolume_short_frozen()));
+                if (DIRECTION_SELL.equals(direction)) {
+                    if (volumeN > available_long){
+                        initDialog(userEntity, mExchangeId, instrumentId);
+                        return;
+                    }
+                } else if (DIRECTION_BUY.equals(direction)) {
+                    if (volumeN > available_short){
+                        initDialog(userEntity, mExchangeId, instrumentId);
+                        return;
+                    }
+                }
+
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentIdTransaction);
                 if (searchEntity != null && (INE_ZN.equals(searchEntity.getExchangeName())
                         || SHFE_ZN.equals(searchEntity.getExchangeName()))) {
-                    UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
-                    if (userEntity == null) return;
-                    PositionEntity positionEntity = userEntity.getPositions().get(mInstrumentIdTransaction);
-                    if (positionEntity == null) return;
 
-                    int available_long = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_long(),
-                            MathUtils.add(positionEntity.getVolume_long_frozen_his(), positionEntity.getVolume_long_frozen_today())));
-                    int available_short = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_short(),
-                            MathUtils.add(positionEntity.getVolume_short_frozen_his(), positionEntity.getVolume_short_frozen_today())));
                     int volume_today = 0;
                     int volume_history = 0;
+
                     if (DIRECTION_SELL.equals(direction)) {
-                        if (volumeN > available_long){
-                            initDialog(userEntity, mExchangeId, instrumentId);
-                            return;
-                        }
                         volume_today = Integer.parseInt(positionEntity.getVolume_long_today());
                         volume_history = Integer.parseInt(positionEntity.getVolume_long_his());
                     } else if (DIRECTION_BUY.equals(direction)) {
-                        if (volumeN > available_short){
-                            initDialog(userEntity, mExchangeId, instrumentId);
-                            return;
-                        }
                         volume_today = Integer.parseInt(positionEntity.getVolume_short_today());
                         volume_history = Integer.parseInt(positionEntity.getVolume_short_his());
                     }
@@ -933,6 +943,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             mInstrumentIdTransaction = searchEntity.getUnderlying_symbol();
         else mInstrumentIdTransaction = mInstrumentId;
         mExchangeId = mInstrumentIdTransaction.split("\\.")[0];
+        //若如果不是从持仓点击而来，则刷新页面
         if (sDataManager.POSITION_DIRECTION.isEmpty()) update();
     }
 
@@ -1117,6 +1128,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                     for (String order_id: orderIds) {
                         BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
                     }
+                    dialog.dismiss();
                 }
             });
             cancel.setOnClickListener(new View.OnClickListener() {
@@ -1145,19 +1157,21 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         PositionEntity positionEntity = userEntity.getPositions().get(mInstrumentIdTransaction);
         if (positionEntity == null) return false;
 
-        int available_long = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_long(),
-                MathUtils.add(positionEntity.getVolume_long_frozen_his(), positionEntity.getVolume_long_frozen_today())));
-        int available_short = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_short(),
-                MathUtils.add(positionEntity.getVolume_short_frozen_his(), positionEntity.getVolume_short_frozen_today())));
+        try {
+            int available_long = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_long(), positionEntity.getVolume_long_frozen()));
+            int available_short = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_short(), positionEntity.getVolume_short_frozen()));
 
-        if (DIRECTION_SELL.equals(direction)) {
-            if (volumeN <= available_long){
-                return true;
+            if (DIRECTION_SELL.equals(direction)) {
+                if (volumeN <= available_long){
+                    return true;
+                }
+            } else if (DIRECTION_BUY.equals(direction)) {
+                if (volumeN <= available_short){
+                    return true;
+                }
             }
-        } else if (DIRECTION_BUY.equals(direction)) {
-            if (volumeN <= available_short){
-                return true;
-            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
         return false;
     }

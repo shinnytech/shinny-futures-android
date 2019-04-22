@@ -93,6 +93,12 @@ public class DataManager {
     public String QUOTES = "";
     public String CHARTS = "";
 
+    /**
+     * date: 2019/4/19
+     * description: 用户最后一次切换的交易所
+     */
+    public String EXCHANGE_ID = "";
+
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
     /**
      * date: 7/9/17

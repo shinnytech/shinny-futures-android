@@ -15,6 +15,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.controller.activity.BankTransferActivity;
+import com.shinnytech.futures.controller.activity.FutureInfoActivity;
+import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentAccountBinding;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
@@ -25,7 +28,12 @@ import com.shinnytech.futures.utils.LogUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.BANK_IN;
+import static com.shinnytech.futures.constants.CommonConstants.BANK_OUT;
+import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_DIRECTION;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 public class AccountFragment extends LazyLoadFragment {
@@ -34,6 +42,7 @@ public class AccountFragment extends LazyLoadFragment {
     private BroadcastReceiver mReceiverAccount;
     private FragmentAccountBinding mBinding;
     private ViewPagerFragmentAdapter mViewPagerFragmentAdapter;
+    private String ins;
 
     public static AccountFragment newInstance() {
         AccountFragment fragment = new AccountFragment();
@@ -151,6 +160,44 @@ public class AccountFragment extends LazyLoadFragment {
 
             }
         });
+
+        mBinding.accountFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity)getActivity()).getmMainActivityPresenter()
+                        .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
+                sDataManager.IS_SHOW_VP_CONTENT = true;
+                Intent intentPos = new Intent(getActivity(), FutureInfoActivity.class);
+                intentPos.putExtra(INS_BETWEEN_ACTIVITY, ins);
+                startActivityForResult(intentPos, JUMP_TO_FUTURE_INFO_ACTIVITY);
+                mBinding.accountFab.setVisibility(View.GONE);
+            }
+        });
+
+        mBinding.bankIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intentBank = new Intent(getActivity(), BankTransferActivity.class);
+                intentBank.putExtra(TRANSFER_DIRECTION, BANK_IN);
+                getActivity().startActivity(intentBank);
+            }
+        });
+
+        mBinding.bankOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intentBank = new Intent(getActivity(), BankTransferActivity.class);
+                intentBank.putExtra(TRANSFER_DIRECTION, BANK_OUT);
+                getActivity().startActivity(intentBank);
+            }
+        });
     }
 
+    public FragmentAccountBinding getmBinding() {
+        return mBinding;
+    }
+
+    public void setIns(String ins) {
+        this.ins = ins;
+    }
 }

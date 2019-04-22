@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
@@ -55,7 +56,7 @@ public class PositionFragment extends LazyLoadFragment {
     private List<PositionEntity> mNewData = new ArrayList<>();
     private FragmentPositionBinding mBinding;
     private boolean mIsUpdate;
-    private boolean mIsPositionsAll;
+    private String ins = "";
 
     @Nullable
     @Override
@@ -68,8 +69,6 @@ public class PositionFragment extends LazyLoadFragment {
     }
 
     protected void initData() {
-        if (getActivity() instanceof MainActivity) mIsPositionsAll = true;
-        else mIsPositionsAll = false;
         mIsUpdate = true;
         mBinding.rv.setLayoutManager(
                 new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
@@ -77,6 +76,10 @@ public class PositionFragment extends LazyLoadFragment {
                 new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
         mAdapter = new PositionAdapter(getActivity(), mOldData);
         mBinding.rv.setAdapter(mAdapter);
+        if (getActivity() instanceof FutureInfoActivity){
+            mBinding.seeMd.setVisibility(View.GONE);
+            ins = ((FutureInfoActivity)getActivity()).getInstrument_id();
+        }
     }
 
     protected void initEvent() {
@@ -92,24 +95,19 @@ public class PositionFragment extends LazyLoadFragment {
                         String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
                         //添加判断，防止自选合约列表为空时产生无效的点击事件
                         if (instrument_id != null) {
-                            if (mIsPositionsAll) {
-                                try {
-                                    if (getActivity() instanceof MainActivity){
-                                        ((MainActivity)getActivity()).getmMainActivityPresenter()
-                                                .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
-                                    }
-                                    sDataManager.IS_SHOW_VP_CONTENT = true;
-                                    Intent intentPos = new Intent(getActivity(), FutureInfoActivity.class);
-                                    intentPos.putExtra("instrument_id", instrument_id);
-                                    startActivityForResult(intentPos, JUMP_TO_FUTURE_INFO_ACTIVITY);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
+                            if (getActivity() instanceof MainActivity){
+                                ((MainActivity)getActivity()).getmMainActivityPresenter()
+                                        .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
+                                sDataManager.IS_SHOW_VP_CONTENT = true;
+                                Intent intentPos = new Intent(getActivity(), FutureInfoActivity.class);
+                                intentPos.putExtra(INS_BETWEEN_ACTIVITY, instrument_id);
+                                startActivityForResult(intentPos, JUMP_TO_FUTURE_INFO_ACTIVITY);
                             }else {
                                 IdEvent idEvent = new IdEvent();
                                 idEvent.setInstrument_id(instrument_id);
                                 EventBus.getDefault().post(idEvent);
                                 ((FutureInfoActivity) getActivity()).getViewPager().setCurrentItem(4, false);
+
                             }
                         }
                     }
@@ -137,6 +135,18 @@ public class PositionFragment extends LazyLoadFragment {
                 }
             }
         });
+
+        mBinding.seeMd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getActivity() instanceof MainActivity){
+                    MainActivity mainActivity = ((MainActivity)getActivity());
+                    mainActivity.getmBinding().bottomNavigation.setSelectedItemId(R.id.market);
+                    QuotePagerFragment quotePagerFragment = (QuotePagerFragment) mainActivity.getmMainActivityPresenter().getmViewPagerFragmentAdapter().getItem(0);
+                    quotePagerFragment.setCurrentItem(0);
+                }
+            }
+        });
     }
 
     protected void refreshPosition() {
@@ -148,11 +158,9 @@ public class PositionFragment extends LazyLoadFragment {
 
             for (PositionEntity positionEntity :
                     userEntity.getPositions().values()) {
-                if (!mIsPositionsAll){
-                    String ins = ((FutureInfoActivity)getActivity()).getInstrument_id();
-                    String ins_ = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
-                    if (!ins_.equals(ins))continue;
-                }
+                String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
+                if (instrument_id.equals(ins))positionEntity.setHighlight(true);
+
                 int volume_long = Integer.parseInt(positionEntity.getVolume_long());
                 int volume_short = Integer.parseInt(positionEntity.getVolume_short());
                 if (volume_long != 0 && volume_short != 0) {
@@ -164,6 +172,8 @@ public class PositionFragment extends LazyLoadFragment {
                     mNewData.add(CloneUtils.clone(positionEntity));
                 }
             }
+
+            if (!mNewData.isEmpty())mBinding.seeMd.setVisibility(View.GONE);
 
             Collections.sort(mNewData);
             DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new PositionDiffCallback(mOldData, mNewData), false);

@@ -86,11 +86,20 @@ public final class CommonConstants {
     public static final int LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY = 5;
     public static final int FUTURE_INFO_ACTIVITY_TO_COMMON_SWITCH_ACTIVITY = 6;
     public static final int MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY = 7;
+    public static final String BACK_TO_ACCOUNT_DETAIL = "checkAccount";
+    public static final String INS_BETWEEN_ACTIVITY = "instrument_id";
     //app名称
     public static final String KUAI_QI_XIAO_Q = "快期小Q";
     //本地自选合约文件名
     public static final String OPTIONAL_INS_LIST = "optionalInsList";
-    //默认配置
+    //银期转帐方向
+    public static final String TRANSFER_DIRECTION = "transferDirection";
+
+    //登录页
+    public static final String BROKER_ID_VISITOR = "游客";
+    public static final String BROKER_ID_SIMULATION = "快期模拟";
+    public static final String[] BROKERS_LOCAL = new String[]{"A安粮期货", "B渤海期货", "B宝城期货", "B北京首创", "B倍特期货", "C长安期货", "C长城期货", "C长江期货", "D大地期货", "D大越期货", "D东航期货", "D大陆期货", "D德盛期货", "D东吴期货", "D东证期货", "D东华期货", "D东方财富", "F方正中期", "G广发期货", "G光大期货", "G国际期货", "G国投安信", "G国富期货", "G国金期货", "G国元期货", "G广金期货", "G国贸期货", "G国泰君安", "G广州期货", "H华安期货", "H华泰期货", "H海通期货", "H海证期货", "H华西期货", "H混沌天成", "H华鑫期货", "H华信期货", "H和合期货", "H恒泰期货", "H弘业期货", "H徽商期货", "H宏源期货", "H海航期货", "J金石期货", "J金元期货", "J建信期货", "J金瑞期货", "J金信期货", "J锦泰期货", "J江海汇鑫", "L良运期货", "L鲁证期货", "M迈科期货", "M美尔雅期货", "N南华期货", "Q前海期货", "S申万期货", "S上海中期", "S上海东方", "S上海东亚", "S盛达期货", "S山西三立期货", "R瑞达期货", "T铜冠金源", "T天鸿期货_主席", "T天鸿期货_次席", "T天富期货", "T天风期货_主席", "T天风期货_二席", "T通惠期货", "W五矿经易", "X先锋期货", "X兴证期货", "X兴业期货", "X新湖期货", "X新世纪期货", "X先融期货", "X西部期货", "Y银河期货", "Y一德期货CTP", "Y英大期货", "Y永安期货", "Z中信建投", "Z中融汇信", "Z招金期货", "Z中财期货", "Z中钢期货", "Z中银国际", "Z中辉期货", "Z中信期货", "Z中天期货", "Z中粮期货", "Z中州期货", "simnow", "中信模拟", "海通股指仿真"};
+    //设置页
     public static final String CONFIG_KLINE_DURATION_DEFAULT = "klineDurationDefault";
     public static final String CONFIG_PARA_MA = "ma";
     public static final String CONFIG_INSERT_ORDER_CONFIRM = "orderConfirm";
@@ -99,8 +108,6 @@ public final class CommonConstants {
     public static final String CONFIG_ORDER_LINE = "isPending";
     public static final String CONFIG_AVERAGE_LINE = "isAverage";
     public static final String CONFIG_MD5 = "isMD5";
-    public static final String CONFIG_LOCK_PASSWORD = "isLocked";
-    public static final String CONFIG_LOCK_ACCOUNT = "isLockedAccount";
     public static final String CONFIG_PASSWORD = "password";
     public static final String CONFIG_ACCOUNT = "phone";
     public static final String CONFIG_BROKER = "brokerName";
@@ -124,8 +131,7 @@ public final class CommonConstants {
             "3分,5分,10分,15分,30分,1时,2时,4时,1日,1周,4周";
     public static final String KLINE_DURATION_DAY = "分时";
 
-    //下单页
-
+    //交易页
     public static final String ACTION_OPEN_BUY = "买多";
     public static final String ACTION_ADD_BUY = "加多";
     public static final String ACTION_OPEN_SELL = "卖空";
@@ -155,7 +161,6 @@ public final class CommonConstants {
     public static final String OFFSET_CLOSE_HISTORY_ZN = "平昨";
     public static final String OFFSET_CLOSE_FORCE_ZN = "强平";
 
-
     //下单版价格类型
     public static final String LATEST_PRICE = "最新价";
     public static final String COUNTERPARTY_PRICE = "对手价";
@@ -163,7 +168,7 @@ public final class CommonConstants {
     public static final String QUEUED_PRICE = "排队价";
     public static final String USER_PRICE = "用户设置价";
 
-    //交易所
+    //交易所信息
     public static final String SHFE = "SHFE";
     public static final String SHFE_ZN = "上海期货交易所";
     public static final String CZCE = "CZCE";

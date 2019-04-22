@@ -3,16 +3,15 @@ package com.shinnytech.futures.controller;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +42,7 @@ import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
+import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
@@ -56,6 +56,7 @@ import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY_FRAGM
 import static com.shinnytech.futures.constants.CommonConstants.DAY_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.FUTURE_INFO_ACTIVITY_TO_COMMON_SWITCH_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.HOUR_FRAGMENT;
+import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_10_MINUTE;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_10_SECOND;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_15_MINUTE;
@@ -87,7 +88,6 @@ import static com.shinnytech.futures.constants.CommonConstants.SECOND_FRAGMENT;
 public class FutureInfoActivityPresenter {
     private final ViewPagerFragmentAdapter mInfoPagerAdapter;
     private final KlineDurationTitleAdapter mKlineDurationTitleAdapter;
-    public Drawable mRightDrawable;
     /**
      * date: 7/7/17
      * description: 合约代码
@@ -102,7 +102,6 @@ public class FutureInfoActivityPresenter {
     private ActivityFutureInfoBinding mBinding;
     private FutureInfoActivity mFutureInfoActivity;
     private Context sContext;
-    private Toolbar mToolbar;
     private TextView mToolbarTitle;
     private FragmentManager mFragmentManager;
     private Dialog mDialogOptional;
@@ -114,10 +113,9 @@ public class FutureInfoActivityPresenter {
             KLINE_5_MINUTE, KLINE_10_MINUTE, KLINE_15_MINUTE, KLINE_30_MINUTE, KLINE_1_HOUR, KLINE_2_HOUR,
             KLINE_4_HOUR, KLINE_1_DAY, KLINE_7_DAY, KLINE_28_DAY};
 
-    public FutureInfoActivityPresenter(FutureInfoActivity futureInfoActivity, Context context, ActivityFutureInfoBinding binding, Toolbar toolbar, TextView toolbarTitle) {
+    public FutureInfoActivityPresenter(FutureInfoActivity futureInfoActivity, Context context, ActivityFutureInfoBinding binding, TextView toolbarTitle) {
         this.mBinding = binding;
         this.mFutureInfoActivity = futureInfoActivity;
-        this.mToolbar = toolbar;
         this.mToolbarTitle = toolbarTitle;
         this.sContext = context;
 
@@ -128,21 +126,9 @@ public class FutureInfoActivityPresenter {
                 add(R.id.fl_content_up, currentDayFragment, CommonConstants.CURRENT_DAY_FRAGMENT).commit();
 
         Intent intent = mFutureInfoActivity.getIntent();
-        mInstrumentId = intent.getStringExtra("instrument_id");
+        mInstrumentId = intent.getStringExtra(INS_BETWEEN_ACTIVITY);
 
-        mToolbar.setTitle("");
-        mToolbar.setTitleTextAppearance(mFutureInfoActivity, R.style.toolBarTitle);
-        mToolbar.setTitleMarginStart(120);
-        mToolbarTitle.setPadding(20, 0, 0, 0);
         mToolbarTitle.setTextSize(20);
-        ViewGroup.LayoutParams layoutParams = mToolbarTitle.getLayoutParams();
-        layoutParams.height = sContext.getResources().getDimensionPixelSize(R.dimen.text_view_height);
-        layoutParams.width = sContext.getResources().getDimensionPixelSize(R.dimen.text_view_width);
-        mToolbarTitle.setLayoutParams(layoutParams);
-        mRightDrawable = ContextCompat.getDrawable(mFutureInfoActivity, R.mipmap.ic_expand_more_white_36dp);
-        if (mRightDrawable != null)
-            mRightDrawable.setBounds(0, 0, mRightDrawable.getMinimumWidth(), mRightDrawable.getMinimumHeight());
-
         //初始化五档行情控制
         initMD5ViewVisibility();
 
@@ -431,6 +417,11 @@ public class FutureInfoActivityPresenter {
         }
     }
 
+    /**
+     * date: 2019/4/20
+     * author: chenli
+     * description: 设置合约名称
+     */
     public void setToolbarTitle() {
         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
         if (searchEntity != null) {
@@ -446,6 +437,18 @@ public class FutureInfoActivityPresenter {
             }
 
         } else mToolbarTitle.setText(mInstrumentId);
+
+        //设置标题右图标
+        String mTitle = mToolbarTitle.getText().toString();
+        Rect bounds = new Rect();
+        Paint textPaint = new Paint();
+        textPaint.setTextSize(DensityUtils.sp2px(sContext, 20));
+        textPaint.getTextBounds(mTitle, 0, mTitle.length(), bounds);
+        int width = bounds.width() + DensityUtils.dp2px(sContext, 40);
+        ViewGroup.LayoutParams layoutParams = mToolbarTitle.getLayoutParams();
+        layoutParams.height = sContext.getResources().getDimensionPixelSize(R.dimen.text_view_height);
+        layoutParams.width = width;
+        mToolbarTitle.setLayoutParams(layoutParams);
     }
 
     public String getInstrumentId() {

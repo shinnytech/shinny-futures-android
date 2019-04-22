@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ItemFragmentQuoteBinding;
+import com.shinnytech.futures.databinding.ItemFragmentQuoteRecommendBinding;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
@@ -33,7 +34,8 @@ import static com.shinnytech.futures.model.engine.LatestFileManager.getUpDownRat
  * state: done
  */
 public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHolder> {
-
+    public final static int TYPE_QUOET = 1;
+    public final static int TYPE_QUOTE_RECOMMEND = 2;//推荐合约布局
     private Context sContext;
     private List<QuoteEntity> mData;
     private String mTitle;
@@ -75,6 +77,12 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
     }
 
     @Override
+    public int getItemViewType(int position) {
+        if (position == mData.size() - 1) return TYPE_QUOTE_RECOMMEND;
+        else return TYPE_QUOET;
+    }
+
+    @Override
     public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         ItemFragmentQuoteBinding binding = DataBindingUtil.inflate(LayoutInflater
                 .from(sContext), R.layout.item_fragment_quote, parent, false);
@@ -103,6 +111,13 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
         return mData == null ? 0 : mData.size();
     }
 
+    /**
+     * date: 2019/4/22
+     * author: chenli
+     * description: 正常合约布局
+     * version:
+     * state:
+     */
     class ItemViewHolder extends RecyclerView.ViewHolder {
 
         private ItemFragmentQuoteBinding mBinding;
@@ -116,6 +131,187 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
         }
 
         public void setBinding(ItemFragmentQuoteBinding binding) {
+            this.mBinding = binding;
+        }
+
+        public void update() {
+            if (mData == null || mData.size() == 0) return;
+            QuoteEntity quoteEntity = mData.get(getLayoutPosition());
+            if (quoteEntity == null) return;
+            try {
+                String instrumentId = quoteEntity.getInstrument_id();
+                if (instrumentId == null) return;
+                String instrumentName = instrumentId;
+                SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrumentId);
+                if (searchEntity != null) instrumentName = searchEntity.getInstrumentName();
+                if (instrumentName.contains("&")) mBinding.quoteName.setTextSize(10);
+                else mBinding.quoteName.setTextSize(15);
+                mBinding.quoteName.setText(instrumentName);
+
+                String pre_settlement = LatestFileManager.saveScaleByPtick(quoteEntity.getPre_settlement(), instrumentId);
+                String latest = LatestFileManager.saveScaleByPtick(quoteEntity.getLast_price(), instrumentId);
+                String changePercent = MathUtils.round(
+                        getUpDownRate(quoteEntity.getLast_price(), quoteEntity.getPre_settlement()), 2);
+                String change = LatestFileManager.saveScaleByPtick(
+                        getUpDown(quoteEntity.getLast_price(), quoteEntity.getPre_settlement()), instrumentId);
+                String askPrice1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(), instrumentId);
+                String bidPrice1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(), instrumentId);
+
+                setTextColor(mBinding.quoteLatest, latest, pre_settlement);
+                if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
+                    if (mSwitchChange) {
+                        setTextColor(mBinding.quoteChangePercent, askPrice1, pre_settlement);
+                    } else {
+                        setTextColor(mBinding.quoteChangePercent, bidPrice1, pre_settlement);
+                    }
+                    if (mSwitchVolume) {
+                        mBinding.quoteOpenInterest.setText(quoteEntity.getAsk_volume1());
+                    } else {
+                        mBinding.quoteOpenInterest.setText(quoteEntity.getBid_volume1());
+                    }
+                } else {
+                    if (mSwitchChange) {
+                        setChangeTextColor(mBinding.quoteChangePercent, change);
+                    } else {
+                        setChangeTextColor(mBinding.quoteChangePercent, changePercent);
+                    }
+                    if (mSwitchVolume) {
+                        mBinding.quoteOpenInterest.setText(quoteEntity.getVolume());
+                    } else {
+                        mBinding.quoteOpenInterest.setText(quoteEntity.getOpen_interest());
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+        }
+
+        private void updatePart(Bundle bundle) {
+            for (String key :
+                    bundle.keySet()) {
+                String value = bundle.getString(key);
+                switch (key) {
+                    case "latest":
+                        setTextColor(mBinding.quoteLatest, value, bundle.getString("pre_settlement"));
+                        break;
+                    case "change":
+                        if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchChange) {
+                            setChangeTextColor(mBinding.quoteChangePercent, value);
+                        }
+                        break;
+                    case "change_percent":
+                        if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && !mSwitchChange) {
+                            setChangeTextColor(mBinding.quoteChangePercent, value);
+                        }
+                        break;
+                    case "volume":
+                        if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchVolume) {
+                            mBinding.quoteOpenInterest.setText(value);
+                        }
+                        break;
+                    case "open_interest":
+                        if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && !mSwitchVolume) {
+                            mBinding.quoteOpenInterest.setText(value);
+                        }
+                        break;
+                    case "ask_price1":
+                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchChange) {
+                            setTextColor(mBinding.quoteChangePercent, value, bundle.getString("pre_settlement"));
+                        }
+                        break;
+                    case "ask_volume1":
+                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchVolume) {
+                            mBinding.quoteOpenInterest.setText(value);
+                        }
+                        break;
+                    case "bid_price1":
+                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && !mSwitchChange) {
+                            setTextColor(mBinding.quoteChangePercent, value, bundle.getString("pre_settlement"));
+                        }
+                        break;
+                    case "bid_volume1":
+                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && !mSwitchVolume) {
+                            mBinding.quoteOpenInterest.setText(value);
+                        }
+                        break;
+
+                }
+            }
+        }
+
+        /**
+         * date: 7/9/17
+         * author: chenli
+         * description: 设置涨跌幅文字颜色
+         */
+        public void setChangeTextColor(TextView textView, String data) {
+            textView.setText(data);
+            if (data == null || data.equals("-")) {
+                textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+                return;
+            }
+            try {
+                float value = new Float(data);
+                if (value < 0)
+                    textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
+                else if (value > 0)
+                    textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
+                else textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+        }
+
+        /**
+         * date: 2018/12/4
+         * author: chenli
+         * description: 设置最新价文字颜色
+         */
+        public void setTextColor(TextView textView, String latest, String pre_settlement) {
+            textView.setText(latest);
+            if (latest == null || latest.equals("-") ||
+                    pre_settlement == null || pre_settlement.equals("-")) {
+                textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+                return;
+            }
+            try {
+                float value = Float.parseFloat(latest) - Float.parseFloat(pre_settlement);
+                if (value < 0)
+                    textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
+                else if (value > 0)
+                    textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
+                else textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+            } catch (Exception e) {
+                e.printStackTrace();
+
+            }
+        }
+    }
+
+
+    /**
+     * date: 2019/4/22
+     * author: chenli
+     * description: 推荐合约布局
+     * version:
+     * state:
+     */
+    class RecommendItemViewHolder extends RecyclerView.ViewHolder {
+
+        private ItemFragmentQuoteRecommendBinding mBinding;
+
+        public RecommendItemViewHolder(View itemView) {
+            super(itemView);
+        }
+
+        public ItemFragmentQuoteRecommendBinding getBinding() {
+            return this.mBinding;
+        }
+
+        public void setBinding(ItemFragmentQuoteRecommendBinding binding) {
             this.mBinding = binding;
         }
 

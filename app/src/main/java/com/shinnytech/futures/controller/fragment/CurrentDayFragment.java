@@ -46,6 +46,7 @@ import com.shinnytech.futures.view.custommpchart.mycomponent.MyMarkerView;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyXAxis;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyYAxis;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.ByteArrayOutputStream;
@@ -228,6 +229,35 @@ public class CurrentDayFragment extends BaseChartFragment {
                 mTopChartViewBase.highlightValue(null, true);
                 mTopChartViewBase.enableScroll();
                 return super.onSingleTapUp(e);
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                // TODO Auto-generated method stub
+                // e1：第1个ACTION_DOWN MotionEvent
+                // e2：最后一个ACTION_MOVE MotionEvent
+                // velocityX：X轴上的移动速度（像素/秒）
+                // velocityY：Y轴上的移动速度（像素/秒）
+                // Y轴的坐标位移大于FLING_MIN_DISTANCE，且移动速度大于FLING_MIN_VELOCITY个像素/秒
+
+                String ins = "";
+                if (Math.abs(e1.getX() - e2.getX()) > FLING_MAX_DISTANCE_X)return false;
+
+                //向上
+                if (e1.getY() - e2.getY() > FLING_MIN_DISTANCE_Y && Math.abs(velocityY) > FLING_MIN_VELOCITY){
+                    ins = getNextInstrumentId(true);
+                }
+                //向下
+                if (e2.getY() - e1.getY() > FLING_MIN_DISTANCE_Y && Math.abs(velocityY) > FLING_MIN_VELOCITY) {
+                    ins = getNextInstrumentId(false);
+                }
+
+                if (!ins.isEmpty()){
+                    IdEvent idEvent = new IdEvent();
+                    idEvent.setInstrument_id(ins);
+                    EventBus.getDefault().post(idEvent);
+                }
+                return false;
             }
         });
 

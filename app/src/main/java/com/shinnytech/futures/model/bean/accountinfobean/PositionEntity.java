@@ -13,6 +13,7 @@ import java.io.Serializable;
 
 public class PositionEntity implements Comparable<PositionEntity>, Serializable {
     private static final long serialVersionUID = 2631590509760908283L;
+    private boolean isHighlight = false;
     private String key = "";
     private String user_id = "";
     private String exchange_id = "";
@@ -50,6 +51,7 @@ public class PositionEntity implements Comparable<PositionEntity>, Serializable 
 
     public PositionEntity cloneLong() {
         PositionEntity positionEntity = new PositionEntity();
+        positionEntity.isHighlight = isHighlight;
         positionEntity.key = key;
         positionEntity.user_id = user_id;
         positionEntity.exchange_id = exchange_id;
@@ -91,6 +93,7 @@ public class PositionEntity implements Comparable<PositionEntity>, Serializable 
 
     public PositionEntity cloneShort() {
         PositionEntity positionEntity = new PositionEntity();
+        positionEntity.isHighlight = isHighlight;
         positionEntity.key = key;
         positionEntity.user_id = user_id;
         positionEntity.exchange_id = exchange_id;
@@ -128,6 +131,14 @@ public class PositionEntity implements Comparable<PositionEntity>, Serializable 
         positionEntity.margin_short = margin_short;
         positionEntity.margin_long = "0.0";
         return positionEntity;
+    }
+
+    public boolean isHighlight() {
+        return isHighlight;
+    }
+
+    public void setHighlight(boolean highlight) {
+        isHighlight = highlight;
     }
 
     public String getVolume_long_frozen() {

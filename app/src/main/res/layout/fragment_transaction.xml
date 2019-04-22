@@ -141,6 +141,14 @@
 
             </LinearLayout>
 
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/transaction_fab"
+                android:layout_gravity="center"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:scaleType="center"
+                android:src="@mipmap/ic_watch_later_white_24dp" />
+
             <LinearLayout
                 android:layout_marginStart="@dimen/margin_5dp"
                 android:layout_width="0dp"

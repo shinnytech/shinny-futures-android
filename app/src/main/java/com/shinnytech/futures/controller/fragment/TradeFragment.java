@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
@@ -156,7 +157,7 @@ public class TradeFragment extends LazyLoadFragment {
                 }
                 sDataManager.IS_SHOW_VP_CONTENT = true;
                 Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
-                intent.putExtra("instrument_id", tradeEntity.getExchange_id() + "." + tradeEntity.getInstrument_id());
+                intent.putExtra(INS_BETWEEN_ACTIVITY, tradeEntity.getExchange_id() + "." + tradeEntity.getInstrument_id());
                 startActivityForResult(intent, JUMP_TO_FUTURE_INFO_ACTIVITY);
             }
 

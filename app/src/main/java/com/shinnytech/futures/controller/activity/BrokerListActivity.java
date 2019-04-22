@@ -12,9 +12,12 @@ import com.shinnytech.futures.model.adapter.BrokerAdapter;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
+import com.shinnytech.futures.utils.ToastNotificationUtils;
 
+import java.util.Arrays;
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.BROKERS_LOCAL;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_LIST;
 
 public class BrokerListActivity extends BaseActivity {
@@ -49,6 +52,11 @@ public class BrokerListActivity extends BaseActivity {
                     @Override
                     public void onItemClick(View view, int position) {
                         String broker = mBrokerAdapter.getData().get(position);
+                        List<String> list = Arrays.asList(BROKERS_LOCAL);
+                        if (!list.contains(broker)){
+                            ToastNotificationUtils.showToast(sContext, "此期货公司还没有添加");
+                            return;
+                        }
                         Intent intent = new Intent();
                         intent.putExtra("broker", broker);
                         setResult(RESULT_OK, intent);

@@ -39,7 +39,6 @@ import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
@@ -49,6 +48,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
+import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
@@ -75,7 +75,6 @@ public class OrderFragment extends LazyLoadFragment {
     private boolean mIsUpdate;
     private boolean mIsShowCancelPop;
     private boolean mIsOrdersAlive;
-    private boolean mIsOrdersAll;
 
     public static OrderFragment newInstance(boolean mIsOrdersAlive) {
         OrderFragment fragment = new OrderFragment();
@@ -104,9 +103,6 @@ public class OrderFragment extends LazyLoadFragment {
     }
 
     protected void initData() {
-        if (getActivity() instanceof MainActivity) mIsOrdersAll = true;
-        else mIsOrdersAll = false;
-
         mIsUpdate = true;
         mBinding.rv.setLayoutManager(
                 new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
@@ -147,16 +143,14 @@ public class OrderFragment extends LazyLoadFragment {
                 if (mIsOrdersAlive) {
                     checkPassword(view, orderEntity);
                 }else {
-                    if (mIsOrdersAll){
-                        ((MainActivity)getActivity()).getmMainActivityPresenter()
-                                .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
+                    ((MainActivity)getActivity()).getmMainActivityPresenter()
+                            .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
 
-                        sDataManager.IS_SHOW_VP_CONTENT = true;
-                        Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
-                        intent.putExtra("instrument_id", orderEntity.getExchange_id()
-                                + "." + orderEntity.getInstrument_id());
-                        startActivityForResult(intent, JUMP_TO_FUTURE_INFO_ACTIVITY);
-                    }
+                    sDataManager.IS_SHOW_VP_CONTENT = true;
+                    Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
+                    intent.putExtra(INS_BETWEEN_ACTIVITY, orderEntity.getExchange_id()
+                            + "." + orderEntity.getInstrument_id());
+                    startActivityForResult(intent, JUMP_TO_FUTURE_INFO_ACTIVITY);
                 }
 
             }
@@ -212,11 +206,6 @@ public class OrderFragment extends LazyLoadFragment {
             for (OrderEntity orderEntity :
                     userEntity.getOrders().values()) {
                 OrderEntity o = CloneUtils.clone(orderEntity);
-                if (!mIsOrdersAll){
-                    String ins = ((FutureInfoActivity)getActivity()).getInstrument_id();
-                    String ins_ = orderEntity.getExchange_id() + "." + orderEntity.getInstrument_id();
-                    if (!ins_.equals(ins))continue;
-                }
 
                 if (!mIsOrdersAlive) {
                     mNewData.add(o);

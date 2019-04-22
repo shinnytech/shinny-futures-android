@@ -108,7 +108,7 @@ public class QuotePagerFragment extends Fragment {
     }
 
     public void setCurrentItem(int index){
-        mBinding.quotePager.setCurrentItem(index);
+        mBinding.quotePager.setCurrentItem(index, false);
     }
 
     public QuoteFragment getCurrentItem(){

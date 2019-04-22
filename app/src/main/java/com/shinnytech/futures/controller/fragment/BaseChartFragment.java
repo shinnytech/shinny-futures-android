@@ -24,6 +24,7 @@ import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.VisibilityEvent;
+import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
@@ -34,16 +35,27 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY_FRAGMENT;
+import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
+import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
+import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
+import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
+import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
+import static com.shinnytech.futures.constants.CommonConstants.SHANGHAI;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
+import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOU;
+import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
+import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
 import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
@@ -56,9 +68,12 @@ import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST
  */
 public class BaseChartFragment extends LazyLoadFragment {
 
+    protected static final int FLING_MAX_DISTANCE_X = 100;// X轴移动最大距离
+    protected static final int FLING_MIN_DISTANCE_Y = 200;// Y轴移动最小距离
+    protected static final int FLING_MIN_VELOCITY = 200;// 移动最大速度
+
     public String mFragmentType;
     public String mKlineType;
-    public boolean mIsUpdate;
     /**
      * date: 7/9/17
      * description: 组合图
@@ -143,7 +158,7 @@ public class BaseChartFragment extends LazyLoadFragment {
         try {
             switch (mDataString) {
                 case MD_MESSAGE:
-                    if (mIsUpdate) refreshKline();
+                    refreshKline();
                     break;
                 case TD_MESSAGE:
                     refreshTrade();
@@ -206,7 +221,6 @@ public class BaseChartFragment extends LazyLoadFragment {
         mCalendar = Calendar.getInstance();
         sDataManager = DataManager.getInstance();
         xVals = new SparseArray<>();
-        mIsUpdate = true;
     }
 
     protected void initChart() {
@@ -663,6 +677,55 @@ public class BaseChartFragment extends LazyLoadFragment {
             mMiddleChartViewBase.setVisibility(View.GONE);
 //            mBottomChartViewBase.setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * date: 2019/4/19
+     * author: chenli
+     * description: 上下滑动获取下个合约代码
+     */
+    protected String getNextInstrumentId(boolean isNext){
+        String title = DataManager.getInstance().EXCHANGE_ID;
+        Map<String, QuoteEntity> map = new HashMap<>();
+        switch (title) {
+            case OPTIONAL:
+                map = LatestFileManager.getOptionalInsList();
+                break;
+            case DOMINANT:
+                map = LatestFileManager.getMainInsList();
+                break;
+            case SHANGHAI:
+                map = LatestFileManager.getShangqiInsList();
+                break;
+            case NENGYUAN:
+                map = LatestFileManager.getNengyuanInsList();
+                break;
+            case DALIAN:
+                map = LatestFileManager.getDalianInsList();
+                break;
+            case ZHENGZHOU:
+                map = LatestFileManager.getZhengzhouInsList();
+                break;
+            case ZHONGJIN:
+                map = LatestFileManager.getZhongjinInsList();
+                break;
+            case DALIANZUHE:
+                map = LatestFileManager.getDalianzuheInsList();
+                break;
+            case ZHENGZHOUZUHE:
+                map = LatestFileManager.getZhengzhouzuheInsList();
+                break;
+            default:
+                break;
+        }
+        List<String> insList = new ArrayList<>(map.keySet());
+        int index = insList.indexOf(instrument_id);
+        if (index == -1)return "";
+        if (isNext) index += 1;
+        else index -= 1;
+        if (index < 0) index = insList.size() - 1;
+        if (index >= insList.size())index = 0;
+        return insList.get(index);
     }
 
 }

@@ -26,10 +26,14 @@
         android:padding="@dimen/padding_5dp" />
 
     <TextView
+        android:id="@+id/trade_quote"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:gravity="center"
+        android:drawableStart="@mipmap/ic_favorite_border_white_18dp"
+        android:text="快速交易"
+        android:textColor="@color/white"
+        android:gravity="start|center_vertical"
         android:padding="@dimen/padding_5dp" />
 
     <TextView

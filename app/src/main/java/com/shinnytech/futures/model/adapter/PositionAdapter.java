@@ -98,15 +98,18 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
             if (positionEntity == null) return;
 
             try {
+                //合约详情页合约高亮
+                boolean isHighlight = positionEntity.isHighlight();
+                if (isHighlight)mBinding.positionBackground.setBackground(sContext.getResources().getDrawable(R.drawable.item_touch_bg_highlight));
+                else mBinding.positionBackground.setBackground(sContext.getResources().getDrawable(R.drawable.item_touch_bg));
+
                 String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
                 mBinding.positionName.setText(searchEntity == null ? positionEntity.getInstrument_id() : searchEntity.getInstrumentName());
 
-                String available_long = MathUtils.subtract(positionEntity.getVolume_long(),
-                        MathUtils.add(positionEntity.getVolume_long_frozen_his(), positionEntity.getVolume_long_frozen_today()));
+                String available_long = MathUtils.subtract(positionEntity.getVolume_long(), positionEntity.getVolume_long_frozen());
                 int volume_long = Integer.parseInt(positionEntity.getVolume_long());
-                String available_short = MathUtils.subtract(positionEntity.getVolume_short(),
-                        MathUtils.add(positionEntity.getVolume_short_frozen_his(), positionEntity.getVolume_short_frozen_today()));
+                String available_short = MathUtils.subtract(positionEntity.getVolume_short(), positionEntity.getVolume_short_frozen());
                 int volume_short = Integer.parseInt(positionEntity.getVolume_short());
                 float profit = 0;
                 if (volume_long != 0 && volume_short == 0) {

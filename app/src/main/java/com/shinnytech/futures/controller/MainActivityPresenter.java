@@ -3,11 +3,15 @@ package com.shinnytech.futures.controller;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -35,7 +39,6 @@ import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.controller.activity.OptionalActivity;
 import com.shinnytech.futures.controller.activity.SettingActivity;
 import com.shinnytech.futures.controller.fragment.AccountFragment;
-import com.shinnytech.futures.controller.fragment.QuoteFragment;
 import com.shinnytech.futures.controller.fragment.QuotePagerFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
 import com.shinnytech.futures.model.adapter.DialogAdapter;
@@ -45,11 +48,12 @@ import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
 import com.shinnytech.futures.model.bean.settingbean.NavigationRightEntity;
+import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
+import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.LogUtils;
-import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -60,6 +64,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT_DETAIL;
+import static com.shinnytech.futures.constants.CommonConstants.BANK_IN;
+import static com.shinnytech.futures.constants.CommonConstants.BANK_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
@@ -67,6 +73,7 @@ import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.SHANGHAI;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_DIRECTION;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOU;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
@@ -128,9 +135,9 @@ public class MainActivityPresenter {
         mBinding.vpContent.setAdapter(mViewPagerFragmentAdapter);
         mBinding.vpContent.setCurrentItem(0);
         mBinding.vpContent.setPagingEnabled(false);
-        switchQuotesNavigation(title);
         //保证lazyLoad的效用,每次加载一个fragment
         mBinding.vpContent.setOffscreenPageLimit(7);
+        switchQuotesNavigation(title);
 
         //设置右导航宽度
         ViewGroup.LayoutParams paramsR = mBinding.nvMenuRight.getLayoutParams();
@@ -251,10 +258,12 @@ public class MainActivityPresenter {
                         break;
                     case CommonConstants.BANK_IN:
                         Intent intentBank = new Intent(mMainActivity, BankTransferActivity.class);
+                        intentBank.putExtra(TRANSFER_DIRECTION, BANK_IN);
                         mMainActivity.startActivity(intentBank);
                         break;
                     case CommonConstants.BANK_OUT:
                         Intent intentBankOut = new Intent(mMainActivity, BankTransferActivity.class);
+                        intentBankOut.putExtra(TRANSFER_DIRECTION, BANK_OUT);
                         mMainActivity.startActivity(intentBankOut);
                         break;
                     case CommonConstants.OPEN_ACCOUNT:
@@ -321,8 +330,6 @@ public class MainActivityPresenter {
                                     new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
                                         @Override
                                         public void onItemClick(View view, int position) {
-                                            String title = mTitleList.get(position);
-                                            switchQuotesNavigation(title);
                                             ((QuotePagerFragment) mViewPagerFragmentAdapter.
                                                     getItem(0)).setCurrentItem(position);
                                             mTitleDialog.dismiss();
@@ -335,7 +342,7 @@ public class MainActivityPresenter {
                                     }));
 
                 }
-                if (!mTitleDialog.isShowing()) mTitleDialog.show();
+                if (!mTitleDialog.isShowing() && !ACCOUNT_DETAIL.equals(mToolbarTitle.getText().toString())) mTitleDialog.show();
             }
         });
 
@@ -356,6 +363,7 @@ public class MainActivityPresenter {
                             mBinding.quoteNavRight.setVisibility(View.VISIBLE);
                         }
                         mToolbarTitle.setText(title);
+                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
                         break;
                     case R.id.trade:
                         mBinding.rvQuoteNavigation.setVisibility(View.GONE);
@@ -363,6 +371,7 @@ public class MainActivityPresenter {
                         mBinding.quoteNavRight.setVisibility(View.GONE);
                         mBinding.vpContent.setCurrentItem(1, false);
                         mToolbarTitle.setText(ACCOUNT_DETAIL);
+                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                         break;
                     default:
                         break;
@@ -466,8 +475,18 @@ public class MainActivityPresenter {
      * description: 根据页面标题匹配对应的导航栏，自选合约页不显示导航栏
      */
     public void switchQuotesNavigation(String mTitle) {
-        if (NetworkUtils.isNetworkConnected(sContext))
-            mToolbarTitle.setText(mTitle);
+        //保存最后一次切换的交易所，用户二级详情页上下滑动切换合约
+        DataManager.getInstance().EXCHANGE_ID = mTitle;
+        mToolbarTitle.setText(mTitle);
+        Rect bounds = new Rect();
+        Paint textPaint = new Paint();
+        textPaint.setTextSize(DensityUtils.sp2px(sContext, 25));
+        textPaint.getTextBounds(mTitle, 0, mTitle.length(), bounds);
+        int width = bounds.width() + DensityUtils.dp2px(sContext, 40);
+        ViewGroup.LayoutParams layoutParams = mToolbarTitle.getLayoutParams();
+        layoutParams.height = sContext.getResources().getDimensionPixelSize(R.dimen.text_view_height);
+        layoutParams.width = width;
+        mToolbarTitle.setLayoutParams(layoutParams);
         if (OPTIONAL.equals(mTitle)) {
             mBinding.rvQuoteNavigation.setVisibility(View.GONE);
             mBinding.quoteNavLeft.setVisibility(View.GONE);

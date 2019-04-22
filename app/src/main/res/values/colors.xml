@@ -143,4 +143,10 @@
 
     <!--键盘背景色-->
     <color name="keyboard">#00000000</color>
+
+    <!--持仓页-->
+    <color name="position_highlight">#99dcdc0a</color>
+
+    <!--登录页-->
+    <color name="transparent">#00000000</color>
 </resources>

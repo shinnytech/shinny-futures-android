@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
+import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
 
@@ -97,7 +98,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
                         EventBus.getDefault().post(idEvent);
                     } else {
                         Intent intent = new Intent(SearchActivity.this, FutureInfoActivity.class);
-                        intent.putExtra("instrument_id", instrument_id);
+                        intent.putExtra(INS_BETWEEN_ACTIVITY, instrument_id);
                         startActivity(intent);
                     }
                     //关闭键盘后销毁

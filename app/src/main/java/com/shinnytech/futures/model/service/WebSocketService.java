@@ -48,12 +48,14 @@ import com.shinnytech.futures.utils.TimeUtils;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import static com.shinnytech.futures.constants.CommonConstants.AMP_TRADE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_TRANSFER;
+import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
 import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
 import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
@@ -280,10 +282,10 @@ public class WebSocketService extends Service {
         }
     }
 
-    public boolean isMDConnected(){
-        if (mWebSocketClientMD != null ) {
+    public boolean isMDConnected() {
+        if (mWebSocketClientMD != null) {
             return mWebSocketClientMD.isOpen();
-        }else {
+        } else {
             return false;
         }
     }
@@ -446,20 +448,20 @@ public class WebSocketService extends Service {
         Context context = BaseApplication.getContext();
         if (SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
             String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
-            if (!date.isEmpty()) {
-                String name = (String) SPUtils.get(context, CommonConstants.CONFIG_ACCOUNT, "");
-                String password = (String) SPUtils.get(context, CommonConstants.CONFIG_PASSWORD, "");
-                String broker = (String) SPUtils.get(context, CommonConstants.CONFIG_BROKER, "");
-                sendReqLogin(broker, name, password);
-            }
+            if (date.isEmpty()) return;
+            String name = (String) SPUtils.get(context, CommonConstants.CONFIG_ACCOUNT, "");
+            String password = (String) SPUtils.get(context, CommonConstants.CONFIG_PASSWORD, "");
+            String broker = (String) SPUtils.get(context, CommonConstants.CONFIG_BROKER, "");
+            if (name != null && name.contains(BROKER_ID_VISITOR) && !TimeUtils.getNowTime().equals(date))return;
+            sendReqLogin(broker, name, password);
         }
 
     }
 
-    public boolean isTDConnected(){
-        if (mWebSocketClientTD != null ) {
+    public boolean isTDConnected() {
+        if (mWebSocketClientTD != null) {
             return mWebSocketClientTD.isOpen();
-        }else {
+        } else {
             return false;
         }
     }

@@ -11,15 +11,20 @@ import android.support.v4.view.GravityCompat;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.MainActivityPresenter;
+import com.shinnytech.futures.controller.fragment.AccountFragment;
 import com.shinnytech.futures.controller.fragment.QuoteFragment;
 import com.shinnytech.futures.controller.fragment.QuotePagerFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
+import static com.shinnytech.futures.constants.CommonConstants.BACK_TO_ACCOUNT_DETAIL;
+import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_SEARCH_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
@@ -54,6 +59,7 @@ public class MainActivity extends BaseActivity {
     protected void initData() {
         mBinding = (ActivityMainDrawerBinding) mViewDataBinding;
         mTitle = OPTIONAL;
+        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
         mMainActivityPresenter = new MainActivityPresenter(this, sContext, mBinding, mTitle, mToolbarTitle);
 
     }
@@ -172,6 +178,18 @@ public class MainActivity extends BaseActivity {
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //交易页的超链接
+        if (data != null){
+            boolean isAccountPage = data.getBooleanExtra(BACK_TO_ACCOUNT_DETAIL, false);
+            String ins = data.getStringExtra(INS_BETWEEN_ACTIVITY);
+            if (isAccountPage){
+                mBinding.bottomNavigation.setSelectedItemId(R.id.trade);
+                AccountFragment accountFragment = (AccountFragment)mMainActivityPresenter.getmViewPagerFragmentAdapter().getItem(1);
+                accountFragment.getmBinding().accountFab.setVisibility(View.VISIBLE);
+                accountFragment.setIns(ins);
+            }
+        }
+
         QuoteFragment quoteFragment = ((QuotePagerFragment) mMainActivityPresenter.
                 getmViewPagerFragmentAdapter().getItem(0)).getCurrentItem();
         if (BaseApplication.getWebSocketService() == null) return;
@@ -193,5 +211,9 @@ public class MainActivity extends BaseActivity {
 
     public MainActivityPresenter getmMainActivityPresenter() {
         return mMainActivityPresenter;
+    }
+
+    public ActivityMainDrawerBinding getmBinding() {
+        return mBinding;
     }
 }

@@ -18,6 +18,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.FutureInfoActivityPresenter;
 import com.shinnytech.futures.controller.fragment.LazyLoadFragment;
+import com.shinnytech.futures.controller.fragment.TransactionFragment;
 import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
@@ -69,7 +70,7 @@ public class FutureInfoActivity extends BaseActivity {
     @Override
     protected void initData() {
         mBinding = (ActivityFutureInfoBinding) mViewDataBinding;
-        mFutureInfoActivityPresenter = new FutureInfoActivityPresenter(this, sContext, mBinding, mToolbar, mToolbarTitle);
+        mFutureInfoActivityPresenter = new FutureInfoActivityPresenter(this, sContext, mBinding, mToolbarTitle);
         mInstrumentId = mFutureInfoActivityPresenter.getInstrumentId();
     }
 
@@ -106,12 +107,12 @@ public class FutureInfoActivity extends BaseActivity {
             mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.black_dark));
             mToolbarTitle.setTextColor(Color.WHITE);
             mFutureInfoActivityPresenter.setToolbarTitle();
-            mToolbarTitle.setCompoundDrawables(null, null, mFutureInfoActivityPresenter.mRightDrawable, null);
+            mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
         } else {
             mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.off_line));
             mToolbarTitle.setTextColor(Color.BLACK);
             mToolbarTitle.setText(OFFLINE);
-            mToolbarTitle.setCompoundDrawables(null, null, null, null);
+            mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
         }
     }
 
@@ -126,13 +127,13 @@ public class FutureInfoActivity extends BaseActivity {
                         mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.off_line));
                         mToolbarTitle.setTextColor(Color.BLACK);
                         mToolbarTitle.setText(OFFLINE);
-                        mToolbarTitle.setCompoundDrawables(null, null, null, null);
+                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                         break;
                     case 1:
                         mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.black_dark));
                         mToolbarTitle.setTextColor(Color.WHITE);
                         mFutureInfoActivityPresenter.setToolbarTitle();
-                        mToolbarTitle.setCompoundDrawables(null, null, mFutureInfoActivityPresenter.mRightDrawable, null);
+                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
                         break;
                 }
             }
@@ -262,11 +263,10 @@ public class FutureInfoActivity extends BaseActivity {
             } else {
                 mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
             }
+            //切换合约更新盘口
+            refreshMD();
             //切换合约判断是否有五档行情
             mFutureInfoActivityPresenter.updateMD5ViewVisibility();
-            ((LazyLoadFragment)mFutureInfoActivityPresenter.getmInfoPagerAdapter().getItem(1)).update();
-            ((LazyLoadFragment)mFutureInfoActivityPresenter.getmInfoPagerAdapter().getItem(2)).update();
-            ((LazyLoadFragment)mFutureInfoActivityPresenter.getmInfoPagerAdapter().getItem(3)).update();
         }
     }
 

@@ -112,8 +112,19 @@
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv"
+            android:layout_weight="1"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="0dp" />
+
+        <TextView
+            android:id="@+id/see_md"
+            android:textSize="@dimen/font_size_normal_more"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:textColor="@color/marker_yellow"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:text="您当前没有持仓，先去看看行情吧"/>
 
     </LinearLayout>
 </layout>

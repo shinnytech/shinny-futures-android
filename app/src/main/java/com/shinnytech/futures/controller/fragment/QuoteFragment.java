@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.util.DiffUtil;
@@ -23,11 +22,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -54,7 +50,6 @@ import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -68,6 +63,7 @@ import java.util.TreeMap;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
+import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
@@ -350,7 +346,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                             .setPreSubscribedQuotes(mDataManager.getRtnData().getIns_list());
                                 }
                                 Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
-                                intent.putExtra("instrument_id", instrument_id);
+                                intent.putExtra(INS_BETWEEN_ACTIVITY, instrument_id);
                                 startActivityForResult(intent, JUMP_TO_FUTURE_INFO_ACTIVITY);
                             }
                         }
@@ -383,6 +379,7 @@ public class QuoteFragment extends LazyLoadFragment {
                         //点击空白处popupWindow消失
                         popWindow.setBackgroundDrawable(new ColorDrawable(0x00000000));
                         TextView add = popUpView.findViewById(R.id.add_remove_quote);
+                        TextView trade = popUpView.findViewById(R.id.trade_quote);
                         TextView drag = popUpView.findViewById(R.id.drag_quote);
                         if (OPTIONAL.equals(mTitle)) drag.setVisibility(View.VISIBLE);
                         else drag.setVisibility(View.INVISIBLE);
@@ -523,6 +520,21 @@ public class QuoteFragment extends LazyLoadFragment {
                                     });
                                 }
 
+                            }
+                        });
+
+                        trade.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if (getActivity() instanceof MainActivity){
+                                    ((MainActivity)getActivity()).getmMainActivityPresenter()
+                                            .setPreSubscribedQuotes(mDataManager.getRtnData().getIns_list());
+                                }
+                                DataManager.getInstance().IS_SHOW_VP_CONTENT = true;
+                                Intent intentPos = new Intent(getActivity(), FutureInfoActivity.class);
+                                intentPos.putExtra(INS_BETWEEN_ACTIVITY, instrument_id);
+                                startActivityForResult(intentPos, JUMP_TO_FUTURE_INFO_ACTIVITY);
+                                popWindow.dismiss();
                             }
                         });
                     }

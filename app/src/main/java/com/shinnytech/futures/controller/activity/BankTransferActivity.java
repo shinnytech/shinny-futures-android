@@ -27,7 +27,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.shinnytech.futures.constants.CommonConstants.BANK_IN;
 import static com.shinnytech.futures.constants.CommonConstants.BANK_OUT;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_DIRECTION;
 import static java.lang.Math.abs;
 
 public class BankTransferActivity extends BaseActivity {
@@ -44,7 +46,10 @@ public class BankTransferActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mLayoutID = R.layout.activity_bank_transfer;
-        mTitle = BANK_OUT;
+        Intent intent = getIntent();
+        if (intent != null){
+            mTitle = intent.getStringExtra(TRANSFER_DIRECTION);
+        }
         super.onCreate(savedInstanceState);
     }
 
@@ -72,6 +77,10 @@ public class BankTransferActivity extends BaseActivity {
         mCurrencySpinnerAdapter = new ArrayAdapter<>(this, R.layout.spinner_display_style, R.id.tv_Spinner, currencyList);
         mCurrencySpinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown_style);
         mBinding.spinnerCurrency.setAdapter(mCurrencySpinnerAdapter);
+
+        if (BANK_IN.equals(mTitle))mBinding.futureBank.setVisibility(View.GONE);
+
+        if (BANK_OUT.equals(mTitle))mBinding.bankFuture.setVisibility(View.GONE);
     }
 
     @Override
