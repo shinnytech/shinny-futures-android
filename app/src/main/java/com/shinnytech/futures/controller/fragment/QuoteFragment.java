@@ -59,7 +59,6 @@ import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -97,22 +96,18 @@ public class QuoteFragment extends LazyLoadFragment {
         @Override
         public int compare(String instrumentId1, String instrumentId2) {
             try {
-                if (instrumentId1 == null || instrumentId2 == null) return 0;
                 QuoteEntity quoteEntity1 = DataManager.getInstance().getRtnData().getQuotes().get(instrumentId1);
                 QuoteEntity quoteEntity2 = DataManager.getInstance().getRtnData().getQuotes().get(instrumentId2);
-                if (quoteEntity1 == null || quoteEntity2 == null) {
-                    return instrumentId1.compareTo(instrumentId2);
-                }
                 String change1 = MathUtils.divide(MathUtils.subtract(quoteEntity1.getLast_price(), quoteEntity1.getPre_settlement()), quoteEntity1.getPre_settlement());
                 String change2 = MathUtils.divide(MathUtils.subtract(quoteEntity2.getLast_price(), quoteEntity2.getPre_settlement()), quoteEntity2.getPre_settlement());
                 if (MathUtils.upper(change1, change2)) {
                     return -1;
                 } else if (MathUtils.lower(change1, change2)){
                     return 1;
-                }else return 0;
+                }else return 1;
             } catch (Exception e) {
                 e.printStackTrace();
-                return 0;
+                return 1;
             }
         }
     };
@@ -199,7 +194,6 @@ public class QuoteFragment extends LazyLoadFragment {
             for (String ins : new ArrayList<>(LatestFileManager.getOptionalInsList().keySet())) {
                 LatestFileManager.getsRecommendInsList().remove(ins);
             }
-
             for (String ins :
                     LatestFileManager.getsRecommendInsList().keySet()) {
                 QuoteEntity quoteEntity = CloneUtils.clone(DataManager.getInstance().getRtnData().getQuotes().get(ins));
@@ -207,7 +201,6 @@ public class QuoteFragment extends LazyLoadFragment {
             }
 
             mInsListRecommend = new ArrayList<>(mNewDataRecommend.keySet());
-
         }
     }
 
@@ -878,6 +871,13 @@ public class QuoteFragment extends LazyLoadFragment {
         diffResult.dispatchUpdatesTo(mAdapter);
         mOldData.clear();
         mOldData.addAll(newData);
+
+//        List<QuoteEntity> newDataRecommend = new ArrayList<>(mNewDataRecommend.values());
+//        DiffUtil.DiffResult diffResultRecommend = DiffUtil.calculateDiff(new RecommendQuoteDiffCallback(mOldDataRecommend, newDataRecommend), false);
+//        mAdapterRecommend.setData(newDataRecommend);
+//        diffResultRecommend.dispatchUpdatesTo(mAdapterRecommend);
+//        mOldDataRecommend.clear();
+//        mOldDataRecommend.addAll(newDataRecommend);
 
         try {
             List<String> insList;
