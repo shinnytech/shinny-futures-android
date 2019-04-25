@@ -75,7 +75,6 @@ import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_4;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.MD_ONLINE;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_INS_LIST;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_ONLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_URL;
@@ -554,11 +553,6 @@ public class BaseApplication extends Application implements ServiceConnection {
                             mMyHandler.sendEmptyMessage(1);
                         else
                             ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
-                        break;
-                    case TD_MESSAGE_SETTLEMENT:
-                        Intent intent1 = new Intent(context, ConfirmActivity.class);
-                        intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        sContext.startActivity(intent1);
                         break;
                     default:
                         break;

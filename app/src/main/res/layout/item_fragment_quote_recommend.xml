@@ -63,13 +63,13 @@
             android:textSize="@dimen/font_size_normal"
             android:textStyle="bold" />
 
-        <ImageView
-            android:scaleType="center"
-            android:src="@mipmap/ic_favorite_white_18dp"
+        <TextView
+            android:drawableEnd="@mipmap/ic_favorite_white_18dp"
             android:id="@+id/add_recommend"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:paddingEnd="@dimen/padding_10dp"
             android:gravity="end|center_vertical" />
 
     </LinearLayout>

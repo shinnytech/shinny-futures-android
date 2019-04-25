@@ -25,11 +25,10 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:background="@color/transaction_dark"
-            android:orientation="horizontal"
-            android:paddingTop="@dimen/padding_5dp"
-            android:paddingBottom="@dimen/padding_5dp">
+            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="0dp"
@@ -98,7 +97,8 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="0dp"
+            android:layout_weight="2"
             android:layout_margin="@dimen/margin_10dp"
             android:baselineAligned="false"
             android:orientation="horizontal">
@@ -190,7 +190,10 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:layout_marginBottom="@dimen/margin_20dp"
             android:layout_marginLeft="@dimen/margin_10dp"
             android:layout_marginRight="@dimen/margin_10dp"
             android:baselineAligned="false"
@@ -199,10 +202,8 @@
             <LinearLayout
                 android:id="@+id/bid_open_position"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_5dp"
-                android:layout_marginEnd="@dimen/margin_5dp"
-                android:layout_marginBottom="@dimen/margin_5dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/margin_10dp"
                 android:layout_weight="1"
                 android:background="@color/bid"
                 android:gravity="center"
@@ -233,8 +234,8 @@
             <LinearLayout
                 android:id="@+id/ask_open_position"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/margin_5dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/margin_10dp"
                 android:layout_weight="1"
                 android:background="@color/ask"
                 android:gravity="center"
@@ -265,10 +266,7 @@
             <LinearLayout
                 android:id="@+id/close_position"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/margin_5dp"
-                android:layout_marginStart="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_5dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@color/close"
                 android:gravity="center"

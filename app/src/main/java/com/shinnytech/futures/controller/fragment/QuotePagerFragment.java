@@ -80,6 +80,7 @@ public class QuotePagerFragment extends Fragment {
         mViewPagerFragmentAdapter = new ViewPagerFragmentAdapter(getActivity().getSupportFragmentManager(), fragmentList);
         mBinding.quotePager.setAdapter(mViewPagerFragmentAdapter);
         mBinding.quotePager.setCurrentItem(0);
+        mBinding.quotePager.setOffscreenPageLimit(8);
     }
 
     private void initEvent() {

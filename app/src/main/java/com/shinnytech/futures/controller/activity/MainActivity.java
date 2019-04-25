@@ -197,10 +197,11 @@ public class MainActivity extends BaseActivity {
         String mIns = mMainActivityPresenter.getPreSubscribedQuotes();
 
         if (OPTIONAL.equals(quoteFragment.getTitle())) {
+            quoteFragment.refreshOptional();
             //自选合约管理菜单
-            if (requestCode == MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY)
-                quoteFragment.refreshOptional();
-            else quoteFragment.update();
+//            if (requestCode == MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY)
+//                quoteFragment.refreshOptional();
+//            else quoteFragment.update();
         } else {
             if (mIns != null && !mIns.equals(sDataManager.getRtnData().getIns_list())) {
                 BaseApplication.getWebSocketService().sendSubscribeQuote(mIns);

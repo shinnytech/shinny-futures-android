@@ -18,45 +18,50 @@
 
             <include layout="@layout/view_toolbar" />
 
-            <com.shinnytech.futures.view.customview.MyViewPager
-                android:id="@+id/vp_content"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_marginTop="?attr/actionBarSize"
-                android:layout_marginBottom="@dimen/margin_50dp" />
-
-            <ImageView
-                android:id="@+id/quote_nav_left"
-                android:layout_width="@dimen/image_view_size"
-                android:layout_height="@dimen/image_view_size"
                 android:layout_marginBottom="@dimen/margin_50dp"
-                android:layout_gravity="bottom|start"
-                android:background="@color/black_light"
-                android:contentDescription="left"
-                android:gravity="center"
-                android:src="@mipmap/ic_chevron_left_white_24dp" />
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/rv_quote_navigation"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/image_view_size"
-                android:layout_gravity="bottom|center_horizontal"
-                android:layout_marginStart="@dimen/margin_45dp"
-                android:layout_marginEnd="@dimen/margin_45dp"
-                android:layout_marginBottom="@dimen/margin_50dp"
-                android:background="@color/black_light"
-                android:gravity="center" />
+                android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/quote_nav_right"
-                android:layout_marginBottom="@dimen/margin_50dp"
-                android:layout_width="@dimen/image_view_size"
-                android:layout_height="@dimen/image_view_size"
-                android:layout_gravity="bottom|end"
-                android:background="@color/black_light"
-                android:contentDescription="right"
-                android:gravity="center"
-                android:src="@mipmap/ic_chevron_right_white_24dp" />
+                <com.shinnytech.futures.view.customview.MyViewPager
+                    android:id="@+id/vp_content"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp" />
+
+                <LinearLayout
+                    android:id="@+id/ll_navigation"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp">
+                    <ImageView
+                        android:id="@+id/quote_nav_left"
+                        android:layout_width="@dimen/image_view_size"
+                        android:layout_height="@dimen/image_view_size"
+                        android:background="@color/black_light"
+                        android:contentDescription="left"
+                        android:src="@mipmap/ic_chevron_left_white_24dp" />
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/rv_quote_navigation"
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/image_view_size"
+                        android:background="@color/black_light" />
+
+                    <ImageView
+                        android:id="@+id/quote_nav_right"
+                        android:layout_width="@dimen/image_view_size"
+                        android:layout_height="@dimen/image_view_size"
+                        android:background="@color/black_light"
+                        android:contentDescription="right"
+                        android:src="@mipmap/ic_chevron_right_white_24dp" />
+                </LinearLayout>
+
+
+            </LinearLayout>
 
             <android.support.design.widget.BottomNavigationView
                 app:itemIconTint="@drawable/bottom_navigation_selector"

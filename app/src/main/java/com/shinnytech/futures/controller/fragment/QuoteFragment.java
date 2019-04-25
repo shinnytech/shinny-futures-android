@@ -38,6 +38,7 @@ import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentQuoteBinding;
 import com.shinnytech.futures.model.adapter.DragDialogAdapter;
 import com.shinnytech.futures.model.adapter.QuoteAdapter;
+import com.shinnytech.futures.model.adapter.QuoteAdapterRecommend;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
@@ -46,26 +47,34 @@ import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.QuoteDiffCallback;
+import com.shinnytech.futures.model.listener.RecommendQuoteDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
+import com.shinnytech.futures.utils.LogUtils;
+import com.shinnytech.futures.utils.MathUtils;
+import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_RECOMMEND_OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
+import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_RECOMMEND_NUM;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
@@ -84,6 +93,30 @@ import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST
  */
 public class QuoteFragment extends LazyLoadFragment {
 
+    private static Comparator<String> comparator = new Comparator<String>() {
+        @Override
+        public int compare(String instrumentId1, String instrumentId2) {
+            try {
+                if (instrumentId1 == null || instrumentId2 == null) return 0;
+                QuoteEntity quoteEntity1 = DataManager.getInstance().getRtnData().getQuotes().get(instrumentId1);
+                QuoteEntity quoteEntity2 = DataManager.getInstance().getRtnData().getQuotes().get(instrumentId2);
+                if (quoteEntity1 == null || quoteEntity2 == null) {
+                    return instrumentId1.compareTo(instrumentId2);
+                }
+                String change1 = MathUtils.divide(MathUtils.subtract(quoteEntity1.getLast_price(), quoteEntity1.getPre_settlement()), quoteEntity1.getPre_settlement());
+                String change2 = MathUtils.divide(MathUtils.subtract(quoteEntity2.getLast_price(), quoteEntity2.getPre_settlement()), quoteEntity2.getPre_settlement());
+                if (MathUtils.upper(change1, change2)) {
+                    return -1;
+                } else if (MathUtils.lower(change1, change2)){
+                    return 1;
+                }else return 0;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return 0;
+            }
+        }
+    };
+
     /**
      * date: 7/9/17
      * description: 页面标题
@@ -96,13 +129,17 @@ public class QuoteFragment extends LazyLoadFragment {
      */
     private boolean mIsUpdate = true;
     private QuoteAdapter mAdapter;
+    private QuoteAdapterRecommend mAdapterRecommend;
     private DataManager mDataManager = DataManager.getInstance();
     private BroadcastReceiver mReceiver;
     private String mTitle = DOMINANT;
     private TextView mToolbarTitle;
     private List<String> mInsList = new ArrayList<>();
+    private List<String> mInsListRecommend = new ArrayList<>();
     private List<QuoteEntity> mOldData = new ArrayList<>();
+    private List<QuoteEntity> mOldDataRecommend = new ArrayList<>();
     private Map<String, QuoteEntity> mNewData = new TreeMap<>();
+    private Map<String, QuoteEntity> mNewDataRecommend = new TreeMap<>(comparator);
     private FragmentQuoteBinding mBinding;
     private Dialog mDialog;
     private RecyclerView mRecyclerView;
@@ -141,26 +178,67 @@ public class QuoteFragment extends LazyLoadFragment {
 
     private void initData() {
         mToolbarTitle = getActivity().findViewById(R.id.title_toolbar);
-        //新用户设置自选合约
-        initConfigOptional();
         mBinding.rvQuote.setLayoutManager(new LinearLayoutManager(getActivity()));
         mBinding.rvQuote.addItemDecoration(
                 new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
         mBinding.rvQuote.setItemAnimator(new DefaultItemAnimator());
         mAdapter = new QuoteAdapter(getActivity(), mOldData, mTitle);
         mBinding.rvQuote.setAdapter(mAdapter);
+
+        mBinding.rvQuoteRecommend.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mBinding.rvQuoteRecommend.addItemDecoration(
+                new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
+        mBinding.rvQuoteRecommend.setItemAnimator(new DefaultItemAnimator());
+        mAdapterRecommend = new QuoteAdapterRecommend(getActivity(), mOldDataRecommend);
+        mBinding.rvQuoteRecommend.setAdapter(mAdapterRecommend);
+
+        if (OPTIONAL.equals(mTitle)) {
+            //新用户设置自选合约
+            initConfigOptional();
+            //配置推荐合约列表
+            for (String ins : new ArrayList<>(LatestFileManager.getOptionalInsList().keySet())) {
+                LatestFileManager.getsRecommendInsList().remove(ins);
+            }
+
+            for (String ins :
+                    LatestFileManager.getsRecommendInsList().keySet()) {
+                QuoteEntity quoteEntity = CloneUtils.clone(DataManager.getInstance().getRtnData().getQuotes().get(ins));
+                mNewDataRecommend.put(ins, quoteEntity);
+            }
+
+            mInsListRecommend = new ArrayList<>(mNewDataRecommend.keySet());
+
+        }
     }
 
     @Override
     public void update() {
-        getQuoteInsList();
-
         try {
-            if (mInsList.size() <= LOAD_QUOTE_NUM) {
-                sendSubscribeQuotes(mInsList);
+            mBinding.rvQuote.scrollToPosition(0);
+            mBinding.rvQuoteRecommend.scrollToPosition(0);
+            getQuoteInsList();
+            if (OPTIONAL.equals(mTitle)) {
+                List<String> ins;
+                if (mInsList.size() <= LOAD_QUOTE_NUM) {
+                    ins = mInsList;
+                } else {
+                    ins = mInsList.subList(0, LOAD_QUOTE_RECOMMEND_NUM);
+                }
+                List<String> insRecommend;
+                if (mInsListRecommend.size() <= LOAD_QUOTE_NUM) {
+                    insRecommend = mInsListRecommend;
+                } else {
+                    insRecommend = mInsListRecommend.subList(0, LOAD_QUOTE_RECOMMEND_NUM);
+                }
+                ins.addAll(insRecommend);
+                sendSubscribeQuotes(ins);
             } else {
-                List<String> insList = mInsList.subList(0, LOAD_QUOTE_NUM);
-                sendSubscribeQuotes(insList);
+                if (mInsList.size() <= LOAD_QUOTE_NUM) {
+                    sendSubscribeQuotes(mInsList);
+                } else {
+                    List<String> insList = mInsList.subList(0, LOAD_QUOTE_NUM);
+                    sendSubscribeQuotes(insList);
+                }
             }
 
         } catch (IndexOutOfBoundsException e) {
@@ -173,13 +251,22 @@ public class QuoteFragment extends LazyLoadFragment {
      * author: chenli
      * description: 根据标题获取不同合约列表
      */
-    private void getQuoteInsList(){
+    private void getQuoteInsList() {
         if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
             mBinding.tvChangePercent.setText(R.string.quote_fragment_bid_price1);
             mBinding.tvOpenInterest.setText(R.string.quote_fragment_bid_volume1);
         } else {
             mBinding.tvChangePercent.setText(R.string.quote_fragment_up_down_rate);
             mBinding.tvOpenInterest.setText(R.string.quote_fragment_open_interest);
+        }
+
+        //控制合约推荐显示与否
+        if (OPTIONAL.equals(mTitle)) {
+            mBinding.rvQuoteRecommend.setVisibility(View.VISIBLE);
+            mBinding.tvRecommend.setVisibility(View.VISIBLE);
+        } else {
+            mBinding.rvQuoteRecommend.setVisibility(View.GONE);
+            mBinding.tvRecommend.setVisibility(View.GONE);
         }
 
         switch (mTitle) {
@@ -301,6 +388,63 @@ public class QuoteFragment extends LazyLoadFragment {
             }
         });
 
+        mAdapterRecommend.setOnItemClickListener(new QuoteAdapterRecommend.OnItemClickListener() {
+            @Override
+            public void OnItemCollect(View view, String instrument_id, int position) {
+                if (instrument_id == null || "".equals(instrument_id)) return;
+                Map<String, QuoteEntity> insListOptional = LatestFileManager.getOptionalInsList();
+                if (!insListOptional.containsKey(instrument_id)) {
+                    QuoteEntity quoteEntity = new QuoteEntity();
+                    quoteEntity.setInstrument_id(instrument_id);
+                    insListOptional.put(instrument_id, quoteEntity);
+                    LatestFileManager.saveInsListToFile(new ArrayList<>(insListOptional.keySet()));
+                    mInsListRecommend.remove(position);
+                    mNewDataRecommend.remove(instrument_id);
+                    refreshOptional();
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ToastNotificationUtils.showToast(BaseApplication.getContext(),
+                                    "该合约已添加到自选列表");
+                        }
+                    });
+                }
+            }
+        });
+
+        mBinding.rvQuoteRecommend.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                switch (newState) {
+                    case RecyclerView.SCROLL_STATE_IDLE:
+                        mIsUpdate = true;
+                        try {
+                            LinearLayoutManager lmRecommend = (LinearLayoutManager) recyclerView.getLayoutManager();
+                            int firstVisibleItemPositionRecommend = lmRecommend.findFirstVisibleItemPosition();
+                            int lastVisibleItemPositionRecommend = lmRecommend.findLastVisibleItemPosition();
+                            List<String> insListRecommend = mInsListRecommend.subList(firstVisibleItemPositionRecommend, lastVisibleItemPositionRecommend + 1);
+                            LinearLayoutManager lm = (LinearLayoutManager) mBinding.rvQuote.getLayoutManager();
+                            int firstVisibleItemPosition = lm.findFirstVisibleItemPosition();
+                            int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
+                            List<String> insList = mInsList.subList(firstVisibleItemPosition, lastVisibleItemPosition + 1);
+                            insList.addAll(insListRecommend);
+                            sendSubscribeQuotes(insList);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                        break;
+                    case RecyclerView.SCROLL_STATE_DRAGGING:
+                        mIsUpdate = false;
+                        break;
+                    case RecyclerView.SCROLL_STATE_SETTLING:
+                        mIsUpdate = false;
+                        break;
+                }
+            }
+
+        });
+
         mBinding.rvQuote.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -308,14 +452,19 @@ public class QuoteFragment extends LazyLoadFragment {
                 switch (newState) {
                     case RecyclerView.SCROLL_STATE_IDLE:
                         mIsUpdate = true;
-                        LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
-                        int firstVisibleItemPosition = lm.findFirstVisibleItemPosition();
-                        int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
                         try {
-                            if (mInsList.size() > LOAD_QUOTE_NUM) {
-                                List<String> insList = mInsList.subList(firstVisibleItemPosition, lastVisibleItemPosition + 1);
-                                sendSubscribeQuotes(insList);
+                            LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
+                            int firstVisibleItemPosition = lm.findFirstVisibleItemPosition();
+                            int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
+                            List<String> insList = mInsList.subList(firstVisibleItemPosition, lastVisibleItemPosition + 1);
+                            if (OPTIONAL.equals(mTitle)){
+                                LinearLayoutManager lmRecommend = (LinearLayoutManager) mBinding.rvQuoteRecommend.getLayoutManager();
+                                int firstVisibleItemPositionRecommend = lmRecommend.findFirstVisibleItemPosition();
+                                int lastVisibleItemPositionRecommend = lmRecommend.findLastVisibleItemPosition();
+                                List<String> insListRecommend = mInsListRecommend.subList(firstVisibleItemPositionRecommend, lastVisibleItemPositionRecommend + 1);
+                                insList.addAll(insListRecommend);
                             }
+                            sendSubscribeQuotes(insList);
                         } catch (IndexOutOfBoundsException e) {
                             e.printStackTrace();
                         }
@@ -341,8 +490,8 @@ public class QuoteFragment extends LazyLoadFragment {
                             String instrument_id = mAdapter.getData().get(position).getInstrument_id();
                             //添加判断，防止自选合约列表为空时产生无效的点击事件
                             if (instrument_id != null && !instrument_id.isEmpty()) {
-                                if (getActivity() instanceof MainActivity){
-                                    ((MainActivity)getActivity()).getmMainActivityPresenter()
+                                if (getActivity() instanceof MainActivity) {
+                                    ((MainActivity) getActivity()).getmMainActivityPresenter()
                                             .setPreSubscribedQuotes(mDataManager.getRtnData().getIns_list());
                                 }
                                 Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
@@ -425,7 +574,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                     mDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                                         @Override
                                         public void onDismiss(DialogInterface dialog) {
-                                            update();
+                                            refreshOptional();
                                         }
                                     });
                                     mDragDialogAdapter = new DragDialogAdapter(getActivity(), new ArrayList<>(insList.keySet()));
@@ -509,7 +658,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                 } else {
                                     insList.remove(instrument_id);
                                     LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
-                                    update();
+                                    refreshOptional();
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -526,8 +675,8 @@ public class QuoteFragment extends LazyLoadFragment {
                         trade.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                if (getActivity() instanceof MainActivity){
-                                    ((MainActivity)getActivity()).getmMainActivityPresenter()
+                                if (getActivity() instanceof MainActivity) {
+                                    ((MainActivity) getActivity()).getmMainActivityPresenter()
                                             .setPreSubscribedQuotes(mDataManager.getRtnData().getIns_list());
                                 }
                                 DataManager.getInstance().IS_SHOW_VP_CONTENT = true;
@@ -571,7 +720,7 @@ public class QuoteFragment extends LazyLoadFragment {
      */
     public void refreshUI(String title) {
         //防止相邻合约列表页面刷新
-        if (!title.equals(mTitle))return;
+        if (!title.equals(mTitle)) return;
         try {
             String[] insList = mDataManager.getRtnData().getIns_list().split(",");
             for (String ins : insList) {
@@ -584,6 +733,13 @@ public class QuoteFragment extends LazyLoadFragment {
                     }
                     mNewData.put(ins, quoteEntity);
                 }
+
+                if (OPTIONAL.equals(title) && mNewDataRecommend.containsKey(ins)) {
+                    QuoteEntity quoteEntity = CloneUtils.clone(mDataManager.getRtnData().getQuotes().get(ins));
+                    if (ins.contains("&") && ins.contains(" "))
+                        quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
+                    mNewDataRecommend.put(ins, quoteEntity);
+                }
             }
 
             List<QuoteEntity> newData = new ArrayList<>(mNewData.values());
@@ -592,6 +748,15 @@ public class QuoteFragment extends LazyLoadFragment {
             diffResult.dispatchUpdatesTo(mAdapter);
             mOldData.clear();
             mOldData.addAll(newData);
+
+            if (OPTIONAL.equals(title)) {
+                List<QuoteEntity> newDataRecommend = new ArrayList<>(mNewDataRecommend.values());
+                DiffUtil.DiffResult diffResultRecommend = DiffUtil.calculateDiff(new RecommendQuoteDiffCallback(mOldDataRecommend, newDataRecommend), false);
+                mAdapterRecommend.setData(newDataRecommend);
+                diffResultRecommend.dispatchUpdatesTo(mAdapterRecommend);
+                mOldDataRecommend.clear();
+                mOldDataRecommend.addAll(newDataRecommend);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -608,16 +773,14 @@ public class QuoteFragment extends LazyLoadFragment {
     @Subscribe
     public void onEvent(PositionEvent positionEvent) {
         if (mTitle.equals(mToolbarTitle.getText().toString())) {
-            int position = positionEvent.getPosition();
-            ((LinearLayoutManager) mBinding.rvQuote.getLayoutManager()).scrollToPositionWithOffset(position, 0);
-            int visibleItemCount1 = mBinding.rvQuote.getChildCount();
-            int lastPosition1 = (position + visibleItemCount1) > mInsList.size() ? mInsList.size() : (position + visibleItemCount1);
-            int firstPosition1 = (lastPosition1 - position) != visibleItemCount1 ? (lastPosition1 - visibleItemCount1) : position;
             try {
-                if (mInsList.size() > LOAD_QUOTE_NUM) {
-                    List<String> insList = mInsList.subList(firstPosition1, lastPosition1);
-                    sendSubscribeQuotes(insList);
-                }
+                int position = positionEvent.getPosition();
+                ((LinearLayoutManager) mBinding.rvQuote.getLayoutManager()).scrollToPositionWithOffset(position, 0);
+                int visibleItemCount1 = mBinding.rvQuote.getChildCount();
+                int lastPosition1 = (position + visibleItemCount1) > mInsList.size() ? mInsList.size() : (position + visibleItemCount1);
+                int firstPosition1 = (lastPosition1 - position) != visibleItemCount1 ? (lastPosition1 - visibleItemCount1) : position;
+                List<String> insList = mInsList.subList(firstPosition1, lastPosition1);
+                sendSubscribeQuotes(insList);
             } catch (IndexOutOfBoundsException e) {
                 e.printStackTrace();
             }
@@ -647,7 +810,7 @@ public class QuoteFragment extends LazyLoadFragment {
      * description: 配置新用户自选合约
      */
     public void initConfigOptional() {
-        if (LatestFileManager.getOptionalInsList().isEmpty()) {
+        if (!SPUtils.contains(BaseApplication.getContext(), CONFIG_RECOMMEND_OPTIONAL) && LatestFileManager.getOptionalInsList().isEmpty()) {
             final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
             View view = View.inflate(getActivity(), R.layout.view_dialog_init_optional, null);
             Window dialogWindow = dialog.getWindow();
@@ -677,7 +840,7 @@ public class QuoteFragment extends LazyLoadFragment {
                     UserEntity userEntity = mDataManager.getTradeBean().getUsers().get(mDataManager.USER_ID);
                     if (userEntity == null) return;
                     Map<String, PositionEntity> positions = userEntity.getPositions();
-                    //从来都没有持仓
+                    //持仓合约
                     if (!positions.isEmpty()) {
                         List<String> list = new ArrayList<>();
                         for (PositionEntity positionEntity : positions.values()) {
@@ -687,27 +850,13 @@ public class QuoteFragment extends LazyLoadFragment {
                                 list.add(positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id());
                             }
                         }
-                        //持仓已经全部平仓
-                        if (list.isEmpty()) addSomeMainListToOptional();
-                        else LatestFileManager.saveInsListToFile(list);
-                    } else addSomeMainListToOptional();
+                        LatestFileManager.saveInsListToFile(list);
+                    }
                     dialog.dismiss();
                 }
             }, 3000);
         }
 
-    }
-
-    /**
-     * date: 2019/4/2
-     * author: chenli
-     * description: 添加一些主力合约到自选中
-     */
-    private void addSomeMainListToOptional() {
-        List<String> list = new ArrayList<>(LatestFileManager.getMainInsList().keySet());
-        if (5 < list.size())
-            LatestFileManager.saveInsListToFile(new ArrayList<>(list.subList(0, 4)));
-        else LatestFileManager.saveInsListToFile(list);
     }
 
     public String getTitle() {
@@ -720,6 +869,7 @@ public class QuoteFragment extends LazyLoadFragment {
      * description: 自选合约管理菜单返回，刷新自选合约
      */
     public void refreshOptional() {
+        //先刷新列表再更新行情
         getQuoteInsList();
         mAdapter.setData(new ArrayList<>(mNewData.values()));
         List<QuoteEntity> newData = new ArrayList<>(mNewData.values());
@@ -728,15 +878,22 @@ public class QuoteFragment extends LazyLoadFragment {
         diffResult.dispatchUpdatesTo(mAdapter);
         mOldData.clear();
         mOldData.addAll(newData);
-        mBinding.rvQuote.scrollToPosition(0);
-        try {
-            if (mInsList.size() <= LOAD_QUOTE_NUM) {
-                sendSubscribeQuotes(mInsList);
-            } else {
-                List<String> insList = mInsList.subList(0, LOAD_QUOTE_NUM);
-                sendSubscribeQuotes(insList);
-            }
 
+        try {
+            List<String> insList;
+            if (mInsList.size() < LOAD_QUOTE_NUM)insList = mInsList;
+            else {
+                LinearLayoutManager lm = (LinearLayoutManager) mBinding.rvQuote.getLayoutManager();
+                int firstVisibleItemPosition = lm.findFirstVisibleItemPosition();
+                int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
+                insList = mInsList.subList(firstVisibleItemPosition, lastVisibleItemPosition + 1);
+            }
+            LinearLayoutManager lmRecommend = (LinearLayoutManager) mBinding.rvQuoteRecommend.getLayoutManager();
+            int firstVisibleItemPositionRecommend = lmRecommend.findFirstVisibleItemPosition();
+            int lastVisibleItemPositionRecommend = lmRecommend.findLastVisibleItemPosition();
+            List<String> insListRecommend = mInsListRecommend.subList(firstVisibleItemPositionRecommend, lastVisibleItemPositionRecommend + 1);
+            insList.addAll(insListRecommend);
+            sendSubscribeQuotes(insList);
         } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
         }

@@ -272,9 +272,9 @@ public class WebSocketService extends Service {
         } else {
             List<String> list = LatestFileManager.getCombineInsList(
                     new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
-
-            if (list.size() < LOAD_QUOTE_NUM) sendSubscribeQuote(TextUtils.join(",", list));
-            else sendSubscribeQuote(TextUtils.join(",", list.subList(0, LOAD_QUOTE_NUM)));
+            //推荐列表刷新
+            list.addAll(LatestFileManager.getsRecommendInsList().keySet());
+            sendSubscribeQuote(TextUtils.join(",", list));
         }
 
         if (!sDataManager.CHARTS.isEmpty() && mWebSocketClientMD != null) {

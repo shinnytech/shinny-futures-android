@@ -78,6 +78,7 @@ public final class CommonConstants {
     public static final int VIEW_WIDTH = 200;
     //订阅合约数
     public static final int LOAD_QUOTE_NUM = 24;
+    public static final int LOAD_QUOTE_RECOMMEND_NUM = 10;
     //页面跳转标志
     public static final int JUMP_TO_SEARCH_ACTIVITY = 1;
     public static final int JUMP_TO_FUTURE_INFO_ACTIVITY = 2;
@@ -112,6 +113,7 @@ public final class CommonConstants {
     public static final String CONFIG_ACCOUNT = "phone";
     public static final String CONFIG_BROKER = "brokerName";
     public static final String CONFIG_LOGIN_DATE = "loginDate";
+    public static final String CONFIG_RECOMMEND_OPTIONAL = "recommendOptional";
     //设置页信息
     public static final String CHART_SETTING = "图表设置";
     public static final String TRANSACTION_SETTING = "交易设置";

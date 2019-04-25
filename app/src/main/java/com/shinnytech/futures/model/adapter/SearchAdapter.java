@@ -117,8 +117,8 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ItemViewHo
 
     public class ItemViewHolder extends RecyclerView.ViewHolder {
 
-        SearchEntity searchEntity;
-        String instrument_id;
+        private SearchEntity searchEntity;
+        private String instrument_id;
 
         private ItemActivitySearchQuoteBinding mBinding;
 

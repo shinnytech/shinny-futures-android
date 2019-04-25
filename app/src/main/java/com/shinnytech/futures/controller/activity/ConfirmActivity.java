@@ -1,8 +1,10 @@
 package com.shinnytech.futures.controller.activity;
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
 
 import com.shinnytech.futures.R;
@@ -47,6 +49,8 @@ public class ConfirmActivity extends AppCompatActivity implements View.OnClickLi
                 case R.id.confirm:
                     if (BaseApplication.getWebSocketService() != null)
                         BaseApplication.getWebSocketService().sendReqConfirmSettlement();
+                    Intent mainIntent = new Intent(ConfirmActivity.this, MainActivity.class);
+                    ConfirmActivity.this.startActivity(mainIntent);
                     finish();
                     break;
                 default:
@@ -62,5 +66,11 @@ public class ConfirmActivity extends AppCompatActivity implements View.OnClickLi
     protected void onPause() {
         super.onPause();
         MobclickAgent.onPause(this);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        System.exit(0);
+        return super.onKeyDown(keyCode, event);
     }
 }

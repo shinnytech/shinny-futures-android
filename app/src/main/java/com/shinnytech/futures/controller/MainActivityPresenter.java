@@ -353,22 +353,13 @@ public class MainActivityPresenter {
                     case R.id.market:
                         mBinding.vpContent.setCurrentItem(0, false);
                         String title = ((QuotePagerFragment) mViewPagerFragmentAdapter.getItem(0)).getmTitle();
-                        if (OPTIONAL.equals(title)) {
-                            mBinding.rvQuoteNavigation.setVisibility(View.GONE);
-                            mBinding.quoteNavLeft.setVisibility(View.GONE);
-                            mBinding.quoteNavRight.setVisibility(View.GONE);
-                        } else {
-                            mBinding.rvQuoteNavigation.setVisibility(View.VISIBLE);
-                            mBinding.quoteNavLeft.setVisibility(View.VISIBLE);
-                            mBinding.quoteNavRight.setVisibility(View.VISIBLE);
-                        }
+                        if (OPTIONAL.equals(title)) mBinding.llNavigation.setVisibility(View.GONE);
+                        else mBinding.llNavigation.setVisibility(View.VISIBLE);
                         mToolbarTitle.setText(title);
                         mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
                         break;
                     case R.id.trade:
-                        mBinding.rvQuoteNavigation.setVisibility(View.GONE);
-                        mBinding.quoteNavLeft.setVisibility(View.GONE);
-                        mBinding.quoteNavRight.setVisibility(View.GONE);
+                        mBinding.llNavigation.setVisibility(View.GONE);
                         mBinding.vpContent.setCurrentItem(1, false);
                         mToolbarTitle.setText(ACCOUNT_DETAIL);
                         mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
@@ -487,15 +478,9 @@ public class MainActivityPresenter {
         layoutParams.height = sContext.getResources().getDimensionPixelSize(R.dimen.text_view_height);
         layoutParams.width = width;
         mToolbarTitle.setLayoutParams(layoutParams);
-        if (OPTIONAL.equals(mTitle)) {
-            mBinding.rvQuoteNavigation.setVisibility(View.GONE);
-            mBinding.quoteNavLeft.setVisibility(View.GONE);
-            mBinding.quoteNavRight.setVisibility(View.GONE);
-        } else {
-            mBinding.rvQuoteNavigation.setVisibility(View.VISIBLE);
-            mBinding.quoteNavLeft.setVisibility(View.VISIBLE);
-            mBinding.quoteNavRight.setVisibility(View.VISIBLE);
-        }
+        if (OPTIONAL.equals(mTitle)) mBinding.llNavigation.setVisibility(View.GONE);
+        else mBinding.llNavigation.setVisibility(View.VISIBLE);
+
         switch (mTitle) {
             case DOMINANT:
                 mInsListNameNav = LatestFileManager.getMainInsListNameNav();

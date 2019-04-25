@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.databinding.ItemFragmentQuoteBinding;
+import com.shinnytech.futures.databinding.ItemFragmentQuoteRecommendBinding;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
@@ -19,9 +19,6 @@ import com.shinnytech.futures.utils.MathUtils;
 
 import java.util.List;
 
-import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
-import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
-import static com.shinnytech.futures.model.engine.LatestFileManager.getUpDown;
 import static com.shinnytech.futures.model.engine.LatestFileManager.getUpDownRate;
 
 
@@ -32,17 +29,14 @@ import static com.shinnytech.futures.model.engine.LatestFileManager.getUpDownRat
  * version:
  * state: done
  */
-public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHolder> {
+public class QuoteAdapterRecommend extends RecyclerView.Adapter<QuoteAdapterRecommend.ItemViewHolder> {
     private Context sContext;
     private List<QuoteEntity> mData;
-    private String mTitle;
-    private boolean mSwitchChange = false;
-    private boolean mSwitchVolume = false;
+    private OnItemClickListener mOnItemClickListener;
 
-    public QuoteAdapter(Context context, List<QuoteEntity> data, String title) {
+    public QuoteAdapterRecommend(Context context, List<QuoteEntity> data) {
         this.sContext = context;
         this.mData = data;
-        this.mTitle = title;
     }
 
     public List<QuoteEntity> getData() {
@@ -53,32 +47,17 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
         this.mData = data;
     }
 
-    /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 涨跌/涨跌幅切换
-     */
-    public void switchChangeView() {
-        mSwitchChange = !mSwitchChange;
-        notifyDataSetChanged();
-    }
-
-    /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 持仓量/成交量切换
-     */
-    public void switchVolView() {
-        mSwitchVolume = !mSwitchVolume;
-        notifyDataSetChanged();
+    public void setOnItemClickListener(OnItemClickListener mOnItemClickListener) {
+        this.mOnItemClickListener = mOnItemClickListener;
     }
 
     @Override
     public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        ItemFragmentQuoteBinding binding = DataBindingUtil.inflate(LayoutInflater
-                .from(sContext), R.layout.item_fragment_quote, parent, false);
+        ItemFragmentQuoteRecommendBinding binding = DataBindingUtil.inflate(LayoutInflater
+                .from(sContext), R.layout.item_fragment_quote_recommend, parent, false);
         ItemViewHolder holder = new ItemViewHolder(binding.getRoot());
         holder.setBinding(binding);
+        holder.initEvent();
         return holder;
     }
 
@@ -102,6 +81,11 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
         return mData == null ? 0 : mData.size();
     }
 
+    public interface OnItemClickListener {
+        void OnItemCollect(View view, String instrument_id, int position);
+    }
+
+
     /**
      * date: 2019/4/22
      * author: chenli
@@ -111,26 +95,40 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
      */
     class ItemViewHolder extends RecyclerView.ViewHolder {
 
-        private ItemFragmentQuoteBinding mBinding;
+        private ItemFragmentQuoteRecommendBinding mBinding;
+        private String instrumentId;
+        private int position;
 
         public ItemViewHolder(View itemView) {
             super(itemView);
         }
 
-        public ItemFragmentQuoteBinding getBinding() {
+        public ItemFragmentQuoteRecommendBinding getBinding() {
             return this.mBinding;
         }
 
-        public void setBinding(ItemFragmentQuoteBinding binding) {
+        public void setBinding(ItemFragmentQuoteRecommendBinding binding) {
             this.mBinding = binding;
+        }
+
+        private void initEvent() {
+            mBinding.addRecommend.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mOnItemClickListener != null) {
+                        mOnItemClickListener.OnItemCollect(v, instrumentId, position);
+                    }
+                }
+            });
         }
 
         public void update() {
             if (mData == null || mData.size() == 0) return;
-            QuoteEntity quoteEntity = mData.get(getLayoutPosition());
+            position = getLayoutPosition();
+            QuoteEntity quoteEntity = mData.get(position);
             if (quoteEntity == null) return;
             try {
-                String instrumentId = quoteEntity.getInstrument_id();
+                instrumentId = quoteEntity.getInstrument_id();
                 if (instrumentId == null) return;
                 String instrumentName = instrumentId;
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrumentId);
@@ -143,35 +141,10 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                 String latest = LatestFileManager.saveScaleByPtick(quoteEntity.getLast_price(), instrumentId);
                 String changePercent = MathUtils.round(
                         getUpDownRate(quoteEntity.getLast_price(), quoteEntity.getPre_settlement()), 2);
-                String change = LatestFileManager.saveScaleByPtick(
-                        getUpDown(quoteEntity.getLast_price(), quoteEntity.getPre_settlement()), instrumentId);
-                String askPrice1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(), instrumentId);
-                String bidPrice1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(), instrumentId);
 
                 setTextColor(mBinding.quoteLatest, latest, pre_settlement);
-                if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
-                    if (mSwitchChange) {
-                        setTextColor(mBinding.quoteChangePercent, askPrice1, pre_settlement);
-                    } else {
-                        setTextColor(mBinding.quoteChangePercent, bidPrice1, pre_settlement);
-                    }
-                    if (mSwitchVolume) {
-                        mBinding.quoteOpenInterest.setText(quoteEntity.getAsk_volume1());
-                    } else {
-                        mBinding.quoteOpenInterest.setText(quoteEntity.getBid_volume1());
-                    }
-                } else {
-                    if (mSwitchChange) {
-                        setChangeTextColor(mBinding.quoteChangePercent, change);
-                    } else {
-                        setChangeTextColor(mBinding.quoteChangePercent, changePercent);
-                    }
-                    if (mSwitchVolume) {
-                        mBinding.quoteOpenInterest.setText(quoteEntity.getVolume());
-                    } else {
-                        mBinding.quoteOpenInterest.setText(quoteEntity.getOpen_interest());
-                    }
-                }
+                setChangeTextColor(mBinding.quoteChangePercent, changePercent);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -187,45 +160,8 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                     case "latest":
                         setTextColor(mBinding.quoteLatest, value, bundle.getString("pre_settlement"));
                         break;
-                    case "change":
-                        if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchChange) {
-                            setChangeTextColor(mBinding.quoteChangePercent, value);
-                        }
-                        break;
                     case "change_percent":
-                        if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && !mSwitchChange) {
-                            setChangeTextColor(mBinding.quoteChangePercent, value);
-                        }
-                        break;
-                    case "volume":
-                        if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchVolume) {
-                            mBinding.quoteOpenInterest.setText(value);
-                        }
-                        break;
-                    case "open_interest":
-                        if (!(DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && !mSwitchVolume) {
-                            mBinding.quoteOpenInterest.setText(value);
-                        }
-                        break;
-                    case "ask_price1":
-                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchChange) {
-                            setTextColor(mBinding.quoteChangePercent, value, bundle.getString("pre_settlement"));
-                        }
-                        break;
-                    case "ask_volume1":
-                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchVolume) {
-                            mBinding.quoteOpenInterest.setText(value);
-                        }
-                        break;
-                    case "bid_price1":
-                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && !mSwitchChange) {
-                            setTextColor(mBinding.quoteChangePercent, value, bundle.getString("pre_settlement"));
-                        }
-                        break;
-                    case "bid_volume1":
-                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && !mSwitchVolume) {
-                            mBinding.quoteOpenInterest.setText(value);
-                        }
+                        setChangeTextColor(mBinding.quoteChangePercent, value);
                         break;
                     default:
                         break;

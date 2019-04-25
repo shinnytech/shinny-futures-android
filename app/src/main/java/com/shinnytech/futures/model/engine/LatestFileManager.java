@@ -97,6 +97,12 @@ public class LatestFileManager {
     private static final Map<String, SearchEntity> SEARCH_ENTITIES = new TreeMap<>(comparator);
 
     /**
+     * date: 2019/4/24
+     * description: 推荐合约列表
+     */
+    private static Map<String, QuoteEntity> sRecommendInsList = new TreeMap<>(comparator);
+
+    /**
      * date: 7/9/17
      * description: 自选合约列表
      */
@@ -268,6 +274,10 @@ public class LatestFileManager {
                     quoteEntity.setInstrument_id(underlying_symbol);
                     sMainInsList.put(underlying_symbol, quoteEntity);
                     sMainInsListNameNav.put(underlying_symbol, ins_name.replace("主连", ""));
+
+                    QuoteEntity quoteEntity1 = new QuoteEntity();
+                    quoteEntity1.setInstrument_id(underlying_symbol);
+                    sRecommendInsList.put(underlying_symbol, quoteEntity1);
                 }
 
                 if ("FUTURE".equals(classN)) {
@@ -342,11 +352,17 @@ public class LatestFileManager {
         }
     }
 
+    public static Map<String, QuoteEntity> getsRecommendInsList() {
+        return sRecommendInsList;
+    }
+
     /**
      * date: 7/9/17
      * author: chenli
      * description: 获取合约列表
      */
+
+
     public static Map<String, QuoteEntity> getOptionalInsList() {
         List<String> insList = readInsListFromFile();
         sOptionalInsList.clear();
