@@ -62,6 +62,7 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -133,8 +134,9 @@ public class QuoteFragment extends LazyLoadFragment {
     private List<String> mInsListRecommend = new ArrayList<>();
     private List<QuoteEntity> mOldData = new ArrayList<>();
     private List<QuoteEntity> mOldDataRecommend = new ArrayList<>();
-    private Map<String, QuoteEntity> mNewData = new TreeMap<>();
-    private Map<String, QuoteEntity> mNewDataRecommend = new TreeMap<>(comparator);
+    private Map<String, QuoteEntity> mNewData = new LinkedHashMap<>();
+    private Map<String, QuoteEntity> mNewDataRecommend = new LinkedHashMap<>();
+    private Map<String, QuoteEntity> sortedRecommend = new TreeMap<>(comparator);
     private FragmentQuoteBinding mBinding;
     private Dialog mDialog;
     private RecyclerView mRecyclerView;
@@ -190,16 +192,14 @@ public class QuoteFragment extends LazyLoadFragment {
         if (OPTIONAL.equals(mTitle)) {
             //新用户设置自选合约
             initConfigOptional();
+
             //配置推荐合约列表
-            for (String ins : new ArrayList<>(LatestFileManager.getOptionalInsList().keySet())) {
-                LatestFileManager.getsRecommendInsList().remove(ins);
-            }
-            for (String ins :
-                    LatestFileManager.getsRecommendInsList().keySet()) {
+            for (String ins : LatestFileManager.getMainInsList().keySet()) {
                 QuoteEntity quoteEntity = CloneUtils.clone(DataManager.getInstance().getRtnData().getQuotes().get(ins));
-                mNewDataRecommend.put(ins, quoteEntity);
+                if (!LatestFileManager.getOptionalInsList().containsKey(ins))sortedRecommend.put(ins, quoteEntity);
             }
 
+            mNewDataRecommend.putAll(sortedRecommend);
             mInsListRecommend = new ArrayList<>(mNewDataRecommend.keySet());
         }
     }
@@ -267,28 +267,28 @@ public class QuoteFragment extends LazyLoadFragment {
                 mNewData = LatestFileManager.getOptionalInsList();
                 break;
             case DOMINANT:
-                mNewData = LatestFileManager.getMainInsList();
+                mNewData.putAll(LatestFileManager.getMainInsList());
                 break;
             case SHANGHAI:
-                mNewData = LatestFileManager.getShangqiInsList();
+                mNewData.putAll(LatestFileManager.getShangqiInsList());
                 break;
             case NENGYUAN:
-                mNewData = LatestFileManager.getNengyuanInsList();
+                mNewData.putAll(LatestFileManager.getNengyuanInsList());
                 break;
             case DALIAN:
-                mNewData = LatestFileManager.getDalianInsList();
+                mNewData.putAll(LatestFileManager.getDalianInsList());
                 break;
             case ZHENGZHOU:
-                mNewData = LatestFileManager.getZhengzhouInsList();
+                mNewData.putAll(LatestFileManager.getZhengzhouInsList());
                 break;
             case ZHONGJIN:
-                mNewData = LatestFileManager.getZhongjinInsList();
+                mNewData.putAll(LatestFileManager.getZhongjinInsList());
                 break;
             case DALIANZUHE:
-                mNewData = LatestFileManager.getDalianzuheInsList();
+                mNewData.putAll(LatestFileManager.getDalianzuheInsList());
                 break;
             case ZHENGZHOUZUHE:
-                mNewData = LatestFileManager.getZhengzhouzuheInsList();
+                mNewData.putAll(LatestFileManager.getZhengzhouzuheInsList());
                 break;
             default:
                 break;
@@ -392,7 +392,6 @@ public class QuoteFragment extends LazyLoadFragment {
                     insListOptional.put(instrument_id, quoteEntity);
                     LatestFileManager.saveInsListToFile(new ArrayList<>(insListOptional.keySet()));
                     mInsListRecommend.remove(position);
-                    mNewDataRecommend.remove(instrument_id);
                     refreshOptional();
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -871,13 +870,6 @@ public class QuoteFragment extends LazyLoadFragment {
         diffResult.dispatchUpdatesTo(mAdapter);
         mOldData.clear();
         mOldData.addAll(newData);
-
-//        List<QuoteEntity> newDataRecommend = new ArrayList<>(mNewDataRecommend.values());
-//        DiffUtil.DiffResult diffResultRecommend = DiffUtil.calculateDiff(new RecommendQuoteDiffCallback(mOldDataRecommend, newDataRecommend), false);
-//        mAdapterRecommend.setData(newDataRecommend);
-//        diffResultRecommend.dispatchUpdatesTo(mAdapterRecommend);
-//        mOldDataRecommend.clear();
-//        mOldDataRecommend.addAll(newDataRecommend);
 
         try {
             List<String> insList;

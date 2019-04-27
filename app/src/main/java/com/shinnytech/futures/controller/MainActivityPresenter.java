@@ -6,12 +6,10 @@ import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -53,8 +51,8 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -168,6 +166,9 @@ public class MainActivityPresenter {
         NavigationRightEntity menu5 = new NavigationRightEntity();
         menu5.setIcon(R.mipmap.ic_account_balance_white_18dp);
         menu5.setContent(CommonConstants.BANK_OUT);
+        NavigationRightEntity menu10 = new NavigationRightEntity();
+        menu10.setIcon(R.mipmap.ic_supervisor_account_white_18dp);
+        menu10.setContent(CommonConstants.CONDITIONAL_ORDER);
         NavigationRightEntity menu6 = new NavigationRightEntity();
         menu6.setIcon(R.mipmap.ic_supervisor_account_white_18dp);
         menu6.setContent(CommonConstants.OPEN_ACCOUNT);
@@ -185,6 +186,7 @@ public class MainActivityPresenter {
         list.add(menu3);
         list.add(menu4);
         list.add(menu5);
+        list.add(menu10);
         list.add(menu6);
         list.add(menu7);
         list.add(menu8);
@@ -265,6 +267,9 @@ public class MainActivityPresenter {
                         Intent intentBankOut = new Intent(mMainActivity, BankTransferActivity.class);
                         intentBankOut.putExtra(TRANSFER_DIRECTION, BANK_OUT);
                         mMainActivity.startActivity(intentBankOut);
+                        break;
+                    case CommonConstants.CONDITIONAL_ORDER:
+                        ToastNotificationUtils.showToast(sContext, "敬请期待！");
                         break;
                     case CommonConstants.OPEN_ACCOUNT:
 //                        Intent intentOpenAccount = new Intent(mMainActivity, OpenAccountActivity.class);

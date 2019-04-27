@@ -3,119 +3,123 @@
 
     <data></data>
 
-    <ScrollView xmlns:tools="http://schemas.android.com/tools"
+    <android.support.design.widget.CoordinatorLayout
+        android:keepScreenOn="true"
+        xmlns:tools="http://schemas.android.com/tools"
         tools:context=".controller.activity.LoginActivity"
-        android:id="@+id/sv"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-        <LinearLayout
+        <ScrollView
+            android:id="@+id/sv"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:keepScreenOn="true"
-            android:orientation="vertical">
-
-            <ImageView
-                android:id="@+id/icon"
-                android:src="@mipmap/ic_launcher"
-                android:layout_marginTop="@dimen/margin_45dp"
-                android:layout_gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="45dp" />
-
-            <TextView
-                android:layout_marginStart="@dimen/margin_30dp"
-                android:layout_marginEnd="@dimen/margin_30dp"
-                android:id="@+id/hint"
-                android:gravity="center"
-                android:textSize="@dimen/font_size_small"
-                android:textColor="@color/gray"
-                android:text="实盘客户，请登录以进行交易，访问实盘报价和账户信息"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:layout_marginStart="@dimen/margin_30dp"
                 android:layout_marginTop="@dimen/margin_50dp"
+                android:layout_marginStart="@dimen/margin_30dp"
                 android:layout_marginEnd="@dimen/margin_30dp"
-                android:layout_marginBottom="@dimen/margin_20dp"
-                android:background="@drawable/rectangle_border"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/firm"
-                    android:background="@color/gray"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:text="实盘"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/font_size_small" />
-
-                <TextView
-                    android:id="@+id/simulation"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="match_parent"
-                    android:text="模拟"
-                    android:textColor="@color/gray"
-                    android:textSize="@dimen/font_size_small" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/ll_broker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_10dp"
-                android:layout_marginEnd="@dimen/margin_10dp"
-                android:background="@drawable/rectangle_border"
-                android:orientation="horizontal">
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_marginBottom="@dimen/margin_30dp"
+                    android:layout_width="200dp"
+                    android:layout_height="45dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/ll_firm"
+                        android:paddingStart="@dimen/padding_10dp"
+                        android:paddingEnd="@dimen/padding_10dp"
+                        android:orientation="vertical"
+                        android:layout_width="80dp"
+                        android:layout_height="match_parent">
+                        <TextView
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:id="@+id/firm"
+                            android:textSize="@dimen/font_size_normal_high"
+                            android:textColor="@color/white"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:text="实 盘" />
+
+                        <View
+                            android:id="@+id/firm_underline"
+                            android:background="@color/launch"
+                            android:layout_width="match_parent"
+                            android:layout_height="2dp"></View>
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:id="@+id/ll_simulation"
+                        android:paddingStart="@dimen/padding_10dp"
+                        android:paddingEnd="@dimen/padding_10dp"
+                        android:orientation="vertical"
+                        android:layout_width="80dp"
+                        android:layout_height="match_parent">
+                        <TextView
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:id="@+id/simulation"
+                            android:textSize="@dimen/font_size_normal_high"
+                            android:textColor="@color/login_gray"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="1"
+                            android:text="模 拟" />
+
+                        <View
+                            android:id="@+id/simulation_underline"
+                            android:visibility="invisible"
+                            android:background="@color/launch"
+                            android:layout_width="match_parent"
+                            android:layout_height="2dp"></View>
+                    </LinearLayout>
+
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tv_broker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
-                    android:padding="@dimen/padding_10dp"
+                    android:paddingStart="@dimen/padding_10dp"
                     android:text="期货公司"
-                    android:textColor="@color/gray"
+                    android:textColor="@color/login_gray"
                     android:textSize="@dimen/font_size_normal" />
 
-                <TextView
-                    android:id="@+id/broker"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_marginBottom="@dimen/margin_10dp"
+                    android:id="@+id/ll_broker"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:padding="@dimen/padding_10dp"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_normal" />
+                    android:background="@drawable/login_rectangle_border"
+                    android:orientation="horizontal">
 
-                <ImageView
-                    android:id="@+id/select_broker"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="@dimen/margin_10dp"
-                    android:layout_marginEnd="@dimen/margin_10dp"
-                    android:background="@drawable/login_icon_bg"
-                    android:src="@mipmap/ic_chevron_right_white_18dp" />
+                    <TextView
+                        android:id="@+id/broker"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="@dimen/padding_10dp"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_size_normal" />
 
-            </LinearLayout>
+                    <ImageView
+                        android:id="@+id/select_broker"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="@dimen/margin_10dp"
+                        android:layout_marginEnd="@dimen/margin_10dp"
+                        android:src="@mipmap/ic_chevron_right_white_18dp" />
 
-            <LinearLayout
-                android:id="@+id/ll_account"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/margin_10dp"
-                android:background="@drawable/rectangle_border"
-                android:orientation="horizontal">
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tv_account"
@@ -123,43 +127,42 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:gravity="center_vertical"
-                    android:padding="@dimen/padding_10dp"
+                    android:paddingStart="@dimen/padding_10dp"
                     android:text="资金账号"
-                    android:textColor="@color/gray"
+                    android:textColor="@color/login_gray"
                     android:textSize="@dimen/font_size_normal" />
 
-                <EditText
-                    android:id="@+id/account"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_marginBottom="@dimen/margin_10dp"
+                    android:id="@+id/ll_account"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@null"
-                    android:gravity="center_vertical"
-                    android:maxLines="1"
-                    android:padding="@dimen/padding_10dp"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_normal" />
+                    android:background="@drawable/login_rectangle_border"
+                    android:orientation="horizontal">
 
-                <ImageView
-                    android:id="@+id/delete_account"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="@dimen/margin_10dp"
-                    android:layout_marginEnd="@dimen/margin_10dp"
-                    android:background="@drawable/login_icon_bg"
-                    android:src="@mipmap/ic_cancel_white_18dp"
-                    android:visibility="invisible" />
-            </LinearLayout>
+                    <EditText
+                        android:id="@+id/account"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:padding="@dimen/padding_10dp"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_size_normal" />
 
-            <LinearLayout
-                android:id="@+id/ll_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_10dp"
-                android:layout_marginEnd="@dimen/margin_10dp"
-                android:background="@drawable/rectangle_border"
-                android:orientation="horizontal">
+                    <ImageView
+                        android:id="@+id/delete_account"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="@dimen/margin_10dp"
+                        android:layout_marginEnd="@dimen/margin_10dp"
+                        android:background="@drawable/login_icon_bg"
+                        android:src="@mipmap/ic_cancel_white_18dp"
+                        android:visibility="invisible" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tv_password"
@@ -167,62 +170,84 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:gravity="center_vertical"
-                    android:padding="@dimen/padding_10dp"
-                    android:text="登录密码"
-                    android:textColor="@color/gray"
+                    android:paddingStart="@dimen/padding_10dp"
+                    android:text="密码"
+                    android:textColor="@color/login_gray"
                     android:textSize="@dimen/font_size_normal" />
 
-                <EditText
-                    android:id="@+id/password"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_marginBottom="@dimen/margin_30dp"
+                    android:id="@+id/ll_password"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@null"
-                    android:gravity="center_vertical"
-                    android:inputType="textPassword"
-                    android:maxLines="1"
-                    android:padding="@dimen/padding_10dp"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_normal" />
+                    android:background="@drawable/login_rectangle_border"
+                    android:orientation="horizontal">
 
-                <ImageView
-                    android:id="@+id/delete_password"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    <EditText
+                        android:id="@+id/password"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:gravity="center_vertical"
+                        android:inputType="textPassword"
+                        android:maxLines="1"
+                        android:padding="@dimen/padding_10dp"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_size_normal" />
+
+                    <ImageView
+                        android:id="@+id/delete_password"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="@dimen/margin_10dp"
+                        android:layout_marginEnd="@dimen/margin_10dp"
+                        android:background="@drawable/login_icon_bg"
+                        android:src="@mipmap/ic_cancel_white_18dp"
+                        android:visibility="invisible" />
+
+                </LinearLayout>
+
+                <Button
+                    android:layout_marginBottom="@dimen/margin_30dp"
+                    android:id="@+id/button_id_login"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:background="@drawable/login_selector"
+                    android:gravity="center"
+                    android:text="@string/login_activity_btn_login"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/font_size_normal_high" />
+
+                <View
+                    android:background="@color/login_gray"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"/>
+
+                <TextView
+                    android:id="@+id/visitor"
+                    android:gravity="center"
                     android:layout_gravity="center"
-                    android:layout_marginStart="@dimen/margin_10dp"
-                    android:layout_marginEnd="@dimen/margin_10dp"
-                    android:background="@drawable/login_icon_bg"
-                    android:src="@mipmap/ic_cancel_white_18dp"
-                    android:visibility="invisible" />
+                    android:textColor="@color/login_gray"
+                    android:text="随便看看"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp" />
 
             </LinearLayout>
 
-            <Button
-                android:id="@+id/button_id_login"
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_marginLeft="@dimen/margin_10dp"
-                android:layout_marginTop="@dimen/margin_20dp"
-                android:layout_marginRight="@dimen/margin_10dp"
-                android:background="@drawable/login_selector"
-                android:gravity="center"
-                android:text="@string/login_activity_btn_login"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_normal_high" />
+        </ScrollView>
 
-            <TextView
-                android:id="@+id/visitor"
-                android:gravity="center"
-                android:layout_gravity="center"
-                android:textColor="@color/gray"
-                android:text="随便看看"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp" />
+        <TextView
+            android:visibility="gone"
+            android:background="@color/login_simulation_hint"
+            android:id="@+id/simulation_hint"
+            android:gravity="center"
+            android:layout_gravity="bottom"
+            android:textColor="@color/white"
+            android:text="无需注册，直接输入手机号和密码开启模拟之旅！"
+            android:layout_width="match_parent"
+            android:layout_height="30dp" />
 
-        </LinearLayout>
-
-    </ScrollView>
-
-
+    </android.support.design.widget.CoordinatorLayout>
 </layout>

@@ -148,5 +148,7 @@
     <color name="position_highlight">#99dcdc0a</color>
 
     <!--登录页-->
-    <color name="transparent">#00000000</color>
+    <color name="login_transparent">#00000000</color>
+    <color name="login_gray">#88ffffff</color>
+    <color name="login_simulation_hint">#88BE000F</color>
 </resources>

@@ -41,6 +41,7 @@ public final class CommonConstants {
     public static final String BANK_IN = "资金转入";
     public static final String BANK_OUT = "资金转出";
     public static final String OPEN_ACCOUNT = "在线开户";
+    public static final String CONDITIONAL_ORDER = "云条件单";
     public static final String FEEDBACK = "问题反馈";
     public static final String ABOUT = "关于";
     public static final String OFFLINE = "交易、行情网络未连接！";

@@ -224,127 +224,132 @@ public class LatestFileManager {
             jsonObject = new JSONObject(latest);
             Iterator<String> instrumentIds = jsonObject.keys();
             while (instrumentIds.hasNext()) {
-                String instrument_id = instrumentIds.next();
-                JSONObject subObject = jsonObject.getJSONObject(instrument_id);
-                String classN = subObject.optString("class");
-                if (!"FUTURE_CONT".equals(classN) && !"FUTURE".equals(classN) &&
-                        !"FUTURE_COMBINE".equals(classN) && !"FUTURE_OPTION".equals(classN)) {
+
+                try {
+                    String instrument_id = instrumentIds.next();
+                    JSONObject subObject = jsonObject.getJSONObject(instrument_id);
+                    String classN = subObject.optString("class");
+                    if (!"FUTURE_CONT".equals(classN) && !"FUTURE".equals(classN) &&
+                            !"FUTURE_COMBINE".equals(classN) && !"FUTURE_OPTION".equals(classN)) {
+                        continue;
+                    }
+                    String ins_name = subObject.optString("ins_name");
+                    String ins_id = subObject.optString("ins_id");
+                    String product_id = subObject.optString("product_id");
+                    String exchange_id = subObject.optString("exchange_id");
+                    String price_tick = subObject.optString("price_tick");
+                    String price_decs = subObject.optString("price_decs");
+                    String volume_multiple = subObject.optString("volume_multiple");
+                    String sort_key = subObject.optString("sort_key");
+                    String product_short_name = subObject.optString("product_short_name");
+                    String py = subObject.optString("py");
+                    boolean expired = subObject.optBoolean("expired");
+                    int pre_volume = subObject.optInt("pre_volume");
+                    SearchEntity searchEntity = new SearchEntity();
+                    searchEntity.setIns_id(ins_id);
+                    searchEntity.setProduct_id(product_id);
+                    searchEntity.setpTick(price_tick);
+                    searchEntity.setpTick_decs(price_decs);
+                    searchEntity.setInstrumentId(instrument_id);
+                    searchEntity.setInstrumentName(ins_name);
+                    searchEntity.setVm(volume_multiple);
+                    searchEntity.setExchangeId(exchange_id);
+                    searchEntity.setSort_key(sort_key);
+                    searchEntity.setPy(py);
+                    searchEntity.setExpired(expired);
+                    searchEntity.setPre_volume(pre_volume);
+                    QuoteEntity quoteEntity = new QuoteEntity();
+                    quoteEntity.setInstrument_id(instrument_id);
+
+                    if ("FUTURE_CONT".equals(classN)) {
+                        String underlying_symbol = subObject.optString("underlying_symbol");
+                        if ("".equals(underlying_symbol)) continue;
+                        searchEntity.setUnderlying_symbol(underlying_symbol);
+                        JSONObject subObjectFuture = jsonObject.optJSONObject(underlying_symbol);
+                        int pre_volume_f = subObjectFuture.optInt("pre_volume");
+                        String product_id_f = subObjectFuture.optString("product_id");
+                        String ins_id_f = subObjectFuture.optString("ins_id");
+                        searchEntity.setPre_volume(pre_volume_f);
+                        searchEntity.setProduct_id(product_id_f);
+                        searchEntity.setIns_id(ins_id_f);
+                        //主力合约页直接显示标的合约
+                        quoteEntity.setInstrument_id(underlying_symbol);
+                        sMainInsList.put(underlying_symbol, quoteEntity);
+                        sMainInsListNameNav.put(underlying_symbol, ins_name.replace("主连", ""));
+
+                        QuoteEntity quoteEntity1 = new QuoteEntity();
+                        quoteEntity1.setInstrument_id(underlying_symbol);
+                        sRecommendInsList.put(underlying_symbol, quoteEntity1);
+                    }
+
+                    if ("FUTURE".equals(classN)) {
+                        switch (exchange_id) {
+                            case SHFE://上期所
+                                if (!expired) sShangqiInsList.put(instrument_id, quoteEntity);
+                                if (!sShangqiInsListNameNav.containsValue(product_short_name))
+                                    sShangqiInsListNameNav.put(instrument_id, product_short_name);
+                                searchEntity.setExchangeName(SHFE_ZN);
+                                break;
+                            case CZCE://郑商所
+                                if (!expired) sZhengzhouInsList.put(instrument_id, quoteEntity);
+                                if (!sZhengzhouInsListNameNav.containsValue(product_short_name))
+                                    sZhengzhouInsListNameNav.put(instrument_id, product_short_name);
+                                searchEntity.setExchangeName(CZCE_ZN);
+                                break;
+                            case DCE://大商所
+                                if (!expired) sDalianInsList.put(instrument_id, quoteEntity);
+                                if (!sDalianInsListNameNav.containsValue(product_short_name))
+                                    sDalianInsListNameNav.put(instrument_id, product_short_name);
+                                searchEntity.setExchangeName(DCE_ZN);
+                                break;
+                            case CFFEX://中金所
+                                if (!expired) sZhongjinInsList.put(instrument_id, quoteEntity);
+                                if (!sZhongjinInsListNameNav.containsValue(product_short_name))
+                                    sZhongjinInsListNameNav.put(instrument_id, product_short_name);
+                                searchEntity.setExchangeName(CFFEX_ZN);
+                                break;
+                            case INE://上期能源
+                                if (!expired) sNengyuanInsList.put(instrument_id, quoteEntity);
+                                if (!sNengyuanInsListNameNav.containsValue(product_short_name))
+                                    sNengyuanInsListNameNav.put(instrument_id, product_short_name);
+                                searchEntity.setExchangeName(INE_ZN);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    if ("FUTURE_COMBINE".equals(classN)) {
+                        String leg1_symbol = subObject.optString("leg1_symbol");
+                        String leg2_symbol = subObject.optString("leg2_symbol");
+                        searchEntity.setLeg1_symbol(leg1_symbol);
+                        searchEntity.setLeg2_symbol(leg2_symbol);
+                        JSONObject subObjectFuture = jsonObject.optJSONObject(leg1_symbol);
+                        String product_short_name_leg = subObjectFuture.optString("product_short_name");
+                        String py_leg = subObjectFuture.optString("py");
+                        searchEntity.setPy(py_leg);
+                        switch (exchange_id) {
+                            case CZCE:
+                                if (!expired) sZhengzhouzuheInsList.put(instrument_id, quoteEntity);
+                                if (!sZhengzhouzuheInsListNameNav.containsValue(product_short_name_leg))
+                                    sZhengzhouzuheInsListNameNav.put(instrument_id, product_short_name_leg);
+                                searchEntity.setExchangeName(CZCE_ZN);
+                                break;
+                            case DCE:
+                                if (!expired) sDalianzuheInsList.put(instrument_id, quoteEntity);
+                                if (!sDalianzuheInsListNameNav.containsValue(product_short_name_leg))
+                                    sDalianzuheInsListNameNav.put(instrument_id, product_short_name_leg);
+                                searchEntity.setExchangeName(DCE_ZN);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    SEARCH_ENTITIES.put(instrument_id, searchEntity);
+                }catch (Exception e){
+                    e.printStackTrace();
                     continue;
                 }
-                String ins_name = subObject.optString("ins_name");
-                String ins_id = subObject.optString("ins_id");
-                String product_id = subObject.optString("product_id");
-                String exchange_id = subObject.optString("exchange_id");
-                String price_tick = subObject.optString("price_tick");
-                String price_decs = subObject.optString("price_decs");
-                String volume_multiple = subObject.optString("volume_multiple");
-                String sort_key = subObject.optString("sort_key");
-                String product_short_name = subObject.optString("product_short_name");
-                String py = subObject.optString("py");
-                boolean expired = subObject.optBoolean("expired");
-                int pre_volume = subObject.optInt("pre_volume");
-                SearchEntity searchEntity = new SearchEntity();
-                searchEntity.setIns_id(ins_id);
-                searchEntity.setProduct_id(product_id);
-                searchEntity.setpTick(price_tick);
-                searchEntity.setpTick_decs(price_decs);
-                searchEntity.setInstrumentId(instrument_id);
-                searchEntity.setInstrumentName(ins_name);
-                searchEntity.setVm(volume_multiple);
-                searchEntity.setExchangeId(exchange_id);
-                searchEntity.setSort_key(sort_key);
-                searchEntity.setPy(py);
-                searchEntity.setExpired(expired);
-                searchEntity.setPre_volume(pre_volume);
-                QuoteEntity quoteEntity = new QuoteEntity();
-                quoteEntity.setInstrument_id(instrument_id);
-
-                if ("FUTURE_CONT".equals(classN)) {
-                    String underlying_symbol = subObject.optString("underlying_symbol");
-                    if ("".equals(underlying_symbol)) continue;
-                    searchEntity.setUnderlying_symbol(underlying_symbol);
-                    JSONObject subObjectFuture = jsonObject.optJSONObject(underlying_symbol);
-                    int pre_volume_f = subObjectFuture.optInt("pre_volume");
-                    String product_id_f = subObjectFuture.optString("product_id");
-                    String ins_id_f = subObjectFuture.optString("ins_id");
-                    searchEntity.setPre_volume(pre_volume_f);
-                    searchEntity.setProduct_id(product_id_f);
-                    searchEntity.setIns_id(ins_id_f);
-                    //主力合约页直接显示标的合约
-                    quoteEntity.setInstrument_id(underlying_symbol);
-                    sMainInsList.put(underlying_symbol, quoteEntity);
-                    sMainInsListNameNav.put(underlying_symbol, ins_name.replace("主连", ""));
-
-                    QuoteEntity quoteEntity1 = new QuoteEntity();
-                    quoteEntity1.setInstrument_id(underlying_symbol);
-                    sRecommendInsList.put(underlying_symbol, quoteEntity1);
-                }
-
-                if ("FUTURE".equals(classN)) {
-                    switch (exchange_id) {
-                        case SHFE://上期所
-                            if (!expired) sShangqiInsList.put(instrument_id, quoteEntity);
-                            if (!sShangqiInsListNameNav.containsValue(product_short_name))
-                                sShangqiInsListNameNav.put(instrument_id, product_short_name);
-                            searchEntity.setExchangeName(SHFE_ZN);
-                            break;
-                        case CZCE://郑商所
-                            if (!expired) sZhengzhouInsList.put(instrument_id, quoteEntity);
-                            if (!sZhengzhouInsListNameNav.containsValue(product_short_name))
-                                sZhengzhouInsListNameNav.put(instrument_id, product_short_name);
-                            searchEntity.setExchangeName(CZCE_ZN);
-                            break;
-                        case DCE://大商所
-                            if (!expired) sDalianInsList.put(instrument_id, quoteEntity);
-                            if (!sDalianInsListNameNav.containsValue(product_short_name))
-                                sDalianInsListNameNav.put(instrument_id, product_short_name);
-                            searchEntity.setExchangeName(DCE_ZN);
-                            break;
-                        case CFFEX://中金所
-                            if (!expired) sZhongjinInsList.put(instrument_id, quoteEntity);
-                            if (!sZhongjinInsListNameNav.containsValue(product_short_name))
-                                sZhongjinInsListNameNav.put(instrument_id, product_short_name);
-                            searchEntity.setExchangeName(CFFEX_ZN);
-                            break;
-                        case INE://上期能源
-                            if (!expired) sNengyuanInsList.put(instrument_id, quoteEntity);
-                            if (!sNengyuanInsListNameNav.containsValue(product_short_name))
-                                sNengyuanInsListNameNav.put(instrument_id, product_short_name);
-                            searchEntity.setExchangeName(INE_ZN);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                if ("FUTURE_COMBINE".equals(classN)) {
-                    String leg1_symbol = subObject.optString("leg1_symbol");
-                    String leg2_symbol = subObject.optString("leg2_symbol");
-                    searchEntity.setLeg1_symbol(leg1_symbol);
-                    searchEntity.setLeg2_symbol(leg2_symbol);
-                    JSONObject subObjectFuture = jsonObject.optJSONObject(leg1_symbol);
-                    String product_short_name_leg = subObjectFuture.optString("product_short_name");
-                    String py_leg = subObjectFuture.optString("py");
-                    searchEntity.setPy(py_leg);
-                    switch (exchange_id) {
-                        case CZCE:
-                            if (!expired) sZhengzhouzuheInsList.put(instrument_id, quoteEntity);
-                            if (!sZhengzhouzuheInsListNameNav.containsValue(product_short_name_leg))
-                                sZhengzhouzuheInsListNameNav.put(instrument_id, product_short_name_leg);
-                            searchEntity.setExchangeName(CZCE_ZN);
-                            break;
-                        case DCE:
-                            if (!expired) sDalianzuheInsList.put(instrument_id, quoteEntity);
-                            if (!sDalianzuheInsListNameNav.containsValue(product_short_name_leg))
-                                sDalianzuheInsListNameNav.put(instrument_id, product_short_name_leg);
-                            searchEntity.setExchangeName(DCE_ZN);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                SEARCH_ENTITIES.put(instrument_id, searchEntity);
             }
             LogUtils.e("合约列表解析结束", true);
         } catch (JSONException e) {

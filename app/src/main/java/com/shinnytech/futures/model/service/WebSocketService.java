@@ -273,7 +273,7 @@ public class WebSocketService extends Service {
             List<String> list = LatestFileManager.getCombineInsList(
                     new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
             //推荐列表刷新
-            list.addAll(LatestFileManager.getsRecommendInsList().keySet());
+            list.addAll(LatestFileManager.getMainInsList().keySet());
             sendSubscribeQuote(TextUtils.join(",", list));
         }
 

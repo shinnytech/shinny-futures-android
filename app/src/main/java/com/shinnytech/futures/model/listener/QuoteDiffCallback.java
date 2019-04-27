@@ -94,6 +94,8 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
         String pre_settlement_new = LatestFileManager.saveScaleByPtick(mNewData.get(newItemPosition).getPre_settlement(), instrumentId);
         bundle.putString("pre_settlement", pre_settlement_new);
 
+        bundle.putString("instrument_id", instrumentId);
+
         if (latest_old != null && latest_new != null) {
             if (!latest_old.equals(latest_new)) bundle.putString("latest", latest_new);
         } else if (latest_old == null && latest_new != null) {

@@ -1,5 +1,6 @@
 package com.shinnytech.futures.controller.activity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -8,10 +9,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -20,7 +23,11 @@ import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 
 import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
@@ -112,6 +119,38 @@ public class LoginActivity extends AppCompatActivity {
 
     private void initEvent() {
 
+        mBinding.llFirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mBinding.firm.setTextColor(getResources().getColor( R.color.white));
+                mBinding.firmUnderline.setVisibility(View.VISIBLE);
+                mBinding.simulation.setTextColor(getResources().getColor(R.color.login_gray));
+                mBinding.simulationUnderline.setVisibility(View.INVISIBLE);
+
+                mBinding.tvBroker.setVisibility(View.VISIBLE);
+                mBinding.llBroker.setVisibility(View.VISIBLE);
+                mBinding.tvAccount.setText("账号");
+                mBinding.simulationHint.setVisibility(View.GONE);
+                setStatusBarColor(R.color.colorPrimaryDark);
+            }
+        });
+
+        mBinding.llSimulation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mBinding.simulation.setTextColor(getResources().getColor( R.color.white));
+                mBinding.simulationUnderline.setVisibility(View.VISIBLE);
+                mBinding.firm.setTextColor(getResources().getColor(R.color.login_gray));
+                mBinding.firmUnderline.setVisibility(View.INVISIBLE);
+
+                mBinding.tvBroker.setVisibility(View.GONE);
+                mBinding.llBroker.setVisibility(View.GONE);
+                mBinding.tvAccount.setText("手机号码");
+                mBinding.simulationHint.setVisibility(View.VISIBLE);
+                setStatusBarColor(R.color.login_simulation_hint);
+            }
+        });
+
         SoftKeyBoardListener.setListener(this, new SoftKeyBoardListener.OnSoftKeyBoardChangeListener() {
             @Override
             public void keyBoardShow(int height) {
@@ -128,34 +167,6 @@ public class LoginActivity extends AppCompatActivity {
                         mBinding.sv.smoothScrollTo(0, mBinding.sv.getTop());
                     }
                 });
-            }
-        });
-
-        mBinding.firm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mIsFirm = true;
-                mBinding.hint.setText("实盘客户，请登录以进行交易，访问实盘报价和账户信息");
-                mBinding.firm.setTextColor(getResources().getColor(R.color.black));
-                mBinding.simulation.setTextColor(getResources().getColor(R.color.gray));
-                mBinding.firm.setBackgroundColor(getResources().getColor(R.color.gray));
-                mBinding.simulation.setBackgroundColor(getResources().getColor(R.color.transparent));
-                mBinding.llBroker.setVisibility(View.VISIBLE);
-                mBinding.tvAccount.setText("资金账号");
-            }
-        });
-
-        mBinding.simulation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mIsFirm = false;
-                mBinding.hint.setText("您当前处于模拟账户模式，您可在此模式中模拟交易，该账户并非经济账户");
-                mBinding.firm.setTextColor(getResources().getColor(R.color.gray));
-                mBinding.simulation.setTextColor(getResources().getColor(R.color.black));
-                mBinding.firm.setBackgroundColor(getResources().getColor(R.color.transparent));
-                mBinding.simulation.setBackgroundColor(getResources().getColor(R.color.gray));
-                mBinding.llBroker.setVisibility(View.GONE);
-                mBinding.tvAccount.setText("手机号码");
             }
         });
 
@@ -257,9 +268,9 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    mBinding.llAccount.setBackgroundResource(R.drawable.rectangle_border_focused);
+                    mBinding.llAccount.setBackgroundResource(R.drawable.login_rectangle_border_focused);
                 } else {
-                    mBinding.llAccount.setBackgroundResource(R.drawable.rectangle_border);
+                    mBinding.llAccount.setBackgroundResource(R.drawable.login_rectangle_border);
                 }
             }
         });
@@ -268,9 +279,9 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    mBinding.llPassword.setBackgroundResource(R.drawable.rectangle_border_focused);
+                    mBinding.llPassword.setBackgroundResource(R.drawable.login_rectangle_border_focused);
                 } else {
-                    mBinding.llPassword.setBackgroundResource(R.drawable.rectangle_border);
+                    mBinding.llPassword.setBackgroundResource(R.drawable.login_rectangle_border);
                 }
             }
         });
@@ -542,6 +553,38 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    private void setStatusBarColor(int color) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            Window w = getWindow();
+            w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            int statusBarHeight = getStatusBarHeight(this);
+
+            View view = new View(this);
+            view.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            view.getLayoutParams().height = statusBarHeight;
+            ((ViewGroup) w.getDecorView()).addView(view);
+            view.setBackground(getResources().getDrawable(color));
+
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = this.getWindow();
+
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+            window.setStatusBarColor(ContextCompat.getColor(this, color));
+        }
+    }
+
+    public static int getStatusBarHeight(Activity context) {
+        int result = 0;
+        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = context.getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
     }
 
 }

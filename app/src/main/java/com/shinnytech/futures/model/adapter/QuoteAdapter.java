@@ -12,12 +12,16 @@ import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ItemFragmentQuoteBinding;
+import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
+import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.MathUtils;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
@@ -130,8 +134,20 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
             QuoteEntity quoteEntity = mData.get(getLayoutPosition());
             if (quoteEntity == null) return;
             try {
+
                 String instrumentId = quoteEntity.getInstrument_id();
                 if (instrumentId == null) return;
+
+                //合约高亮
+                DataManager manager = DataManager.getInstance();
+                UserEntity userEntity = manager.getTradeBean().getUsers().get(manager.USER_ID);
+                if (userEntity != null){
+                    Map<String, PositionEntity> positionEntityMap = userEntity.getPositions();
+                    if (positionEntityMap.containsKey(instrumentId))
+                        mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.item_touch_bg_highlight));
+                    else mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.item_touch_bg));
+                }
+
                 String instrumentName = instrumentId;
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrumentId);
                 if (searchEntity != null) instrumentName = searchEntity.getInstrumentName();
@@ -180,6 +196,17 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
         }
 
         private void updatePart(Bundle bundle) {
+            String instrumentId = bundle.getString("instrument_id");
+            //合约高亮
+            DataManager manager = DataManager.getInstance();
+            UserEntity userEntity = manager.getTradeBean().getUsers().get(manager.USER_ID);
+            if (userEntity != null){
+                Map<String, PositionEntity> positionEntityMap = userEntity.getPositions();
+                if (positionEntityMap.containsKey(instrumentId))
+                    mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.item_touch_bg_highlight));
+                else mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.item_touch_bg));
+            }
+
             for (String key :
                     bundle.keySet()) {
                 String value = bundle.getString(key);

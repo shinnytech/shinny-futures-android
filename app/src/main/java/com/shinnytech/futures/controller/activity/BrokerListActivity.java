@@ -54,7 +54,7 @@ public class BrokerListActivity extends BaseActivity {
                         String broker = mBrokerAdapter.getData().get(position);
                         List<String> list = Arrays.asList(BROKERS_LOCAL);
                         if (!list.contains(broker)){
-                            ToastNotificationUtils.showToast(sContext, "此期货公司还没有添加");
+                            ToastNotificationUtils.showToast(sContext, "请联系期货公司申请！");
                             return;
                         }
                         Intent intent = new Intent();
