@@ -13,7 +13,7 @@
         android:textColor="@color/white"
         android:layout_width="match_parent"
         android:layout_height="@dimen/layout_height_item_activity_broker"
-        android:background="@drawable/item_touch_bg">
+        android:background="@drawable/fragment_item_touch_bg">
 
     </TextView>
 </layout>

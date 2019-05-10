@@ -21,7 +21,7 @@
                 android:layout_height="match_parent"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="@drawable/popup_item_touch_bg"
+                android:background="@drawable/fragment_popup_item_touch_bg"
                 android:gravity="center"
                 android:scaleType="center"
                 android:src="@mipmap/ic_content_cut_black_18dp" />
@@ -50,7 +50,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
-                android:background="@drawable/popup_item_touch_bg"
+                android:background="@drawable/fragment_popup_item_touch_bg"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
@@ -65,7 +65,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:background="@drawable/popup_item_touch_bg"
+                android:background="@drawable/fragment_popup_item_touch_bg"
                 android:scaleType="center"
                 android:src="@mipmap/ic_format_line_spacing_black_18dp"/>
         </LinearLayout>

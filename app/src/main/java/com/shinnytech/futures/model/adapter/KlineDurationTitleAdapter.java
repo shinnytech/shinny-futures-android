@@ -92,7 +92,7 @@ public class KlineDurationTitleAdapter extends RecyclerView.Adapter<KlineDuratio
                 mBinding.durationTitleUnderline.setBackground(ContextCompat.getDrawable(sContext, R.color.marker_yellow));
                 mBinding.durationTitle.setTextColor(ContextCompat.getColor(sContext, R.color.marker_yellow));
             } else {
-                mBinding.durationTitleUnderline.setBackground(ContextCompat.getDrawable(sContext, R.color.black_light));
+                mBinding.durationTitleUnderline.setBackground(ContextCompat.getDrawable(sContext, R.color.future_info_toolbar));
                 mBinding.durationTitle.setTextColor(ContextCompat.getColor(sContext, R.color.white));
             }
         }

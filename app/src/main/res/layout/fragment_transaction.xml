@@ -20,14 +20,13 @@
         android:id="@+id/transaction"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/transaction_light"
+        android:background="@color/future_info_toolbar"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/transaction_dark"
             android:orientation="horizontal">
 
             <TextView
@@ -108,7 +107,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/rectangle"
+                android:background="@drawable/fragment_transaction_rectangle"
                 android:gravity="center"
                 android:orientation="horizontal">
 
@@ -154,7 +153,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/rectangle"
+                android:background="@drawable/fragment_transaction_rectangle"
                 android:gravity="center"
                 android:orientation="horizontal">
 
@@ -205,7 +204,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginEnd="@dimen/margin_10dp"
                 android:layout_weight="1"
-                android:background="@color/bid"
+                android:background="@drawable/fragment_transaction_bid_rectangle"
                 android:gravity="center"
                 android:orientation="vertical"
                 android:padding="@dimen/padding_5dp">
@@ -237,7 +236,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginEnd="@dimen/margin_10dp"
                 android:layout_weight="1"
-                android:background="@color/ask"
+                android:background="@drawable/fragment_transaction_ask_rectangle"
                 android:gravity="center"
                 android:orientation="vertical"
                 android:padding="@dimen/padding_5dp">
@@ -268,7 +267,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@color/close"
+                android:background="@drawable/fragment_transaction_close_rectangle"
                 android:gravity="center"
                 android:orientation="vertical"
                 android:padding="@dimen/padding_5dp">

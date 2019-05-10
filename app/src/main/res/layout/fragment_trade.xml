@@ -8,7 +8,7 @@
         android:keepScreenOn="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black_light"
+        android:background="@color/future_info_toolbar"
         android:orientation="vertical">
 
         <LinearLayout

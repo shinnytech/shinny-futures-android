@@ -17,9 +17,8 @@ import android.widget.RadioGroup;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.FutureInfoActivityPresenter;
-import com.shinnytech.futures.controller.fragment.LazyLoadFragment;
-import com.shinnytech.futures.controller.fragment.TransactionFragment;
 import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
+import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
@@ -32,12 +31,24 @@ import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Map;
 
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_INSTRUMENT_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_COMMON_SWITCH;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_FUTURE_INFO;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_SEARCH;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_OPTIONAL_FUTURE_INFO;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.FUTURE_INFO_ACTIVITY_TO_COMMON_SWITCH_ACTIVITY;
@@ -104,7 +115,7 @@ public class FutureInfoActivity extends BaseActivity {
     @Override
     protected void updateToolbarFromNetwork(Context context, String title) {
         if (NetworkUtils.isNetworkConnected(sContext)) {
-            mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.black_dark));
+            mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.toolbar));
             mToolbarTitle.setTextColor(Color.WHITE);
             mFutureInfoActivityPresenter.setToolbarTitle();
             mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
@@ -127,12 +138,14 @@ public class FutureInfoActivity extends BaseActivity {
                         mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.off_line));
                         mToolbarTitle.setTextColor(Color.BLACK);
                         mToolbarTitle.setText(OFFLINE);
+                        mToolbarTitle.setTextSize(20);
                         mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                         break;
                     case 1:
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.black_dark));
+                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.toolbar));
                         mToolbarTitle.setTextColor(Color.WHITE);
                         mFutureInfoActivityPresenter.setToolbarTitle();
+                        mToolbarTitle.setTextSize(25);
                         mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
                         break;
                 }
@@ -195,23 +208,32 @@ public class FutureInfoActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        JSONObject jsonObject = new JSONObject();
         switch (id) {
             case R.id.action_collect:
                 if (mInstrumentId == null || mInstrumentId.equals(""))
                     return super.onOptionsItemSelected(item);
-                Map<String, QuoteEntity> insList = LatestFileManager.getOptionalInsList();
-                if (insList.containsKey(mInstrumentId)) {
-                    insList.remove(mInstrumentId);
-                    LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
-                    ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
-                    mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
-                } else {
-                    QuoteEntity quoteEntity = new QuoteEntity();
-                    quoteEntity.setInstrument_id(mInstrumentId);
-                    insList.put(mInstrumentId, quoteEntity);
-                    LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
-                    ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
-                    mMenuItem.setIcon(R.mipmap.ic_favorite_white_24dp);
+                try {
+                    jsonObject.put(AMP_EVENT_OPTIONAL_INSTRUMENT_ID, mInstrumentId);
+                    Map<String, QuoteEntity> insList = LatestFileManager.getOptionalInsList();
+                    if (insList.containsKey(mInstrumentId)) {
+                        jsonObject.put(AMP_EVENT_OPTIONAL_DIRECTION, AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE);
+                        insList.remove(mInstrumentId);
+                        LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
+                        ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
+                        mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
+                    } else {
+                        jsonObject.put(AMP_EVENT_OPTIONAL_DIRECTION, AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD);
+                        QuoteEntity quoteEntity = new QuoteEntity();
+                        quoteEntity.setInstrument_id(mInstrumentId);
+                        insList.put(mInstrumentId, quoteEntity);
+                        LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
+                        ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
+                        mMenuItem.setIcon(R.mipmap.ic_favorite_white_24dp);
+                    }
+                    Amplitude.getInstance().logEvent(AMP_OPTIONAL_FUTURE_INFO, jsonObject);
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
                 break;
             case android.R.id.home:
@@ -220,6 +242,13 @@ public class FutureInfoActivity extends BaseActivity {
                 finish();
                 break;
             case R.id.search_quote:
+                try {
+                    jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_FUTURE_INFO);
+                    jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_SEARCH);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                 Intent intentS = new Intent(this, SearchActivity.class);
                 intentS.putExtra("fromFutureInfoActivity", true);
                 startActivity(intentS);
@@ -312,6 +341,14 @@ public class FutureInfoActivity extends BaseActivity {
             setUpEvent.setPosition(mIsPosition);
             EventBus.getDefault().post(setUpEvent);
             mFutureInfoActivityPresenter.updateMD5ViewVisibility();
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_COMMON_SWITCH);
+                jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_FUTURE_INFO);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
         }
     }
 }

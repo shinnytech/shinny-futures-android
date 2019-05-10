@@ -2,12 +2,12 @@ package com.shinnytech.futures.constants;
 
 public final class CommonConstants {
     //服务器地址
-    public static String TRANSACTION_URL = "ws://opentd.shinnytech.com/trade/user0";
-    public static String JSON_FILE_URL = "http://openmd.shinnytech.com/t/md/symbols/latest.json";
-    public static final String MARKET_URL_1 = "ws://openmd.shinnytech.com/t/md/front/mobile";
-    public static final String MARKET_URL_2 = "ws://139.198.126.116/t/md/front/mobile";
-    public static final String MARKET_URL_3 = "ws://139.198.122.80/t/md/front/mobile";
-    public static final String MARKET_URL_4 = "ws://139.198.123.206/t/md/front/mobile";
+    public static String TRANSACTION_URL = "wss://opentd.shinnytech.com/trade/user0";
+    public static String JSON_FILE_URL = "https://openmd.shinnytech.com/t/md/symbols/latest.json";
+    public static final String MARKET_URL_1 = "wss://openmd.shinnytech.com/t/md/front/mobile";
+    public static final String MARKET_URL_2 = "wss://139.198.126.116/t/md/front/mobile";
+    public static final String MARKET_URL_3 = "wss://139.198.122.80/t/md/front/mobile";
+    public static final String MARKET_URL_4 = "wss://139.198.123.206/t/md/front/mobile";
     public static final String FEED_BACK_URL = "https://ask.shinnytech.com/src/indexm.html";
     //广播信息类型
     public static final String MD_ONLINE = "MD_ONLINE";
@@ -38,8 +38,8 @@ public final class CommonConstants {
     public static final String OPTIONAL_SETTING = "自选管理";
     public static final String ACCOUNT = "资金详情";
     public static final String PASSWORD = "修改密码";
-    public static final String BANK_IN = "资金转入";
-    public static final String BANK_OUT = "资金转出";
+    public static final String TRANSFER_IN = "资金转入";
+    public static final String TRANSFER_OUT = "资金转出";
     public static final String OPEN_ACCOUNT = "在线开户";
     public static final String CONDITIONAL_ORDER = "云条件单";
     public static final String FEEDBACK = "问题反馈";
@@ -100,7 +100,6 @@ public final class CommonConstants {
     //登录页
     public static final String BROKER_ID_VISITOR = "游客";
     public static final String BROKER_ID_SIMULATION = "快期模拟";
-    public static final String[] BROKERS_LOCAL = new String[]{"A安粮期货", "B渤海期货", "B宝城期货", "B北京首创", "B倍特期货", "C长安期货", "C长城期货", "C长江期货", "D大地期货", "D大越期货", "D东航期货", "D大陆期货", "D德盛期货", "D东吴期货", "D东证期货", "D东华期货", "D东方财富", "F方正中期", "G广发期货", "G光大期货", "G国际期货", "G国投安信", "G国富期货", "G国金期货", "G国元期货", "G广金期货", "G国贸期货", "G国泰君安", "G广州期货", "H华安期货", "H华泰期货", "H海通期货", "H海证期货", "H华西期货", "H混沌天成", "H华鑫期货", "H华信期货", "H和合期货", "H恒泰期货", "H弘业期货", "H徽商期货", "H宏源期货", "H海航期货", "J金石期货", "J金元期货", "J建信期货", "J金瑞期货", "J金信期货", "J锦泰期货", "J江海汇鑫", "L良运期货", "L鲁证期货", "M迈科期货", "M美尔雅期货", "N南华期货", "Q前海期货", "S申万期货", "S上海中期", "S上海东方", "S上海东亚", "S盛达期货", "S山西三立期货", "R瑞达期货", "T铜冠金源", "T天鸿期货_主席", "T天鸿期货_次席", "T天富期货", "T天风期货_主席", "T天风期货_二席", "T通惠期货", "W五矿经易", "X先锋期货", "X兴证期货", "X兴业期货", "X新湖期货", "X新世纪期货", "X先融期货", "X西部期货", "Y银河期货", "Y一德期货CTP", "Y英大期货", "Y永安期货", "Z中信建投", "Z中融汇信", "Z招金期货", "Z中财期货", "Z中钢期货", "Z中银国际", "Z中辉期货", "Z中信期货", "Z中天期货", "Z中粮期货", "Z中州期货", "simnow", "中信模拟", "海通股指仿真"};
     //设置页
     public static final String CONFIG_KLINE_DURATION_DEFAULT = "klineDurationDefault";
     public static final String CONFIG_PARA_MA = "ma";
@@ -185,12 +184,89 @@ public final class CommonConstants {
 
     //amp event type
     public static final String AMP_INIT = "amp_init";
+    public static final String AMP_SELECT_BROKER = "amp_select_broker";
+    public static final String AMP_LOGIN = "amp_login";
+    public static final String AMP_VISIT = "amp_visit";
+    public static final String AMP_LOGIN_SUCCEEDED = "amp_login_succeeded";
+    public static final String AMP_LOGIN_FAILED = "amp_login_failed";
+    public static final String AMP_FOREGROUND = "amp_foreground";
     public static final String AMP_BACKGROUND = "amp_background";
-    public static final String AMP_TRADE = "amp_trade";
-    public static final String AMP_TRANSFER = "amp_transfer";
-    public static final String AMP_LOGGED = "amp_logged";
+    public static final String AMP_LOGOUT = "amp_logout";
+    public static final String AMP_QUOTE_TAB = "amp_quote_tab";
+    public static final String AMP_ACCOUNT_TAB = "amp_account_tab";
+    public static final String AMP_ACCOUNT_LINK = "amp_account_link";
+    public static final String AMP_CANCEL_CLOSE_CONFIRMED = "amp_cancel_close_confirmed";
+    public static final String AMP_CANCEL_CLOSE_CANCELED = "amp_cancel_close_canceled";
+    public static final String AMP_CANCEL_ORDER = "amp_cancel_order";
+    public static final String AMP_INSERT_ORDER = "amp_insert_order";
+    public static final String AMP_OPTIONAL_SEARCH = "amp_optional_search";
+    public static final String AMP_OPTIONAL_RECOMMEND = "amp_optional_recommend";
+    public static final String AMP_OPTIONAL_QUOTE = "amp_optional_quote";
+    public static final String AMP_OPTIONAL_FUTURE_INFO = "amp_optional_future_info";
+    public static final String AMP_MENU_TRANSFER_IN = "amp_menu_transfer_in";
+    public static final String AMP_MENU_TRANSFER_OUT = "amp_menu_transfer_out";
+    public static final String AMP_ACCOUNT_TRANSFER_IN = "amp_account_transfer_in";
+    public static final String AMP_ACCOUNT_TRANSFER_OUT = "amp_account_transfer_out";
+    public static final String AMP_TRANSFER_IN = "amp_transfer_in";
+    public static final String AMP_TRANSFER_OUT = "amp_transfer_out";
+    public static final String AMP_CONDITIONAL_ORDER = "amp_conditional_order";
+    public static final String AMP_CRASH = "amp_crash";
+    public static final String AMP_SWITCH_PAGE = "amp_switch_page";
+
+    //amp event property
+    public static final String AMP_USER_BROKER_ID_SELECTED = "broker_id_selected";
+
+    public static final String AMP_EVENT_PRICE = "price";
+    public static final String AMP_EVENT_INSTRUMENT_ID = "instrument_id";
+    public static final String AMP_EVENT_VOLUME = "volume";
+    public static final String AMP_EVENT_DIRECTION = "direction";
+    public static final String AMP_EVENT_OFFSET = "offset";
+
+    public static final String AMP_EVENT_OPTIONAL_INSTRUMENT_ID = "optional_instrument_id";
+    public static final String AMP_EVENT_OPTIONAL_DIRECTION = "optional_direction";
+    public static final String AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD = "添加";
+    public static final String AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE = "删除";
+
+    public static final String AMP_EVENT_BANK = "bank";
+    public static final String AMP_EVENT_AMOUNT = "amount";
+    public static final String AMP_EVENT_CURRENCY = "currency";
+
+    public static final String AMP_EVENT_CURRENT_PAGE = "current_page";
+    public static final String AMP_EVENT_TARGET_PAGE = "target_page";
+    public static final String AMP_EVENT_PAGE_VALUE_MAIN = "main_page";
+    public static final String AMP_EVENT_PAGE_VALUE_LOGIN = "login_page";
+    public static final String AMP_EVENT_PAGE_VALUE_SETTING = "setting_page";
+    public static final String AMP_EVENT_PAGE_VALUE_OPTIONAL_SETTING = "optional_setting_page";
+    public static final String AMP_EVENT_PAGE_VALUE_COMMON_SWITCH = "common_switch_page";
+    public static final String AMP_EVENT_PAGE_VALUE_ACCOUNT = "account_page";
+    public static final String AMP_EVENT_PAGE_VALUE_CHANGE_PASSWORD = "change_password_page";
+    public static final String AMP_EVENT_PAGE_VALUE_TRANSFER = "transfer_page";
+    public static final String AMP_EVENT_PAGE_VALUE_OPEN_ACCOUNT = "open_account_page";
+    public static final String AMP_EVENT_PAGE_VALUE_FEED_BACK = "feed_back_page";
+    public static final String AMP_EVENT_PAGE_VALUE_ABOUT = "about_page";
+    public static final String AMP_EVENT_PAGE_VALUE_SEARCH = "search_page";
+    public static final String AMP_EVENT_PAGE_VALUE_FUTURE_INFO = "future_info_page";
+
     //amp user property
-    public static final String AMP_USER_SCREEN_SIZE = "screen_size";
-    public static final String AMP_USER_BROKER_ID = "broker_id_last";
-    public static final String AMP_USER_PACKAGE_ID = "package_id_last";
+    public static final String AMP_USER_PACKAGE_ID_FIRST = "package_id_first";
+    public static final String AMP_USER_PACKAGE_ID_LAST = "package_id_last";
+    public static final String AMP_USER_INIT_TIME_FIRST = "init_time_first";
+    public static final String AMP_USER_LOGIN_TIME_FIRST = "login_time_first";
+    public static final String AMP_USER_ACCOUNT_ID_FIRST = "account_id_first";
+    public static final String AMP_USER_ACCOUNT_ID_LAST = "account_id_last";
+    public static final String AMP_USER_BROKER_ID_FIRST = "broker_id_first";
+    public static final String AMP_USER_BROKER_ID_LAST = "broker_id_last";
+    public static final String AMP_USER_BANK_FIRST = "bank_first";
+    public static final String AMP_USER_BANK_LAST = "bank_last";
+    public static final String AMP_USER_FIRST_BALANCE = "first_balance";
+    public static final String AMP_USER_MAX_BALANCE = "max_balance";
+    public static final String AMP_USER_LAST_BALANCE = "last_balance";
+    public static final String AMP_USER_BANK_USER_TYPE = "user_type";
+    public static final String AMP_USER_BANK_USER_TYPE_VALUE = "trader";
+    public static final String AMP_USER_BANK_USER_TYPE_VALUE = "q_trader";
+    public static final String AMP_USER_BANK_USER_TYPE_VALUE = "newbie";
+    public static final String AMP_USER_BANK_USER_TYPE_VALUE = "pure_newbie";
+    public static final String AMP_USER_BANK_USER_TYPE_VALUE = "visitor";
+
+
 }

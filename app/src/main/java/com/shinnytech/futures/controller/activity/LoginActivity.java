@@ -12,6 +12,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -43,15 +44,26 @@ import com.shinnytech.futures.utils.SoftKeyBoardListener;
 import com.shinnytech.futures.utils.TimeUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Random;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGGED;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_PACKAGE_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_LOGIN;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_MAIN;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_FAILED;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_SUCCEEDED;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID_LAST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_PACKAGE_ID_LAST;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_SCREEN_SIZE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_VISIT;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMULATION;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ACCOUNT;
@@ -173,6 +185,7 @@ public class LoginActivity extends AppCompatActivity {
         mBinding.visitor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Amplitude.getInstance().logEvent(AMP_VISIT);
                 //随机生成8位字符串
                 String data = "";
                 Random random = new Random();
@@ -185,7 +198,12 @@ public class LoginActivity extends AppCompatActivity {
                 mPassword = generatedString;
                 if (BaseApplication.getWebSocketService() != null)
                     BaseApplication.getWebSocketService().sendReqLogin(mBrokerName, mPhoneNumber, mPassword);
-                ToastNotificationUtils.showToast(sContext, "游客模式账户信息和持仓隔日会重置");
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastNotificationUtils.showToast(sContext, "游客模式账户信息和持仓隔日会重置");
+                    }
+                }, 1000);
 
             }
         });
@@ -268,9 +286,9 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    mBinding.llAccount.setBackgroundResource(R.drawable.login_rectangle_border_focused);
+                    mBinding.llAccount.setBackgroundResource(R.drawable.activity_login_rectangle_border_focused);
                 } else {
-                    mBinding.llAccount.setBackgroundResource(R.drawable.login_rectangle_border);
+                    mBinding.llAccount.setBackgroundResource(R.drawable.activity_login_rectangle_border);
                 }
             }
         });
@@ -279,9 +297,9 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    mBinding.llPassword.setBackgroundResource(R.drawable.login_rectangle_border_focused);
+                    mBinding.llPassword.setBackgroundResource(R.drawable.activity_login_rectangle_border_focused);
                 } else {
-                    mBinding.llPassword.setBackgroundResource(R.drawable.login_rectangle_border);
+                    mBinding.llPassword.setBackgroundResource(R.drawable.activity_login_rectangle_border);
                 }
             }
         });
@@ -366,10 +384,15 @@ public class LoginActivity extends AppCompatActivity {
             // form field with an error.
             focusView.requestFocus();
         } else {
+            Amplitude.getInstance().logEvent(AMP_LOGIN);
+
             // Show a progress spinner, and kick off a background task to
             // perform the user fragment_home attempt.
             if (BaseApplication.getWebSocketService() != null)
                 BaseApplication.getWebSocketService().sendReqLogin(mBrokerName, mPhoneNumber, mPassword);
+
+            //超时检测
+            mHandler.sendEmptyMessageDelayed(2, 5000);
 
             //关闭键盘
             View view = getWindow().getCurrentFocus();
@@ -500,8 +523,8 @@ public class LoginActivity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int height = metrics.heightPixels;
         int width = metrics.widthPixels;
-        Identify identify = new Identify().set(AMP_USER_BROKER_ID, "unknown")
-                .set(AMP_USER_PACKAGE_ID, BuildConfig.FLAVOR)
+        Identify identify = new Identify().set(AMP_USER_BROKER_ID_LAST, "unknown")
+                .set(AMP_USER_PACKAGE_ID_LAST, BuildConfig.FLAVOR)
                 .set(AMP_USER_SCREEN_SIZE, width + "*" + height);
         Amplitude.getInstance().identify(identify);
     }
@@ -526,9 +549,12 @@ public class LoginActivity extends AppCompatActivity {
             if (activity != null) {
                 switch (msg.what) {
                     case 0:
-                        Identify identify = new Identify().set(AMP_USER_BROKER_ID, activity.mBrokerName);
+                        String broker_id;
+                        if (activity.mPhoneNumber.contains(BROKER_ID_VISITOR))broker_id = BROKER_ID_VISITOR + "_" + activity.mBrokerName;
+                        else broker_id = activity.mBrokerName;
+                        Identify identify = new Identify().set(AMP_USER_BROKER_ID_LAST, broker_id);
                         Amplitude.getInstance().identify(identify);
-                        Amplitude.getInstance().logEvent(AMP_LOGGED);
+                        Amplitude.getInstance().logEvent(AMP_LOGIN_SUCCEEDED);
                         SPUtils.putAndApply(activity.sContext, CONFIG_LOGIN_DATE, TimeUtils.getNowTime());
                         SPUtils.putAndApply(activity.sContext, CONFIG_ACCOUNT, activity.mPhoneNumber);
                         SPUtils.putAndApply(activity.sContext, CONFIG_PASSWORD, activity.mPassword);
@@ -540,6 +566,14 @@ public class LoginActivity extends AppCompatActivity {
                             if (inputMethodManager != null)
                                 inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOT_ALWAYS);
                         }
+                        JSONObject jsonObject = new JSONObject();
+                        try {
+                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_LOGIN);
+                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                         Intent intent1 = new Intent(activity, MainActivity.class);
                         activity.startActivity(intent1);
                         activity.finish();
@@ -547,6 +581,9 @@ public class LoginActivity extends AppCompatActivity {
                     case 1:
                         Intent intent = new Intent(activity, ChangePasswordActivity.class);
                         activity.startActivityForResult(intent, LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY);
+                        break;
+                    case 2:
+                        if (activity.sDataManager.USER_ID.isEmpty())Amplitude.getInstance().logEvent(AMP_LOGIN_FAILED);
                         break;
                     default:
                         break;

@@ -8,6 +8,6 @@
         android:id="@+id/dialog_rv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/popup_item_touch_bg"></android.support.v7.widget.RecyclerView>
+        android:background="@drawable/fragment_popup_item_touch_bg"></android.support.v7.widget.RecyclerView>
 
 </LinearLayout>

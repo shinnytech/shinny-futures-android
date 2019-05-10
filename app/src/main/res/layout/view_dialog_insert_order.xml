@@ -3,7 +3,7 @@
     android:id="@+id/root"
     android:layout_width="@dimen/layout_width_view_dialog_cancel_order"
     android:layout_height="@dimen/layout_height_view_dialog_cancel_order"
-    android:background="@drawable/dialog_shape"
+    android:background="@drawable/fragment_order_dialog"
     android:orientation="vertical">
 
     <LinearLayout

@@ -1,10 +1,12 @@
 package com.shinnytech.futures.controller.activity;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.model.engine.DataManager;
+import com.tencent.bugly.beta.Beta;
 
 import static com.shinnytech.futures.constants.CommonConstants.ABOUT;
 
@@ -24,7 +26,12 @@ public class AboutActivity extends BaseActivity {
 
     @Override
     protected void initEvent() {
-
+        findViewById(R.id.check_version).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Beta.checkUpgrade();
+            }
+        });
     }
 
     @Override

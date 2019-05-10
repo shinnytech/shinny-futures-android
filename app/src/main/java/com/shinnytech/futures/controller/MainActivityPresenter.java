@@ -16,6 +16,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,6 +44,7 @@ import com.shinnytech.futures.model.adapter.DialogAdapter;
 import com.shinnytech.futures.model.adapter.NavigationRightAdapter;
 import com.shinnytech.futures.model.adapter.QuoteNavAdapter;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
+import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
 import com.shinnytech.futures.model.bean.settingbean.NavigationRightEntity;
@@ -55,6 +57,8 @@ import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,8 +66,27 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT_DETAIL;
-import static com.shinnytech.futures.constants.CommonConstants.BANK_IN;
-import static com.shinnytech.futures.constants.CommonConstants.BANK_OUT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_ACCOUNT_TAB;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_CONDITIONAL_ORDER;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_ABOUT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_ACCOUNT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_CHANGE_PASSWORD;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_FEED_BACK;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_LOGIN;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_MAIN;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_OPEN_ACCOUNT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_OPTIONAL_SETTING;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_SETTING;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_TRANSFER;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGOUT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_MENU_TRANSFER_IN;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_MENU_TRANSFER_OUT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_QUOTE_TAB;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_IN;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
@@ -162,10 +185,10 @@ public class MainActivityPresenter {
         menu3.setContent(CommonConstants.PASSWORD);
         NavigationRightEntity menu4 = new NavigationRightEntity();
         menu4.setIcon(R.mipmap.ic_account_balance_white_18dp);
-        menu4.setContent(CommonConstants.BANK_IN);
+        menu4.setContent(CommonConstants.TRANSFER_IN);
         NavigationRightEntity menu5 = new NavigationRightEntity();
         menu5.setIcon(R.mipmap.ic_account_balance_white_18dp);
-        menu5.setContent(CommonConstants.BANK_OUT);
+        menu5.setContent(CommonConstants.TRANSFER_OUT);
         NavigationRightEntity menu10 = new NavigationRightEntity();
         menu10.setIcon(R.mipmap.ic_supervisor_account_white_18dp);
         menu10.setContent(CommonConstants.CONDITIONAL_ORDER);
@@ -235,43 +258,104 @@ public class MainActivityPresenter {
             @Override
             public void onItemClick(View view, int position) {
                 String title = (String) view.getTag();
+                JSONObject jsonObject = new JSONObject();
                 switch (title) {
                     case CommonConstants.LOGOUT:
+                        Amplitude.getInstance().logEvent(AMP_LOGOUT);
+                        try {
+                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_LOGIN);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                         SPUtils.putAndApply(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
                         BaseApplication.getWebSocketService().reConnectTD();
                         mMainActivity.startActivity(new Intent(mMainActivity, LoginActivity.class));
                         mMainActivity.finish();
                         break;
                     case CommonConstants.SETTING:
+                        try {
+                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_SETTING);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                         Intent intentSetting = new Intent(mMainActivity, SettingActivity.class);
                         mMainActivity.startActivity(intentSetting);
                         break;
                     case CommonConstants.OPTIONAL_SETTING:
+                        try {
+                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_OPTIONAL_SETTING);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                         Intent intentSettingOptional = new Intent(mMainActivity, OptionalActivity.class);
                         mMainActivity.startActivityForResult(intentSettingOptional, MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY);
                         break;
                     case CommonConstants.ACCOUNT:
+                        try {
+                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_ACCOUNT);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                         Intent intentAcc = new Intent(mMainActivity, AccountActivity.class);
                         mMainActivity.startActivity(intentAcc);
                         break;
                     case CommonConstants.PASSWORD:
+                        try {
+                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_CHANGE_PASSWORD);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                         Intent intentChange = new Intent(mMainActivity, ChangePasswordActivity.class);
                         mMainActivity.startActivity(intentChange);
                         break;
-                    case CommonConstants.BANK_IN:
+                    case CommonConstants.TRANSFER_IN:
+                        try {
+                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_TRANSFER);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+                        Amplitude.getInstance().logEvent(AMP_MENU_TRANSFER_IN);
                         Intent intentBank = new Intent(mMainActivity, BankTransferActivity.class);
-                        intentBank.putExtra(TRANSFER_DIRECTION, BANK_IN);
+                        intentBank.putExtra(TRANSFER_DIRECTION, TRANSFER_IN);
                         mMainActivity.startActivity(intentBank);
                         break;
-                    case CommonConstants.BANK_OUT:
+                    case CommonConstants.TRANSFER_OUT:
+                        try {
+                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_TRANSFER);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+                        Amplitude.getInstance().logEvent(AMP_MENU_TRANSFER_OUT);
                         Intent intentBankOut = new Intent(mMainActivity, BankTransferActivity.class);
-                        intentBankOut.putExtra(TRANSFER_DIRECTION, BANK_OUT);
+                        intentBankOut.putExtra(TRANSFER_DIRECTION, TRANSFER_OUT);
                         mMainActivity.startActivity(intentBankOut);
                         break;
                     case CommonConstants.CONDITIONAL_ORDER:
+                        Amplitude.getInstance().logEvent(AMP_CONDITIONAL_ORDER);
                         ToastNotificationUtils.showToast(sContext, "敬请期待！");
                         break;
                     case CommonConstants.OPEN_ACCOUNT:
+                        try {
+                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_OPEN_ACCOUNT);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
 //                        Intent intentOpenAccount = new Intent(mMainActivity, OpenAccountActivity.class);
                         Intent intentOpenAccount = mMainActivity.getPackageManager().getLaunchIntentForPackage("com.cfmmc.app.sjkh");
                         if (intentOpenAccount != null)
@@ -282,10 +366,24 @@ public class MainActivityPresenter {
                         }
                         break;
                     case CommonConstants.FEEDBACK:
+                        try {
+                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_FEED_BACK);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                         Intent intentFeed = new Intent(mMainActivity, FeedBackActivity.class);
                         mMainActivity.startActivity(intentFeed);
                         break;
                     case CommonConstants.ABOUT:
+                        try {
+                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_ABOUT);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                         Intent intentAbout = new Intent(mMainActivity, AboutActivity.class);
                         mMainActivity.startActivity(intentAbout);
                         break;
@@ -312,22 +410,20 @@ public class MainActivityPresenter {
                     View viewDialog = View.inflate(mMainActivity, R.layout.view_dialog_optional_quote, null);
                     Window dialogWindow = mTitleDialog.getWindow();
                     if (dialogWindow != null) {
-                        dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+                        dialogWindow.getDecorView().setPadding(0, getToolBarHeight(), 0, 0);
                         WindowManager.LayoutParams lp = dialogWindow.getAttributes();
-                        dialogWindow.setGravity(Gravity.BOTTOM);
+                        dialogWindow.setGravity(Gravity.TOP);
                         lp.width = WindowManager.LayoutParams.MATCH_PARENT;
                         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
                         dialogWindow.setAttributes(lp);
                     }
                     mTitleDialog.setContentView(viewDialog);
-                    mTitleDialogAdapter = new DialogAdapter(mMainActivity, mTitleList);
-                    TextView textView = viewDialog.findViewById(R.id.dialog_hint);
-                    textView.setText("选择期货交易所");
+                    mTitleDialogAdapter = new DialogAdapter(mMainActivity, mTitleList, mToolbarTitle.getText().toString());
                     mTitleRecyclerView = viewDialog.findViewById(R.id.dialog_rv);
                     mTitleRecyclerView.setLayoutManager(
                             new GridLayoutManager(mMainActivity, 3));
                     mTitleRecyclerView.addItemDecoration(
-                            new DividerGridItemDecorationUtils(mMainActivity, R.drawable.divider_optional_dialog));
+                            new DividerGridItemDecorationUtils(mMainActivity, R.drawable.activity_optional_quote_dialog));
                     mTitleRecyclerView.setAdapter(mTitleDialogAdapter);
 
                     mTitleRecyclerView.addOnItemTouchListener(
@@ -346,7 +442,7 @@ public class MainActivityPresenter {
                                         }
                                     }));
 
-                }
+                }else mTitleDialogAdapter.updateList(mTitleList, mToolbarTitle.getText().toString());
                 if (!mTitleDialog.isShowing() && !ACCOUNT_DETAIL.equals(mToolbarTitle.getText().toString())) mTitleDialog.show();
             }
         });
@@ -356,6 +452,7 @@ public class MainActivityPresenter {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.market:
+                        Amplitude.getInstance().logEvent(AMP_QUOTE_TAB);
                         mBinding.vpContent.setCurrentItem(0, false);
                         String title = ((QuotePagerFragment) mViewPagerFragmentAdapter.getItem(0)).getmTitle();
                         if (OPTIONAL.equals(title)) mBinding.llNavigation.setVisibility(View.GONE);
@@ -364,6 +461,7 @@ public class MainActivityPresenter {
                         mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
                         break;
                     case R.id.trade:
+                        Amplitude.getInstance().logEvent(AMP_ACCOUNT_TAB);
                         mBinding.llNavigation.setVisibility(View.GONE);
                         mBinding.vpContent.setCurrentItem(1, false);
                         mToolbarTitle.setText(ACCOUNT_DETAIL);
@@ -516,6 +614,19 @@ public class MainActivityPresenter {
         }
         if (!OPTIONAL.equals(mTitle)) mNavAdapter.updateList(mInsListNameNav);
 
+    }
+
+    /**
+     * date: 2019/4/17
+     * author: chenli
+     * description: 获取toolbar高度px
+     */
+    private int getToolBarHeight() {
+        TypedValue tv = new TypedValue();
+        if (mMainActivity.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            return TypedValue.complexToDimensionPixelSize(tv.data, mMainActivity.getResources().getDisplayMetrics());
+        }
+        return DensityUtils.dp2px(sContext, 56);
     }
 
     public String getPreSubscribedQuotes() {

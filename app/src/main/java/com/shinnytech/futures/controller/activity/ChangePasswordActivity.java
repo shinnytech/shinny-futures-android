@@ -143,9 +143,9 @@ public class ChangePasswordActivity extends BaseActivity {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    mBinding.llOldPassword.setBackgroundResource(R.drawable.login_rectangle_border_focused);
+                    mBinding.llOldPassword.setBackgroundResource(R.drawable.activity_login_rectangle_border_focused);
                 } else {
-                    mBinding.llOldPassword.setBackgroundResource(R.drawable.rectangle_border);
+                    mBinding.llOldPassword.setBackgroundResource(R.drawable.activity_change_password_rectangle_border);
                 }
             }
         });
@@ -154,9 +154,9 @@ public class ChangePasswordActivity extends BaseActivity {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    mBinding.llNewPassword.setBackgroundResource(R.drawable.login_rectangle_border_focused);
+                    mBinding.llNewPassword.setBackgroundResource(R.drawable.activity_login_rectangle_border_focused);
                 } else {
-                    mBinding.llNewPassword.setBackgroundResource(R.drawable.rectangle_border);
+                    mBinding.llNewPassword.setBackgroundResource(R.drawable.activity_change_password_rectangle_border);
                 }
             }
         });
@@ -165,9 +165,9 @@ public class ChangePasswordActivity extends BaseActivity {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    mBinding.llConfirmNewPassword.setBackgroundResource(R.drawable.login_rectangle_border_focused);
+                    mBinding.llConfirmNewPassword.setBackgroundResource(R.drawable.activity_login_rectangle_border_focused);
                 } else {
-                    mBinding.llConfirmNewPassword.setBackgroundResource(R.drawable.rectangle_border);
+                    mBinding.llConfirmNewPassword.setBackgroundResource(R.drawable.activity_change_password_rectangle_border);
                 }
             }
         });

@@ -2,23 +2,25 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/layout_height_popup_fragment_quote"
-    android:background="@color/black_light"
+    android:background="@color/quote_popup_background"
     android:orientation="horizontal">
 
     <TextView
+        android:layout_margin="@dimen/margin_5dp"
+        android:background="@drawable/fragment_quote_popup_rectangle"
         android:visibility="invisible"
         android:id="@+id/drag_quote"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:gravity="start|center_vertical"
-        android:drawableStart="@mipmap/ic_share_white_18dp"
+        android:gravity="center"
         android:text="管理"
         android:padding="@dimen/padding_5dp"
-        android:textColor="@color/white"
+        android:textColor="@color/quote_popup_text"
         android:textSize="@dimen/font_size_normal" />
 
     <TextView
+        android:layout_margin="@dimen/margin_5dp"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -26,26 +28,28 @@
         android:padding="@dimen/padding_5dp" />
 
     <TextView
+        android:background="@drawable/fragment_quote_popup_transaction_rectangle"
         android:id="@+id/trade_quote"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:drawableStart="@mipmap/ic_favorite_border_white_18dp"
-        android:text="快速交易"
-        android:textColor="@color/white"
-        android:gravity="start|center_vertical"
+        android:text="下单"
+        android:layout_margin="@dimen/margin_5dp"
+        android:textColor="@color/quote_popup_text_transaction"
+        android:gravity="center"
         android:padding="@dimen/padding_5dp" />
 
     <TextView
+        android:background="@drawable/fragment_quote_popup_rectangle"
         android:id="@+id/add_remove_quote"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:drawableStart="@mipmap/ic_favorite_border_white_18dp"
-        android:gravity="start|center_vertical"
+        android:gravity="center"
         android:padding="@dimen/padding_5dp"
-        android:text="加入自选"
-        android:textColor="@color/white"
+        android:layout_margin="@dimen/margin_5dp"
+        android:text="添加"
+        android:textColor="@color/quote_popup_text"
         android:textSize="@dimen/font_size_normal" />
 
 

@@ -47,7 +47,7 @@ public class AddKlineDurationActivity extends BaseActivity {
         mBinding.addDurationRv.setLayoutManager(
                 new GridLayoutManager(this, 4));
         mBinding.addDurationRv.addItemDecoration(
-                new DividerGridItemDecorationUtils(this, R.drawable.divider_add_duration));
+                new DividerGridItemDecorationUtils(this, R.drawable.activity_add_kline_duration_divider));
         mBinding.addDurationRv.setAdapter(addDurationAdapter);
     }
 

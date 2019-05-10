@@ -3,6 +3,10 @@ package com.shinnytech.futures.application;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleObserver;
+import android.arch.lifecycle.OnLifecycleEvent;
+import android.arch.lifecycle.ProcessLifecycleOwner;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -32,7 +36,6 @@ import com.lzy.okgo.cookie.store.SPCookieStore;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
 import com.shinnytech.futures.constants.CommonConstants;
-import com.shinnytech.futures.controller.activity.ConfirmActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.DataManager;
@@ -44,6 +47,7 @@ import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
+import com.tencent.bugly.crashreport.CrashReport;
 import com.umeng.commonsdk.UMConfigure;
 
 import java.io.File;
@@ -51,13 +55,17 @@ import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import okhttp3.OkHttpClient;
 
 import static com.shinnytech.futures.constants.CommonConstants.AMP_BACKGROUND;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_CRASH;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_FOREGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_INIT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM;
@@ -96,12 +104,12 @@ public class BaseApplication extends Application implements ServiceConnection {
     private static int index = 0;
     private static LOGClient mLOGClient;
     private boolean mServiceBound = false;
-    private boolean mBackGround = false;
+    private static boolean mBackGround = false;
     private BroadcastReceiver mReceiverMarket;
     private BroadcastReceiver mReceiverTransaction;
     private BroadcastReceiver mReceiverNetwork;
-    private BroadcastReceiver mReceiverScreen;
     private MyHandler mMyHandler = new MyHandler();
+    private AppLifecycleObserver appLifecycleObserver = new AppLifecycleObserver();
 
     public static int getIndex() {
         return index;
@@ -119,6 +127,10 @@ public class BaseApplication extends Application implements ServiceConnection {
         return sContext;
     }
 
+    public static boolean ismBackGround() {
+        return mBackGround;
+    }
+
     @NonNull
     public static WebSocketService getWebSocketService() {
         return sWebSocketService;
@@ -132,6 +144,8 @@ public class BaseApplication extends Application implements ServiceConnection {
     public void onCreate() {
         super.onCreate();
         if (sContext == null) sContext = getApplicationContext();
+
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(appLifecycleObserver);
 
         //获取版本号
         initAppVersion();
@@ -279,21 +293,6 @@ public class BaseApplication extends Application implements ServiceConnection {
         mServiceBound = false;
     }
 
-    /**
-     * date: 7/21/17
-     * author: chenli
-     * description: Home键监听器
-     */
-    @Override
-    public void onTrimMemory(int level) {
-        super.onTrimMemory(level);
-        Beta.unInit();
-        if (level == TRIM_MEMORY_UI_HIDDEN) {
-            notifyBackground();
-        }
-
-    }
-
     private void initOkGo() {
         //构建OkHttpClient.Builder
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
@@ -355,19 +354,30 @@ public class BaseApplication extends Application implements ServiceConnection {
             String AMP_KEY = (String) cl.getMethod("getAmpKey").invoke(null);
             String AK = (String) cl.getMethod("getAK").invoke(null);
             String SK = (String) cl.getMethod("getSK").invoke(null);
-            String user_agent = (String) cl.getMethod("getUserAgent").invoke(null);
+            final String user_agent = (String) cl.getMethod("getUserAgent").invoke(null);
             MDUrlGroup.add(MARKET_URL_5);
             MDUrlGroup.add(MARKET_URL_6);
             MDUrlGroup.add(MARKET_URL_7);
             sMDURLs.add(MARKET_URL_8);
             TRANSACTION_URL = TRANSACTION_URL_L;
             JSON_FILE_URL = JSON_FILE_URL_L;
-            Bugly.init(sContext, BUGLY_KEY, false);
             UMConfigure.init(sContext, UMENG_KEY, "ShinnyTech", UMConfigure.DEVICE_TYPE_PHONE, "");
             StatService.setAppKey(BAIDU_KEY);
             StatService.start(this);
             Amplitude.getInstance().initialize(this, AMP_KEY).enableForegroundTracking(this);
             Amplitude.getInstance().logEvent(AMP_INIT);
+            CrashReport.UserStrategy strategy = new CrashReport.UserStrategy(sContext);
+            strategy.setCrashHandleCallback( new CrashReport.CrashHandleCallback() {
+                public Map<String, String> onCrashHandleStart(int crashType, String errorType,
+                                                              String errorMessage, String errorStack) {
+                    Amplitude.getInstance().logEvent(AMP_CRASH);
+                    LinkedHashMap<String, String> map = new LinkedHashMap<>();
+                    map.put("user-agent", user_agent);
+                    return map;
+                }
+            });
+            Beta.enableHotfix = false;
+            Bugly.init(sContext, BUGLY_KEY, false, strategy);
             initAliLog(AK, SK);
             DataManager.getInstance().USER_AGENT = user_agent;
         } catch (ClassNotFoundException e) {
@@ -407,7 +417,6 @@ public class BaseApplication extends Application implements ServiceConnection {
 
             @Override
             public void onActivityResumed(Activity activity) {
-                notifyForeground();
             }
 
             @Override
@@ -438,7 +447,6 @@ public class BaseApplication extends Application implements ServiceConnection {
                     if (mReceiverTransaction != null)
                         LocalBroadcastManager.getInstance(sContext).unregisterReceiver(mReceiverTransaction);
                     if (mReceiverNetwork != null) sContext.unregisterReceiver(mReceiverNetwork);
-                    if (mReceiverScreen != null) sContext.unregisterReceiver(mReceiverScreen);
                     if (sWebSocketService != null) {
                         sWebSocketService.disConnectMD();
                         sWebSocketService.disConnectTD();
@@ -465,7 +473,9 @@ public class BaseApplication extends Application implements ServiceConnection {
         if (mServiceBound && mBackGround && sWebSocketService != null) {
             mBackGround = false;
             if (!sWebSocketService.isTDConnected()) sWebSocketService.connectTD();
+            else sWebSocketService.sendPeekMessage();
             if (!sWebSocketService.isMDConnected()) sWebSocketService.connectMD(sMDURLs.get(index));
+            else sWebSocketService.sendPeekMessageTransaction();
         }
     }
 
@@ -477,7 +487,6 @@ public class BaseApplication extends Application implements ServiceConnection {
     private void notifyBackground() {
         //后台
         mBackGround = true;
-        Amplitude.getInstance().logEvent(AMP_BACKGROUND);
     }
 
     /**
@@ -587,15 +596,6 @@ public class BaseApplication extends Application implements ServiceConnection {
         };
         sContext.registerReceiver(mReceiverNetwork, new IntentFilter(NETWORK_STATE));
 
-        //屏幕亮起后重连广播
-        mReceiverScreen = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                notifyBackground();
-            }
-        };
-        sContext.registerReceiver(mReceiverScreen, new IntentFilter(Intent.ACTION_SCREEN_OFF));
-
     }
 
     /**
@@ -617,6 +617,20 @@ public class BaseApplication extends Application implements ServiceConnection {
                 default:
                     break;
             }
+        }
+    }
+
+    class AppLifecycleObserver implements LifecycleObserver {
+        @OnLifecycleEvent(Lifecycle.Event.ON_START)
+        public void onEnterForeground() {
+            notifyForeground();
+            Amplitude.getInstance().logEvent(AMP_FOREGROUND);
+        }
+
+        @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+        public void onEnterBackground() {
+            notifyBackground();
+            Amplitude.getInstance().logEvent(AMP_BACKGROUND);
         }
     }
 

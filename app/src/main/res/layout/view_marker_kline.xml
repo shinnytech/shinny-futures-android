@@ -3,7 +3,7 @@
     android:id="@+id/kline_marker"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/rectangle_border_marker_view"
+    android:background="@drawable/fragment_kline_markview_rectangle_border"
     android:orientation="vertical">
 
 

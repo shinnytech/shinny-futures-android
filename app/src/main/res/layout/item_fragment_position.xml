@@ -8,7 +8,7 @@
         android:id="@+id/position_background"
         android:layout_width="match_parent"
         android:layout_height="@dimen/layout_height_item_fragment_quote"
-        android:background="@drawable/item_touch_bg"
+        android:background="@drawable/fragment_item_touch_bg"
         android:clickable="true"
         android:gravity="center"
         android:orientation="horizontal">

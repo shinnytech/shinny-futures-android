@@ -100,8 +100,8 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
             try {
                 //合约详情页合约高亮
                 boolean isHighlight = positionEntity.isHighlight();
-                if (isHighlight)mBinding.positionBackground.setBackground(sContext.getResources().getDrawable(R.drawable.item_touch_bg_highlight));
-                else mBinding.positionBackground.setBackground(sContext.getResources().getDrawable(R.drawable.item_touch_bg));
+                if (isHighlight)mBinding.positionBackground.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_highlight_touch_bg));
+                else mBinding.positionBackground.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_touch_bg));
 
                 String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);

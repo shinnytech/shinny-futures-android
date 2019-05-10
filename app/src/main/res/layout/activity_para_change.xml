@@ -31,7 +31,7 @@
                     <RadioButton
                         android:id="@+id/para_ma"
                         android:checked="true"
-                        android:background="@drawable/bgcolor_setting_nav"
+                        android:background="@drawable/activity_para_change_checked_selector"
                         android:textColor="@color/white"
                         android:layout_gravity="center"
                         android:gravity="center"
@@ -42,7 +42,7 @@
 
                     <!--<RadioButton-->
                         <!--android:id="@+id/para_expma"-->
-                        <!--android:background="@drawable/bgcolor_setting_nav"-->
+                        <!--android:background="@drawable/activity_para_change_checked_selector"-->
                         <!--android:textColor="@color/white"-->
                         <!--android:layout_gravity="center"-->
                         <!--android:gravity="center"-->
@@ -53,7 +53,7 @@
 
                     <!--<RadioButton-->
                         <!--android:id="@+id/para_sar"-->
-                        <!--android:background="@drawable/bgcolor_setting_nav"-->
+                        <!--android:background="@drawable/activity_para_change_checked_selector"-->
                         <!--android:textColor="@color/white"-->
                         <!--android:layout_gravity="center"-->
                         <!--android:gravity="center"-->
@@ -83,7 +83,7 @@
                     android:id="@+id/para_save"
                     android:textSize="@dimen/font_size_normal"
                     android:textColor="@color/white"
-                    android:background="@drawable/para_selector"
+                    android:background="@drawable/activity_para_change_pressed_selector"
                     android:layout_margin="@dimen/margin_5dp"
                     android:gravity="center"
                     android:layout_gravity="center"
@@ -97,7 +97,7 @@
                     android:id="@+id/para_reset"
                     android:textSize="@dimen/font_size_normal"
                     android:textColor="@color/white"
-                    android:background="@drawable/para_selector"
+                    android:background="@drawable/activity_para_change_pressed_selector"
                     android:layout_margin="@dimen/margin_5dp"
                     android:gravity="center"
                     android:layout_gravity="center"

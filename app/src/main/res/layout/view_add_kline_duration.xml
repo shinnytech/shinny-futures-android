@@ -40,7 +40,7 @@
             android:inputType="number"
             android:layout_marginStart="@dimen/margin_5dp"
             android:paddingStart="@dimen/padding_5dp"
-            android:background="@drawable/rectangle_border_add_duration"
+            android:background="@drawable/activity_add_kline_duration_rectangle_border"
             android:hint="自定义周期"
             android:textColorHint="@color/white"
             android:layout_weight="2"

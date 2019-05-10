@@ -3,7 +3,9 @@
 
     <data/>
 
-    <android.support.design.widget.CoordinatorLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    <android.support.design.widget.CoordinatorLayout
+        android:background="@color/search_background"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:keepScreenOn="true"
         android:layout_width="match_parent"
@@ -21,7 +23,7 @@
                 android:id="@+id/toolbar_search"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
+                android:background="@color/toolbar"
                 app:popupTheme="@style/AppTheme.PopupOverlay">
 
                 <TextView

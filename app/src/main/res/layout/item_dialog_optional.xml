@@ -7,7 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/layout_height_popup_fragment_quote"
-        android:background="@drawable/popup_item_touch_bg"
+        android:background="@color/quote_background"
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
@@ -25,7 +25,7 @@
             app:autoSizeStepGranularity="1sp"
             android:paddingBottom="@dimen/padding_10dp"
             android:paddingTop="@dimen/padding_10dp"
-            android:textColor="@color/dialog_optional_text"
+            android:textColor="@color/quote_dialog_text"
             android:textSize="@dimen/font_size_normal_high" />
 
     </LinearLayout>

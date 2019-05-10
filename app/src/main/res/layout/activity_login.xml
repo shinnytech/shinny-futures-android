@@ -98,7 +98,7 @@
                     android:id="@+id/ll_broker"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/login_rectangle_border"
+                    android:background="@drawable/activity_login_rectangle_border"
                     android:orientation="horizontal">
 
                     <TextView
@@ -137,7 +137,7 @@
                     android:id="@+id/ll_account"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/login_rectangle_border"
+                    android:background="@drawable/activity_login_rectangle_border"
                     android:orientation="horizontal">
 
                     <EditText
@@ -159,7 +159,7 @@
                         android:layout_gravity="center"
                         android:layout_marginStart="@dimen/margin_10dp"
                         android:layout_marginEnd="@dimen/margin_10dp"
-                        android:background="@drawable/login_icon_bg"
+                        android:background="@drawable/activity_login_touch_bg"
                         android:src="@mipmap/ic_cancel_white_18dp"
                         android:visibility="invisible" />
                 </LinearLayout>
@@ -180,7 +180,7 @@
                     android:id="@+id/ll_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/login_rectangle_border"
+                    android:background="@drawable/activity_login_rectangle_border"
                     android:orientation="horizontal">
 
                     <EditText
@@ -203,7 +203,7 @@
                         android:layout_gravity="center"
                         android:layout_marginStart="@dimen/margin_10dp"
                         android:layout_marginEnd="@dimen/margin_10dp"
-                        android:background="@drawable/login_icon_bg"
+                        android:background="@drawable/activity_login_touch_bg"
                         android:src="@mipmap/ic_cancel_white_18dp"
                         android:visibility="invisible" />
 
@@ -214,7 +214,7 @@
                     android:id="@+id/button_id_login"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
-                    android:background="@drawable/login_selector"
+                    android:background="@drawable/activity_login_selector"
                     android:gravity="center"
                     android:text="@string/login_activity_btn_login"
                     android:textColor="@color/white"

@@ -280,7 +280,7 @@
                 android:layout_marginEnd="@dimen/margin_5dp">
 
                 <Button
-                    android:id="@+id/bank_in"
+                    android:id="@+id/transfer_in"
                     android:layout_marginRight="@dimen/margin_10dp"
                     android:background="@color/launch"
                     android:layout_width="0dp"
@@ -290,7 +290,7 @@
                     android:textColor="@color/white"/>
 
                 <Button
-                    android:id="@+id/bank_out"
+                    android:id="@+id/transfer_out"
                     android:background="@color/launch"
                     android:layout_marginLeft="@dimen/margin_10dp"
                     android:layout_width="0dp"

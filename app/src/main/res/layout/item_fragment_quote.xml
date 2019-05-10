@@ -8,7 +8,7 @@
         android:id="@+id/ll_quote"
         android:layout_width="match_parent"
         android:layout_height="@dimen/layout_height_item_fragment_quote"
-        android:background="@drawable/item_touch_bg"
+        android:background="@drawable/fragment_item_touch_bg"
         android:clickable="true"
         android:focusable="true"
         android:orientation="horizontal">
@@ -27,8 +27,7 @@
             app:autoSizeMaxTextSize="@dimen/font_size_normal"
             app:autoSizeStepGranularity="1sp"
             android:textColor="@color/white"
-            android:textSize="@dimen/font_size_normal"
-            android:textStyle="bold" />
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/quote_latest"
@@ -44,8 +43,7 @@
             app:autoSizeMaxTextSize="@dimen/font_size_normal"
             app:autoSizeStepGranularity="1sp"
             android:textColor="@color/white"
-            android:textSize="@dimen/font_size_normal"
-            android:textStyle="bold" />
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/quote_change_percent"
@@ -61,8 +59,7 @@
             app:autoSizeMaxTextSize="@dimen/font_size_normal"
             app:autoSizeStepGranularity="1sp"
             android:textColor="@color/white"
-            android:textSize="@dimen/font_size_normal"
-            android:textStyle="bold" />
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/quote_open_interest"
@@ -78,8 +75,7 @@
             app:autoSizeMaxTextSize="@dimen/font_size_normal"
             app:autoSizeStepGranularity="1sp"
             android:textColor="@color/white"
-            android:textSize="@dimen/font_size_normal"
-            android:textStyle="bold" />
+            android:textSize="@dimen/font_size_normal" />
 
     </LinearLayout>
 </layout>

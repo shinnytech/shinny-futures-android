@@ -13,6 +13,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityBankTransferBinding;
 import com.shinnytech.futures.model.adapter.BankTransferAdapter;
+import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.accountinfobean.BankEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.TransferEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
@@ -21,14 +22,21 @@ import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.shinnytech.futures.constants.CommonConstants.BANK_IN;
-import static com.shinnytech.futures.constants.CommonConstants.BANK_OUT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_AMOUNT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BANK;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENCY;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_TRANSFER_IN;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_TRANSFER_OUT;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_IN;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_DIRECTION;
 import static java.lang.Math.abs;
 
@@ -78,9 +86,9 @@ public class BankTransferActivity extends BaseActivity {
         mCurrencySpinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown_style);
         mBinding.spinnerCurrency.setAdapter(mCurrencySpinnerAdapter);
 
-        if (BANK_IN.equals(mTitle))mBinding.futureBank.setVisibility(View.GONE);
+        if (TRANSFER_IN.equals(mTitle))mBinding.futureBank.setVisibility(View.GONE);
 
-        if (BANK_OUT.equals(mTitle))mBinding.bankFuture.setVisibility(View.GONE);
+        if (TRANSFER_OUT.equals(mTitle))mBinding.bankFuture.setVisibility(View.GONE);
     }
 
     @Override
@@ -98,6 +106,11 @@ public class BankTransferActivity extends BaseActivity {
                 try {
                     float amountF = -abs(Float.parseFloat(amount));
                     BaseApplication.getWebSocketService().sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(AMP_EVENT_BANK, bank);
+                    jsonObject.put(AMP_EVENT_AMOUNT, amountF);
+                    jsonObject.put(AMP_EVENT_CURRENCY, currency);
+                    Amplitude.getInstance().logEvent(AMP_TRANSFER_OUT, jsonObject);
                 } catch (Exception e) {
                     ToastNotificationUtils.showToast(sContext, "输入金额错误！");
                 }
@@ -117,6 +130,11 @@ public class BankTransferActivity extends BaseActivity {
                 try {
                     float amountF = abs(Float.parseFloat(amount));
                     BaseApplication.getWebSocketService().sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(AMP_EVENT_BANK, bank);
+                    jsonObject.put(AMP_EVENT_AMOUNT, amountF);
+                    jsonObject.put(AMP_EVENT_CURRENCY, currency);
+                    Amplitude.getInstance().logEvent(AMP_TRANSFER_IN, jsonObject);
                 } catch (Exception e) {
                     ToastNotificationUtils.showToast(sContext, "输入金额错误！");
                 }

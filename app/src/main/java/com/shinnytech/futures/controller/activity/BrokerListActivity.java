@@ -9,15 +9,19 @@ import android.view.View;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ActivityBrokerListBinding;
 import com.shinnytech.futures.model.adapter.BrokerAdapter;
+import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
-import java.util.Arrays;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
 
-import static com.shinnytech.futures.constants.CommonConstants.BROKERS_LOCAL;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_SELECT_BROKER;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID_SELECTED;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_LIST;
 
 public class BrokerListActivity extends BaseActivity {
@@ -52,8 +56,14 @@ public class BrokerListActivity extends BaseActivity {
                     @Override
                     public void onItemClick(View view, int position) {
                         String broker = mBrokerAdapter.getData().get(position);
-                        List<String> list = Arrays.asList(BROKERS_LOCAL);
-                        if (!list.contains(broker)){
+                        JSONObject jsonObject = new JSONObject();
+                        try {
+                            jsonObject.put(AMP_USER_BROKER_ID_SELECTED, broker);
+                            Amplitude.getInstance().logEvent(AMP_SELECT_BROKER, jsonObject);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        if (broker != null && broker.contains(" ")){
                             ToastNotificationUtils.showToast(sContext, "请联系期货公司申请！");
                             return;
                         }

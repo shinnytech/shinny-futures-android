@@ -100,7 +100,7 @@ public class MyLegendRenderer extends LegendRenderer {
                         ? +xoffset
                         : -xoffset);
 
-                // Horizontally layed out legends do the center offset on a line basis,
+                // Horizontally layed out legends do the center offset on a fragment_quote_recommend_line basis,
                 // So here we offset the vertical ones only.
                 if (orientation == Legend.LegendOrientation.VERTICAL) {
                     originPosX += (direction == Legend.LegendDirection.LEFT_TO_RIGHT

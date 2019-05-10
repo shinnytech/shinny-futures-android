@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.databinding.ItemActivityTradeBinding;
+import com.shinnytech.futures.databinding.ItemFragmentTradeBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.TradeEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
@@ -59,8 +59,8 @@ public class TradeAdapter extends RecyclerView.Adapter<TradeAdapter.ItemViewHold
 
     @Override
     public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        ItemActivityTradeBinding binding = DataBindingUtil.inflate(LayoutInflater
-                .from(sContext), R.layout.item_activity_trade, parent, false);
+        ItemFragmentTradeBinding binding = DataBindingUtil.inflate(LayoutInflater
+                .from(sContext), R.layout.item_fragment_trade, parent, false);
         ItemViewHolder holder = new ItemViewHolder(binding.getRoot());
         holder.setBinding(binding);
         return holder;
@@ -80,17 +80,17 @@ public class TradeAdapter extends RecyclerView.Adapter<TradeAdapter.ItemViewHold
 
         TradeEntity tradeEntity;
 
-        private ItemActivityTradeBinding mBinding;
+        private ItemFragmentTradeBinding mBinding;
 
         public ItemViewHolder(View itemView) {
             super(itemView);
         }
 
-        public ItemActivityTradeBinding getBinding() {
+        public ItemFragmentTradeBinding getBinding() {
             return this.mBinding;
         }
 
-        public void setBinding(ItemActivityTradeBinding binding) {
+        public void setBinding(ItemFragmentTradeBinding binding) {
             this.mBinding = binding;
         }
 

@@ -57,10 +57,6 @@
     <color name="transaction_light">#444444</color>
     <!--交易页内深颜色-->
     <color name="transaction_dark">#333333</color>
-    <!--所有涉及红字颜色-->
-    <color name="text_red">#be1414</color>
-    <!--所有涉及绿字颜色-->
-    <color name="text_green">#1ac51a</color>
     <!--断线重连提示颜色-->
     <color name="off_line">#ffff99</color>
     <!--上下导航按钮的底色-->
@@ -147,8 +143,37 @@
     <!--持仓页-->
     <color name="position_highlight">#99dcdc0a</color>
 
+    -------------------------------------------------------------------
+    -------------------------------------------------------------------
+    -------------------------------------------------------------------
+
     <!--登录页-->
     <color name="login_transparent">#00000000</color>
     <color name="login_gray">#88ffffff</color>
     <color name="login_simulation_hint">#88BE000F</color>
+
+    <!--一级页-->
+    <color name="status_bar">#121212</color>
+    <color name="toolbar">#121212</color>
+    <color name="quote_background">#000000</color>
+    <color name="quote_recommend_background">#121212</color>
+    <color name="quote_highlight">#88BE000F</color>
+    <color name="quote_popup_background">#232323</color>
+    <color name="quote_popup_text">#929292</color>
+    <color name="quote_popup_text_transaction">#EF372B</color>
+    <color name="quote_dialog_text">#ffffff</color>
+    <color name="quote_dialog_text_selected">#797677</color>
+    <color name="quote_dialog_divider">#6A6A6A</color>
+    <color name="text_red">#FF3B2F</color>
+    <color name="text_green">#16CC26</color>
+
+    <!--二级页-->
+    <color name="future_info_background">#000000</color>
+    <color name="future_info_toolbar">#121212</color>
+    <color name="fragment_transaction_bid">#b34545</color>
+    <color name="fragment_transaction_ask">#368e5f</color>
+    <color name="fragment_transaction_close">#dcdcdc</color>
+
+    <!--搜索页-->
+    <color name="search_background">#000000</color>
 </resources>

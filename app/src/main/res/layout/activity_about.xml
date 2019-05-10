@@ -165,6 +165,20 @@
                 android:layout_height="match_parent"
                 android:text="1.0.0"
                 android:textColor="@color/gray" />
+
+            <TextView
+                android:id="@+id/check_version"
+                android:gravity="center_vertical|end"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
+                app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                app:autoSizeStepGranularity="1sp"
+                android:textSize="@dimen/font_size_normal"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text=" (检测更新)"
+                android:textColor="@color/launch" />
         </LinearLayout>
 
         <View

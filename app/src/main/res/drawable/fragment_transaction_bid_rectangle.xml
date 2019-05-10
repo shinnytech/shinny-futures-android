@@ -3,14 +3,15 @@
     android:shape="rectangle">
     <!--
     shape的類型含有:
-    1.rectangle   長方形、矩形
+    1.fragment_transaction_rectangle   長方形、矩形
     2.oval   橢圓形、卵形
-    3.line   線
+    3.fragment_quote_recommend_line   線
     4.ring   環形
     -->
     <!-- 圓角，Layout佈局圓角幅度設定值 -->
-    <corners android:radius="30dp" />
+    <corners android:radius="10dp" />
     <!-- 外框，框線粗細，框線顏色 -->
-
-    <solid android:color="@color/launch"></solid>
+    <solid
+        android:width="1dp"
+        android:color="@color/fragment_transaction_bid" />
 </shape>

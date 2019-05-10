@@ -20,16 +20,26 @@ import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentAccountBinding;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
+import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.utils.LogUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.shinnytech.futures.constants.CommonConstants.BANK_IN;
-import static com.shinnytech.futures.constants.CommonConstants.BANK_OUT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_ACCOUNT_TRANSFER_IN;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_ACCOUNT_TRANSFER_OUT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_MAIN;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_TRANSFER;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_IN;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
@@ -170,24 +180,42 @@ public class AccountFragment extends LazyLoadFragment {
                 Intent intentPos = new Intent(getActivity(), FutureInfoActivity.class);
                 intentPos.putExtra(INS_BETWEEN_ACTIVITY, ins);
                 startActivityForResult(intentPos, JUMP_TO_FUTURE_INFO_ACTIVITY);
-                mBinding.accountFab.setVisibility(View.GONE);
+                mBinding.accountFab.hide();
             }
         });
 
-        mBinding.bankIn.setOnClickListener(new View.OnClickListener() {
+        mBinding.transferIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                    jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_TRANSFER);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+                Amplitude.getInstance().logEvent(AMP_ACCOUNT_TRANSFER_IN);
                 Intent intentBank = new Intent(getActivity(), BankTransferActivity.class);
-                intentBank.putExtra(TRANSFER_DIRECTION, BANK_IN);
+                intentBank.putExtra(TRANSFER_DIRECTION, TRANSFER_IN);
                 getActivity().startActivity(intentBank);
             }
         });
 
-        mBinding.bankOut.setOnClickListener(new View.OnClickListener() {
+        mBinding.transferOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                    jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_TRANSFER);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+                Amplitude.getInstance().logEvent(AMP_ACCOUNT_TRANSFER_OUT);
                 Intent intentBank = new Intent(getActivity(), BankTransferActivity.class);
-                intentBank.putExtra(TRANSFER_DIRECTION, BANK_OUT);
+                intentBank.putExtra(TRANSFER_DIRECTION, TRANSFER_OUT);
                 getActivity().startActivity(intentBank);
             }
         });

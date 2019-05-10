@@ -59,13 +59,12 @@
                         android:contentDescription="right"
                         android:src="@mipmap/ic_chevron_right_white_24dp" />
                 </LinearLayout>
-
-
             </LinearLayout>
 
             <android.support.design.widget.BottomNavigationView
-                app:itemIconTint="@drawable/bottom_navigation_selector"
-                app:itemTextColor="@drawable/bottom_navigation_selector"
+                android:background="@color/toolbar"
+                app:itemIconTint="@drawable/activity_main_bottom_navigation_selector"
+                app:itemTextColor="@drawable/activity_main_bottom_navigation_selector"
                 app:menu="@menu/activity_main_tab"
                 android:id="@+id/bottom_navigation"
                 android:layout_gravity="bottom"

@@ -26,15 +26,18 @@ import java.util.List;
 public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ItemViewHolder> {
     private Context sContext;
     private List<String> mData = new ArrayList<>();
+    private String mSelected;
 
-    public DialogAdapter(Context context, List<String> data) {
+    public DialogAdapter(Context context, List<String> data, String selected) {
         this.sContext = context;
         this.mData.addAll(data);
+        this.mSelected = selected;
     }
 
-    public void updateList(List<String> data) {
+    public void updateList(List<String> data, String selected) {
         this.mData.clear();
         this.mData.addAll(data);
+        this.mSelected = selected;
         notifyDataSetChanged();
     }
 
@@ -82,6 +85,10 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ItemViewHo
             if (insName != null) mBinding.tvIdDialog.setText(insName.getInstrumentName());
             else mBinding.tvIdDialog.setText(instrumentId);
             itemView.setTag(instrumentId);
+
+            if (mSelected.equals(instrumentId))mBinding.tvIdDialog.setTextColor(sContext.getResources().getColor(R.color.quote_dialog_text_selected));
+            else mBinding.tvIdDialog.setTextColor(sContext.getResources().getColor(R.color.quote_dialog_text));
+
         }
 
     }

@@ -512,9 +512,9 @@ public class LatestFileManager {
     public static int setTextViewColor(String data, String pre_settlement) {
         try {
             float value = Float.parseFloat(data) - Float.parseFloat(pre_settlement);
-            if (value < 0) return ContextCompat.getColor(BaseApplication.getContext(), R.color.ask);
+            if (value < 0) return ContextCompat.getColor(BaseApplication.getContext(), R.color.text_green);
             else if (value > 0)
-                return ContextCompat.getColor(BaseApplication.getContext(), R.color.bid);
+                return ContextCompat.getColor(BaseApplication.getContext(), R.color.text_red);
             else return ContextCompat.getColor(BaseApplication.getContext(), R.color.white);
         } catch (Exception e) {
             e.printStackTrace();

@@ -12,7 +12,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
@@ -21,12 +20,22 @@ import com.shinnytech.futures.controller.fragment.AccountFragment;
 import com.shinnytech.futures.controller.fragment.QuoteFragment;
 import com.shinnytech.futures.controller.fragment.QuotePagerFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
+import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.ToastNotificationUtils;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_FEED_BACK;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_MAIN;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_SEARCH;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.BACK_TO_ACCOUNT_DETAIL;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_SEARCH_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
@@ -59,7 +68,6 @@ public class MainActivity extends BaseActivity {
     protected void initData() {
         mBinding = (ActivityMainDrawerBinding) mViewDataBinding;
         mTitle = OPTIONAL;
-        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
         mMainActivityPresenter = new MainActivityPresenter(this, sContext, mBinding, mTitle, mToolbarTitle);
 
     }
@@ -79,6 +87,22 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
+    protected void updateToolbarFromNetwork(Context context, String title) {
+        if (NetworkUtils.isNetworkConnected(sContext)) {
+            mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.toolbar));
+            mToolbarTitle.setTextColor(Color.WHITE);
+            mToolbarTitle.setText(title);
+            mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
+        } else {
+            mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.off_line));
+            mToolbarTitle.setTextColor(Color.BLACK);
+            mToolbarTitle.setText(OFFLINE);
+            mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+        }
+    }
+
+
+    @Override
     protected void registerBroaderCast() {
         mReceiverNetwork = new BroadcastReceiver() {
             @Override
@@ -92,12 +116,14 @@ public class MainActivity extends BaseActivity {
                         mToolbarTitle.setTextColor(Color.BLACK);
                         mToolbarTitle.setText(OFFLINE);
                         mToolbarTitle.setTextSize(20);
+                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                         break;
                     case 1:
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.black_dark));
+                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.toolbar));
                         mToolbarTitle.setTextColor(Color.WHITE);
                         mToolbarTitle.setText(mTitle);
                         mToolbarTitle.setTextSize(25);
+                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
                         break;
                     default:
                         break;
@@ -136,6 +162,14 @@ public class MainActivity extends BaseActivity {
                 }
                 return true;
             case R.id.search_quote:
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                    jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_SEARCH);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                 mMainActivityPresenter.setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
                 Intent intent = new Intent(MainActivity.this, SearchActivity.class);
                 startActivityForResult(intent, JUMP_TO_SEARCH_ACTIVITY);
@@ -185,7 +219,7 @@ public class MainActivity extends BaseActivity {
             if (isAccountPage){
                 mBinding.bottomNavigation.setSelectedItemId(R.id.trade);
                 AccountFragment accountFragment = (AccountFragment)mMainActivityPresenter.getmViewPagerFragmentAdapter().getItem(1);
-                accountFragment.getmBinding().accountFab.setVisibility(View.VISIBLE);
+                accountFragment.getmBinding().accountFab.show();
                 accountFragment.setIns(ins);
             }
         }
@@ -198,14 +232,22 @@ public class MainActivity extends BaseActivity {
 
         if (OPTIONAL.equals(quoteFragment.getTitle())) {
             quoteFragment.refreshOptional();
-            //自选合约管理菜单
-//            if (requestCode == MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY)
-//                quoteFragment.refreshOptional();
-//            else quoteFragment.update();
         } else {
             if (mIns != null && !mIns.equals(sDataManager.getRtnData().getIns_list())) {
                 BaseApplication.getWebSocketService().sendSubscribeQuote(mIns);
             }
+        }
+
+        //主页到搜索页的返回
+        if (requestCode == JUMP_TO_SEARCH_ACTIVITY){
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_SEARCH);
+                jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
         }
 
     }

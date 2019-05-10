@@ -29,6 +29,8 @@ import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.accountinfobean.BrokerEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqCancelOrderEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqConfirmSettlementEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqInsertOrderEntity;
@@ -45,19 +47,23 @@ import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_TRADE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_TRANSFER;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_CANCEL_ORDER;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_DIRECTION;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_INSTRUMENT_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OFFSET;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_VOLUME;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_INSERT_ORDER;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
 import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
-import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
@@ -235,7 +241,7 @@ public class WebSocketService extends Service {
                                         sendMessage(MD_OFFLINE, MD_BROADCAST);
                                         return;
                                 }
-                                sendPeekMessage();
+                                if (!BaseApplication.ismBackGround())sendPeekMessage();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -412,7 +418,7 @@ public class WebSocketService extends Service {
                                         sendMessage(TD_OFFLINE, TD_BROADCAST);
                                         return;
                                 }
-                                sendPeekMessageTransaction();
+                                if (!BaseApplication.ismBackGround())sendPeekMessageTransaction();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -537,6 +543,17 @@ public class WebSocketService extends Service {
     public void sendReqInsertOrder(String exchange_id, String instrument_id, String direction,
                                    String offset, int volume, String price_type, double price) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put(AMP_EVENT_PRICE, price);
+                jsonObject.put(AMP_EVENT_INSTRUMENT_ID, exchange_id + "." + instrument_id);
+                jsonObject.put(AMP_EVENT_VOLUME, volume);
+                jsonObject.put(AMP_EVENT_DIRECTION, direction);
+                jsonObject.put(AMP_EVENT_OFFSET, offset);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            Amplitude.getInstance().logEvent(AMP_INSERT_ORDER, jsonObject);
             String user_id = DataManager.getInstance().USER_ID;
             ReqInsertOrderEntity reqInsertOrderEntity = new ReqInsertOrderEntity();
             reqInsertOrderEntity.setAid("insert_order");
@@ -553,7 +570,6 @@ public class WebSocketService extends Service {
             reqInsertOrderEntity.setTime_condition("GFD");
             String reqInsertOrder = new Gson().toJson(reqInsertOrderEntity);
             mWebSocketClientTD.sendText(reqInsertOrder);
-            Amplitude.getInstance().logEvent(AMP_TRADE);
             LogUtils.e(reqInsertOrder, true);
             LatestFileManager.insertLogToDB(reqInsertOrder);
         }
@@ -567,13 +583,29 @@ public class WebSocketService extends Service {
     public void sendReqCancelOrder(String order_id) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
             String user_id = DataManager.getInstance().USER_ID;
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(user_id);
+            if (userEntity != null){
+                OrderEntity orderEntity = userEntity.getOrders().get(order_id);
+                if (orderEntity != null){
+                    JSONObject jsonObject = new JSONObject();
+                    try {
+                        jsonObject.put(AMP_EVENT_PRICE, orderEntity.getLimit_price());
+                        jsonObject.put(AMP_EVENT_INSTRUMENT_ID, orderEntity.getExchange_id() + "." + orderEntity.getInstrument_id());
+                        jsonObject.put(AMP_EVENT_VOLUME, orderEntity.getVolume_left());
+                        jsonObject.put(AMP_EVENT_DIRECTION, orderEntity.getDirection());
+                        jsonObject.put(AMP_EVENT_OFFSET, orderEntity.getOffset());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Amplitude.getInstance().logEvent(AMP_CANCEL_ORDER, jsonObject);
+                }
+            }
             ReqCancelOrderEntity reqCancelOrderEntity = new ReqCancelOrderEntity();
             reqCancelOrderEntity.setAid("cancel_order");
             reqCancelOrderEntity.setUser_id(user_id);
             reqCancelOrderEntity.setOrder_id(order_id);
             String reqInsertOrder = new Gson().toJson(reqCancelOrderEntity);
             mWebSocketClientTD.sendText(reqInsertOrder);
-            Amplitude.getInstance().logEvent(AMP_TRADE);
             LogUtils.e(reqInsertOrder, true);
             LatestFileManager.insertLogToDB(reqInsertOrder);
         }
@@ -597,7 +629,6 @@ public class WebSocketService extends Service {
             reqTransferEntity.setAmount(amount);
             String reqTransfer = new Gson().toJson(reqTransferEntity);
             mWebSocketClientTD.sendText(reqTransfer);
-            Amplitude.getInstance().logEvent(AMP_TRANSFER);
             LogUtils.e(reqTransfer, true);
             LatestFileManager.insertLogToDB(reqTransfer);
         }

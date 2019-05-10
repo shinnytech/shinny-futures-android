@@ -3,21 +3,15 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimary">@color/status_bar</item>
+        <item name="colorPrimaryDark">@color/status_bar</item>
         <item name="colorAccent">@color/launch</item>
-        <item name="android:listDivider">@drawable/divider_quote</item>
+        <item name="android:listDivider">@drawable/fragment_quote_divider</item>
         <item name="android:windowBackground">@null</item>
-
-        <!--不显示开机空白页,只是显得有点卡顿-->
-        <!--<item name="android:windowIsTranslucent">true</item>-->
     </style>
 
     <style name="MainActivityTheme" parent="AppTheme">
-        <!--preview window添加背景图-->
-        <!--<item name="android:windowBackground">@mipmap/ic_splash</item>-->
-
-        <item name="android:windowBackground">@color/black_dark_more</item>
+        <item name="android:windowBackground">@color/quote_background</item>
     </style>
 
     <style name="LoginActivityTheme" parent="AppTheme">
@@ -27,7 +21,7 @@
 
     <style name="SearchActivityTheme" parent="AppTheme">
         <!--preview window添加背景图-->
-        <item name="android:windowBackground">@color/black_light_more</item>
+        <item name="android:windowBackground">@color/search_background</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
@@ -72,8 +66,8 @@
         <item name="android:layout_weight">1.5</item>
         <item name="android:layout_height">30dp</item>
         <item name="android:button">@null</item>
-        <item name="android:textColor">@drawable/txtcolor_yellow2gray_check</item>
-        <item name="android:background">@drawable/bgcolor_gray2yellow_check_up</item>
+        <item name="android:textColor">@drawable/activity_future_info_radio_button_up_checked_selector</item>
+        <item name="android:background">@drawable/activity_future_info_radio_button_up_selector</item>
         <item name="android:gravity">center</item>
     </style>
 
@@ -89,8 +83,8 @@
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">40dp</item>
         <item name="android:button">@null</item>
-        <item name="android:textColor">@drawable/txtcolor_yellow2gray_check</item>
-        <item name="android:background">@drawable/bgcolor_gray2yellow_check_down</item>
+        <item name="android:textColor">@drawable/activity_future_info_radio_button_up_checked_selector</item>
+        <item name="android:background">@drawable/activity_future_info_radio_button_down_selector</item>
         <item name="android:gravity">center</item>
     </style>
 
@@ -99,8 +93,8 @@
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">40dp</item>
         <item name="android:button">@null</item>
-        <item name="android:textColor">@drawable/txtcolor_yellow2white_check</item>
-        <item name="android:background">@drawable/bgcolor_gray2yellow_check_down_transaction</item>
+        <item name="android:textColor">@drawable/activity_future_info_radio_button_down_checked_selector</item>
+        <item name="android:background">@drawable/activity_future_info_radio_button_down_transaction_selector</item>
         <item name="android:gravity">center</item>
     </style>
 

@@ -5,7 +5,7 @@
 
     <LinearLayout
         android:id="@+id/ll_account"
-        android:background="@drawable/rectangle_border_para_content"
+        android:background="@drawable/activity_para_change_content_rectangle_border"
         android:layout_margin="@dimen/margin_5dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

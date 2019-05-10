@@ -12,6 +12,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,7 @@ import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
 import com.shinnytech.futures.model.adapter.DialogAdapter;
 import com.shinnytech.futures.model.adapter.KlineDurationTitleAdapter;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
+import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.VisibilityEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
@@ -47,10 +49,18 @@ import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_COMMON_SWITCH;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_FUTURE_INFO;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_SEARCH;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
 import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.DAY_FRAGMENT;
@@ -230,21 +240,21 @@ public class FutureInfoActivityPresenter {
                     View viewDialog = View.inflate(mFutureInfoActivity, R.layout.view_dialog_optional_quote, null);
                     Window dialogWindow = mDialogOptional.getWindow();
                     if (dialogWindow != null) {
-                        dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+                        dialogWindow.getDecorView().setPadding(0, getToolBarHeight(), 0, 0);
                         WindowManager.LayoutParams lp = dialogWindow.getAttributes();
-                        dialogWindow.setGravity(Gravity.BOTTOM);
+                        dialogWindow.setGravity(Gravity.TOP);
                         lp.width = WindowManager.LayoutParams.MATCH_PARENT;
                         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
                         dialogWindow.setAttributes(lp);
                     }
                     mDialogOptional.setContentView(viewDialog);
                     mDialogAdapterOptional = new DialogAdapter(mFutureInfoActivity,
-                            new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
+                            new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()), mInstrumentId);
                     mRecyclerViewOptional = viewDialog.findViewById(R.id.dialog_rv);
                     mRecyclerViewOptional.setLayoutManager(
                             new GridLayoutManager(mFutureInfoActivity, 3));
                     mRecyclerViewOptional.addItemDecoration(
-                            new DividerGridItemDecorationUtils(mFutureInfoActivity, R.drawable.divider_optional_dialog));
+                            new DividerGridItemDecorationUtils(mFutureInfoActivity, R.drawable.activity_optional_quote_dialog));
                     mRecyclerViewOptional.setAdapter(mDialogAdapterOptional);
 
                     mRecyclerViewOptional.addOnItemTouchListener(
@@ -272,7 +282,7 @@ public class FutureInfoActivityPresenter {
                                     }));
 
                 } else
-                    mDialogAdapterOptional.updateList(new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
+                    mDialogAdapterOptional.updateList(new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()), mInstrumentId);
 
                 if (!mDialogOptional.isShowing()) mDialogOptional.show();
             }
@@ -309,6 +319,14 @@ public class FutureInfoActivityPresenter {
             public void onClick(View v) {
                 Intent intent = new Intent(mFutureInfoActivity, CommonSwitchActivity.class);
                 mFutureInfoActivity.startActivityForResult(intent, FUTURE_INFO_ACTIVITY_TO_COMMON_SWITCH_ACTIVITY);
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_FUTURE_INFO);
+                    jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_COMMON_SWITCH);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
             }
         });
 
@@ -529,4 +547,18 @@ public class FutureInfoActivityPresenter {
         }
         return "";
     }
+
+    /**
+     * date: 2019/4/17
+     * author: chenli
+     * description: 获取toolbar高度px
+     */
+    private int getToolBarHeight() {
+        TypedValue tv = new TypedValue();
+        if (mFutureInfoActivity.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            return TypedValue.complexToDimensionPixelSize(tv.data, mFutureInfoActivity.getResources().getDisplayMetrics());
+        }
+        return DensityUtils.dp2px(sContext, 56);
+    }
+
 }

@@ -44,7 +44,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/confirm_selector"
+                android:background="@drawable/activity_confirm_selector"
                 android:gravity="center"
                 android:text="@string/confirm_activity_settlement"
                 android:textColor="@color/white"

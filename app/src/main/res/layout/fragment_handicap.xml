@@ -20,7 +20,7 @@
         android:layout_height="match_parent"
         android:paddingTop="@dimen/padding_5dp"
         android:paddingBottom="@dimen/padding_5dp"
-        android:background="@color/down_fragment"
+        android:background="@color/future_info_toolbar"
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:context=".controller.activity.FutureInfoActivity">

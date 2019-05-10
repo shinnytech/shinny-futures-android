@@ -38,6 +38,7 @@ import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.databinding.FragmentTransactionBinding;
 import com.shinnytech.futures.databinding.ViewDialogKeyboardBinding;
+import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
@@ -60,6 +61,9 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.AMP_ACCOUNT_LINK;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_CANCEL_CLOSE_CANCELED;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_CANCEL_CLOSE_CONFIRMED;
 import static com.shinnytech.futures.constants.CommonConstants.BACK_TO_ACCOUNT_DETAIL;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
 import static com.shinnytech.futures.constants.CommonConstants.COUNTERPARTY_PRICE;
@@ -288,6 +292,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         mBinding.transactionFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Amplitude.getInstance().logEvent(AMP_ACCOUNT_LINK);
                 Intent intent = new Intent();
                 intent.putExtra(BACK_TO_ACCOUNT_DETAIL, true);
                 intent.putExtra(INS_BETWEEN_ACTIVITY, mInstrumentId);
@@ -1129,12 +1134,14 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
                     }
                     dialog.dismiss();
+                    Amplitude.getInstance().logEvent(AMP_CANCEL_CLOSE_CONFIRMED);
                 }
             });
             cancel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     dialog.dismiss();
+                    Amplitude.getInstance().logEvent(AMP_CANCEL_CLOSE_CANCELED);
                 }
             });
             if (!dialog.isShowing())dialog.show();

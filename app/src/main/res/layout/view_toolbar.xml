@@ -10,7 +10,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/black_dark"
+        android:background="@color/toolbar"
         android:layout_gravity="center"
         android:theme="@style/AppTheme.AppBarOverlay"
         app:popupTheme="@style/AppTheme.PopupOverlay">
@@ -26,7 +26,7 @@
             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
             app:autoSizeMaxTextSize="@dimen/font_size_large"
             app:autoSizeStepGranularity="1sp"
-            android:textColor="@android:color/white"
+            android:textColor="@color/white"
             android:textSize="@dimen/font_size_large" />
 
     </android.support.v7.widget.Toolbar>

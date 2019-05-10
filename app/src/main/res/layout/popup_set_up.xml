@@ -8,7 +8,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/line_width"
-        android:background="@drawable/divider_quote" />
+        android:background="@drawable/fragment_quote_divider" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -36,7 +36,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/line_width"
-        android:background="@drawable/divider_quote" />
+        android:background="@drawable/fragment_quote_divider" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -64,7 +64,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/line_width"
-        android:background="@drawable/divider_quote" />
+        android:background="@drawable/fragment_quote_divider" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -91,7 +91,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/line_width"
-        android:background="@drawable/divider_quote" />
+        android:background="@drawable/fragment_quote_divider" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -118,6 +118,6 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/line_width"
-        android:background="@drawable/divider_quote" />
+        android:background="@drawable/fragment_quote_divider" />
 
 </LinearLayout>

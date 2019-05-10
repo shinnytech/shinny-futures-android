@@ -144,8 +144,8 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                 if (userEntity != null){
                     Map<String, PositionEntity> positionEntityMap = userEntity.getPositions();
                     if (positionEntityMap.containsKey(instrumentId))
-                        mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.item_touch_bg_highlight));
-                    else mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.item_touch_bg));
+                        mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_highlight_touch_bg));
+                    else mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_touch_bg));
                 }
 
                 String instrumentName = instrumentId;
@@ -203,8 +203,8 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
             if (userEntity != null){
                 Map<String, PositionEntity> positionEntityMap = userEntity.getPositions();
                 if (positionEntityMap.containsKey(instrumentId))
-                    mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.item_touch_bg_highlight));
-                else mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.item_touch_bg));
+                    mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_highlight_touch_bg));
+                else mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_touch_bg));
             }
 
             for (String key :
