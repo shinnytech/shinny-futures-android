@@ -17,11 +17,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="取值范围："
-            android:textColor="@color/white"
+            android:textColor="@color/text_white"
             android:textSize="@dimen/font_size_normal" />
 
         <TextView
-            android:textColor="@color/white"
+            android:textColor="@color/text_white"
             android:text="1-1140"
             android:id="@+id/duration_range"
             android:layout_width="wrap_content"
@@ -42,12 +42,12 @@
             android:paddingStart="@dimen/padding_5dp"
             android:background="@drawable/activity_add_kline_duration_rectangle_border"
             android:hint="自定义周期"
-            android:textColorHint="@color/white"
+            android:textColorHint="@color/text_white"
             android:layout_weight="2"
             android:layout_width="0dp"
             android:maxLength="4"
             android:layout_height="match_parent"
-            android:textColor="@color/white"
+            android:textColor="@color/text_white"
             android:textSize="@dimen/font_size_normal" />
 
         <Button

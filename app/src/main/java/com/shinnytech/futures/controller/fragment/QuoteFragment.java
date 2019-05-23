@@ -38,6 +38,7 @@ import com.shinnytech.futures.model.adapter.DragDialogAdapter;
 import com.shinnytech.futures.model.adapter.QuoteAdapter;
 import com.shinnytech.futures.model.adapter.QuoteAdapterRecommend;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
@@ -53,7 +54,7 @@ import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.SPUtils;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -74,27 +75,30 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONA
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_INSTRUMENT_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_FUTURE_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_MAIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_SEARCH;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_OPTIONAL_QUOTE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_OPTIONAL_RECOMMEND;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_RECOMMEND;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_RECOMMEND_OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
 import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_RECOMMEND_NUM;
+import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.SHANGHAI;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOU;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
 import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
+import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 7/9/17
@@ -105,6 +109,11 @@ import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST
  */
 public class QuoteFragment extends LazyLoadFragment {
 
+    /**
+     * date: 7/9/17
+     * description: 页面标题
+     */
+    private static final String KEY_FRAGMENT_TITLE = "title";
     private static Comparator<String> comparator = new Comparator<String>() {
         @Override
         public int compare(String instrumentId1, String instrumentId2) {
@@ -115,22 +124,15 @@ public class QuoteFragment extends LazyLoadFragment {
                 String change2 = MathUtils.divide(MathUtils.subtract(quoteEntity2.getLast_price(), quoteEntity2.getPre_settlement()), quoteEntity2.getPre_settlement());
                 if (MathUtils.upper(change1, change2)) {
                     return -1;
-                } else if (MathUtils.lower(change1, change2)){
+                } else if (MathUtils.lower(change1, change2)) {
                     return 1;
-                }else return 1;
+                } else return 1;
             } catch (Exception e) {
                 e.printStackTrace();
                 return 1;
             }
         }
     };
-
-    /**
-     * date: 7/9/17
-     * description: 页面标题
-     */
-    private static final String KEY_FRAGMENT_TITLE = "title";
-
     /**
      * date: 7/9/17
      * description: 数据刷新控制标志
@@ -140,6 +142,7 @@ public class QuoteFragment extends LazyLoadFragment {
     private QuoteAdapterRecommend mAdapterRecommend;
     private DataManager mDataManager = DataManager.getInstance();
     private BroadcastReceiver mReceiver;
+    private BroadcastReceiver mReceiverTrade;
     private String mTitle = DOMINANT;
     private TextView mToolbarTitle;
     private List<String> mInsList = new ArrayList<>();
@@ -172,8 +175,6 @@ public class QuoteFragment extends LazyLoadFragment {
         super.onCreate(savedInstanceState);
         mTitle = getArguments().getString(KEY_FRAGMENT_TITLE);
         setHasOptionsMenu(true);
-        EventBus.getDefault().register(this);
-        registerBroaderCast();
     }
 
     @Nullable
@@ -197,20 +198,29 @@ public class QuoteFragment extends LazyLoadFragment {
         mBinding.rvQuoteRecommend.setLayoutManager(new LinearLayoutManager(getActivity()));
         mBinding.rvQuoteRecommend.addItemDecoration(
                 new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
-        mBinding.rvQuoteRecommend.setItemAnimator(new DefaultItemAnimator());
+        mBinding.rvQuoteRecommend.setItemAnimator(null);
         mAdapterRecommend = new QuoteAdapterRecommend(getActivity(), mOldDataRecommend);
         mBinding.rvQuoteRecommend.setAdapter(mAdapterRecommend);
 
         if (OPTIONAL.equals(mTitle)) {
             //控制合约推荐显示与否
-            mBinding.llRecommend.setVisibility(View.VISIBLE);
+            boolean isShow = (boolean) SPUtils.get(BaseApplication.getContext(), CONFIG_RECOMMEND, true);
+            if (isShow) {
+                mBinding.quoteFab.setImageResource(R.mipmap.ic_expand_more_white_24dp);
+                mBinding.llRecommend.setVisibility(View.VISIBLE);
+            } else {
+                mBinding.quoteFab.setImageResource(R.mipmap.ic_expand_less_white_24dp);
+                mBinding.llRecommend.setVisibility(View.GONE);
+            }
+            mBinding.quoteFab.show();
             //新用户设置自选合约
             initConfigOptional();
 
             //配置推荐合约列表
             for (String ins : LatestFileManager.getMainInsList().keySet()) {
                 QuoteEntity quoteEntity = CloneUtils.clone(DataManager.getInstance().getRtnData().getQuotes().get(ins));
-                if (!LatestFileManager.getOptionalInsList().containsKey(ins))sortedRecommend.put(ins, quoteEntity);
+                if (!LatestFileManager.getOptionalInsList().containsKey(ins))
+                    sortedRecommend.put(ins, quoteEntity);
             }
 
             mNewDataRecommend.putAll(sortedRecommend);
@@ -257,11 +267,13 @@ public class QuoteFragment extends LazyLoadFragment {
         try {
             if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
                 mBinding.tvChangePercent.setText(R.string.quote_fragment_bid_price1);
-                mBinding.tvOpenInterest.setText(R.string.quote_fragment_bid_volume1);
+                mBinding.tvOpenInterest.setText(R.string.quote_fragment_ask_price1);
             } else {
                 mBinding.tvChangePercent.setText(R.string.quote_fragment_up_down_rate);
                 mBinding.tvOpenInterest.setText(R.string.quote_fragment_open_interest);
             }
+
+            refreshTD();
 
             mBinding.rvQuote.scrollToPosition(0);
             mBinding.rvQuoteRecommend.scrollToPosition(0);
@@ -319,33 +331,47 @@ public class QuoteFragment extends LazyLoadFragment {
      */
     private void initEvent() {
 
+        mBinding.quoteFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mBinding.llRecommend.getVisibility() == View.VISIBLE) {
+                    mBinding.llRecommend.setVisibility(View.GONE);
+                    mBinding.quoteFab.setImageResource(R.mipmap.ic_expand_less_white_24dp);
+                    SPUtils.putAndApply(BaseApplication.getContext(), CONFIG_RECOMMEND, false);
+                } else {
+                    mBinding.llRecommend.setVisibility(View.VISIBLE);
+                    mBinding.quoteFab.setImageResource(R.mipmap.ic_expand_more_white_24dp);
+                    SPUtils.putAndApply(BaseApplication.getContext(), CONFIG_RECOMMEND, true);
+                }
+            }
+        });
+
         mBinding.tvChangePercent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
                     switch (mBinding.tvChangePercent.getText().toString()) {
-                        case "买价":
-                            mBinding.tvChangePercent.setText("卖价");
+                        case "买价 ⇲":
+                            mBinding.tvChangePercent.setText("买量 ⇲");
                             mAdapter.switchChangeView();
                             break;
-                        case "卖价":
-                            mBinding.tvChangePercent.setText("买价");
+                        case "买量 ⇲":
+                            mBinding.tvChangePercent.setText("买价 ⇲");
                             mAdapter.switchChangeView();
                             break;
                     }
                 } else {
                     switch (mBinding.tvChangePercent.getText().toString()) {
-                        case "涨跌幅%":
-                            mBinding.tvChangePercent.setText("涨跌");
+                        case "涨跌幅% ⇲":
+                            mBinding.tvChangePercent.setText("涨跌 ⇲");
                             mAdapter.switchChangeView();
                             break;
-                        case "涨跌":
-                            mBinding.tvChangePercent.setText("涨跌幅%");
+                        case "涨跌 ⇲":
+                            mBinding.tvChangePercent.setText("涨跌幅% ⇲");
                             mAdapter.switchChangeView();
                             break;
                     }
                 }
-
             }
         });
 
@@ -354,23 +380,23 @@ public class QuoteFragment extends LazyLoadFragment {
             public void onClick(View view) {
                 if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
                     switch (mBinding.tvOpenInterest.getText().toString()) {
-                        case "买量":
-                            mBinding.tvOpenInterest.setText("卖量");
+                        case "卖价 ⇲":
+                            mBinding.tvOpenInterest.setText("卖量 ⇲");
                             mAdapter.switchVolView();
                             break;
-                        case "卖量":
-                            mBinding.tvOpenInterest.setText("买量");
+                        case "卖量 ⇲":
+                            mBinding.tvOpenInterest.setText("卖价 ⇲");
                             mAdapter.switchVolView();
                             break;
                     }
                 } else {
                     switch (mBinding.tvOpenInterest.getText().toString()) {
-                        case "持仓量":
-                            mBinding.tvOpenInterest.setText("成交量");
+                        case "持仓量 ⇲":
+                            mBinding.tvOpenInterest.setText("成交量 ⇲");
                             mAdapter.switchVolView();
                             break;
-                        case "成交量":
-                            mBinding.tvOpenInterest.setText("持仓量");
+                        case "成交量 ⇲":
+                            mBinding.tvOpenInterest.setText("持仓量 ⇲");
                             mAdapter.switchVolView();
                             break;
                     }
@@ -379,9 +405,12 @@ public class QuoteFragment extends LazyLoadFragment {
             }
         });
 
-        mAdapterRecommend.setOnItemClickListener(new QuoteAdapterRecommend.OnItemClickListener() {
+        mBinding.rvQuoteRecommend.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rvQuoteRecommend, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
             @Override
-            public void OnItemCollect(View view, String instrument_id, int position) {
+            public void onItemClick(View view, int position) {
+                QuoteEntity quoteEntity0 = mAdapterRecommend.getData().get(position);
+                if (quoteEntity0 == null) return;
+                String instrument_id = quoteEntity0.getInstrument_id();
                 if (instrument_id == null || "".equals(instrument_id)) return;
                 Map<String, QuoteEntity> insListOptional = LatestFileManager.getOptionalInsList();
                 if (!insListOptional.containsKey(instrument_id)) {
@@ -402,13 +431,18 @@ public class QuoteFragment extends LazyLoadFragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            ToastNotificationUtils.showToast(BaseApplication.getContext(),
+                            ToastUtils.showToast(BaseApplication.getContext(),
                                     "该合约已添加到自选列表");
                         }
                     });
                 }
             }
-        });
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+
+            }
+        }));
 
         mBinding.rvQuoteRecommend.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -428,7 +462,7 @@ public class QuoteFragment extends LazyLoadFragment {
                             List<String> insList = mInsList.subList(firstVisibleItemPosition, lastVisibleItemPosition + 1);
                             insList.addAll(insListRecommend);
                             sendSubscribeQuotes(insList);
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                         break;
@@ -455,7 +489,7 @@ public class QuoteFragment extends LazyLoadFragment {
                             int firstVisibleItemPosition = lm.findFirstVisibleItemPosition();
                             int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
                             List<String> insList = mInsList.subList(firstVisibleItemPosition, lastVisibleItemPosition + 1);
-                            if (OPTIONAL.equals(mTitle)){
+                            if (OPTIONAL.equals(mTitle)) {
                                 LinearLayoutManager lmRecommend = (LinearLayoutManager) mBinding.rvQuoteRecommend.getLayoutManager();
                                 int firstVisibleItemPositionRecommend = lmRecommend.findFirstVisibleItemPosition();
                                 int lastVisibleItemPositionRecommend = lmRecommend.findLastVisibleItemPosition();
@@ -485,7 +519,9 @@ public class QuoteFragment extends LazyLoadFragment {
                     @Override
                     public void onItemClick(View view, int position) {
                         if (mAdapter.getData().get(position) != null) {
-                            String instrument_id = mAdapter.getData().get(position).getInstrument_id();
+                            QuoteEntity quoteEntity = mAdapter.getData().get(position);
+                            if (quoteEntity == null) return;
+                            String instrument_id = quoteEntity.getInstrument_id();
                             //添加判断，防止自选合约列表为空时产生无效的点击事件
                             if (instrument_id != null && !instrument_id.isEmpty()) {
                                 if (getActivity() instanceof MainActivity) {
@@ -494,7 +530,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                 }
                                 Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
                                 intent.putExtra(INS_BETWEEN_ACTIVITY, instrument_id);
-                                startActivityForResult(intent, JUMP_TO_FUTURE_INFO_ACTIVITY);
+                                getActivity().startActivityForResult(intent, MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY);
                                 JSONObject jsonObject = new JSONObject();
                                 try {
                                     jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
@@ -651,7 +687,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                             @Override
                                             public void run() {
                                                 popWindow.dismiss();
-                                                ToastNotificationUtils.showToast(BaseApplication.getContext(),
+                                                ToastUtils.showToast(BaseApplication.getContext(),
                                                         "该合约已添加到自选列表");
                                             }
                                         });
@@ -664,7 +700,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                             @Override
                                             public void run() {
                                                 popWindow.dismiss();
-                                                ToastNotificationUtils.showToast(BaseApplication.getContext(),
+                                                ToastUtils.showToast(BaseApplication.getContext(),
                                                         "该合约已被移除自选列表");
                                             }
                                         });
@@ -686,7 +722,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                 DataManager.getInstance().IS_SHOW_VP_CONTENT = true;
                                 Intent intentPos = new Intent(getActivity(), FutureInfoActivity.class);
                                 intentPos.putExtra(INS_BETWEEN_ACTIVITY, instrument_id);
-                                startActivityForResult(intentPos, JUMP_TO_FUTURE_INFO_ACTIVITY);
+                                getActivity().startActivityForResult(intentPos, MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY);
                                 popWindow.dismiss();
                             }
                         });
@@ -707,7 +743,7 @@ public class QuoteFragment extends LazyLoadFragment {
                 String mDataString = intent.getStringExtra("msg");
                 switch (mDataString) {
                     case MD_MESSAGE:
-                        if (mIsUpdate) refreshUI(mToolbarTitle.getText().toString());
+                        if (mIsUpdate) refreshMD(mToolbarTitle.getText().toString());
                         break;
                     default:
                         break;
@@ -715,6 +751,22 @@ public class QuoteFragment extends LazyLoadFragment {
             }
         };
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, new IntentFilter(MD_BROADCAST_ACTION));
+
+        mReceiverTrade = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String mDataString = intent.getStringExtra("msg");
+                switch (mDataString) {
+                    case TD_MESSAGE:
+                        refreshTD();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiverTrade, new IntentFilter(TD_BROADCAST_ACTION));
+
     }
 
     /**
@@ -722,7 +774,7 @@ public class QuoteFragment extends LazyLoadFragment {
      * author: chenli
      * description: 根据主页标题和mTitle判断刷新不同行情页, 不显示的页面不刷
      */
-    public void refreshUI(String title) {
+    public void refreshMD(String title) {
         //防止相邻合约列表页面刷新
         if (!title.equals(mTitle)) return;
         try {
@@ -766,11 +818,47 @@ public class QuoteFragment extends LazyLoadFragment {
         }
     }
 
+    /**
+     * date: 2019/5/19
+     * author: chenli
+     * description: 刷新持仓挂单信息
+     */
+    public void refreshTD() {
+        DataManager dataManager = DataManager.getInstance();
+        UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.USER_ID);
+        if (userEntity == null) return;
+        List<String> list = new ArrayList<>();
+
+        for (PositionEntity positionEntity : userEntity.getPositions().values()) {
+            String ins = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
+            int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+            int volume_short = Integer.parseInt(positionEntity.getVolume_short());
+            if (volume_long != 0 || volume_short != 0) list.add(ins);
+        }
+
+        for (OrderEntity orderEntity : userEntity.getOrders().values()) {
+            if (STATUS_ALIVE.equals(orderEntity.getStatus())) {
+                String ins = orderEntity.getExchange_id() + "." + orderEntity.getInstrument_id();
+                if (!list.contains(ins)) list.add(ins);
+            }
+        }
+
+        mAdapter.updateHighlightList(list);
+    }
+
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onResume() {
+        super.onResume();
+        EventBus.getDefault().register(this);
+        registerBroaderCast();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
         EventBus.getDefault().unregister(this);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiverTrade);
     }
 
     //根据合约导航滑动行情列表
@@ -814,7 +902,8 @@ public class QuoteFragment extends LazyLoadFragment {
      * description: 配置新用户自选合约
      */
     public void initConfigOptional() {
-        if (!SPUtils.contains(BaseApplication.getContext(), CONFIG_RECOMMEND_OPTIONAL) && LatestFileManager.getOptionalInsList().isEmpty()) {
+        if (!SPUtils.contains(BaseApplication.getContext(), CONFIG_RECOMMEND_OPTIONAL)
+                && LatestFileManager.getOptionalInsList().isEmpty()) {
             final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
             View view = View.inflate(getActivity(), R.layout.view_dialog_init_optional, null);
             Window dialogWindow = dialog.getWindow();
@@ -833,7 +922,7 @@ public class QuoteFragment extends LazyLoadFragment {
             dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
-                    QuoteFragment.this.update();
+                    QuoteFragment.this.refreshOptional();
                 }
             });
 
@@ -855,6 +944,7 @@ public class QuoteFragment extends LazyLoadFragment {
                             }
                         }
                         LatestFileManager.saveInsListToFile(list);
+                        SPUtils.putAndApply(BaseApplication.getContext(), CONFIG_RECOMMEND_OPTIONAL, true);
                     }
                     dialog.dismiss();
                 }
@@ -873,7 +963,7 @@ public class QuoteFragment extends LazyLoadFragment {
      * description: 自选合约管理菜单返回，刷新自选合约
      */
     public void refreshOptional() {
-        if (!OPTIONAL.equals(mTitle))return;
+        if (!OPTIONAL.equals(mTitle)) return;
         //先刷新列表再更新行情
         mNewData = LatestFileManager.getOptionalInsList();
         mInsList = new ArrayList<>(mNewData.keySet());
@@ -894,7 +984,7 @@ public class QuoteFragment extends LazyLoadFragment {
 
         try {
             List<String> insList;
-            if (mInsList.size() < LOAD_QUOTE_NUM)insList = mInsList;
+            if (mInsList.size() < LOAD_QUOTE_NUM) insList = mInsList;
             else {
                 LinearLayoutManager lm = (LinearLayoutManager) mBinding.rvQuote.getLayoutManager();
                 int firstVisibleItemPosition = lm.findFirstVisibleItemPosition();

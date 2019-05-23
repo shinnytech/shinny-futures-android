@@ -11,7 +11,6 @@ import android.support.v4.view.GravityCompat;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
@@ -22,20 +21,22 @@ import com.shinnytech.futures.controller.fragment.QuotePagerFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.utils.NetworkUtils;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_FEED_BACK;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_MAIN;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_SEARCH;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.BACK_TO_ACCOUNT_DETAIL;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_SEARCH_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_SEARCH_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_TRANSFER_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
@@ -92,7 +93,7 @@ public class MainActivity extends BaseActivity {
             mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.toolbar));
             mToolbarTitle.setTextColor(Color.WHITE);
             mToolbarTitle.setText(title);
-            mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
+            mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
         } else {
             mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.off_line));
             mToolbarTitle.setTextColor(Color.BLACK);
@@ -100,7 +101,6 @@ public class MainActivity extends BaseActivity {
             mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
         }
     }
-
 
     @Override
     protected void registerBroaderCast() {
@@ -123,7 +123,7 @@ public class MainActivity extends BaseActivity {
                         mToolbarTitle.setTextColor(Color.WHITE);
                         mToolbarTitle.setText(mTitle);
                         mToolbarTitle.setTextSize(25);
-                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
+                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
                         break;
                     default:
                         break;
@@ -172,7 +172,7 @@ public class MainActivity extends BaseActivity {
                 Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                 mMainActivityPresenter.setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
                 Intent intent = new Intent(MainActivity.this, SearchActivity.class);
-                startActivityForResult(intent, JUMP_TO_SEARCH_ACTIVITY);
+                startActivityForResult(intent, MAIN_ACTIVITY_TO_SEARCH_ACTIVITY);
                 return true;
             default:
                 break;
@@ -194,7 +194,7 @@ public class MainActivity extends BaseActivity {
         } else {
             if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
                 if ((System.currentTimeMillis() - mExitTime) > 2000) {
-                    ToastNotificationUtils.showToast(BaseApplication.getContext(), getString(R.string.main_activity_exit));
+                    ToastUtils.showToast(BaseApplication.getContext(), getString(R.string.main_activity_exit));
                     mExitTime = System.currentTimeMillis();
                 } else {
                     finish();
@@ -213,33 +213,44 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         //交易页的超链接
-        if (data != null){
+        if (data != null) {
             boolean isAccountPage = data.getBooleanExtra(BACK_TO_ACCOUNT_DETAIL, false);
             String ins = data.getStringExtra(INS_BETWEEN_ACTIVITY);
-            if (isAccountPage){
+            if (isAccountPage) {
                 mBinding.bottomNavigation.setSelectedItemId(R.id.trade);
-                AccountFragment accountFragment = (AccountFragment)mMainActivityPresenter.getmViewPagerFragmentAdapter().getItem(1);
+                AccountFragment accountFragment = (AccountFragment) mMainActivityPresenter.getmViewPagerFragmentAdapter().getItem(1);
                 accountFragment.getmBinding().accountFab.show();
                 accountFragment.setIns(ins);
             }
         }
 
-        QuoteFragment quoteFragment = ((QuotePagerFragment) mMainActivityPresenter.
-                getmViewPagerFragmentAdapter().getItem(0)).getCurrentItem();
-        if (BaseApplication.getWebSocketService() == null) return;
-
-        String mIns = mMainActivityPresenter.getPreSubscribedQuotes();
-
-        if (OPTIONAL.equals(quoteFragment.getTitle())) {
-            quoteFragment.refreshOptional();
-        } else {
-            if (mIns != null && !mIns.equals(sDataManager.getRtnData().getIns_list())) {
+        //二级页、搜索页、自选管理页返回重新订阅行情
+        if (requestCode == MAIN_ACTIVITY_TO_SEARCH_ACTIVITY
+                || requestCode == MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY
+                || requestCode == MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY) {
+            QuoteFragment quoteFragment = ((QuotePagerFragment) mMainActivityPresenter.
+                    getmViewPagerFragmentAdapter().getItem(0)).getCurrentItem();
+            quoteFragment.refreshTD();
+            String mIns = mMainActivityPresenter.getPreSubscribedQuotes();
+            if (OPTIONAL.equals(quoteFragment.getTitle())) {
+                quoteFragment.refreshOptional();
+            } else if (mIns != null && !mIns.equals(sDataManager.getRtnData().getIns_list())
+                    && BaseApplication.getWebSocketService() != null) {
                 BaseApplication.getWebSocketService().sendSubscribeQuote(mIns);
             }
         }
 
+        //二级页、银期转帐页刷新账户信息
+        if (requestCode == MAIN_ACTIVITY_TO_TRANSFER_ACTIVITY
+                || requestCode == MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY) {
+            AccountFragment accountFragment = (AccountFragment) mMainActivityPresenter.
+                    getmViewPagerFragmentAdapter().getItem(1);
+            accountFragment.refreshAccount();
+            accountFragment.refreshAccountDetail();
+        }
+
         //主页到搜索页的返回
-        if (requestCode == JUMP_TO_SEARCH_ACTIVITY){
+        if (requestCode == MAIN_ACTIVITY_TO_SEARCH_ACTIVITY) {
             JSONObject jsonObject = new JSONObject();
             try {
                 jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_SEARCH);

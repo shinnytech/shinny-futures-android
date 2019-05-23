@@ -20,7 +20,7 @@
             android:text="-"
             android:layout_marginStart="@dimen/margin_5dp"
             android:layout_marginEnd="@dimen/margin_5dp"
-            android:textColor="@color/white"
+            android:textColor="@color/text_white"
             android:textSize="@dimen/font_size_normal" />
     </LinearLayout>
 </layout>

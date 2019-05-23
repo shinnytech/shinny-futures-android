@@ -1,7 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?><!-- 数字键盘 -->
+<?xml version="1.0" encoding="utf-8"?>
 <Keyboard xmlns:android="http://schemas.android.com/apk/res/android"
-    android:keyHeight="10%p"
-    android:keyWidth="20%p">
+    android:horizontalGap="3px"
+    android:verticalGap="3px"
+    android:keyHeight="50dp"
+    android:keyWidth="17%p">
+
     <Row>
         <Key
             android:codes="49"
@@ -17,6 +20,7 @@
             android:keyLabel="3" />
 
         <Key
+            android:keyHeight="101dp"
             android:codes="@integer/keycode_add"
             android:isRepeatable="true"
             android:keyEdgeFlags="right"
@@ -38,16 +42,9 @@
             android:codes="54"
             android:keyLabel="6" />
 
-        <Key
-            android:codes="@integer/keycode_sub"
-            android:isRepeatable="true"
-            android:keyEdgeFlags="right"
-            android:keyIcon="@mipmap/ic_remove_white_24dp" />
-
     </Row>
 
     <Row>
-
         <Key
             android:codes="55"
             android:keyEdgeFlags="left"
@@ -62,28 +59,29 @@
             android:keyLabel="9" />
 
         <Key
-            android:codes="@integer/keycode_empty_text"
+
+            android:keyHeight="101dp"
+            android:codes="@integer/keycode_sub"
+            android:isRepeatable="true"
             android:keyEdgeFlags="right"
-            android:keyLabel="清空" />
+            android:keyIcon="@mipmap/ic_remove_white_24dp" />
     </Row>
 
     <Row>
         <Key
-            android:codes="48"
+            android:codes="@integer/keycode_empty_text"
             android:keyEdgeFlags="left"
-            android:keyLabel="0"
-            android:keyWidth="40%p" />
+            android:keyLabel="清空" />
+
+        <Key
+            android:codes="48"
+            android:keyLabel="0" />
 
         <Key
             android:codes="-5"
             android:isRepeatable="true"
-            android:keyIcon="@mipmap/ic_keyboard_backspace_white_24dp"
-            android:keyWidth="20%p" />
+            android:keyIcon="@mipmap/ic_keyboard_backspace_white_24dp" />
 
-        <Key
-            android:codes="-4"
-            android:keyEdgeFlags="right"
-            android:keyLabel="确定"
-            android:keyWidth="20%p" />
     </Row>
+
 </Keyboard>

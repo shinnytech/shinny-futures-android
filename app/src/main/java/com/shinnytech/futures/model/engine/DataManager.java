@@ -18,7 +18,7 @@ import com.shinnytech.futures.model.bean.futureinfobean.DiffEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.FutureBean;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -75,7 +75,7 @@ public class DataManager {
      * date: 2018/11/7
      * description: 用户下单价格类型
      */
-    public String PRICE_TYPE = "对手价";
+    public String PRICE_TYPE = "对手";
     /**
      * date: 2018/12/13
      * description: 持仓点击方向
@@ -86,6 +86,11 @@ public class DataManager {
      * description: 是否显示副图判断
      */
     public boolean IS_SHOW_VP_CONTENT = false;
+    /**
+     * date: 2019/5/11
+     * description: 判断是否显示登录成功弹框
+     */
+    public boolean IS_SHOW_LOGIN_SUCCESS = false;
     /**
      * date: 2019/3/18
      * description: 用户最后一次发送的订阅请求
@@ -416,10 +421,15 @@ public class DataManager {
                                     if (BaseApplication.getWebSocketService() != null)
                                         BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_SETTLEMENT, TD_BROADCAST);
                                 } else {
+                                    if (content.equals("登录成功")) {
+                                        //断线重连不弹框
+                                        if (IS_SHOW_LOGIN_SUCCESS) IS_SHOW_LOGIN_SUCCESS = false;
+                                        else continue;
+                                    }
                                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            ToastNotificationUtils.showToast(BaseApplication.getContext(), content);
+                                            ToastUtils.showToast(BaseApplication.getContext(), content);
                                         }
                                     });
                                 }

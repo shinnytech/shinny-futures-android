@@ -13,15 +13,15 @@ import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BROKER_ID_SELECTED;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SELECT_BROKER;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID_SELECTED;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_LIST;
 
 public class BrokerListActivity extends BaseActivity {
@@ -58,13 +58,13 @@ public class BrokerListActivity extends BaseActivity {
                         String broker = mBrokerAdapter.getData().get(position);
                         JSONObject jsonObject = new JSONObject();
                         try {
-                            jsonObject.put(AMP_USER_BROKER_ID_SELECTED, broker);
+                            jsonObject.put(AMP_EVENT_BROKER_ID_SELECTED, broker);
                             Amplitude.getInstance().logEvent(AMP_SELECT_BROKER, jsonObject);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        if (broker != null && broker.contains(" ")){
-                            ToastNotificationUtils.showToast(sContext, "请联系期货公司申请！");
+                        if (broker != null && broker.contains(" ")) {
+                            ToastUtils.showToast(sContext, "请联系期货公司申请！");
                             return;
                         }
                         Intent intent = new Intent();

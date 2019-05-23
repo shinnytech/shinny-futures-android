@@ -21,252 +21,408 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/future_info_toolbar"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_marginLeft="@dimen/margin_5dp"
+            android:layout_marginRight="@dimen/margin_5dp"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/transaction_fragment_upper_limit"
+                    android:textColor="@color/text_red"
+                    android:textSize="@dimen/font_size_small_high" />
+
+                <TextView
+                    android:id="@+id/tv_id_transaction_upper_limit"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="end|center"
+                    android:text="@{LatestFileManager.saveScaleByPtick(quote.upper_limit, quote.instrument_id)}"
+                    android:textColor="@color/text_red"
+                    android:textSize="@dimen/font_size_small_high" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/transaction_fragment_lower_limit"
+                    android:textColor="@color/text_green"
+                    android:textSize="@dimen/font_size_small_high" />
+
+                <TextView
+                    android:id="@+id/tv_id_transaction_lower_limit"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="end|center"
+                    android:text="@{LatestFileManager.saveScaleByPtick(quote.lower_limit, quote.instrument_id)}"
+                    android:textColor="@color/text_green"
+                    android:textSize="@dimen/font_size_small_high" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/transaction_fragment_low"
+                    android:textColor="@color/text_white"
+                    android:textSize="@dimen/font_size_small_high" />
+
+                <TextView
+                    android:id="@+id/tv_id_transaction_low"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="end|center"
+                    android:text="@{LatestFileManager.saveScaleByPtick(quote.lowest, quote.instrument_id)}"
+                    android:textColor="@color/text_white"
+                    android:textSize="@dimen/font_size_small_high" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/transaction_fragment_high"
+                    android:textColor="@color/text_white"
+                    android:textSize="@dimen/font_size_small_high" />
+
+                <TextView
+                    android:id="@+id/tv_id_transaction_high"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="end|center"
+                    android:text="@{LatestFileManager.saveScaleByPtick(quote.highest, quote.instrument_id)}"
+                    android:textColor="@color/text_white"
+                    android:textSize="@dimen/font_size_small_high" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/transaction_fragment_account"
+                    android:textColor="@color/text_yellow"
+                    android:textSize="@dimen/font_size_small_high" />
+
+                <TextView
+                    android:id="@+id/tv_id_transaction_account"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="end|center"
+                    android:text='@{account.user_id.contains("游客_") ? account.user_id.replace("游客_", "") : account.user_id}'
+                    android:textColor="@color/text_yellow"
+                    android:textSize="@dimen/font_size_small_high" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/transaction_fragment_balance"
+                    android:textColor="@color/text_white"
+                    android:textSize="@dimen/font_size_small_high" />
+
+                <TextView
+                    android:id="@+id/tv_id_transaction_balance"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="end|center"
+                    android:text="@{MathUtils.round(account.balance, 0)}"
+                    android:textColor="@color/text_white"
+                    android:textSize="@dimen/font_size_small_high" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/transaction_fragment_available"
+                    android:textColor="@color/text_white"
+                    android:textSize="@dimen/font_size_small_high" />
+
+                <TextView
+                    android:id="@+id/tv_id_transaction_available"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="end|center"
+                    android:text="@{MathUtils.round(account.available, 0)}"
+                    android:textColor="@color/text_white"
+                    android:textSize="@dimen/font_size_small_high" />
+
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/transaction_fragment_using_ratio"
+                    android:textColor="@color/text_white"
+                    android:textSize="@dimen/font_size_small_high" />
+
+                <TextView
+                    android:id="@+id/tv_id_transaction_using_ratio"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="end|center"
+                    android:text='@{MathUtils.subZeroAndDot(MathUtils.round(MathUtils.multiply("100", MathUtils.divide(account.margin, account.balance)), 2)) + "%"}'
+                    android:textColor="@color/text_white"
+                    android:textSize="@dimen/font_size_small_high" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/transaction_fragment_p_tick"
+                    android:textColor="@color/text_white"
+                    android:textSize="@dimen/font_size_small_high" />
+
+                <TextView
+                    android:id="@+id/tv_id_transaction_p_tick"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="end|center"
+                    android:text="-"
+                    android:textColor="@color/text_white"
+                    android:textSize="@dimen/font_size_small_high" />
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_weight="1"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="end|center"
-                android:text="@string/transaction_fragment_balance"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_small_high" />
-
-            <TextView
-                android:id="@+id/tv_id_transaction_balance"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1.8"
-                android:ellipsize="end"
-                android:gravity="start|center"
-                android:maxLines="1"
-                android:text="@{MathUtils.round(account.balance, 0)}"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_small_high" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="end|center"
-                android:text="@string/transaction_fragment_available"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_small_high" />
-
-            <TextView
-                android:id="@+id/tv_id_transaction_available"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1.7"
-                android:ellipsize="end"
-                android:gravity="start|center"
-                android:maxLines="1"
-                android:text="@{MathUtils.round(account.available, 0)}"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_small_high" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="end|center"
-                android:text="@string/transaction_fragment_using_ratio"
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_small_high" />
-
-            <TextView
-                android:id="@+id/tv_id_transaction_using_ratio"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:ellipsize="end"
-                android:gravity="start|center"
-                android:maxLines="1"
-                android:text='@{MathUtils.subZeroAndDot(MathUtils.round(MathUtils.multiply("100", MathUtils.divide(account.margin, account.balance)), 2)) + "%"}'
-                android:textColor="@color/white"
-                android:textSize="@dimen/font_size_small_high" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="2"
-            android:layout_margin="@dimen/margin_10dp"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
-
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
             <LinearLayout
-                android:layout_marginEnd="@dimen/margin_5dp"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/fragment_transaction_rectangle"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="@dimen/margin_5dp"
-                    android:layout_weight="1"
-                    android:gravity="start|center"
-                    android:labelFor="@+id/price"
-                    android:text="@string/transaction_fragment_price"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_normal" />
-
-                <EditText
-                    android:id="@+id/price"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="@dimen/margin_5dp"
-                    android:layout_weight="2"
-                    android:background="@null"
-                    android:ellipsize="end"
-                    android:focusable="true"
-                    android:gravity="end|center"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:text="-"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_normal" />
-
-            </LinearLayout>
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/transaction_fab"
-                android:layout_gravity="center"
-                android:layout_width="40dp"
+                android:layout_margin="@dimen/margin_5dp"
+                android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:scaleType="center"
-                android:src="@mipmap/ic_watch_later_white_24dp" />
-
-            <LinearLayout
-                android:layout_marginStart="@dimen/margin_5dp"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/fragment_transaction_rectangle"
-                android:gravity="center"
                 android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="@dimen/margin_5dp"
-                    android:layout_weight="1"
-                    android:gravity="start|center"
-                    android:labelFor="@+id/volume"
-                    android:text="@string/transaction_fragment_volume"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_normal" />
-
-                <EditText
-                    android:id="@+id/volume"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                <LinearLayout
                     android:layout_marginEnd="@dimen/margin_5dp"
-                    android:layout_weight="2"
-                    android:background="@null"
-                    android:ellipsize="end"
-                    android:focusable="true"
-                    android:gravity="end|center"
-                    android:inputType="number"
-                    android:maxLines="1"
-                    android:text="1"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_normal" />
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.5"
+                    android:background="@drawable/fragment_transaction_rectangle"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="start|center"
+                        android:labelFor="@+id/price"
+                        android:text="@string/transaction_fragment_price"
+                        android:textColor="@color/text_white"
+                        android:textSize="@dimen/font_size_normal" />
+
+                    <EditText
+                        android:layout_marginEnd="@dimen/margin_5dp"
+                        android:id="@+id/price"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:ellipsize="end"
+                        android:focusable="true"
+                        android:gravity="end|center"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:text="-"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_size_normal" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_marginStart="@dimen/margin_5dp"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/fragment_transaction_rectangle"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="start|center"
+                        android:labelFor="@+id/volume"
+                        android:text="@string/transaction_fragment_volume"
+                        android:textColor="@color/text_white"
+                        android:textSize="@dimen/font_size_normal" />
+
+                    <EditText
+                        android:layout_marginEnd="@dimen/margin_5dp"
+                        android:id="@+id/volume"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:ellipsize="end"
+                        android:focusable="true"
+                        android:gravity="end|center"
+                        android:inputType="number"
+                        android:maxLines="1"
+                        android:text="1"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_size_normal" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_marginStart="@dimen/margin_10dp"
+                    android:id="@+id/back_account"
+                    android:layout_gravity="center"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:scaleType="center"
+                    android:background="@mipmap/ic_account_circle_white_36dp" />
+
             </LinearLayout>
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="3"
-            android:layout_marginTop="@dimen/margin_5dp"
-            android:layout_marginBottom="@dimen/margin_20dp"
-            android:layout_marginLeft="@dimen/margin_10dp"
-            android:layout_marginRight="@dimen/margin_10dp"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
-
             <LinearLayout
-                android:id="@+id/bid_open_position"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="@dimen/margin_10dp"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
                 android:layout_weight="1"
-                android:background="@drawable/fragment_transaction_bid_rectangle"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:padding="@dimen/padding_5dp">
+                android:layout_margin="@dimen/margin_5dp"
+                android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/bid_price1_1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
+                <LinearLayout
+                    android:id="@+id/bid_open_position"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="@dimen/margin_10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/fragment_transaction_bid_rectangle"
                     android:gravity="center"
-                    android:maxLines="1"
-                    android:text="-"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_normal" />
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_5dp">
 
-                <TextView
-                    android:id="@+id/bid_price1_direction"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    <TextView
+                        android:id="@+id/bid_price1_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="-"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_size_normal_more" />
+
+                    <TextView
+                        android:id="@+id/bid_price1_direction"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/transaction_fragment_bid_direction"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_size_normal_more" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ask_open_position"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/fragment_transaction_ask_rectangle"
                     android:gravity="center"
-                    android:text="@string/transaction_fragment_bid_direction"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_normal" />
-            </LinearLayout>
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_5dp">
 
-            <LinearLayout
-                android:id="@+id/ask_open_position"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="@dimen/margin_10dp"
-                android:layout_weight="1"
-                android:background="@drawable/fragment_transaction_ask_rectangle"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:padding="@dimen/padding_5dp">
+                    <TextView
+                        android:id="@+id/ask_price1_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:text="-"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_size_normal_more" />
 
-                <TextView
-                    android:id="@+id/ask_price1_1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:maxLines="1"
-                    android:text="-"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_normal" />
+                    <TextView
+                        android:id="@+id/ask_price1_direction"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/transaction_fragment_ask_direction"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/font_size_normal_more" />
+                </LinearLayout>
 
-                <TextView
-                    android:id="@+id/ask_price1_direction"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/transaction_fragment_ask_direction"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/font_size_normal" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/close_position"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
                 android:layout_weight="1"
+                android:layout_margin="@dimen/margin_5dp"
                 android:background="@drawable/fragment_transaction_close_rectangle"
                 android:gravity="center"
                 android:orientation="vertical"
@@ -279,7 +435,7 @@
                     android:gravity="center"
                     android:text="@string/transaction_fragment_close_status"
                     android:textColor="@color/black"
-                    android:textSize="@dimen/font_size_normal" />
+                    android:textSize="@dimen/font_size_normal_more" />
 
                 <TextView
                     android:id="@+id/close_direction"
@@ -288,10 +444,12 @@
                     android:gravity="center"
                     android:text="@string/transaction_fragment_close_direction"
                     android:textColor="@color/black"
-                    android:textSize="@dimen/font_size_normal" />
+                    android:textSize="@dimen/font_size_normal_more" />
             </LinearLayout>
 
         </LinearLayout>
+
+
 
     </LinearLayout>
 

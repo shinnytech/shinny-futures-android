@@ -26,7 +26,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:scrollbars="horizontal|vertical"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/text_white" />
 
             </HorizontalScrollView>
 
@@ -47,7 +47,7 @@
                 android:background="@drawable/activity_confirm_selector"
                 android:gravity="center"
                 android:text="@string/confirm_activity_settlement"
-                android:textColor="@color/white"
+                android:textColor="@color/text_white"
                 android:textSize="@dimen/font_size_normal_high" />
         </LinearLayout>
 

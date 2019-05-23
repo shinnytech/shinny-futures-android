@@ -43,6 +43,18 @@
         <item name="android:scrollHorizontally">true</item>
     </style>
 
+    <!--自定义键盘-->
+    <style name="Theme.Light.No.Dim.Dialog" parent="android:style/Theme.Dialog">
+        <item name="android:windowFrame">@null</item><!--边框-->
+        <item name="android:windowIsFloating">true</item><!--是否浮现在activity之上-->
+        <item name="android:windowIsTranslucent">false</item><!--半透明-->
+        <item name="android:windowNoTitle">true</item><!--无标题-->
+        <item name="android:windowBackground">@android:color/transparent</item><!--背景透明-->
+        <item name="android:backgroundDimEnabled">false</item><!--模糊-->
+        <item name="android:layout_margin">0dp</item>
+        <item name="android:padding">0dp</item>
+    </style>
+
     <!--免责条款弹出框,全屏-->
     <style name="responsibilityDialog">
         <item name="android:windowFullscreen">true</item>
@@ -61,16 +73,6 @@
         <item name="android:windowExitAnimation">@anim/popup_out</item>
     </style>
 
-    <style name="RadioButtonTabUp">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_weight">1.5</item>
-        <item name="android:layout_height">30dp</item>
-        <item name="android:button">@null</item>
-        <item name="android:textColor">@drawable/activity_future_info_radio_button_up_checked_selector</item>
-        <item name="android:background">@drawable/activity_future_info_radio_button_up_selector</item>
-        <item name="android:gravity">center</item>
-    </style>
-
     <style name="RadioButtonSetUp">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_weight">1</item>
@@ -78,13 +80,23 @@
         <item name="android:gravity">right|center</item>
     </style>
 
+    <style name="RadioButtonTabDownHandicap">
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:button">@null</item>
+        <item name="android:textColor">@drawable/activity_future_info_radio_button_text_selector</item>
+        <item name="android:background">@drawable/activity_future_info_radio_button_handicap_selector</item>
+        <item name="android:gravity">center</item>
+    </style>
+
     <style name="RadioButtonTabDown">
         <item name="android:layout_weight">1</item>
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">40dp</item>
         <item name="android:button">@null</item>
-        <item name="android:textColor">@drawable/activity_future_info_radio_button_up_checked_selector</item>
-        <item name="android:background">@drawable/activity_future_info_radio_button_down_selector</item>
+        <item name="android:textColor">@drawable/activity_future_info_radio_button_text_selector</item>
+        <item name="android:background">@drawable/activity_future_info_radio_button_selector</item>
         <item name="android:gravity">center</item>
     </style>
 
@@ -93,8 +105,8 @@
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">40dp</item>
         <item name="android:button">@null</item>
-        <item name="android:textColor">@drawable/activity_future_info_radio_button_down_checked_selector</item>
-        <item name="android:background">@drawable/activity_future_info_radio_button_down_transaction_selector</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:background">@drawable/activity_future_info_radio_button_transaction_selector</item>
         <item name="android:gravity">center</item>
     </style>
 

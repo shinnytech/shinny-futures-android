@@ -24,10 +24,10 @@
             android:maxLines="1"
             app:autoSizeTextType="uniform"
             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-            app:autoSizeMaxTextSize="@dimen/font_size_small"
+            app:autoSizeMaxTextSize="@dimen/font_size_normal"
             app:autoSizeStepGranularity="1sp"
-            android:textColor="@color/white"
-            android:textSize="@dimen/font_size_small" />
+            android:textColor="@color/text_yellow"
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/tv_trade_offset"
@@ -39,10 +39,10 @@
             android:maxLines="1"
             app:autoSizeTextType="uniform"
             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-            app:autoSizeMaxTextSize="@dimen/font_size_small"
+            app:autoSizeMaxTextSize="@dimen/font_size_normal"
             app:autoSizeStepGranularity="1sp"
-            android:textColor="@color/white"
-            android:textSize="@dimen/font_size_small" />
+            android:textColor="@color/text_white"
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/tv_trade_price"
@@ -54,10 +54,10 @@
             android:maxLines="1"
             app:autoSizeTextType="uniform"
             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-            app:autoSizeMaxTextSize="@dimen/font_size_small"
+            app:autoSizeMaxTextSize="@dimen/font_size_normal"
             app:autoSizeStepGranularity="1sp"
-            android:textColor="@color/white"
-            android:textSize="@dimen/font_size_small" />
+            android:textColor="@color/text_white"
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/tv_trade_volume"
@@ -69,10 +69,10 @@
             android:maxLines="1"
             app:autoSizeTextType="uniform"
             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-            app:autoSizeMaxTextSize="@dimen/font_size_small"
+            app:autoSizeMaxTextSize="@dimen/font_size_normal"
             app:autoSizeStepGranularity="1sp"
-            android:textColor="@color/white"
-            android:textSize="@dimen/font_size_small" />
+            android:textColor="@color/text_white"
+            android:textSize="@dimen/font_size_normal" />
 
         <TextView
             android:id="@+id/tv_trade_time"
@@ -84,10 +84,10 @@
             android:maxLines="1"
             app:autoSizeTextType="uniform"
             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
-            app:autoSizeMaxTextSize="@dimen/font_size_small"
+            app:autoSizeMaxTextSize="@dimen/font_size_normal"
             app:autoSizeStepGranularity="1sp"
-            android:textColor="@color/white"
-            android:textSize="@dimen/font_size_small" />
+            android:textColor="@color/text_white"
+            android:textSize="@dimen/font_size_normal" />
 
     </LinearLayout>
 

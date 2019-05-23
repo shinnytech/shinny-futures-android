@@ -25,7 +25,7 @@
             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
             app:autoSizeMaxTextSize="@dimen/font_size_normal"
             app:autoSizeStepGranularity="1sp"
-            android:textColor="@color/white"
+            android:textColor="@color/text_yellow"
             android:textSize="@dimen/font_size_normal" />
 
         <TextView
@@ -41,7 +41,7 @@
             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
             app:autoSizeMaxTextSize="@dimen/font_size_normal"
             app:autoSizeStepGranularity="1sp"
-            android:textColor="@color/white"
+            android:textColor="@color/text_white"
             android:textSize="@dimen/font_size_normal" />
 
         <TextView
@@ -57,11 +57,11 @@
             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
             app:autoSizeMaxTextSize="@dimen/font_size_normal"
             app:autoSizeStepGranularity="1sp"
-            android:textColor="@color/white"
+            android:textColor="@color/text_white"
             android:textSize="@dimen/font_size_normal" />
 
         <TextView
-            android:drawableEnd="@mipmap/ic_favorite_white_18dp"
+            android:drawableEnd="@mipmap/ic_recommend_add"
             android:id="@+id/add_recommend"
             android:layout_width="0dp"
             android:layout_height="match_parent"

@@ -21,7 +21,6 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.umeng.analytics.MobclickAgent;
 
@@ -165,7 +164,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         switch (id) {
             case android.R.id.home:
                 JSONObject jsonObject = new JSONObject();
-                switch (mLayoutID){
+                switch (mLayoutID) {
                     case R.layout.activity_setting:
                         try {
                             jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_SETTING);
@@ -245,7 +244,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         JSONObject jsonObject = new JSONObject();
-        switch (mLayoutID){
+        switch (mLayoutID) {
             case R.layout.activity_setting:
                 try {
                     jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_SETTING);

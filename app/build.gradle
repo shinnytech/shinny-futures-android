@@ -7,7 +7,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 28
         versionCode 32
-        versionName "1.10.31"
+        versionName "1.10.33"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         resValue("string", "app_name", "ShinnyFutures")
         flavorDimensions("shinny")
@@ -705,8 +705,6 @@ android {
     dataBinding {
         enabled = true
     }
-    compileOptions {
-    }
 }
 
 dependencies {
@@ -726,12 +724,12 @@ dependencies {
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.2'
     implementation 'com.lzy.net:okgo:3.0.4'
     implementation 'com.tencent.bugly:crashreport_upgrade:latest.release'
-    implementation 'com.neovisionaries:nv-websocket-client:2.5'
+    implementation 'com.neovisionaries:nv-websocket-client:2.8'
     implementation 'com.umeng.umsdk:analytics:7.5.4'
     implementation 'com.umeng.umsdk:common:1.5.4'
     implementation 'com.baidu.mobstat:mtj-sdk:latest.integration'
     implementation files('libs/aliyun-log-sdk-android-2.1.0.jar')
     implementation 'org.greenrobot:greendao:3.2.2'
     implementation 'com.alibaba:fastjson:1.2.56'
-    implementation "android.arch.lifecycle:extensions:1.1.1"
+    implementation 'android.arch.lifecycle:extensions:1.1.1'
 }

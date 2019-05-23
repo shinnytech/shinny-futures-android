@@ -59,6 +59,12 @@
                         android:contentDescription="right"
                         android:src="@mipmap/ic_chevron_right_white_24dp" />
                 </LinearLayout>
+
+                <View
+                    android:background="@color/quote_divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"/>
+
             </LinearLayout>
 
             <android.support.design.widget.BottomNavigationView
@@ -80,7 +86,7 @@
             android:layout_gravity="end">
 
             <RelativeLayout
-                android:background="@color/black_light"
+                android:background="@color/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 

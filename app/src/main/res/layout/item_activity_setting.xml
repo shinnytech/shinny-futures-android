@@ -25,7 +25,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp" />
             <TextView
-                android:textColor="@color/white"
+                android:textColor="@color/text_white"
                 android:textSize="@dimen/font_size_normal_more"
                 android:layout_gravity="center_vertical"
                 android:gravity="center_vertical"

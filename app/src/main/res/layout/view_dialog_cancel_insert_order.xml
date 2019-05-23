@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/root"
-    android:layout_width="@dimen/layout_width_view_dialog_cancel_order"
-    android:layout_height="@dimen/layout_height_view_dialog_cancel_order"
+    android:layout_width="@dimen/cancel_insert_order_width"
+    android:layout_height="@dimen/cancel_insert_order_height"
     android:background="@drawable/fragment_order_dialog"
     android:orientation="vertical">
 
@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="@dimen/margin_10dp"
+        android:layout_marginTop="@dimen/margin_5dp"
         android:layout_marginBottom="@dimen/margin_5dp"
         android:orientation="vertical">
 
@@ -22,8 +22,7 @@
             android:layout_height="wrap_content"
             android:text="平仓手数不足"
             android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal_high"
-            android:textStyle="bold" />
+            android:textSize="@dimen/font_size_normal_high" />
 
         <TextView
             android:layout_gravity="center"
@@ -32,8 +31,7 @@
             android:layout_height="wrap_content"
             android:text="撤单后下单?"
             android:textColor="@color/dialog_order_xia_text"
-            android:textSize="@dimen/font_size_normal_high"
-            android:textStyle="bold" />
+            android:textSize="@dimen/font_size_normal_high" />
 
     </LinearLayout>
 
@@ -48,7 +46,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <TextView
+        <Button
             android:id="@+id/order_cancel"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -56,6 +54,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="取消"
+            android:background="@null"
             android:textColor="@color/dialog_order_button_text"
             android:textSize="@dimen/font_size_normal_high" />
 
@@ -64,7 +63,7 @@
             android:layout_height="wrap_content"
             android:background="@color/dialog_order_divider"></View>
 
-        <TextView
+        <Button
             android:id="@+id/order_ok"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -72,6 +71,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="确定"
+            android:background="@null"
             android:textColor="@color/dialog_order_button_text"
             android:textSize="@dimen/font_size_normal_high" />
 

@@ -20,17 +20,11 @@ import java.util.Date;
 import java.util.List;
 
 import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_FORCE_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_HISTORY_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_TODAY_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_OPEN_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_SELL;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_FORCE;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_HISTORY;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_TODAY;
+import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY_ZN_S;
+import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_SELL_ZN_S;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_ZN_S;
 import static com.shinnytech.futures.constants.CommonConstants.OFFSET_OPEN;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_OPEN_ZN_S;
 
 /**
  * date: 7/9/17
@@ -101,37 +95,18 @@ public class TradeAdapter extends RecyclerView.Adapter<TradeAdapter.ItemViewHold
                     String instrument_id = tradeEntity.getExchange_id() + "." + tradeEntity.getInstrument_id();
                     SearchEntity insName = LatestFileManager.getSearchEntities().get(instrument_id);
                     mBinding.tvTradeName.setText(insName == null ? instrument_id : insName.getInstrumentName());
-                    switch (tradeEntity.getOffset()) {
-                        case OFFSET_OPEN:
-                            mBinding.tvTradeOffset.setText(OFFSET_OPEN_ZN);
-                            break;
-                        case OFFSET_CLOSE_TODAY:
-                            mBinding.tvTradeOffset.setText(OFFSET_CLOSE_TODAY_ZN);
-                            break;
-                        case OFFSET_CLOSE_HISTORY:
-                            mBinding.tvTradeOffset.setText(OFFSET_CLOSE_HISTORY_ZN);
-                            break;
-                        case OFFSET_CLOSE:
-                            mBinding.tvTradeOffset.setText(OFFSET_CLOSE_ZN);
-                            break;
-                        case OFFSET_CLOSE_FORCE:
-                            mBinding.tvTradeOffset.setText(OFFSET_CLOSE_FORCE_ZN);
-                            break;
-                        default:
-                            mBinding.tvTradeOffset.setText("");
-                            break;
+                    String direction;
+                    if (DIRECTION_BUY.equals(tradeEntity.getDirection())) {
+                        direction = DIRECTION_BUY_ZN_S;
+                        mBinding.tvTradeOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
+                    } else {
+                        direction = DIRECTION_SELL_ZN_S;
+                        mBinding.tvTradeOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
                     }
-                    switch (tradeEntity.getDirection()) {
-                        case DIRECTION_BUY:
-                            mBinding.tvTradeOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
-                            break;
-                        case DIRECTION_SELL:
-                            mBinding.tvTradeOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
-                            break;
-                        default:
-                            mBinding.tvTradeOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
-                            break;
-                    }
+                    if (OFFSET_OPEN.equals(tradeEntity.getOffset()))
+                        mBinding.tvTradeOffset.setText(direction + OFFSET_OPEN_ZN_S);
+                    else mBinding.tvTradeOffset.setText(direction + OFFSET_CLOSE_ZN_S);
+
                     mBinding.tvTradePrice.setText(LatestFileManager.saveScaleByPtick(tradeEntity.getPrice(), instrument_id));
                     mBinding.tvTradeVolume.setText(tradeEntity.getVolume());
                     String date = DataManager.getInstance().getSimpleDateFormat().format(new Date(Long.valueOf(tradeEntity.getTrade_date_time()) / 1000000));

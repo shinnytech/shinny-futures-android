@@ -5,7 +5,7 @@
     android:orientation="vertical">
 
     <View
-        android:background="@color/gray"
+        android:background="@color/login_gray"
         android:layout_width="match_parent"
         android:layout_height="0.1dp"/>
 

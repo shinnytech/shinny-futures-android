@@ -86,8 +86,10 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ItemViewHo
             else mBinding.tvIdDialog.setText(instrumentId);
             itemView.setTag(instrumentId);
 
-            if (mSelected.equals(instrumentId))mBinding.tvIdDialog.setTextColor(sContext.getResources().getColor(R.color.quote_dialog_text_selected));
-            else mBinding.tvIdDialog.setTextColor(sContext.getResources().getColor(R.color.quote_dialog_text));
+            if (mSelected.equals(instrumentId))
+                mBinding.tvIdDialog.setTextColor(sContext.getResources().getColor(R.color.quote_dialog_text_selected));
+            else
+                mBinding.tvIdDialog.setTextColor(sContext.getResources().getColor(R.color.quote_dialog_text));
 
         }
 

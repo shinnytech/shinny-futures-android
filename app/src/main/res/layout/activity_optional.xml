@@ -9,13 +9,13 @@
         android:keepScreenOn="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black_light"
+        android:background="@color/setting_content"
         android:orientation="vertical">
 
         <include layout="@layout/view_toolbar"></include>
 
         <LinearLayout
-            android:background="@color/gray"
+            android:background="@color/login_gray"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:orientation="horizontal">

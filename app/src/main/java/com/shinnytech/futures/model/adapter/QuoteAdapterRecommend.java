@@ -32,7 +32,6 @@ import static com.shinnytech.futures.model.engine.LatestFileManager.getUpDownRat
 public class QuoteAdapterRecommend extends RecyclerView.Adapter<QuoteAdapterRecommend.ItemViewHolder> {
     private Context sContext;
     private List<QuoteEntity> mData;
-    private OnItemClickListener mOnItemClickListener;
 
     public QuoteAdapterRecommend(Context context, List<QuoteEntity> data) {
         this.sContext = context;
@@ -47,17 +46,12 @@ public class QuoteAdapterRecommend extends RecyclerView.Adapter<QuoteAdapterReco
         this.mData = data;
     }
 
-    public void setOnItemClickListener(OnItemClickListener mOnItemClickListener) {
-        this.mOnItemClickListener = mOnItemClickListener;
-    }
-
     @Override
     public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         ItemFragmentQuoteRecommendBinding binding = DataBindingUtil.inflate(LayoutInflater
                 .from(sContext), R.layout.item_fragment_quote_recommend, parent, false);
         ItemViewHolder holder = new ItemViewHolder(binding.getRoot());
         holder.setBinding(binding);
-        holder.initEvent();
         return holder;
     }
 
@@ -79,10 +73,6 @@ public class QuoteAdapterRecommend extends RecyclerView.Adapter<QuoteAdapterReco
     @Override
     public int getItemCount() {
         return mData == null ? 0 : mData.size();
-    }
-
-    public interface OnItemClickListener {
-        void OnItemCollect(View view, String instrument_id, int position);
     }
 
 
@@ -109,17 +99,6 @@ public class QuoteAdapterRecommend extends RecyclerView.Adapter<QuoteAdapterReco
 
         public void setBinding(ItemFragmentQuoteRecommendBinding binding) {
             this.mBinding = binding;
-        }
-
-        private void initEvent() {
-            mBinding.addRecommend.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mOnItemClickListener != null) {
-                        mOnItemClickListener.OnItemCollect(v, instrumentId, position);
-                    }
-                }
-            });
         }
 
         public void update() {
@@ -178,7 +157,7 @@ public class QuoteAdapterRecommend extends RecyclerView.Adapter<QuoteAdapterReco
         public void setChangeTextColor(TextView textView, String data) {
             textView.setText(data);
             if (data == null || data.equals("-")) {
-                textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+                textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_white));
                 return;
             }
             try {
@@ -187,7 +166,7 @@ public class QuoteAdapterRecommend extends RecyclerView.Adapter<QuoteAdapterReco
                     textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
                 else if (value > 0)
                     textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
-                else textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+                else textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_white));
             } catch (Exception e) {
                 e.printStackTrace();
 
@@ -203,7 +182,7 @@ public class QuoteAdapterRecommend extends RecyclerView.Adapter<QuoteAdapterReco
             textView.setText(latest);
             if (latest == null || latest.equals("-") ||
                     pre_settlement == null || pre_settlement.equals("-")) {
-                textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+                textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_white));
                 return;
             }
             try {
@@ -212,7 +191,7 @@ public class QuoteAdapterRecommend extends RecyclerView.Adapter<QuoteAdapterReco
                     textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
                 else if (value > 0)
                     textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
-                else textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+                else textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_white));
             } catch (Exception e) {
                 e.printStackTrace();
 

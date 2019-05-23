@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
     <!-- SD卡读写入数据权限 -->
+    <uses-permission android:name="android.permission.REORDER_TASKS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
@@ -86,6 +87,16 @@
             </intent-filter>
         </receiver>
 
+
+        <receiver
+            android:name=".model.receiver.NotificationClickReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="notification_click" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name=".controller.activity.AccountActivity"
             android:screenOrientation="portrait" />
@@ -100,28 +111,48 @@
             android:screenOrientation="portrait"
             android:theme="@style/LoginActivityTheme"
             android:windowSoftInputMode="adjustResize|stateHidden" />
-        <activity android:name=".controller.activity.AboutActivity" />
         <activity
-            android:name=".controller.activity.ChangePasswordActivity"
-            android:theme="@style/LoginActivityTheme" />
-        <activity android:name=".controller.activity.BrokerListActivity" />
-        <activity android:name=".controller.activity.OpenAccountActivity" />
-        <activity android:name=".controller.activity.SettingActivity" />
+            android:screenOrientation="portrait"
+            android:name=".controller.activity.AboutActivity" />
         <activity
-            android:name=".controller.activity.ParaChangeActivity"
-            android:theme="@style/LoginActivityTheme" />
-        <activity android:name=".controller.activity.KlineDurationActivity" />
-        <activity android:name=".controller.activity.AddKlineDurationActivity" />
-        <activity android:name=".controller.activity.SplashActivity">
+            android:screenOrientation="portrait"
+            android:name=".controller.activity.ChangePasswordActivity" />
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".controller.activity.BrokerListActivity" />
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".controller.activity.OpenAccountActivity" />
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".controller.activity.SettingActivity" />
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".controller.activity.ParaChangeActivity" />
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".controller.activity.KlineDurationActivity" />
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".controller.activity.AddKlineDurationActivity" />
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".controller.activity.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".controller.activity.SubSettingActivity" />
-        <activity android:name=".controller.activity.OptionalActivity" />
-        <activity android:name=".controller.activity.CommonSwitchActivity"></activity>
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".controller.activity.SubSettingActivity" />
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".controller.activity.OptionalActivity" />
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".controller.activity.CommonSwitchActivity"></activity>
     </application>
 
 </manifest>

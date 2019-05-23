@@ -32,6 +32,7 @@ import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -45,7 +46,7 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VA
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
@@ -64,7 +65,6 @@ public class PositionFragment extends LazyLoadFragment {
     private List<PositionEntity> mNewData = new ArrayList<>();
     private FragmentPositionBinding mBinding;
     private boolean mIsUpdate;
-    private String ins = "";
 
     @Nullable
     @Override
@@ -84,9 +84,10 @@ public class PositionFragment extends LazyLoadFragment {
                 new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
         mAdapter = new PositionAdapter(getActivity(), mOldData);
         mBinding.rv.setAdapter(mAdapter);
-        if (getActivity() instanceof FutureInfoActivity){
-            mBinding.seeMd.setVisibility(View.GONE);
-            ins = ((FutureInfoActivity)getActivity()).getInstrument_id();
+        if (getActivity() instanceof FutureInfoActivity) {
+            mAdapter.setHighlightIns(((FutureInfoActivity) getActivity()).getInstrument_id());
+            //注册EventBus
+            EventBus.getDefault().register(this);
         }
     }
 
@@ -103,13 +104,13 @@ public class PositionFragment extends LazyLoadFragment {
                         String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
                         //添加判断，防止自选合约列表为空时产生无效的点击事件
                         if (instrument_id != null) {
-                            if (getActivity() instanceof MainActivity){
-                                ((MainActivity)getActivity()).getmMainActivityPresenter()
+                            if (getActivity() instanceof MainActivity) {
+                                ((MainActivity) getActivity()).getmMainActivityPresenter()
                                         .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
                                 sDataManager.IS_SHOW_VP_CONTENT = true;
                                 Intent intentPos = new Intent(getActivity(), FutureInfoActivity.class);
                                 intentPos.putExtra(INS_BETWEEN_ACTIVITY, instrument_id);
-                                startActivityForResult(intentPos, JUMP_TO_FUTURE_INFO_ACTIVITY);
+                                getActivity().startActivityForResult(intentPos, MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY);
                                 JSONObject jsonObject = new JSONObject();
                                 try {
                                     jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
@@ -118,7 +119,8 @@ public class PositionFragment extends LazyLoadFragment {
                                     e.printStackTrace();
                                 }
                                 Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
-                            }else {
+                            } else {
+                                mAdapter.updateHighlightIns(instrument_id);
                                 IdEvent idEvent = new IdEvent();
                                 idEvent.setInstrument_id(instrument_id);
                                 EventBus.getDefault().post(idEvent);
@@ -155,8 +157,8 @@ public class PositionFragment extends LazyLoadFragment {
         mBinding.seeMd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (getActivity() instanceof MainActivity){
-                    MainActivity mainActivity = ((MainActivity)getActivity());
+                if (getActivity() instanceof MainActivity) {
+                    MainActivity mainActivity = ((MainActivity) getActivity());
                     mainActivity.getmBinding().bottomNavigation.setSelectedItemId(R.id.market);
                     QuotePagerFragment quotePagerFragment = (QuotePagerFragment) mainActivity.getmMainActivityPresenter().getmViewPagerFragmentAdapter().getItem(0);
                     quotePagerFragment.setCurrentItem(0);
@@ -167,15 +169,13 @@ public class PositionFragment extends LazyLoadFragment {
 
     protected void refreshPosition() {
         try {
-            if (!mIsUpdate)return;
+            if (!mIsUpdate) return;
             UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
             mNewData.clear();
 
             for (PositionEntity positionEntity :
                     userEntity.getPositions().values()) {
-                String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
-                if (instrument_id.equals(ins))positionEntity.setHighlight(true);
 
                 int volume_long = Integer.parseInt(positionEntity.getVolume_long());
                 int volume_short = Integer.parseInt(positionEntity.getVolume_short());
@@ -189,7 +189,9 @@ public class PositionFragment extends LazyLoadFragment {
                 }
             }
 
-            if (!mNewData.isEmpty())mBinding.seeMd.setVisibility(View.GONE);
+            if (getActivity() instanceof MainActivity && mNewData.isEmpty())
+                mBinding.seeMd.setVisibility(View.VISIBLE);
+            else mBinding.seeMd.setVisibility(View.GONE);
 
             Collections.sort(mNewData);
             DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new PositionDiffCallback(mOldData, mNewData), false);
@@ -233,11 +235,26 @@ public class PositionFragment extends LazyLoadFragment {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (getActivity() instanceof FutureInfoActivity) EventBus.getDefault().unregister(this);
+    }
 
     @Override
     public void update() {
         refreshPosition();
         mBinding.rv.scrollToPosition(0);
+    }
+
+    /**
+     * date: 7/9/17
+     * author: chenli
+     * description: 接收持仓点击、自选点击、搜索页点击发来的合约，用于更新高亮合约
+     */
+    @Subscribe
+    public void onEvent(IdEvent data) {
+        mAdapter.updateHighlightIns(data.getInstrument_id());
     }
 
 }

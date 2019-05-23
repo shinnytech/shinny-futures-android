@@ -5,14 +5,14 @@
 
     <item
         android:id="@+id/market"
-        android:icon="@mipmap/ic_trending_up_white_18dp"
+        android:icon="@mipmap/ic_assessment_white_18dp"
         android:orderInCategory="101"
         android:title="交易"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/trade"
-        android:icon="@mipmap/ic_perm_identity_white_18dp"
+        android:icon="@mipmap/ic_account_circle_white_18dp"
         android:orderInCategory="101"
         android:title="账户"
         app:showAsAction="always" />

@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentQuotePagerBinding;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
@@ -108,11 +107,11 @@ public class QuotePagerFragment extends Fragment {
         return mTitle;
     }
 
-    public void setCurrentItem(int index){
-        mBinding.quotePager.setCurrentItem(index, false);
+    public QuoteFragment getCurrentItem() {
+        return (QuoteFragment) mViewPagerFragmentAdapter.getItem(mBinding.quotePager.getCurrentItem());
     }
 
-    public QuoteFragment getCurrentItem(){
-        return (QuoteFragment) mViewPagerFragmentAdapter.getItem(mBinding.quotePager.getCurrentItem());
+    public void setCurrentItem(int index) {
+        mBinding.quotePager.setCurrentItem(index, false);
     }
 }

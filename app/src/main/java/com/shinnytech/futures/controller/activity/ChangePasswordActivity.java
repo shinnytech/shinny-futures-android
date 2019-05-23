@@ -15,7 +15,7 @@ import android.view.View;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityChangePasswordBinding;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
 import java.lang.ref.WeakReference;
 
@@ -177,29 +177,29 @@ public class ChangePasswordActivity extends BaseActivity {
             public void onClick(View v) {
 
                 if (BaseApplication.getWebSocketService() == null) {
-                    ToastNotificationUtils.showToast(sContext, "连接断开，请重启");
+                    ToastUtils.showToast(sContext, "连接断开，请重启");
                     return;
                 }
 
                 String old_password = mBinding.etOldPassword.getText().toString();
                 if (old_password == null || old_password.isEmpty()) {
-                    ToastNotificationUtils.showToast(sContext, "旧密码不能为空");
+                    ToastUtils.showToast(sContext, "旧密码不能为空");
                     return;
                 }
 
                 String new_password = mBinding.etNewPassword.getText().toString();
                 if (new_password == null || new_password.isEmpty()) {
-                    ToastNotificationUtils.showToast(sContext, "新密码不能为空");
+                    ToastUtils.showToast(sContext, "新密码不能为空");
                     return;
                 }
                 String confirm_new_password = mBinding.etConfirmNewPassword.getText().toString();
                 if (confirm_new_password == null || confirm_new_password.isEmpty()) {
-                    ToastNotificationUtils.showToast(sContext, "请确认新密码");
+                    ToastUtils.showToast(sContext, "请确认新密码");
                     return;
                 }
 
                 if (!confirm_new_password.equals(new_password)) {
-                    ToastNotificationUtils.showToast(sContext, "新密码确认不一致");
+                    ToastUtils.showToast(sContext, "新密码确认不一致");
                     return;
                 }
 

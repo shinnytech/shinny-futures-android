@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.SparseArray;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -45,6 +46,7 @@ import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.model.bean.eventbusbean.AverageEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.KlineEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
@@ -320,6 +322,8 @@ public class KlineFragment extends BaseChartFragment {
             @Override
             public void onLongPress(MotionEvent e) {
                 super.onLongPress(e);
+                int height = (int) mTopChartViewBase.getViewPortHandler().contentHeight();
+                ((KlineMarkerView) mTopChartViewBase.getMarker()).resize(height);
                 mIsLongPress = true;
                 Highlight h = mTopChartViewBase.getHighlightByTouchPoint(e.getX(), e.getY());
                 if (h != null) {
@@ -347,9 +351,9 @@ public class KlineFragment extends BaseChartFragment {
                 // Y轴的坐标位移大于FLING_MIN_DISTANCE，且移动速度大于FLING_MIN_VELOCITY个像素/秒
 
                 String ins = "";
-                if (Math.abs(e1.getX() - e2.getX()) > FLING_MAX_DISTANCE_X)return false;
+                if (Math.abs(e1.getX() - e2.getX()) > FLING_MAX_DISTANCE_X) return false;
                 //向上
-                if (e1.getY() - e2.getY() > FLING_MIN_DISTANCE_Y && Math.abs(velocityY) > FLING_MIN_VELOCITY){
+                if (e1.getY() - e2.getY() > FLING_MIN_DISTANCE_Y && Math.abs(velocityY) > FLING_MIN_VELOCITY) {
                     ins = getNextInstrumentId(true);
                 }
                 //向下
@@ -357,7 +361,7 @@ public class KlineFragment extends BaseChartFragment {
                     ins = getNextInstrumentId(false);
                 }
 
-                if (!ins.isEmpty()){
+                if (!ins.isEmpty()) {
                     IdEvent idEvent = new IdEvent();
                     idEvent.setInstrument_id(ins);
                     EventBus.getDefault().post(idEvent);
@@ -535,7 +539,7 @@ public class KlineFragment extends BaseChartFragment {
      * description: 载入K线数据
      */
     @Override
-    protected void refreshKline() {
+    protected void drawKline() {
         try {
             //开始加载数据
             if (mTopChartViewBase.getData() != null && mTopChartViewBase.getData().getDataSetCount() > 0) {
@@ -648,9 +652,9 @@ public class KlineFragment extends BaseChartFragment {
                 else topCombinedData.setData(new LineData());
                 mTopChartViewBase.setData(topCombinedData);//当前屏幕会显示所有的数据
 
-                LineDataSet oiDataSet = generateLineDataSet(oiEntries, ContextCompat.getColor(getActivity(), R.color.white),
+                LineDataSet oiDataSet = generateLineDataSet(oiEntries, ContextCompat.getColor(getActivity(), R.color.text_white),
                         "OI", false, YAxis.AxisDependency.RIGHT);
-                BarDataSet volumeDataSet = generateBarDataSet(volumeEntries, ContextCompat.getColor(getActivity(), R.color.white),
+                BarDataSet volumeDataSet = generateBarDataSet(volumeEntries, ContextCompat.getColor(getActivity(), R.color.text_white),
                         "Volume", true);
                 LineData oiData = new LineData(oiDataSet);
                 BarData volumeData = new BarData(volumeDataSet);
@@ -665,9 +669,6 @@ public class KlineFragment extends BaseChartFragment {
                 generateLatestLine(dataEntities.get(right_id_t));
                 mTopChartViewBase.zoom(mScaleX, 1.0f, mLastIndex - mBaseIndex, 0, YAxis.AxisDependency.LEFT);
                 mTopChartViewBase.moveViewToX(mLastIndex - mBaseIndex);
-                int height = (int) mTopChartViewBase.getViewPortHandler().contentHeight();
-                int width = (int) (mTopChartViewBase.getViewPortHandler().contentWidth() / 6);
-                ((KlineMarkerView) mTopChartViewBase.getMarker()).resize(width, height);
 
                 mMiddleChartViewBase.getXAxis().setAxisMaximum(middleCombinedData.getXMax() + 2.5f);
                 mMiddleChartViewBase.getXAxis().setAxisMinimum(middleCombinedData.getXMin() - 0.5f);
@@ -683,6 +684,19 @@ public class KlineFragment extends BaseChartFragment {
             String exception = error.toString();
             LogUtils.e(exception, true);
         }
+    }
+
+    @Override
+    protected void clearKline() {
+        removeLatestLine();
+        removeOrderLimitLines();
+        removePositionLimitLines();
+        xVals.clear();
+        mTopChartViewBase.clear();
+        mTopChartViewBase.fitScreen();
+        mMiddleChartViewBase.clear();
+        mMiddleChartViewBase.fitScreen();
+        mViewWidth = CommonConstants.VIEW_WIDTH;
     }
 
     @Override
@@ -760,10 +774,10 @@ public class KlineFragment extends BaseChartFragment {
         set.setDecreasingPaintStyle(Paint.Style.FILL);
         set.setIncreasingColor(mIncreasingColor);
         set.setIncreasingPaintStyle(Paint.Style.STROKE);
-        set.setNeutralColor(ContextCompat.getColor(getActivity(), R.color.white));
+        set.setNeutralColor(ContextCompat.getColor(getActivity(), R.color.text_white));
         set.setShadowColorSameAsCandle(true);
         set.setHighlightLineWidth(0.7f);
-        set.setHighLightColor(ContextCompat.getColor(getActivity(), R.color.white));
+        set.setHighLightColor(ContextCompat.getColor(getActivity(), R.color.text_white));
         set.setDrawValues(true);
         set.setValueTextColor(Color.RED);
         set.setValueTextSize(9f);
@@ -940,21 +954,12 @@ public class KlineFragment extends BaseChartFragment {
         String klineType = klineEvent.getKlineType();
         if (mFragmentType.equals(fragmentType) && !mKlineType.equals(klineType)) {
             mKlineType = klineType;
-
-            removeLatestLine();
-            removeOrderLimitLines();
-            removePositionLimitLines();
-            xVals.clear();
-            mTopChartViewBase.clear();
-            mTopChartViewBase.fitScreen();
-            mMiddleChartViewBase.clear();
-            mMiddleChartViewBase.fitScreen();
-
-            if (BaseApplication.getWebSocketService() != null)
-                BaseApplication.getWebSocketService().sendSetChartKline(instrument_id, VIEW_WIDTH, mKlineType);
-
+            clearKline();
+            drawKline();
             if (mIsPosition) addPositionLimitLines();
             if (mIsPending) addOrderLimitLines();
+            if (BaseApplication.getWebSocketService() != null)
+                BaseApplication.getWebSocketService().sendSetChartKline(instrument_id, VIEW_WIDTH, mKlineType);
 
         }
     }
@@ -970,26 +975,16 @@ public class KlineFragment extends BaseChartFragment {
         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id_new);
         if (instrument_id.equals(instrument_id_new)) return;
         instrument_id = instrument_id_new;
-
-        removeLatestLine();
-        removeOrderLimitLines();
-        removePositionLimitLines();
-        xVals.clear();
-        mTopChartViewBase.clear();
-        mTopChartViewBase.fitScreen();
-        mMiddleChartViewBase.clear();
-        mMiddleChartViewBase.fitScreen();
-        mViewWidth = CommonConstants.VIEW_WIDTH;
-
-        if (BaseApplication.getWebSocketService() != null)
-            BaseApplication.getWebSocketService().sendSetChartKline(instrument_id, VIEW_WIDTH, mKlineType);
-
+        clearKline();
         if (instrument_id.contains("KQ") && searchEntity != null)
             instrument_id_transaction = searchEntity.getUnderlying_symbol();
         else instrument_id_transaction = instrument_id;
-
+        drawKline();
         if (mIsPosition) addPositionLimitLines();
         if (mIsPending) addOrderLimitLines();
+        if (BaseApplication.getWebSocketService() != null)
+            BaseApplication.getWebSocketService().sendSetChartKline(instrument_id, VIEW_WIDTH, mKlineType);
+
     }
 
     /**
@@ -1026,9 +1021,48 @@ public class KlineFragment extends BaseChartFragment {
         mTopChartViewBase.invalidate();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+    /**
+     * date: 2019/5/12
+     * author: chenli
+     * description: 重绘均线
+     */
+    @Subscribe
+    public void onEvent(AverageEvent averageEvent) {
+        String average = (String) SPUtils.get(BaseApplication.getContext(),
+                CommonConstants.CONFIG_PARA_MA, CommonConstants.PARA_MA);
+        String averagePre = TextUtils.join(",", mas);
+        if (!average.equals(averagePre)) {
+            mas.clear();
+            for (String para : average.split(",")) {
+                try {
+                    int ma = Integer.parseInt(para);
+                    if (ma != 0) {
+                        mas.add(ma);
+                    }
+                } catch (Exception e) {
+                    continue;
+                }
+            }
+
+            List<LegendEntry> legendEntries = new ArrayList<>();
+            for (int i = 0; i < mas.size(); i++) {
+                int para = mas.get(i);
+                LegendEntry ma = new LegendEntry("MA" + para, Legend.LegendForm.SQUARE,
+                        NaN, NaN, null, mColorMas[i]);
+                legendEntries.add(ma);
+            }
+            Legend legend = mTopChartViewBase.getLegend();
+            legend.setCustom(legendEntries);
+            legend.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
+            legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
+            legend.setTextColor(Color.WHITE);
+
+            clearKline();
+            drawKline();
+            if (mIsPosition) addPositionLimitLines();
+            if (mIsPending) addOrderLimitLines();
+
+        }
     }
 
     @Override
@@ -1036,11 +1070,6 @@ public class KlineFragment extends BaseChartFragment {
         //moveTo方法的bug
         MoveViewJob.getInstance(null, 0, 0, null, null);
         super.onPause();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
     }
 
     /**
@@ -1152,39 +1181,39 @@ public class KlineFragment extends BaseChartFragment {
                         float close_float = Float.parseFloat(close);
 
                         if (open_float < closePre_float)
-                            this.open.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_green));
+                            this.open.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_green));
                         else
-                            this.open.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_red));
+                            this.open.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_red));
 
                         if (high_float < closePre_float)
-                            this.high.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_green));
+                            this.high.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_green));
                         else
-                            this.high.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_red));
+                            this.high.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_red));
 
                         if (low_float < closePre_float)
-                            this.low.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_green));
+                            this.low.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_green));
                         else
-                            this.low.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_red));
+                            this.low.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_red));
 
                         if (close_float < closePre_float)
-                            this.close.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_green));
+                            this.close.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_green));
                         else
-                            this.close.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_red));
+                            this.close.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_red));
 
                         float close_change_float = Float.parseFloat(change);
                         if (close_change_float < 0) {
-                            this.closeChange.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_green));
-                            this.closeChangePercent.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_green));
+                            this.closeChange.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_green));
+                            this.closeChangePercent.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_green));
                         } else {
-                            this.closeChange.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_red));
-                            this.closeChangePercent.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_red));
+                            this.closeChange.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_red));
+                            this.closeChangePercent.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_red));
                         }
 
                         int close_oi_delta = Integer.parseInt(closeOiDelta);
                         if (close_oi_delta < 0)
-                            this.closeOiDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_green));
+                            this.closeOiDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_green));
                         else
-                            this.closeOiDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_red));
+                            this.closeOiDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_red));
 
                     } catch (Exception ex) {
                         ex.printStackTrace();

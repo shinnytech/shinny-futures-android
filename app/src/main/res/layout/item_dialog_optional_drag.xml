@@ -24,7 +24,7 @@
                 android:background="@drawable/fragment_popup_item_touch_bg"
                 android:gravity="center"
                 android:scaleType="center"
-                android:src="@mipmap/ic_content_cut_black_18dp" />
+                android:src="@mipmap/ic_content_cut_white_18dp" />
 
 
             <TextView
@@ -35,14 +35,14 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:background="@color/dialog_optional"
+                android:background="@drawable/fragment_popup_item_touch_bg"
                 android:maxLines="1"
                 app:autoSizeTextType="uniform"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal_high"
                 app:autoSizeMinTextSize="@dimen/font_size_small"
                 app:autoSizeStepGranularity="1sp"
                 android:padding="@dimen/padding_10dp"
-                android:textColor="@color/dialog_optional_text"
+                android:textColor="@color/text_white"
                 android:textSize="@dimen/font_size_normal_high" />
 
             <ImageView
@@ -55,7 +55,7 @@
                 android:focusable="true"
                 android:gravity="center"
                 android:scaleType="center"
-                android:src="@mipmap/ic_vertical_align_top_black_18dp" />
+                android:src="@mipmap/ic_vertical_align_top_white_18dp" />
 
             <ImageView
                 android:id="@+id/tv_drag_dialog"
@@ -67,7 +67,7 @@
                 android:gravity="center"
                 android:background="@drawable/fragment_popup_item_touch_bg"
                 android:scaleType="center"
-                android:src="@mipmap/ic_format_line_spacing_black_18dp"/>
+                android:src="@mipmap/ic_format_line_spacing_white_18dp"/>
         </LinearLayout>
 
    <View

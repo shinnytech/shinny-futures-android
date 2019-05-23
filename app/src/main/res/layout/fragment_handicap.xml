@@ -26,6 +26,8 @@
         tools:context=".controller.activity.FutureInfoActivity">
 
         <LinearLayout
+            android:gravity="center"
+            android:layout_gravity="center"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -35,7 +37,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_ask_price1"
@@ -46,7 +47,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.ask_price1, handicap.instrument_id)}"
@@ -63,7 +63,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_ask_volume1"
@@ -74,15 +73,16 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{handicap.ask_volume1}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
         </LinearLayout>
 
         <LinearLayout
+            android:gravity="center"
+            android:layout_gravity="center"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -92,7 +92,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_bid_price1"
@@ -103,7 +102,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.bid_price1, handicap.instrument_id)}"
@@ -119,7 +117,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_bid_volume1"
@@ -130,15 +127,16 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{handicap.bid_volume1}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
         </LinearLayout>
 
         <LinearLayout
+            android:gravity="center"
+            android:layout_gravity="center"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -189,11 +187,13 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(MathUtils.subtract(handicap.last_price, handicap.pre_settlement), handicap.instrument_id)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
         </LinearLayout>
 
         <LinearLayout
+            android:gravity="center"
+            android:layout_gravity="center"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -204,7 +204,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_open"
@@ -215,7 +214,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.open, handicap.instrument_id)}"
@@ -231,7 +229,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_volume"
@@ -242,15 +239,16 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{handicap.volume}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
         </LinearLayout>
 
         <LinearLayout
+            android:gravity="center"
+            android:layout_gravity="center"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -260,7 +258,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_highest"
@@ -271,7 +268,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.highest, handicap.instrument_id)}"
@@ -287,7 +283,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_open_interest"
@@ -298,15 +293,16 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{handicap.open_interest}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
         </LinearLayout>
 
         <LinearLayout
+            android:gravity="center"
+            android:layout_gravity="center"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -327,7 +323,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.lowest, handicap.instrument_id)}"
@@ -343,7 +338,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_pre_open_interest"
@@ -354,15 +348,16 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{MathUtils.subtract(handicap.open_interest, handicap.pre_open_interest)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
         </LinearLayout>
 
         <LinearLayout
+            android:gravity="center"
+            android:layout_gravity="center"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -373,7 +368,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_average"
@@ -384,11 +378,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.average, handicap.instrument_id)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
 
             <View
@@ -400,7 +393,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_settlement"
@@ -411,15 +403,16 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.settlement, handicap.instrument_id)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
         </LinearLayout>
 
         <LinearLayout
+            android:gravity="center"
+            android:layout_gravity="center"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -430,7 +423,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_pre_close"
@@ -441,11 +433,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.pre_close, handicap.instrument_id)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
 
             <View
@@ -458,7 +449,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_upper_limit"
@@ -469,15 +459,16 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.upper_limit, handicap.instrument_id)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
         </LinearLayout>
 
         <LinearLayout
+            android:gravity="center"
+            android:layout_gravity="center"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -488,7 +479,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_pre_settlement"
@@ -499,11 +489,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.pre_settlement, handicap.instrument_id)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
 
             <View
@@ -516,7 +505,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_20dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="start"
                 android:text="@string/handicap_fragment_lower_limit"
@@ -527,11 +515,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_5dp"
-                android:layout_marginTop="@dimen/margin_1dp"
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="@{LatestFileManager.saveScaleByPtick(handicap.lower_limit, handicap.instrument_id)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
         </LinearLayout>
 

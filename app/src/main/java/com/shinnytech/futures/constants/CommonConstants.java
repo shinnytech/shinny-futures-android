@@ -13,9 +13,11 @@ public final class CommonConstants {
     public static final String MD_ONLINE = "MD_ONLINE";
     public static final String MD_OFFLINE = "MD_OFFLINE";
     public static final String MD_MESSAGE = "MD_MESSAGE";
+    public static final String MD_TIMEOUT = "MD_TIMEOUT";
     public static final String TD_ONLINE = "TD_ONLINE";
     public static final String TD_OFFLINE = "TD_OFFLINE";
     public static final String TD_MESSAGE = "TD_MESSAGE";
+    public static final String TD_TIMEOUT = "TD_TIMEOUT";
     public static final String TD_MESSAGE_LOGIN = "TD_MESSAGE_LOGIN";
     public static final String TD_MESSAGE_WEAK_PASSWORD = "TD_MESSAGE_WEAK_PASSWORD";
     public static final String TD_MESSAGE_SETTLEMENT = "TD_MESSAGE_SETTLEMENT";
@@ -81,13 +83,14 @@ public final class CommonConstants {
     public static final int LOAD_QUOTE_NUM = 24;
     public static final int LOAD_QUOTE_RECOMMEND_NUM = 10;
     //页面跳转标志
-    public static final int JUMP_TO_SEARCH_ACTIVITY = 1;
-    public static final int JUMP_TO_FUTURE_INFO_ACTIVITY = 2;
-    public static final int LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY = 3;
-    public static final int KLINE_DURATION_ACTIVITY_TO_ADD_DURATION_ACTIVITY = 4;
-    public static final int LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY = 5;
-    public static final int FUTURE_INFO_ACTIVITY_TO_COMMON_SWITCH_ACTIVITY = 6;
-    public static final int MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY = 7;
+    public static final int MAIN_ACTIVITY_TO_SEARCH_ACTIVITY = 1;
+    public static final int MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY = 2;
+    public static final int MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY = 3;
+    public static final int MAIN_ACTIVITY_TO_TRANSFER_ACTIVITY = 4;
+    public static final int LOGIN_ACTIVITY_TO_CHANGE_PASSWORD_ACTIVITY = 5;
+    public static final int LOGIN_ACTIVITY_TO_BROKER_LIST_ACTIVITY = 6;
+    public static final int KLINE_DURATION_ACTIVITY_TO_ADD_DURATION_ACTIVITY = 7;
+    public static final int FUTURE_INFO_ACTIVITY_TO_CHART_SETTING_ACTIVITY = 8;
     public static final String BACK_TO_ACCOUNT_DETAIL = "checkAccount";
     public static final String INS_BETWEEN_ACTIVITY = "instrument_id";
     //app名称
@@ -114,6 +117,7 @@ public final class CommonConstants {
     public static final String CONFIG_BROKER = "brokerName";
     public static final String CONFIG_LOGIN_DATE = "loginDate";
     public static final String CONFIG_RECOMMEND_OPTIONAL = "recommendOptional";
+    public static final String CONFIG_RECOMMEND = "recommend";
     //设置页信息
     public static final String CHART_SETTING = "图表设置";
     public static final String TRANSACTION_SETTING = "交易设置";
@@ -127,7 +131,7 @@ public final class CommonConstants {
     public static final String CANCEL_ORDER_CONFIRM = "撤单确认";
     public static final String UPLOAD_LOG = "上传运行日志";
     public static final String COMMON_SWITCH = "常用开关";
-    public static final String PARA_MA = "5,10,20,60,0,0";
+    public static final String PARA_MA = "5,10,20,40,60,0";
     public static final String KLINE_DURATION_DEFAULT = "1分,5分,15分,30分,1日,1周";
     public static final String KLINE_DURATION_ALL = "3秒,5秒,10秒,15秒,20秒,30秒,1分,2分," +
             "3分,5分,10分,15分,30分,1时,2时,4时,1日,1周,4周";
@@ -144,12 +148,18 @@ public final class CommonConstants {
     public static final String STATUS_FIRST_OPEN_FIRST_CLOSE = "先开先平";
     public static final String STATUS_LOCK = "锁仓状态";
     public static final String STATUS_ALIVE = "ALIVE";
+    public static final String STATUS_ALIVE_ZN = "未成";
+    public static final String STATUS_FINISHED = "FINISHED";
+    public static final String STATUS_FINISHED_ZN = "已成";
+    public static final String STATUS_CANCELED_ZN = "已撤";
     public static final String PRICE_TYPE_LIMIT = "LIMIT";
 
     public static final String DIRECTION_BUY = "BUY";
     public static final String DIRECTION_SELL = "SELL";
     public static final String DIRECTION_BUY_ZN = "多";
+    public static final String DIRECTION_BUY_ZN_S = "买";
     public static final String DIRECTION_SELL_ZN = "空";
+    public static final String DIRECTION_SELL_ZN_S = "卖";
     public static final String DIRECTION_BOTH_ZN = "双向";
 
     public static final String OFFSET_OPEN = "OPEN";
@@ -158,16 +168,18 @@ public final class CommonConstants {
     public static final String OFFSET_CLOSE_HISTORY = "CLOSEHISTORY";
     public static final String OFFSET_CLOSE_FORCE = "FORCECLOSE";
     public static final String OFFSET_OPEN_ZN = "开仓";
+    public static final String OFFSET_OPEN_ZN_S = "开";
     public static final String OFFSET_CLOSE_ZN = "平仓";
+    public static final String OFFSET_CLOSE_ZN_S = "平";
     public static final String OFFSET_CLOSE_TODAY_ZN = "平今";
     public static final String OFFSET_CLOSE_HISTORY_ZN = "平昨";
     public static final String OFFSET_CLOSE_FORCE_ZN = "强平";
 
     //下单版价格类型
-    public static final String LATEST_PRICE = "最新价";
-    public static final String COUNTERPARTY_PRICE = "对手价";
+    public static final String LATEST_PRICE = "最新";
+    public static final String OPPONENT_PRICE = "对手";
     public static final String MARKET_PRICE = "市价";
-    public static final String QUEUED_PRICE = "排队价";
+    public static final String QUEUED_PRICE = "排队";
     public static final String USER_PRICE = "用户设置价";
 
     //交易所信息
@@ -212,9 +224,12 @@ public final class CommonConstants {
     public static final String AMP_CONDITIONAL_ORDER = "amp_conditional_order";
     public static final String AMP_CRASH = "amp_crash";
     public static final String AMP_SWITCH_PAGE = "amp_switch_page";
+    public static final String AMP_PRICE_KEY = "amp_price_key";
+    public static final String AMP_VOLUME_KEY = "amp_volume_key";
 
     //amp event property
-    public static final String AMP_USER_BROKER_ID_SELECTED = "broker_id_selected";
+    public static final String AMP_EVENT_BROKER_ID_SELECTED = "broker_id_selected";
+    public static final String AMP_EVENT_BROKER_ID_SUCCEEDED = "broker_id_succeeded";
 
     public static final String AMP_EVENT_PRICE = "price";
     public static final String AMP_EVENT_INSTRUMENT_ID = "instrument_id";
@@ -237,7 +252,7 @@ public final class CommonConstants {
     public static final String AMP_EVENT_PAGE_VALUE_LOGIN = "login_page";
     public static final String AMP_EVENT_PAGE_VALUE_SETTING = "setting_page";
     public static final String AMP_EVENT_PAGE_VALUE_OPTIONAL_SETTING = "optional_setting_page";
-    public static final String AMP_EVENT_PAGE_VALUE_COMMON_SWITCH = "common_switch_page";
+    public static final String AMP_EVENT_PAGE_VALUE_CHART_SETTING = "chart_setting_page";
     public static final String AMP_EVENT_PAGE_VALUE_ACCOUNT = "account_page";
     public static final String AMP_EVENT_PAGE_VALUE_CHANGE_PASSWORD = "change_password_page";
     public static final String AMP_EVENT_PAGE_VALUE_TRANSFER = "transfer_page";
@@ -246,6 +261,42 @@ public final class CommonConstants {
     public static final String AMP_EVENT_PAGE_VALUE_ABOUT = "about_page";
     public static final String AMP_EVENT_PAGE_VALUE_SEARCH = "search_page";
     public static final String AMP_EVENT_PAGE_VALUE_FUTURE_INFO = "future_info_page";
+
+    public static final String AMP_EVENT_PRICE_KEY = "price_key";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_0 = "price_key_0";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_1 = "price_key_1";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_2 = "price_key_2";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_3 = "price_key_3";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_4 = "price_key_4";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_5 = "price_key_5";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_6 = "price_key_6";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_7 = "price_key_7";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_8 = "price_key_8";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_9 = "price_key_9";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_DEL = "price_key_del";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_MINUS = "price_key_minus";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_PLUS = "price_key_plus";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_POINT = "price_key_point";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_QUEUED = "price_key_queued";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_OPPONENT = "price_key_opponent";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_MARKET = "price_key_market";
+    public static final String AMP_EVENT_PRICE_KEY_VALUE_LAST = "price_key_last";
+
+    public static final String AMP_EVENT_VOLUME_KEY = "volume_key";
+    public static final String AMP_EVENT_VOLUME_KEY_VALUE_0 = "volume_key_0";
+    public static final String AMP_EVENT_VOLUME_KEY_VALUE_1 = "volume_key_1";
+    public static final String AMP_EVENT_VOLUME_KEY_VALUE_2 = "volume_key_2";
+    public static final String AMP_EVENT_VOLUME_KEY_VALUE_3 = "volume_key_3";
+    public static final String AMP_EVENT_VOLUME_KEY_VALUE_4 = "volume_key_4";
+    public static final String AMP_EVENT_VOLUME_KEY_VALUE_5 = "volume_key_5";
+    public static final String AMP_EVENT_VOLUME_KEY_VALUE_6 = "volume_key_6";
+    public static final String AMP_EVENT_VOLUME_KEY_VALUE_7 = "volume_key_7";
+    public static final String AMP_EVENT_VOLUME_KEY_VALUE_8 = "volume_key_8";
+    public static final String AMP_EVENT_VOLUME_KEY_VALUE_9 = "volume_key_9";
+    public static final String AMP_EVENT_VOLUME_KEY_VALUE_DEL = "volume_key_del";
+    public static final String AMP_EVENT_VOLUME_KEY_VALUE_MINUS = "volume_key_minus";
+    public static final String AMP_EVENT_VOLUME_KEY_VALUE_PLUS = "volume_key_plus";
+    public static final String AMP_EVENT_VOLUME_KEY_VALUE_CLEAR = "volume_key_clear";
 
     //amp user property
     public static final String AMP_USER_PACKAGE_ID_FIRST = "package_id_first";
@@ -258,15 +309,10 @@ public final class CommonConstants {
     public static final String AMP_USER_BROKER_ID_LAST = "broker_id_last";
     public static final String AMP_USER_BANK_FIRST = "bank_first";
     public static final String AMP_USER_BANK_LAST = "bank_last";
-    public static final String AMP_USER_FIRST_BALANCE = "first_balance";
-    public static final String AMP_USER_MAX_BALANCE = "max_balance";
-    public static final String AMP_USER_LAST_BALANCE = "last_balance";
-    public static final String AMP_USER_BANK_USER_TYPE = "user_type";
-    public static final String AMP_USER_BANK_USER_TYPE_VALUE = "trader";
-    public static final String AMP_USER_BANK_USER_TYPE_VALUE = "q_trader";
-    public static final String AMP_USER_BANK_USER_TYPE_VALUE = "newbie";
-    public static final String AMP_USER_BANK_USER_TYPE_VALUE = "pure_newbie";
-    public static final String AMP_USER_BANK_USER_TYPE_VALUE = "visitor";
-
+    public static final String AMP_USER_BALANCE_FIRST = "balance_first";
+    public static final String AMP_USER_BALANCE_LAST = "balance_last";
+    public static final String AMP_USER_TYPE_FIRST = "user_type_first";
+    public static final String AMP_USER_TYPE_FIRST_PURE_NEWBIE_VALUE = "pure_newbie";
+    public static final String AMP_USER_TYPE_FIRST_TRADER_VALUE = "trader";
 
 }

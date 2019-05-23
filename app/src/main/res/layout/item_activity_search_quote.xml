@@ -31,7 +31,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="-"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/text_white" />
 
                 <TextView
                     android:id="@+id/tv_search_instrument_id"

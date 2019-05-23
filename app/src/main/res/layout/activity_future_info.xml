@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
 
@@ -18,7 +19,6 @@
 
     <android.support.design.widget.CoordinatorLayout
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:keepScreenOn="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -41,10 +41,10 @@
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="60dp">
+                android:layout_height="80dp">
 
                 <LinearLayout
-                    android:background="@drawable/activity_future_info_hadicap1_rectangle_border"
+                    android:background="@drawable/activity_future_info_handicap_rectangle_border"
                     android:orientation="vertical"
                     android:layout_weight="1"
                     android:layout_width="0dp"
@@ -55,29 +55,29 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="2"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:maxLines="1"
+                        android:layout_marginStart="@dimen/margin_30dp"
+                        android:gravity="start|center"
+                        android:layout_gravity="start|center"
                         android:text="@{LatestFileManager.saveScaleByPtick(quote.last_price, quote.instrument_id)}"
-                        android:textColor='@{MathUtils.lower(quote.last_price, quote.pre_settlement) ? @color/marker_green : MathUtils.upper(quote.last_price, quote.pre_settlement) ? @color/marker_red : @color/white}'
+                        android:textColor='@{MathUtils.lower(quote.last_price, quote.pre_settlement) ? @color/text_green : MathUtils.upper(quote.last_price, quote.pre_settlement) ? @color/text_red : @color/text_white}'
                         android:textSize="@dimen/font_size_large_high" />
 
                     <TextView
+                        android:layout_marginEnd="@dimen/margin_30dp"
                         android:id="@+id/future_info_activity_change"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:maxLines="1"
+                        android:gravity="end|center"
+                        android:layout_gravity="end|center"
                         android:text='@{LatestFileManager.saveScaleByPtick(MathUtils.subtract(quote.last_price, quote.pre_settlement), quote.instrument_id)+@string/future_info_activity_slash+MathUtils.round(LatestFileManager.getUpDownRate(quote.getLast_price(), quote.getPre_settlement()), 2)+@string/future_info_activity_percent}'
-                        android:textColor='@{MathUtils.lower(quote.last_price, quote.pre_settlement) ? @color/marker_green : MathUtils.upper(quote.last_price, quote.pre_settlement) ? @color/marker_red : @color/white}'
+                        android:textColor='@{MathUtils.lower(quote.last_price, quote.pre_settlement) ? @color/text_green : MathUtils.upper(quote.last_price, quote.pre_settlement) ? @color/text_red : @color/text_white}'
                         android:textSize="@dimen/font_size_normal" />
 
                 </LinearLayout>
 
                 <LinearLayout
-                    android:background="@drawable/activity_future_info_hadicap1_rectangle_border"
+                    android:background="@drawable/activity_future_info_handicap_rectangle_border"
                     android:orientation="vertical"
                     android:layout_weight="1"
                     android:layout_width="0dp"
@@ -89,16 +89,16 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="center"
                         android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:gravity="start"
+                            android:gravity="start|center"
+                            android:layout_gravity="start|center"
                             android:text="@string/future_info_activity_ask"
-                            android:textColor="@color/white"
+                            android:textColor="@color/text_white"
                             android:textSize="@dimen/font_size_normal" />
 
                         <TextView
@@ -106,11 +106,10 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
-                            android:ellipsize="end"
-                            android:gravity="left"
-                            android:maxLines="1"
+                            android:gravity="left|center"
+                            android:layout_gravity="left|center"
                             android:text="@{LatestFileManager.saveScaleByPtick(quote.ask_price1, quote.instrument_id)}"
-                            android:textColor='@{MathUtils.lower(quote.ask_price1, quote.pre_settlement) ? @color/marker_green : MathUtils.upper(quote.ask_price1, quote.pre_settlement) ? @color/marker_red : @color/white}'
+                            android:textColor='@{MathUtils.lower(quote.ask_price1, quote.pre_settlement) ? @color/text_green : MathUtils.upper(quote.ask_price1, quote.pre_settlement) ? @color/text_red : @color/text_white}'
                             android:textSize="@dimen/font_size_normal" />
 
                         <TextView
@@ -118,11 +117,10 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
-                            android:ellipsize="end"
-                            android:gravity="right"
-                            android:maxLines="1"
+                            android:gravity="right|center"
+                            android:layout_gravity="right|center"
                             android:text="@{quote.ask_volume1}"
-                            android:textColor="@color/white"
+                            android:textColor="@color/text_white"
                             android:textSize="@dimen/font_size_normal" />
 
                     </LinearLayout>
@@ -138,16 +136,16 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="center"
                         android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:gravity="start"
+                            android:gravity="start|center"
+                            android:layout_gravity="start|center"
                             android:text="@string/future_info_activity_bid"
-                            android:textColor="@color/white"
+                            android:textColor="@color/text_white"
                             android:textSize="@dimen/font_size_normal" />
 
                         <TextView
@@ -155,11 +153,10 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
-                            android:ellipsize="end"
-                            android:gravity="left"
-                            android:maxLines="1"
+                            android:gravity="left|center"
+                            android:layout_gravity="left|center"
                             android:text="@{LatestFileManager.saveScaleByPtick(quote.bid_price1, quote.instrument_id)}"
-                            android:textColor='@{MathUtils.lower(quote.bid_price1, quote.pre_settlement) ? @color/marker_green : MathUtils.upper(quote.bid_price1, quote.pre_settlement) ? @color/marker_red : @color/white}'
+                            android:textColor='@{MathUtils.lower(quote.bid_price1, quote.pre_settlement) ? @color/text_green : MathUtils.upper(quote.bid_price1, quote.pre_settlement) ? @color/text_red : @color/text_white}'
                             android:textSize="@dimen/font_size_normal" />
 
                         <TextView
@@ -167,11 +164,10 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
-                            android:ellipsize="end"
-                            android:gravity="right"
-                            android:maxLines="1"
+                            android:gravity="right|center"
+                            android:layout_gravity="right|center"
                             android:text="@{quote.bid_volume1}"
-                            android:textColor="@color/white"
+                            android:textColor="@color/text_white"
                             android:textSize="@dimen/font_size_normal" />
 
                     </LinearLayout>
@@ -187,16 +183,16 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="center"
                         android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:gravity="start"
+                            android:gravity="start|center"
+                            android:layout_gravity="start|center"
                             android:text="@string/future_info_activity_position"
-                            android:textColor="@color/white"
+                            android:textColor="@color/text_white"
                             android:textSize="@dimen/font_size_normal" />
 
                         <TextView
@@ -204,11 +200,10 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
-                            android:ellipsize="end"
-                            android:gravity="left"
-                            android:maxLines="1"
+                            android:gravity="left|center"
+                            android:layout_gravity="left|center"
                             android:text="@{quote.open_interest}"
-                            android:textColor="@color/white"
+                            android:textColor="@color/text_white"
                             android:textSize="@dimen/font_size_normal" />
 
                         <TextView
@@ -216,11 +211,10 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="3"
-                            android:ellipsize="end"
-                            android:gravity="right"
-                            android:maxLines="1"
+                            android:gravity="right|center"
+                            android:layout_gravity="right|center"
                             android:text="@{MathUtils.subtract(quote.open_interest, quote.pre_open_interest)}"
-                            android:textColor="@color/white"
+                            android:textColor="@color/text_white"
                             android:textSize="@dimen/font_size_normal" />
 
                     </LinearLayout>
@@ -265,7 +259,7 @@
                 android:id="@+id/kline_content"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1.5"
+                android:layout_weight="1"
                 android:background="@color/black"
                 android:orientation="horizontal">
 
@@ -279,39 +273,26 @@
                     android:id="@+id/md"
                     android:layout_width="100dp"
                     android:layout_height="match_parent"
-                    android:background="@drawable/activity_future_info_handicap_rectangle_border"
+                    android:background="@drawable/activity_future_info_md5_rectangle_border"
                     android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="13dp"
-                        android:gravity="center"
-                        android:text="五档"
-                        android:textColor="@color/white"
-                        android:textSize="10sp" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.7dp"
-                        android:background="@color/kline_grid" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_marginStart="@dimen/margin_5dp"
+                        android:layout_marginEnd="@dimen/margin_5dp"
                         android:layout_weight="1">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="center"
+                            android:gravity="left|center_vertical"
                             android:maxLines="1"
                             android:text="卖5"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -320,13 +301,13 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:layout_weight="2"
+                            android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{LatestFileManager.saveScaleByPtick(quote.ask_price5, quote.instrument_id)}"
                             android:textColor="@color/text_green"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -339,9 +320,9 @@
                             android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{quote.ask_volume5}"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -350,20 +331,20 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_marginStart="@dimen/margin_5dp"
+                        android:layout_marginEnd="@dimen/margin_5dp"
                         android:layout_weight="1">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="center"
+                            android:gravity="left|center_vertical"
                             android:maxLines="1"
                             android:text="卖4"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -372,13 +353,13 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:layout_weight="2"
+                            android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{LatestFileManager.saveScaleByPtick(quote.ask_price4, quote.instrument_id)}"
                             android:textColor="@color/text_green"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -391,9 +372,9 @@
                             android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{quote.ask_volume4}"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -402,20 +383,20 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_marginStart="@dimen/margin_5dp"
+                        android:layout_marginEnd="@dimen/margin_5dp"
                         android:layout_weight="1">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="center"
+                            android:gravity="left|center_vertical"
                             android:maxLines="1"
                             android:text="卖3"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -424,13 +405,13 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:layout_weight="2"
+                            android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{LatestFileManager.saveScaleByPtick(quote.ask_price3, quote.instrument_id)}"
                             android:textColor="@color/text_green"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -443,9 +424,9 @@
                             android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{quote.ask_volume3}"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -454,20 +435,20 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_marginStart="@dimen/margin_5dp"
+                        android:layout_marginEnd="@dimen/margin_5dp"
                         android:layout_weight="1">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="center"
+                            android:gravity="left|center_vertical"
                             android:maxLines="1"
                             android:text="卖2"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -476,13 +457,13 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:layout_weight="2"
+                            android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{LatestFileManager.saveScaleByPtick(quote.ask_price2, quote.instrument_id)}"
                             android:textColor="@color/text_green"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -495,9 +476,9 @@
                             android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{quote.ask_volume2}"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -506,20 +487,20 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_marginStart="@dimen/margin_5dp"
+                        android:layout_marginEnd="@dimen/margin_5dp"
                         android:layout_weight="1">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="center"
+                            android:gravity="left|center_vertical"
                             android:maxLines="1"
                             android:text="卖1"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -528,13 +509,13 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:layout_weight="2"
+                            android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{LatestFileManager.saveScaleByPtick(quote.ask_price1, quote.instrument_id)}"
                             android:textColor="@color/text_green"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -547,9 +528,9 @@
                             android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{quote.ask_volume1}"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -563,20 +544,20 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_marginStart="@dimen/margin_5dp"
+                        android:layout_marginEnd="@dimen/margin_5dp"
                         android:layout_weight="1">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="center"
+                            android:gravity="left|center_vertical"
                             android:maxLines="1"
                             android:text="买1"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -585,13 +566,13 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:layout_weight="2"
+                            android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{LatestFileManager.saveScaleByPtick(quote.bid_price1, quote.instrument_id)}"
                             android:textColor="@color/text_red"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -604,9 +585,9 @@
                             android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{quote.bid_volume1}"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -615,20 +596,20 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_marginStart="@dimen/margin_5dp"
+                        android:layout_marginEnd="@dimen/margin_5dp"
                         android:layout_weight="1">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="center"
+                            android:gravity="left|center_vertical"
                             android:maxLines="1"
                             android:text="买2"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -637,13 +618,13 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:layout_weight="2"
+                            android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{LatestFileManager.saveScaleByPtick(quote.bid_price2, quote.instrument_id)}"
                             android:textColor="@color/text_red"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -656,9 +637,9 @@
                             android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{quote.bid_volume2}"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -667,20 +648,20 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_marginStart="@dimen/margin_5dp"
+                        android:layout_marginEnd="@dimen/margin_5dp"
                         android:layout_weight="1">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="center"
+                            android:gravity="left|center_vertical"
                             android:maxLines="1"
                             android:text="买3"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -689,13 +670,13 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:layout_weight="2"
+                            android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{LatestFileManager.saveScaleByPtick(quote.bid_price3, quote.instrument_id)}"
                             android:textColor="@color/text_red"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -708,9 +689,9 @@
                             android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{quote.bid_volume3}"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -719,20 +700,20 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_marginStart="@dimen/margin_5dp"
+                        android:layout_marginEnd="@dimen/margin_5dp"
                         android:layout_weight="1">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="center"
+                            android:gravity="left|center_vertical"
                             android:maxLines="1"
                             android:text="买4"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -741,13 +722,13 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:layout_weight="2"
+                            android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{LatestFileManager.saveScaleByPtick(quote.bid_price4, quote.instrument_id)}"
                             android:textColor="@color/text_red"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -760,9 +741,9 @@
                             android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{quote.bid_volume4}"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -771,20 +752,20 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_margin="@dimen/margin_5dp"
+                        android:layout_marginStart="@dimen/margin_5dp"
+                        android:layout_marginEnd="@dimen/margin_5dp"
                         android:layout_weight="1">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="center"
+                            android:gravity="left|center_vertical"
                             android:maxLines="1"
                             android:text="买5"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -793,13 +774,13 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:layout_weight="2"
+                            android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{LatestFileManager.saveScaleByPtick(quote.bid_price5, quote.instrument_id)}"
                             android:textColor="@color/text_red"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -812,9 +793,9 @@
                             android:gravity="right|center_vertical"
                             android:maxLines="1"
                             android:text="@{quote.bid_volume5}"
-                            android:textColor="@color/white"
-                            android:textSize="@dimen/font_size_normal"
-                            app:autoSizeMaxTextSize="@dimen/font_size_normal"
+                            android:textColor="@color/text_white"
+                            android:textSize="@dimen/font_size_small"
+                            app:autoSizeMaxTextSize="@dimen/font_size_small"
                             app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                             app:autoSizeStepGranularity="1sp"
                             app:autoSizeTextType="uniform" />
@@ -827,8 +808,7 @@
                 android:visibility="gone"
                 android:id="@+id/vp_info_content"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
+                android:layout_height="200dp" />
 
             <RadioGroup
                 android:id="@+id/rg_tab_info"
@@ -840,7 +820,7 @@
 
                 <RadioButton
                     android:id="@+id/rb_handicap_info"
-                    style="@style/RadioButtonTabDown"
+                    style="@style/RadioButtonTabDownHandicap"
                     android:checked="true"
                     android:text="@string/future_info_activity_handicap_up"
                     android:textSize="@dimen/font_size_normal" />

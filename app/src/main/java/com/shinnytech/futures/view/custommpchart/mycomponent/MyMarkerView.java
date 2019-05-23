@@ -14,6 +14,9 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.model.engine.DataManager;
+import com.shinnytech.futures.utils.DensityUtils;
 
 import java.lang.ref.WeakReference;
 
@@ -29,6 +32,8 @@ public class MyMarkerView extends RelativeLayout implements IMarker {
     private MPPointF mOffset2 = new MPPointF();
     private WeakReference<Chart> mWeakChart;
     private LinearLayout linearLayout;
+    private View inflated;
+    private int layoutResource;
 
     /**
      * Constructor. Sets up the MarkerView with a custom layout resource.
@@ -47,8 +52,8 @@ public class MyMarkerView extends RelativeLayout implements IMarker {
      * @param layoutResource
      */
     private void setupLayoutResource(int layoutResource) {
-
-        View inflated = LayoutInflater.from(getContext()).inflate(layoutResource, this);
+        this.layoutResource = layoutResource;
+        inflated = LayoutInflater.from(getContext()).inflate(layoutResource, this);
         linearLayout = inflated.findViewById(R.id.kline_marker);
         inflated.setLayoutParams(new LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
         inflated.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
@@ -57,9 +62,24 @@ public class MyMarkerView extends RelativeLayout implements IMarker {
         inflated.layout(0, 0, inflated.getMeasuredWidth(), inflated.getMeasuredHeight());
     }
 
-    public void resize(int width, int height) {
+    public void resize(int height) {
         linearLayout.getLayoutParams().height = height;
-//        linearLayout.getLayoutParams().width = width;
+        if (layoutResource == R.layout.view_marker_current_day) {
+            if (DataManager.getInstance().IS_SHOW_VP_CONTENT) {
+                linearLayout.getLayoutParams().width = DensityUtils.dp2px(BaseApplication.getContext(), 40);
+            } else {
+                linearLayout.getLayoutParams().width = DensityUtils.dp2px(BaseApplication.getContext(), 60);
+            }
+        }
+
+        if (layoutResource == R.layout.view_marker_kline) {
+            if (DataManager.getInstance().IS_SHOW_VP_CONTENT) {
+                linearLayout.getLayoutParams().width = DensityUtils.dp2px(BaseApplication.getContext(), 45);
+            } else {
+                linearLayout.getLayoutParams().width = DensityUtils.dp2px(BaseApplication.getContext(), 65);
+            }
+        }
+
         linearLayout.requestLayout();
     }
 

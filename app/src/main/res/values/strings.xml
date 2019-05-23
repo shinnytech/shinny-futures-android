@@ -110,9 +110,15 @@
     <string name="position_fragment_profit_each">逐笔盈亏</string>
 
     <!--related to transaction fragment-->
-    <string name="transaction_fragment_balance">权益：</string>
-    <string name="transaction_fragment_available">可用：</string>
-    <string name="transaction_fragment_using_ratio">使用率：</string>
+    <string name="transaction_fragment_upper_limit">涨停</string>
+    <string name="transaction_fragment_lower_limit">跌停</string>
+    <string name="transaction_fragment_high">最高</string>
+    <string name="transaction_fragment_low">最低</string>
+    <string name="transaction_fragment_account">账户</string>
+    <string name="transaction_fragment_balance">权益</string>
+    <string name="transaction_fragment_available">可用</string>
+    <string name="transaction_fragment_using_ratio">已用</string>
+    <string name="transaction_fragment_p_tick">最小变动</string>
     <string name="transaction_fragment_price">价格</string>
     <string name="transaction_fragment_volume">手数</string>
     <string name="transaction_fragment_ask_price1">卖</string>
@@ -124,18 +130,16 @@
     <string name="transaction_fragment_close_status">先开先平</string>
 
     <!--related to quote fragment-->
-    <string name="quote_fragment_up_down_rate">涨跌幅%</string>
-    <string name="quote_fragment_up_down">涨跌</string>
-    <string name="quote_fragment_open_interest">持仓量</string>
-    <string name="quote_fragment_open_volume">成交量</string>
+    <string name="quote_fragment_up_down_rate">涨跌幅% ⇲</string>
+    <string name="quote_fragment_up_down">涨跌 ⇲</string>
+    <string name="quote_fragment_open_interest">持仓量 ⇲</string>
+    <string name="quote_fragment_open_volume">成交量 ⇲</string>
     <string name="quote_fragment_latest">最新价</string>
     <string name="quote_fragment_name">合约名称</string>
-    <string name="quote_fragment_upper_limit">涨停价</string>
-    <string name="quote_fragment_lower_limit">跌停价</string>
-    <string name="quote_fragment_ask_price1">卖价</string>
-    <string name="quote_fragment_ask_volume1">卖量</string>
-    <string name="quote_fragment_bid_price1">买价</string>
-    <string name="quote_fragment_bid_volume1">买量</string>
+    <string name="quote_fragment_ask_price1">卖价 ⇲</string>
+    <string name="quote_fragment_ask_volume1">卖量 ⇲</string>
+    <string name="quote_fragment_bid_price1">买价 ⇲</string>
+    <string name="quote_fragment_bid_volume1">买量 ⇲</string>
 
     <!--related to dialog change quote view-->
     <string name="select_from_optional">从自选列表中选择合约</string>

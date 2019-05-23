@@ -21,17 +21,15 @@ import java.util.Date;
 import java.util.List;
 
 import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_FORCE_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_HISTORY_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_TODAY_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_OPEN_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_SELL;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_FORCE;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_HISTORY;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_TODAY;
+import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY_ZN_S;
+import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_SELL_ZN_S;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_ZN_S;
 import static com.shinnytech.futures.constants.CommonConstants.OFFSET_OPEN;
+import static com.shinnytech.futures.constants.CommonConstants.OFFSET_OPEN_ZN_S;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_CANCELED_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_FINISHED_ZN;
 
 /**
  * date: 7/9/17
@@ -44,10 +42,22 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemViewHold
 
     private Context sContext;
     private List<OrderEntity> mOrderData;
+    private String mHighlightIns;
 
     public OrderAdapter(Context context, List<OrderEntity> orderData) {
         this.sContext = context;
         this.mOrderData = orderData;
+    }
+
+    public void setHighlightIns(String ins) {
+        mHighlightIns = ins;
+    }
+
+    public void updateHighlightIns(String ins) {
+        if (ins != null && !ins.equals(mHighlightIns)) {
+            mHighlightIns = ins;
+            notifyDataSetChanged();
+        }
     }
 
     public List<OrderEntity> getData() {
@@ -113,40 +123,40 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemViewHold
 
             try {
                 String instrument_id = orderEntity.getExchange_id() + "." + orderEntity.getInstrument_id();
+
+                if (mHighlightIns != null) {
+                    //合约详情页合约高亮
+                    boolean isHighlight = instrument_id.equals(mHighlightIns);
+                    if (isHighlight) {
+                        mBinding.orderBackground.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_highlight_touch_bg));
+                    } else
+                        mBinding.orderBackground.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_touch_bg));
+                }
+
                 SearchEntity insName = LatestFileManager.getSearchEntities().get(instrument_id);
                 mBinding.orderName.setText(insName == null ? orderEntity.getInstrument_id() : insName.getInstrumentName());
-                mBinding.orderStatus.setText(orderEntity.getLast_msg());
-                switch (orderEntity.getOffset()) {
-                    case OFFSET_OPEN:
-                        mBinding.orderOffset.setText(OFFSET_OPEN_ZN);
-                        break;
-                    case OFFSET_CLOSE_TODAY:
-                        mBinding.orderOffset.setText(OFFSET_CLOSE_TODAY_ZN);
-                        break;
-                    case OFFSET_CLOSE_HISTORY:
-                        mBinding.orderOffset.setText(OFFSET_CLOSE_HISTORY_ZN);
-                        break;
-                    case OFFSET_CLOSE:
-                        mBinding.orderOffset.setText(OFFSET_CLOSE_ZN);
-                        break;
-                    case OFFSET_CLOSE_FORCE:
-                        mBinding.orderOffset.setText(OFFSET_CLOSE_FORCE_ZN);
-                        break;
-                    default:
-                        mBinding.orderOffset.setText("");
-                        break;
+
+                int volume_left = Integer.parseInt(orderEntity.getVolume_left());
+                String status;
+                if (STATUS_ALIVE.equals(orderEntity.getStatus())) status = STATUS_ALIVE_ZN;
+                else {
+                    if (volume_left == 0) status = STATUS_FINISHED_ZN;
+                    else status = STATUS_CANCELED_ZN;
                 }
-                switch (orderEntity.getDirection()) {
-                    case DIRECTION_BUY:
-                        mBinding.orderOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
-                        break;
-                    case DIRECTION_SELL:
-                        mBinding.orderOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
-                        break;
-                    default:
-                        mBinding.orderOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
-                        break;
+                mBinding.orderStatus.setText(status);
+
+                String direction;
+                if (DIRECTION_BUY.equals(orderEntity.getDirection())) {
+                    direction = DIRECTION_BUY_ZN_S;
+                    mBinding.orderOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
+                } else {
+                    direction = DIRECTION_SELL_ZN_S;
+                    mBinding.orderOffset.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
                 }
+                if (OFFSET_OPEN.equals(orderEntity.getOffset()))
+                    mBinding.orderOffset.setText(direction + OFFSET_OPEN_ZN_S);
+                else mBinding.orderOffset.setText(direction + OFFSET_CLOSE_ZN_S);
+
                 mBinding.orderPrice.setText(LatestFileManager.saveScaleByPtick(orderEntity.getLimit_price(), instrument_id));
                 String volume = MathUtils.subtract(orderEntity.getVolume_orign(), orderEntity.getVolume_left()) + "/" + orderEntity.getVolume_orign();
                 mBinding.orderVolume.setText(volume);

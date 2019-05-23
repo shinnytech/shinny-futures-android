@@ -21,7 +21,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +29,6 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 
-import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityLoginBinding;
@@ -40,9 +38,8 @@ import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
-import com.shinnytech.futures.utils.SoftKeyBoardListener;
 import com.shinnytech.futures.utils.TimeUtils;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,6 +49,7 @@ import java.util.List;
 import java.util.Random;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BROKER_ID_SUCCEEDED;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_MAIN;
@@ -60,9 +58,11 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_FAILED;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_SUCCEEDED;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_ACCOUNT_ID_FIRST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_ACCOUNT_ID_LAST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID_FIRST;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID_LAST;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_PACKAGE_ID_LAST;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_SCREEN_SIZE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_LOGIN_TIME_FIRST;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_VISIT;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMULATION;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
@@ -70,8 +70,9 @@ import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PASSWORD;
-import static com.shinnytech.futures.constants.CommonConstants.LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.LOGIN_ACTIVITY_TO_BROKER_LIST_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.LOGIN_ACTIVITY_TO_CHANGE_PASSWORD_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_WEAK_PASSWORD;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
@@ -100,6 +101,15 @@ public class LoginActivity extends AppCompatActivity {
     private long mExitTime = 0;
     private boolean mIsFirm = true;
 
+    public static int getStatusBarHeight(Activity context) {
+        int result = 0;
+        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = context.getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,25 +118,27 @@ public class LoginActivity extends AppCompatActivity {
         initEvent();
         checkResponsibility();
         checkNetwork();
-        initAmpUserProperties();
     }
 
     private void initData() {
-
         sContext = BaseApplication.getContext();
         sDataManager = DataManager.getInstance();
         mHandler = new MyHandler(this);
+
         List<String> brokers = LatestFileManager.getBrokerIdFromBuildConfig(sDataManager.getBroker().getBrokers());
-
+        if (brokers.isEmpty()) return;
         //获取用户登录成功后保存在sharedPreference里的期货公司
-        if (SPUtils.contains(sContext, CONFIG_BROKER)) {
-            String brokerName = (String) SPUtils.get(sContext, CONFIG_BROKER, "");
-            if (BROKER_ID_SIMULATION.equals(brokerName)) mBinding.broker.setText(brokers.get(0));
-            else mBinding.broker.setText(brokerName);
-        }else {
-            if (!brokers.isEmpty())mBinding.broker.setText(brokers.get(0));
-        }
+        if (SPUtils.contains(sContext, CONFIG_LOGIN_DATE)) {
+            String loginDate = (String) SPUtils.get(sContext, CONFIG_LOGIN_DATE, "");
+            if (loginDate.isEmpty()) mBinding.broker.setText(brokers.get(0));
+            else {
+                String brokerName = (String) SPUtils.get(sContext, CONFIG_BROKER, "");
+                if (BROKER_ID_SIMULATION.equals(brokerName))
+                    mBinding.broker.setText(brokers.get(0));
+                else mBinding.broker.setText(brokerName);
+            }
 
+        } else mBinding.broker.setText(brokers.get(0));
     }
 
     private void initEvent() {
@@ -134,7 +146,7 @@ public class LoginActivity extends AppCompatActivity {
         mBinding.llFirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mBinding.firm.setTextColor(getResources().getColor( R.color.white));
+                mBinding.firm.setTextColor(getResources().getColor(R.color.white));
                 mBinding.firmUnderline.setVisibility(View.VISIBLE);
                 mBinding.simulation.setTextColor(getResources().getColor(R.color.login_gray));
                 mBinding.simulationUnderline.setVisibility(View.INVISIBLE);
@@ -144,13 +156,15 @@ public class LoginActivity extends AppCompatActivity {
                 mBinding.tvAccount.setText("账号");
                 mBinding.simulationHint.setVisibility(View.GONE);
                 setStatusBarColor(R.color.colorPrimaryDark);
+
+                mIsFirm = true;
             }
         });
 
         mBinding.llSimulation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mBinding.simulation.setTextColor(getResources().getColor( R.color.white));
+                mBinding.simulation.setTextColor(getResources().getColor(R.color.white));
                 mBinding.simulationUnderline.setVisibility(View.VISIBLE);
                 mBinding.firm.setTextColor(getResources().getColor(R.color.login_gray));
                 mBinding.firmUnderline.setVisibility(View.INVISIBLE);
@@ -160,25 +174,8 @@ public class LoginActivity extends AppCompatActivity {
                 mBinding.tvAccount.setText("手机号码");
                 mBinding.simulationHint.setVisibility(View.VISIBLE);
                 setStatusBarColor(R.color.login_simulation_hint);
-            }
-        });
 
-        SoftKeyBoardListener.setListener(this, new SoftKeyBoardListener.OnSoftKeyBoardChangeListener() {
-            @Override
-            public void keyBoardShow(int height) {
-                mBinding.sv.post(new Runnable() {
-                    public void run() {
-                        mBinding.sv.smoothScrollTo(0, mBinding.sv.getBottom());
-                    }
-                });
-            }
-            @Override
-            public void keyBoardHide(int height) {
-                mBinding.sv.post(new Runnable() {
-                    public void run() {
-                        mBinding.sv.smoothScrollTo(0, mBinding.sv.getTop());
-                    }
-                });
+                mIsFirm = false;
             }
         });
 
@@ -189,7 +186,7 @@ public class LoginActivity extends AppCompatActivity {
                 //随机生成8位字符串
                 String data = "";
                 Random random = new Random();
-                for (int i = 0; i < 8; i++){
+                for (int i = 0; i < 8; i++) {
                     data += random.nextInt(10);
                 }
                 String generatedString = BROKER_ID_VISITOR + "_" + data;
@@ -198,12 +195,12 @@ public class LoginActivity extends AppCompatActivity {
                 mPassword = generatedString;
                 if (BaseApplication.getWebSocketService() != null)
                     BaseApplication.getWebSocketService().sendReqLogin(mBrokerName, mPhoneNumber, mPassword);
-                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        ToastNotificationUtils.showToast(sContext, "游客模式账户信息和持仓隔日会重置");
+                        ToastUtils.showToast(sContext, "游客模式账户信息和持仓隔日会重置");
                     }
-                }, 1000);
+                });
 
             }
         });
@@ -212,7 +209,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intentBroker = new Intent(LoginActivity.this, BrokerListActivity.class);
-                startActivityForResult(intentBroker, LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY);
+                startActivityForResult(intentBroker, LOGIN_ACTIVITY_TO_BROKER_LIST_ACTIVITY);
             }
         });
 
@@ -220,7 +217,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intentBroker = new Intent(LoginActivity.this, BrokerListActivity.class);
-                startActivityForResult(intentBroker, LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY);
+                startActivityForResult(intentBroker, LOGIN_ACTIVITY_TO_BROKER_LIST_ACTIVITY);
             }
         });
 
@@ -323,7 +320,7 @@ public class LoginActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
             if ((System.currentTimeMillis() - mExitTime) > 2000) {
-                ToastNotificationUtils.showToast(BaseApplication.getContext(), getString(R.string.main_activity_exit));
+                ToastUtils.showToast(BaseApplication.getContext(), getString(R.string.main_activity_exit));
                 mExitTime = System.currentTimeMillis();
             } else {
                 System.exit(0);
@@ -385,6 +382,7 @@ public class LoginActivity extends AppCompatActivity {
             focusView.requestFocus();
         } else {
             Amplitude.getInstance().logEvent(AMP_LOGIN);
+            sDataManager.IS_SHOW_LOGIN_SUCCESS = true;
 
             // Show a progress spinner, and kick off a background task to
             // perform the user fragment_home attempt.
@@ -425,6 +423,22 @@ public class LoginActivity extends AppCompatActivity {
                         //弱密码
                         mHandler.sendEmptyMessageDelayed(1, 2000);
                         break;
+                    case TD_MESSAGE_BROKER_INFO:
+                        List<String> brokers = LatestFileManager.getBrokerIdFromBuildConfig(sDataManager.getBroker().getBrokers());
+                        if (brokers.isEmpty()) return;
+                        //获取用户登录成功后保存在sharedPreference里的期货公司
+                        if (SPUtils.contains(sContext, CONFIG_LOGIN_DATE)) {
+                            String loginDate = (String) SPUtils.get(sContext, CONFIG_LOGIN_DATE, "");
+                            if (loginDate.isEmpty()) mBinding.broker.setText(brokers.get(0));
+                            else {
+                                String brokerName = (String) SPUtils.get(sContext, CONFIG_BROKER, "");
+                                if (BROKER_ID_SIMULATION.equals(brokerName))
+                                    mBinding.broker.setText(brokers.get(0));
+                                else mBinding.broker.setText(brokerName);
+                            }
+
+                        } else mBinding.broker.setText(brokers.get(0));
+                        break;
                     default:
                         break;
                 }
@@ -443,11 +457,11 @@ public class LoginActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
-                case LOGIN_BROKER_JUMP_TO_BROKER_LIST_ACTIVITY:
+                case LOGIN_ACTIVITY_TO_BROKER_LIST_ACTIVITY:
                     String broker = data.getStringExtra("broker");
                     mBinding.broker.setText(broker);
                     break;
-                case LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY:
+                case LOGIN_ACTIVITY_TO_CHANGE_PASSWORD_ACTIVITY:
                     mBinding.password.setText("");
                     break;
                 default:
@@ -513,85 +527,6 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * date: 2019/3/22
-     * author: chenli
-     * description: 初始化amp用户属性
-     */
-    private void initAmpUserProperties() {
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        int height = metrics.heightPixels;
-        int width = metrics.widthPixels;
-        Identify identify = new Identify().set(AMP_USER_BROKER_ID_LAST, "unknown")
-                .set(AMP_USER_PACKAGE_ID_LAST, BuildConfig.FLAVOR)
-                .set(AMP_USER_SCREEN_SIZE, width + "*" + height);
-        Amplitude.getInstance().identify(identify);
-    }
-
-    /**
-     * date: 6/1/18
-     * author: chenli
-     * description: 点击登录后服务器返回处理
-     * version:
-     * state:
-     */
-    static class MyHandler extends Handler {
-        WeakReference<LoginActivity> mActivityReference;
-
-        MyHandler(LoginActivity activity) {
-            mActivityReference = new WeakReference<>(activity);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            final LoginActivity activity = mActivityReference.get();
-            if (activity != null) {
-                switch (msg.what) {
-                    case 0:
-                        String broker_id;
-                        if (activity.mPhoneNumber.contains(BROKER_ID_VISITOR))broker_id = BROKER_ID_VISITOR + "_" + activity.mBrokerName;
-                        else broker_id = activity.mBrokerName;
-                        Identify identify = new Identify().set(AMP_USER_BROKER_ID_LAST, broker_id);
-                        Amplitude.getInstance().identify(identify);
-                        Amplitude.getInstance().logEvent(AMP_LOGIN_SUCCEEDED);
-                        SPUtils.putAndApply(activity.sContext, CONFIG_LOGIN_DATE, TimeUtils.getNowTime());
-                        SPUtils.putAndApply(activity.sContext, CONFIG_ACCOUNT, activity.mPhoneNumber);
-                        SPUtils.putAndApply(activity.sContext, CONFIG_PASSWORD, activity.mPassword);
-                        SPUtils.putAndApply(activity.sContext, CONFIG_BROKER, activity.mBrokerName);
-                        //关闭键盘
-                        View view = activity.getWindow().getCurrentFocus();
-                        if (view != null) {
-                            InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-                            if (inputMethodManager != null)
-                                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOT_ALWAYS);
-                        }
-                        JSONObject jsonObject = new JSONObject();
-                        try {
-                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_LOGIN);
-                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
-                        Intent intent1 = new Intent(activity, MainActivity.class);
-                        activity.startActivity(intent1);
-                        activity.finish();
-                        break;
-                    case 1:
-                        Intent intent = new Intent(activity, ChangePasswordActivity.class);
-                        activity.startActivityForResult(intent, LOGIN_JUMP_TO_CHANGE_PASSWORD_ACTIVITY);
-                        break;
-                    case 2:
-                        if (activity.sDataManager.USER_ID.isEmpty())Amplitude.getInstance().logEvent(AMP_LOGIN_FAILED);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-    }
-
     private void setStatusBarColor(int color) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             Window w = getWindow();
@@ -615,13 +550,81 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    public static int getStatusBarHeight(Activity context) {
-        int result = 0;
-        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = context.getResources().getDimensionPixelSize(resourceId);
+    /**
+     * date: 6/1/18
+     * author: chenli
+     * description: 点击登录后服务器返回处理
+     * version:
+     * state:
+     */
+    static class MyHandler extends Handler {
+        WeakReference<LoginActivity> mActivityReference;
+
+        MyHandler(LoginActivity activity) {
+            mActivityReference = new WeakReference<>(activity);
         }
-        return result;
+
+        @Override
+        public void handleMessage(Message msg) {
+            final LoginActivity activity = mActivityReference.get();
+            if (activity != null) {
+                switch (msg.what) {
+                    case 0:
+                        String broker_id;
+                        if (activity.mPhoneNumber != null && activity.mPhoneNumber.contains(BROKER_ID_VISITOR))
+                            broker_id = BROKER_ID_VISITOR + "_" + activity.mBrokerName;
+                        else broker_id = activity.mBrokerName;
+                        Amplitude.getInstance().setUserId(broker_id + activity.mPhoneNumber);
+                        Identify identify = new Identify()
+                                .setOnce(AMP_USER_LOGIN_TIME_FIRST, TimeUtils.getNowTimeSecond())
+                                .setOnce(AMP_USER_ACCOUNT_ID_FIRST, activity.mPhoneNumber)
+                                .set(AMP_USER_ACCOUNT_ID_LAST, activity.mPhoneNumber)
+                                .setOnce(AMP_USER_BROKER_ID_FIRST, broker_id)
+                                .set(AMP_USER_BROKER_ID_LAST, broker_id);
+                        Amplitude.getInstance().identify(identify);
+                        JSONObject jsonObject = new JSONObject();
+                        try {
+                            jsonObject.put(AMP_EVENT_BROKER_ID_SUCCEEDED, broker_id);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_LOGIN_SUCCEEDED, jsonObject);
+                        SPUtils.putAndApply(activity.sContext, CONFIG_LOGIN_DATE, TimeUtils.getNowTime());
+                        SPUtils.putAndApply(activity.sContext, CONFIG_ACCOUNT, activity.mPhoneNumber);
+                        SPUtils.putAndApply(activity.sContext, CONFIG_PASSWORD, activity.mPassword);
+                        SPUtils.putAndApply(activity.sContext, CONFIG_BROKER, activity.mBrokerName);
+                        //关闭键盘
+                        View view = activity.getWindow().getCurrentFocus();
+                        if (view != null) {
+                            InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                            if (inputMethodManager != null)
+                                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), HIDE_NOT_ALWAYS);
+                        }
+                        JSONObject jsonObjectSwitch = new JSONObject();
+                        try {
+                            jsonObjectSwitch.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_LOGIN);
+                            jsonObjectSwitch.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObjectSwitch);
+                        Intent intent1 = new Intent(activity, MainActivity.class);
+                        activity.startActivity(intent1);
+                        activity.finish();
+                        break;
+                    case 1:
+                        Intent intent = new Intent(activity, ChangePasswordActivity.class);
+                        activity.startActivityForResult(intent, LOGIN_ACTIVITY_TO_CHANGE_PASSWORD_ACTIVITY);
+                        break;
+                    case 2:
+                        if (activity.sDataManager.USER_ID.isEmpty())
+                            Amplitude.getInstance().logEvent(AMP_LOGIN_FAILED);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
 
 }

@@ -5,7 +5,7 @@
 
     <item
         android:id="@+id/right_navigation"
-        android:icon="@mipmap/ic_view_list_white_24dp"
+        android:icon="@mipmap/ic_menu"
         android:orderInCategory="101"
         android:title="right_navigation"
         app:showAsAction="always" />

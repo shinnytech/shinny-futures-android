@@ -42,7 +42,7 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VA
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
@@ -159,15 +159,15 @@ public class TradeFragment extends LazyLoadFragment {
             @Override
             public void onItemClick(View view, int position) {
                 TradeEntity tradeEntity = mAdapter.getData().get(position);
-                if (tradeEntity == null)return;
-                if (getActivity() instanceof MainActivity){
-                    ((MainActivity)getActivity()).getmMainActivityPresenter()
+                if (tradeEntity == null) return;
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).getmMainActivityPresenter()
                             .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
                 }
                 sDataManager.IS_SHOW_VP_CONTENT = true;
                 Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
                 intent.putExtra(INS_BETWEEN_ACTIVITY, tradeEntity.getExchange_id() + "." + tradeEntity.getInstrument_id());
-                startActivityForResult(intent, JUMP_TO_FUTURE_INFO_ACTIVITY);
+                getActivity().startActivityForResult(intent, MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY);
                 JSONObject jsonObject = new JSONObject();
                 try {
                     jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);

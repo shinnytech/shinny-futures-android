@@ -34,7 +34,10 @@ import com.shinnytech.futures.model.adapter.OrderAdapter;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
+import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
+import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
+import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.OrderDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.CloneUtils;
@@ -42,8 +45,10 @@ import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -58,7 +63,7 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
@@ -120,6 +125,13 @@ public class OrderFragment extends LazyLoadFragment {
         mAdapter = new OrderAdapter(getActivity(), mOldData);
         mBinding.rv.setAdapter(mAdapter);
         mIsShowCancelPop = (boolean) SPUtils.get(BaseApplication.getContext(), CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM, true);
+
+        if (getActivity() instanceof FutureInfoActivity) {
+            mAdapter.setHighlightIns(((FutureInfoActivity) getActivity()).getInstrument_id());
+            //注册EventBus
+            EventBus.getDefault().register(this);
+        }
+
     }
 
     protected void initEvent() {
@@ -151,15 +163,15 @@ public class OrderFragment extends LazyLoadFragment {
 
                 if (mIsOrdersAlive) {
                     checkPassword(view, orderEntity);
-                }else {
-                    ((MainActivity)getActivity()).getmMainActivityPresenter()
+                } else {
+                    ((MainActivity) getActivity()).getmMainActivityPresenter()
                             .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
 
                     sDataManager.IS_SHOW_VP_CONTENT = true;
                     Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
                     intent.putExtra(INS_BETWEEN_ACTIVITY, orderEntity.getExchange_id()
                             + "." + orderEntity.getInstrument_id());
-                    startActivityForResult(intent, JUMP_TO_FUTURE_INFO_ACTIVITY);
+                    getActivity().startActivityForResult(intent, MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY);
                     JSONObject jsonObject = new JSONObject();
                     try {
                         jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
@@ -191,6 +203,12 @@ public class OrderFragment extends LazyLoadFragment {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (getActivity() instanceof FutureInfoActivity) EventBus.getDefault().unregister(this);
+    }
+
     protected void registerBroaderCast() {
         mReceiver = new BroadcastReceiver() {
             @Override
@@ -215,13 +233,14 @@ public class OrderFragment extends LazyLoadFragment {
      */
     protected void refreshOrder() {
         try {
-            if (!mIsUpdate)return;
+            if (!mIsUpdate) return;
             UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
             mNewData.clear();
 
             for (OrderEntity orderEntity :
                     userEntity.getOrders().values()) {
+
                 OrderEntity o = CloneUtils.clone(orderEntity);
 
                 if (!mIsOrdersAlive) {
@@ -253,17 +272,12 @@ public class OrderFragment extends LazyLoadFragment {
      * author: chenli
      * description: 撤单确认密码
      */
-    private void checkPassword(final View view, final OrderEntity orderEntity){
+    private void checkPassword(final View view, final OrderEntity orderEntity) {
         final Context context = BaseApplication.getContext();
         String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
         if (TimeUtils.getNowTime().equals(date)) {
-            String order_id = orderEntity.getOrder_id();
-            if (mIsShowCancelPop) {
-                initPopUp(view, order_id);
-            } else {
-                BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
-            }
-        }else {
+            initPopUp(view, orderEntity);
+        } else {
             final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
             View viewDialog = View.inflate(getActivity(), R.layout.view_dialog_check_password, null);
             Window dialogWindow = dialog.getWindow();
@@ -281,17 +295,11 @@ public class OrderFragment extends LazyLoadFragment {
                 public void onClick(View v) {
                     String password = editText.getText().toString();
                     String passwordLocal = (String) SPUtils.get(context, CommonConstants.CONFIG_PASSWORD, "");
-                    if (passwordLocal.equals(password)){
+                    if (passwordLocal.equals(password)) {
                         dialog.dismiss();
                         SPUtils.putAndApply(context, CONFIG_LOGIN_DATE, TimeUtils.getNowTime());
-
-                        String order_id = orderEntity.getOrder_id();
-                        if (mIsShowCancelPop) {
-                            initPopUp(view, order_id);
-                        } else {
-                            BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
-                        }
-                    } else ToastNotificationUtils.showToast(context, "密码输入错误");
+                        initPopUp(view, orderEntity);
+                    } else ToastUtils.showToast(context, "密码输入错误");
                 }
             });
             dialog.setContentView(viewDialog);
@@ -306,7 +314,7 @@ public class OrderFragment extends LazyLoadFragment {
      * author: chenli
      * description: 构造一个撤单的PopupWindow
      */
-    private void initPopUp(View view, final String order_id) {
+    private void initPopUp(final View view, final OrderEntity orderEntity) {
         final View popUpView = View.inflate(getActivity(), R.layout.popup_fragment_order, null);
         final PopupWindow popWindow = new PopupWindow(popUpView,
                 ViewGroup.LayoutParams.MATCH_PARENT, DensityUtils.dp2px(getActivity(), 42), true);
@@ -319,14 +327,87 @@ public class OrderFragment extends LazyLoadFragment {
         DisplayMetrics outMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
         popWindow.showAsDropDown(view, outMetrics.widthPixels / 4 * 3, 0);
-
+        final String order_id = orderEntity.getOrder_id();
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
-                popWindow.dismiss();
+                if (mIsShowCancelPop) {
+                    String instrument_id = orderEntity.getExchange_id() + "." + orderEntity.getInstrument_id();
+                    String ins_name = instrument_id;
+                    SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
+                    if (searchEntity != null) ins_name = searchEntity.getInstrumentName();
+                    String direction_title = ((TextView) view.findViewById(R.id.order_offset)).getText().toString();
+                    String volume = orderEntity.getVolume_left();
+                    String price = ((TextView) view.findViewById(R.id.order_price)).getText().toString();
+                    initDialog(order_id, ins_name, direction_title, volume, price);
+                    popWindow.dismiss();
+                } else {
+                    BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
+                    popWindow.dismiss();
+                }
             }
         });
     }
+
+    /**
+     * date: 7/14/17
+     * author: chenli
+     * description: 撤单弹出框，根据固定宽高值自定义dialog，注意宽高值从dimens.xml文件中得到
+     */
+    private void initDialog(final String order_id, String instrument_id, String direction_title, String volume, String price) {
+        final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
+        View view = View.inflate(getActivity(), R.layout.view_dialog_cancel_order, null);
+        Window dialogWindow = dialog.getWindow();
+        if (dialogWindow != null) {
+            dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+            WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+            dialogWindow.setGravity(Gravity.CENTER);
+            lp.width = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_width);
+            lp.height = (int) getActivity().getResources().getDimension(R.dimen.order_dialog_height);
+            dialogWindow.setAttributes(lp);
+        }
+        dialog.setContentView(view);
+        dialog.setCancelable(false);
+        TextView tv_ins = view.findViewById(R.id.order_instrument_id);
+        TextView tv_price = view.findViewById(R.id.order_price);
+        TextView tv_direction = view.findViewById(R.id.order_direction);
+        TextView tv_volume = view.findViewById(R.id.order_volume);
+        TextView ok = view.findViewById(R.id.order_ok);
+        TextView cancel = view.findViewById(R.id.order_cancel);
+        tv_ins.setText(instrument_id);
+        tv_price.setText(price);
+        tv_direction.setText(direction_title);
+        tv_volume.setText(volume);
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    if (BaseApplication.getWebSocketService() != null)
+                        BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
+                } catch (NumberFormatException ex) {
+                    ex.printStackTrace();
+                }
+                dialog.dismiss();
+            }
+        });
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
+
+    /**
+     * date: 7/9/17
+     * author: chenli
+     * description: 接收持仓点击、自选点击、搜索页点击发来的合约，用于更新高亮合约
+     */
+    @Subscribe
+    public void onEvent(IdEvent data) {
+        mAdapter.updateHighlightIns(data.getInstrument_id());
+    }
+
 
 }

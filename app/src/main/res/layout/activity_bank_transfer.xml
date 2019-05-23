@@ -9,6 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:background="@color/setting_content"
         tools:context=".controller.activity.BankTransferActivity">
 
         <include layout="@layout/view_toolbar"></include>
@@ -29,7 +30,7 @@
                 android:gravity="center_vertical"
                 android:padding="@dimen/padding_5dp"
                 android:text="选择银行"
-                android:textColor="@color/gray"
+                android:textColor="@color/login_gray"
                 android:textSize="@dimen/font_size_normal" />
 
             <android.support.v7.widget.AppCompatSpinner
@@ -45,7 +46,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/line_width"
                 android:layout_below="@id/bank"
-                android:background="@color/gray" />
+                android:background="@color/login_gray" />
 
 
             <TextView
@@ -59,7 +60,7 @@
                 android:gravity="center_vertical"
                 android:padding="@dimen/padding_5dp"
                 android:text="资金账户密码"
-                android:textColor="@color/gray"
+                android:textColor="@color/login_gray"
                 android:textSize="@dimen/font_size_normal" />
 
             <EditText
@@ -74,8 +75,9 @@
                 android:inputType="textPassword"
                 android:maxLines="1"
                 android:hint="请输入资金账户密码"
+                android:textColorHint="@color/text_white"
                 android:padding="@dimen/padding_5dp"
-                android:textColor="@color/white"
+                android:textColor="@color/text_white"
                 android:textSize="@dimen/font_size_normal" />
 
             <View
@@ -83,7 +85,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/line_width"
                 android:layout_below="@id/account_password"
-                android:background="@color/gray" />
+                android:background="@color/login_gray" />
 
 
             <TextView
@@ -97,7 +99,7 @@
                 android:gravity="center_vertical"
                 android:padding="@dimen/padding_5dp"
                 android:text="银行账户密码"
-                android:textColor="@color/gray"
+                android:textColor="@color/login_gray"
                 android:textSize="@dimen/font_size_normal" />
 
             <EditText
@@ -112,8 +114,9 @@
                 android:inputType="textPassword"
                 android:maxLines="1"
                 android:hint="请输入银行账户密码"
+                android:textColorHint="@color/text_white"
                 android:padding="@dimen/padding_5dp"
-                android:textColor="@color/white"
+                android:textColor="@color/text_white"
                 android:textSize="@dimen/font_size_normal" />
 
             <View
@@ -121,7 +124,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/line_width"
                 android:layout_below="@id/bank_password"
-                android:background="@color/gray" />
+                android:background="@color/login_gray" />
 
             <TextView
                 android:id="@+id/transfer_money"
@@ -134,7 +137,7 @@
                 android:gravity="center_vertical"
                 android:padding="@dimen/padding_5dp"
                 android:text="转账金额"
-                android:textColor="@color/gray"
+                android:textColor="@color/login_gray"
                 android:textSize="@dimen/font_size_normal" />
 
             <EditText
@@ -149,8 +152,9 @@
                 android:inputType="numberDecimal"
                 android:maxLines="1"
                 android:hint="请输入转账金额"
+                android:textColorHint="@color/text_white"
                 android:padding="@dimen/padding_5dp"
-                android:textColor="@color/white"
+                android:textColor="@color/text_white"
                 android:textSize="@dimen/font_size_normal" />
 
             <View
@@ -158,7 +162,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/line_width"
                 android:layout_below="@id/transfer_money"
-                android:background="@color/gray" />
+                android:background="@color/login_gray" />
 
             <TextView
                 android:id="@+id/currency"
@@ -171,7 +175,7 @@
                 android:gravity="center_vertical"
                 android:padding="@dimen/padding_5dp"
                 android:text="币种选择"
-                android:textColor="@color/gray"
+                android:textColor="@color/login_gray"
                 android:textSize="@dimen/font_size_normal" />
 
             <android.support.v7.widget.AppCompatSpinner
@@ -187,7 +191,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/line_width"
                 android:layout_below="@id/currency"
-                android:background="@color/gray" />
+                android:background="@color/login_gray" />
 
 
             <ProgressBar
@@ -219,7 +223,7 @@
                 app:autoSizeMaxTextSize="@dimen/font_size_normal"
                 app:autoSizeStepGranularity="1sp"
                 android:text="转账时间"
-                android:textColor="@color/bg_gray_light"
+                android:textColor="@color/title_white"
                 android:textSize="@dimen/font_size_normal" />
 
             <TextView
@@ -233,7 +237,7 @@
                 app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal"
                 app:autoSizeStepGranularity="1sp"
-                android:textColor="@color/bg_gray_light"
+                android:textColor="@color/title_white"
                 android:textSize="@dimen/font_size_normal" />
 
             <TextView
@@ -247,7 +251,7 @@
                 app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal"
                 app:autoSizeStepGranularity="1sp"
-                android:textColor="@color/bg_gray_light"
+                android:textColor="@color/title_white"
                 android:textSize="@dimen/font_size_normal" />
 
             <TextView
@@ -261,7 +265,7 @@
                 app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal"
                 app:autoSizeStepGranularity="1sp"
-                android:textColor="@color/bg_gray_light"
+                android:textColor="@color/title_white"
                 android:textSize="@dimen/font_size_normal" />
 
         </LinearLayout>

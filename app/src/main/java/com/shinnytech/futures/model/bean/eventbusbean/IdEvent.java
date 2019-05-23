@@ -7,6 +7,7 @@ package com.shinnytech.futures.model.bean.eventbusbean;
  */
 
 public class IdEvent {
+    private String position_direction;
     private String instrument_id;
 
     public String getInstrument_id() {
@@ -15,5 +16,13 @@ public class IdEvent {
 
     public void setInstrument_id(String instrument_id) {
         this.instrument_id = instrument_id;
+    }
+
+    public String getPosition_direction() {
+        return position_direction;
+    }
+
+    public void setPosition_direction(String position_direction) {
+        this.position_direction = position_direction;
     }
 }

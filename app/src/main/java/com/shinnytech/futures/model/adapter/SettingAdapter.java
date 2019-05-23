@@ -11,7 +11,6 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ItemActivitySettingBinding;
 import com.shinnytech.futures.model.bean.settingbean.SettingEntity;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
 import java.util.List;
@@ -96,8 +95,12 @@ public class SettingAdapter extends RecyclerView.Adapter<SettingAdapter.ItemView
             else {
                 switch (content) {
                     case CommonConstants.INSERT_ORDER_CONFIRM:
-                        boolean check = (boolean) SPUtils.get(sContext, CommonConstants.CONFIG_INSERT_ORDER_CONFIRM, false);
-                        mBinding.settingToggle.setChecked(check);
+                        boolean checkInsert = (boolean) SPUtils.get(sContext, CommonConstants.CONFIG_INSERT_ORDER_CONFIRM, false);
+                        mBinding.settingToggle.setChecked(checkInsert);
+                        break;
+                    case CommonConstants.CANCEL_ORDER_CONFIRM:
+                        boolean checkCancel = (boolean) SPUtils.get(sContext, CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM, false);
+                        mBinding.settingToggle.setChecked(checkCancel);
                         break;
                     default:
                         break;

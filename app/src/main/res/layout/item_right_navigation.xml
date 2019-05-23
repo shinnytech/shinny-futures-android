@@ -14,7 +14,7 @@
             android:focusable="true"
             android:paddingStart="@dimen/margin_5dp"
             android:paddingEnd="@dimen/margin_5dp"
-            android:background="@drawable/activity_setting_selector"
+            android:background="@color/toolbar"
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -27,7 +27,7 @@
             <TextView
                 android:textStyle="bold"
                 android:layout_marginStart="@dimen/margin_10dp"
-                android:textColor="@color/white"
+                android:textColor="@color/text_white"
                 android:layout_gravity="center_vertical"
                 android:gravity="center_vertical"
                 android:id="@+id/content"

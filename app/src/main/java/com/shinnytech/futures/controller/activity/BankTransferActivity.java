@@ -14,13 +14,14 @@ import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityBankTransferBinding;
 import com.shinnytech.futures.model.adapter.BankTransferAdapter;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.model.amplitude.api.Identify;
 import com.shinnytech.futures.model.bean.accountinfobean.BankEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.TransferEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.listener.TransferDiffCallback;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
 import org.json.JSONObject;
 
@@ -35,9 +36,11 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BANK;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENCY;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_TRANSFER_IN;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_TRANSFER_OUT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BANK_FIRST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BANK_LAST;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_DIRECTION;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_IN;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_OUT;
-import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_DIRECTION;
 import static java.lang.Math.abs;
 
 public class BankTransferActivity extends BaseActivity {
@@ -55,7 +58,7 @@ public class BankTransferActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         mLayoutID = R.layout.activity_bank_transfer;
         Intent intent = getIntent();
-        if (intent != null){
+        if (intent != null) {
             mTitle = intent.getStringExtra(TRANSFER_DIRECTION);
         }
         super.onCreate(savedInstanceState);
@@ -86,9 +89,9 @@ public class BankTransferActivity extends BaseActivity {
         mCurrencySpinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown_style);
         mBinding.spinnerCurrency.setAdapter(mCurrencySpinnerAdapter);
 
-        if (TRANSFER_IN.equals(mTitle))mBinding.futureBank.setVisibility(View.GONE);
+        if (TRANSFER_IN.equals(mTitle)) mBinding.futureBank.setVisibility(View.GONE);
 
-        if (TRANSFER_OUT.equals(mTitle))mBinding.bankFuture.setVisibility(View.GONE);
+        if (TRANSFER_OUT.equals(mTitle)) mBinding.bankFuture.setVisibility(View.GONE);
     }
 
     @Override
@@ -106,13 +109,17 @@ public class BankTransferActivity extends BaseActivity {
                 try {
                     float amountF = -abs(Float.parseFloat(amount));
                     BaseApplication.getWebSocketService().sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
+                    Identify identify = new Identify()
+                            .setOnce(AMP_USER_BANK_FIRST, bank)
+                            .set(AMP_USER_BANK_LAST, bank);
+                    Amplitude.getInstance().identify(identify);
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put(AMP_EVENT_BANK, bank);
                     jsonObject.put(AMP_EVENT_AMOUNT, amountF);
                     jsonObject.put(AMP_EVENT_CURRENCY, currency);
                     Amplitude.getInstance().logEvent(AMP_TRANSFER_OUT, jsonObject);
                 } catch (Exception e) {
-                    ToastNotificationUtils.showToast(sContext, "输入金额错误！");
+                    ToastUtils.showToast(sContext, "输入金额错误！");
                 }
             }
         });
@@ -130,13 +137,17 @@ public class BankTransferActivity extends BaseActivity {
                 try {
                     float amountF = abs(Float.parseFloat(amount));
                     BaseApplication.getWebSocketService().sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
+                    Identify identify = new Identify()
+                            .setOnce(AMP_USER_BANK_FIRST, bank)
+                            .set(AMP_USER_BANK_LAST, bank);
+                    Amplitude.getInstance().identify(identify);
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put(AMP_EVENT_BANK, bank);
                     jsonObject.put(AMP_EVENT_AMOUNT, amountF);
                     jsonObject.put(AMP_EVENT_CURRENCY, currency);
                     Amplitude.getInstance().logEvent(AMP_TRANSFER_IN, jsonObject);
                 } catch (Exception e) {
-                    ToastNotificationUtils.showToast(sContext, "输入金额错误！");
+                    ToastUtils.showToast(sContext, "输入金额错误！");
                 }
             }
         });

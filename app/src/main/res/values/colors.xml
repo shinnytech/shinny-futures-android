@@ -18,14 +18,9 @@
     <color name="black_light">#444444</color>
     <!--列表页表头涨跌和持仓颜色-->
     <color name="black_light_more">#636363</color>
-    <!--一般字体颜色-->
-    <color name="white">#ffffff</color>
     <!--搜索页列表合约代码字体颜色-->
     <color name="instrument_id">#333333</color>
-    <!--一般分隔线颜色-->
-    <color name="alpha_white">#49ffffff</color>
     <color name="text_gray_light">#A7ADBC</color>
-    <color name="gray">#6A6A6A</color>
     <color name="bg_gray_light">#cdcdcd</color>
     <color name="bg_gray_light_more">#f9f9f9</color>
     ---------------------------------------------------------------
@@ -43,16 +38,8 @@
     <color name="dialog_optional_out_text">#FFFFFF</color>
     <!--详情页选择合约的九宫格底色-->
     <color name="dialog_optional">#D9D9D9</color>
-    <!--合约列表/九宫格分割线颜色-->
-    <color name="quote_divider">#1e1e1e</color>
     <!--九宫格字色-->
     <color name="dialog_optional_text">#797979</color>
-    <!--加多按钮颜色-->
-    <color name="bid">#b34545</color>
-    <!--加空按钮颜色-->
-    <color name="ask">#368e5f</color>
-    <!--平仓按钮颜色-->
-    <color name="close">#dcdcdc</color>
     <!--交易页内浅颜色-->
     <color name="transaction_light">#444444</color>
     <!--交易页内深颜色-->
@@ -76,66 +63,15 @@
     <!--信息页上十字分割线颜色 -->
     <color name="handicap_cross">#9f9f9f</color>
     ---------------------------------------------------------------
-    <!--绿K线-->
-    <color name="kline_green">#00fcfc</color>
-    <!--红K线-->
-    <color name="kline_red">#da0000</color>
-    <!--分时图颜色 -->
-    <color name="kline_one_minute">#ffffff</color>
-    <!--均线颜色 -->
-    <color name="kline_average">#ffff00</color>
-    <!--K线XY轴颜色 -->
-    <color name="kline_axis">#9f9f9f</color>
-    <!--K线网格颜色 -->
-    <color name="kline_grid">#6c0000</color>
-    <!--K线坐标轴上数字颜色 -->
-    <color name="kline_text">#9f9f9f</color>
-    <!--K线背景颜色 -->
-    <color name="kline_background">#000000</color>
-    <!--K线持仓线颜色 -->
-    <color name="kline_position">#a01414</color>
-    <!--K线挂单线颜色 -->
-    <color name="kline_order">#1ac51a</color>
-    <!--均线1-->
-    <color name="kline_ma1">#ffffff</color>
-    <!--均线2-->
-    <color name="kline_ma2">#ffff00</color>
-    <!--均线3-->
-    <color name="kline_ma3">#ff00ff</color>
-    <!--均线4-->
-    <color name="kline_ma4">#00ff00</color>
-    <!--均线5-->
-    <color name="kline_ma5">#b2b2b2</color>
-    <!--均线6-->
-    <color name="kline_ma6">#ff3c3c</color>
-    <!--最新价线-->
-    <color name="kline_last">#005480</color>
+
     ---------------------------------------------------------------
     <!--确认结算单按钮框色-->
     <color name="settlement_border">#797979</color>
     <!--结算单背景色-->
     <color name="settlement_background">#686868</color>
     ---------------------------------------------------------------
-    <!--related to my chart-->
-    <color name="minute_yellow">#E7B448</color>
-    <color name="marker_yellow">#dcdc0a</color>
-    <color name="marker_red">#ff3c3c</color>
-    <color name="marker_green">#00dc00</color>
-    <color name="bg_popup_set_up">#99000000</color>
     ---------------------------------------------------------------
-    <!--设置页-->
-    <color name="setting_header">#2d2d2d</color>
-    <color name="setting_content">#444444</color>
-    <color name="navigation_divider">#333333</color>
-    ---------------------------------------------------------------
-    <!--参数修改页-->
-    <color name="para_nav">#444444</color>
-    <color name="para_content">#696969</color>
 
-    <!--k线周期设置页-->
-    <color name="kline_duration">#333333</color>
-    <color name="add_duration_select">#cdcdcd</color>
-    <color name="add_duration_add">#999999</color>
 
     <!--键盘背景色-->
     <color name="keyboard">#00000000</color>
@@ -157,23 +93,74 @@
     <color name="toolbar">#121212</color>
     <color name="quote_background">#000000</color>
     <color name="quote_recommend_background">#121212</color>
-    <color name="quote_highlight">#88BE000F</color>
+    <color name="quote_highlight">#262626</color>
     <color name="quote_popup_background">#232323</color>
     <color name="quote_popup_text">#929292</color>
     <color name="quote_popup_text_transaction">#EF372B</color>
     <color name="quote_dialog_text">#ffffff</color>
     <color name="quote_dialog_text_selected">#797677</color>
     <color name="quote_dialog_divider">#6A6A6A</color>
-    <color name="text_red">#FF3B2F</color>
-    <color name="text_green">#16CC26</color>
+    <!--合约列表/九宫格分割线颜色-->
+    <color name="quote_divider">#1e1e1e</color>
+    <color name="text_red">#d22c1d</color>
+    <color name="text_green">#68e242</color>
+    <color name="text_white">#a9a9a9</color>
+    <color name="title_white">#cdcdcd</color>
+    <color name="white">#ffffff</color>
+    <color name="divider_white">#49ffffff</color>
+    <color name="text_yellow">#e7c143</color>
 
     <!--二级页-->
     <color name="future_info_background">#000000</color>
     <color name="future_info_toolbar">#121212</color>
-    <color name="fragment_transaction_bid">#b34545</color>
-    <color name="fragment_transaction_ask">#368e5f</color>
-    <color name="fragment_transaction_close">#dcdcdc</color>
+    <!--加多按钮颜色-->
+    <color name="bid">#b54d48</color>
+    <!--加空按钮颜色-->
+    <color name="ask">#4e8b62</color>
+    <!--平仓按钮颜色-->
+    <color name="close">#dbdbdb</color>
+    <!--绿K线-->
+    <color name="kline_green">#00fcfc</color>
+    <!--红K线-->
+    <color name="kline_red">#da0000</color>
+    <!--K线XY轴颜色 -->
+    <color name="kline_axis">#9f9f9f</color>
+    <!--K线网格颜色 -->
+    <color name="kline_grid">#6c0000</color>
+    <!--K线坐标轴上数字颜色 -->
+    <color name="kline_text">#a9a9a9</color>
+    <!--K线背景颜色 -->
+    <color name="kline_background">#000000</color>
+    <!--K线持仓线颜色 -->
+    <color name="kline_position">#a01414</color>
+    <!--K线挂单线颜色 -->
+    <color name="kline_order">#1ac51a</color>
+    <!--均线1-->
+    <color name="kline_ma1">#ffffff</color>
+    <!--均线2-->
+    <color name="kline_ma2">#ffff00</color>
+    <!--均线3-->
+    <color name="kline_ma3">#ff00ff</color>
+    <!--均线4-->
+    <color name="kline_ma4">#00ff00</color>
+    <!--均线5-->
+    <color name="kline_ma5">#b2b2b2</color>
+    <!--均线6-->
+    <color name="kline_ma6">#ff3c3c</color>
+    <!--最新价线-->
+    <color name="kline_last">#005480</color>
 
     <!--搜索页-->
     <color name="search_background">#000000</color>
+
+    <!--设置页-->
+    <color name="setting_content">#232323</color>
+    <color name="navigation_divider">#333333</color>
+    <!--参数修改页-->
+    <color name="para_nav">#444444</color>
+    <color name="para_content">#696969</color>
+    <!--k线周期设置页-->
+    <color name="kline_duration">#333333</color>
+    <color name="add_duration_select">#cdcdcd</color>
+    <color name="add_duration_add">#999999</color>
 </resources>

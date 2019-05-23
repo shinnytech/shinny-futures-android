@@ -4,7 +4,7 @@
     android:layout_height="56dp"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="@color/black_dark">
+    android:background="@color/toolbar">
 
     <TextView
         android:textColor="@android:color/white"

@@ -10,7 +10,6 @@ import com.shinnytech.futures.utils.MathUtils;
 
 import java.util.List;
 
-import static com.shinnytech.futures.model.engine.LatestFileManager.getUpDown;
 import static com.shinnytech.futures.model.engine.LatestFileManager.getUpDownRate;
 
 /**

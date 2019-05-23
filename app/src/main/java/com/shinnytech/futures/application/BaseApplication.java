@@ -35,16 +35,22 @@ import com.lzy.okgo.callback.FileCallback;
 import com.lzy.okgo.cookie.store.SPCookieStore;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
+import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.model.amplitude.api.Identify;
+import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.LogUtils;
+import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
+import com.shinnytech.futures.utils.TimeUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.tencent.bugly.crashreport.CrashReport;
@@ -67,14 +73,23 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_BACKGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_CRASH;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_FOREGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_INIT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BALANCE_FIRST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BALANCE_LAST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_INIT_TIME_FIRST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_PACKAGE_ID_FIRST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_PACKAGE_ID_LAST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_TYPE_FIRST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_TYPE_FIRST_PURE_NEWBIE_VALUE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_TYPE_FIRST_TRADER_VALUE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_INSERT_ORDER_CONFIRM;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_DURATION_DEFAULT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_INSERT_ORDER_CONFIRM;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PARA_MA;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_RECOMMEND;
 import static com.shinnytech.futures.constants.CommonConstants.JSON_FILE_URL;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_1;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_2;
@@ -103,8 +118,8 @@ public class BaseApplication extends Application implements ServiceConnection {
     private static List<String> sMDURLs = new ArrayList<>();
     private static int index = 0;
     private static LOGClient mLOGClient;
-    private boolean mServiceBound = false;
     private static boolean mBackGround = false;
+    private boolean mServiceBound = false;
     private BroadcastReceiver mReceiverMarket;
     private BroadcastReceiver mReceiverTransaction;
     private BroadcastReceiver mReceiverNetwork;
@@ -190,8 +205,7 @@ public class BaseApplication extends Application implements ServiceConnection {
         conf.setMaxErrorRetry(2); // 失败后最大重试次数，默认2次
         SLSLog.enableLog(); // log打印在控制台
 
-        String endpoint = "http://cn-shanghai.log.aliyuncs.com";
-
+        String endpoint = "https://cn-shanghai.log.aliyuncs.com";
         mLOGClient = new LOGClient(sContext, endpoint, credentialProvider, conf);
     }
 
@@ -216,6 +230,10 @@ public class BaseApplication extends Application implements ServiceConnection {
             kline = kline.replace("钟", "");
             kline = kline.replace("小", "");
             SPUtils.putAndApply(sContext, CONFIG_KLINE_DURATION_DEFAULT, kline);
+        }
+
+        if (!SPUtils.contains(sContext, CONFIG_RECOMMEND)) {
+            SPUtils.putAndApply(sContext, CONFIG_RECOMMEND, true);
         }
 
         if (!SPUtils.contains(sContext, CONFIG_PARA_MA)) {
@@ -365,9 +383,14 @@ public class BaseApplication extends Application implements ServiceConnection {
             StatService.setAppKey(BAIDU_KEY);
             StatService.start(this);
             Amplitude.getInstance().initialize(this, AMP_KEY).enableForegroundTracking(this);
+            Identify identify = new Identify()
+                    .setOnce(AMP_USER_PACKAGE_ID_FIRST, BuildConfig.FLAVOR)
+                    .set(AMP_USER_PACKAGE_ID_LAST, BuildConfig.FLAVOR)
+                    .setOnce(AMP_USER_INIT_TIME_FIRST, TimeUtils.getNowTimeSecond());
+            Amplitude.getInstance().identify(identify);
             Amplitude.getInstance().logEvent(AMP_INIT);
             CrashReport.UserStrategy strategy = new CrashReport.UserStrategy(sContext);
-            strategy.setCrashHandleCallback( new CrashReport.CrashHandleCallback() {
+            strategy.setCrashHandleCallback(new CrashReport.CrashHandleCallback() {
                 public Map<String, String> onCrashHandleStart(int crashType, String errorType,
                                                               String errorMessage, String errorStack) {
                     Amplitude.getInstance().logEvent(AMP_CRASH);
@@ -439,7 +462,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                 if (activity instanceof MainActivity) {
                     //退出重登不退出app
                     String loginDate = (String) SPUtils.get(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
-                    if (loginDate.isEmpty())return;
+                    if (loginDate.isEmpty()) return;
 
                     LogUtils.e("App彻底销毁", true);
                     if (mReceiverMarket != null)
@@ -526,7 +549,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                 switch (mDataString) {
                     case MD_ONLINE:
                         //不给用户造成干扰，此条暂且不发
-//                        ToastNotificationUtils.showToast(sContext, "行情服务器连接成功");
+//                        ToastUtils.showToast(sContext, "行情服务器连接成功");
                         break;
                     case MD_OFFLINE:
                         //断线重连
@@ -535,7 +558,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                         if (NetworkUtils.isNetworkConnected(sContext))
                             mMyHandler.sendEmptyMessage(0);
                         else
-                            ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
+                            ToastUtils.showToast(sContext, "无网络，请检查网络设置");
                         break;
                     default:
                         break;
@@ -552,7 +575,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                 switch (mDataString) {
                     case TD_ONLINE:
                         //不给用户造成干扰，此条暂且不发
-//                        ToastNotificationUtils.showToast(sContext, "交易服务器连接成功");
+//                        ToastUtils.showToast(sContext, "交易服务器连接成功");
                         break;
                     case TD_OFFLINE:
                         //断线重连
@@ -561,7 +584,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                         if (NetworkUtils.isNetworkConnected(sContext))
                             mMyHandler.sendEmptyMessage(1);
                         else
-                            ToastNotificationUtils.showToast(sContext, "无网络，请检查网络设置");
+                            ToastUtils.showToast(sContext, "无网络，请检查网络设置");
                         break;
                     default:
                         break;
@@ -598,6 +621,30 @@ public class BaseApplication extends Application implements ServiceConnection {
 
     }
 
+    private void refreshAmpUserProperty() {
+        UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().USER_ID);
+        if (userEntity == null) return;
+        AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
+        if (accountEntity == null) return;
+        Identify identify = new Identify();
+        String static_balance = MathUtils.round(accountEntity.getStatic_balance(), 2);
+        String pre_balance = MathUtils.round(accountEntity.getPre_balance(), 2);
+        if (!"-".equals(static_balance)) {
+            identify.setOnce(AMP_USER_BALANCE_FIRST, static_balance)
+                    .set(AMP_USER_BALANCE_LAST, static_balance);
+        }
+
+        String settlement = DataManager.getInstance().getBroker().getSettlement();
+        if (!"-".equals(pre_balance)) {
+            if (MathUtils.isZero(pre_balance) && settlement == null) {
+                identify.setOnce(AMP_USER_TYPE_FIRST, AMP_USER_TYPE_FIRST_PURE_NEWBIE_VALUE);
+            } else {
+                identify.setOnce(AMP_USER_TYPE_FIRST, AMP_USER_TYPE_FIRST_TRADER_VALUE);
+            }
+        }
+        Amplitude.getInstance().identify(identify);
+    }
+
     /**
      * date: 6/1/18
      * author: chenli
@@ -630,6 +677,7 @@ public class BaseApplication extends Application implements ServiceConnection {
         @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
         public void onEnterBackground() {
             notifyBackground();
+            refreshAmpUserProperty();
             Amplitude.getInstance().logEvent(AMP_BACKGROUND);
         }
     }

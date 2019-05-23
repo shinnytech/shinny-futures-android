@@ -6,8 +6,8 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 
 public class SoftKeyBoardListener {
-    private View rootView;  //activity的根视图
     int rootViewVisibleHeight;  //记录根视图的显示高度
+    private View rootView;  //activity的根视图
     private OnSoftKeyBoardChangeListener onSoftKeyBoardChangeListener;
 
     public SoftKeyBoardListener(Activity activity) {
@@ -49,6 +49,11 @@ public class SoftKeyBoardListener {
         });
     }
 
+    public static void setListener(Activity activity, OnSoftKeyBoardChangeListener onSoftKeyBoardChangeListener) {
+        SoftKeyBoardListener softKeyBoardListener = new SoftKeyBoardListener(activity);
+        softKeyBoardListener.setOnSoftKeyBoardChangeListener(onSoftKeyBoardChangeListener);
+    }
+
     private void setOnSoftKeyBoardChangeListener(OnSoftKeyBoardChangeListener onSoftKeyBoardChangeListener) {
         this.onSoftKeyBoardChangeListener = onSoftKeyBoardChangeListener;
     }
@@ -57,10 +62,5 @@ public class SoftKeyBoardListener {
         void keyBoardShow(int height);
 
         void keyBoardHide(int height);
-    }
-
-    public static void setListener(Activity activity, OnSoftKeyBoardChangeListener onSoftKeyBoardChangeListener) {
-        SoftKeyBoardListener softKeyBoardListener = new SoftKeyBoardListener(activity);
-        softKeyBoardListener.setOnSoftKeyBoardChangeListener(onSoftKeyBoardChangeListener);
     }
 }

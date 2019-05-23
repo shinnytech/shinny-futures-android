@@ -8,10 +8,11 @@
         android:keepScreenOn="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/future_info_toolbar"
+        android:background="@color/quote_background"
         android:orientation="vertical">
 
         <LinearLayout
+            android:background="@color/toolbar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/layout_height_fragment_quote"
             android:gravity="center"
@@ -31,7 +32,7 @@
                 app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal"
                 app:autoSizeStepGranularity="1sp"
-                android:textColor="@android:color/white"
+                android:textColor="@color/title_white"
                 android:textSize="@dimen/font_size_normal" />
 
 
@@ -46,7 +47,7 @@
                 app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal"
                 app:autoSizeStepGranularity="1sp"
-                android:textColor="@android:color/white"
+                android:textColor="@color/title_white"
                 android:textSize="@dimen/font_size_normal" />
 
             <TextView
@@ -60,7 +61,7 @@
                 app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal"
                 app:autoSizeStepGranularity="1sp"
-                android:textColor="@android:color/white"
+                android:textColor="@color/title_white"
                 android:textSize="@dimen/font_size_normal" />
 
             <TextView
@@ -74,7 +75,7 @@
                 app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal"
                 app:autoSizeStepGranularity="1sp"
-                android:textColor="@android:color/white"
+                android:textColor="@color/title_white"
                 android:textSize="@dimen/font_size_normal" />
 
             <TextView
@@ -88,7 +89,7 @@
                 app:autoSizeMinTextSize="@dimen/font_size_tiny_high"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal"
                 app:autoSizeStepGranularity="1sp"
-                android:textColor="@android:color/white"
+                android:textColor="@color/title_white"
                 android:textSize="@dimen/font_size_normal" />
 
         </LinearLayout>
@@ -96,7 +97,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/line_width"
-            android:background="@color/alpha_white"></View>
+            android:background="@color/divider_white"></View>
 
 
         <android.support.v7.widget.RecyclerView

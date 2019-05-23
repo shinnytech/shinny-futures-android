@@ -1,61 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/root"
-    android:layout_width="@dimen/layout_width_view_dialog_cancel_order"
-    android:layout_height="@dimen/layout_height_view_dialog_cancel_order"
+    android:layout_width="@dimen/order_dialog_width"
+    android:layout_height="@dimen/order_dialog_height"
     android:background="@drawable/fragment_order_dialog"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/title_layout"
+    <TextView
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_marginTop="@dimen/margin_10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="@dimen/margin_15dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="确认"
-            android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal_high"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="撤"
-            android:textColor="@color/dialog_order_xia_text"
-            android:textSize="@dimen/font_size_normal_high"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="单吗?"
-            android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal_high"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-
+        android:text="确认撤单吗？"
+        android:textColor="@color/black"
+        android:textSize="@dimen/font_size_normal" />
 
     <LinearLayout
         android:id="@+id/content_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="@dimen/margin_10dp"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
         <TextView
             android:id="@+id/order_instrument_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="单号: "
+            android:text="m1709"
             android:textColor="@color/black"
-            android:textSize="@dimen/font_size_normal" />
+            android:textStyle="bold"
+            android:textSize="@dimen/font_size_normal_more" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=", "
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="@dimen/font_size_normal_more" />
+
+        <TextView
+            android:id="@+id/order_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxEms="4"
+            android:maxLines="1"
+            android:text="1111"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="@dimen/font_size_normal_more" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/margin_10dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/order_direction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="买开"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="@dimen/font_size_normal_more" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=", "
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="@dimen/font_size_normal_more" />
+
+        <TextView
+            android:id="@+id/order_volume"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1"
+            android:textColor="@color/text_red"
+            android:textStyle="bold"
+            android:textSize="@dimen/font_size_normal_more" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="手"
+            android:textColor="@color/text_red"
+            android:textStyle="bold"
+            android:textSize="@dimen/font_size_normal_more" />
 
     </LinearLayout>
 
@@ -70,7 +108,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <TextView
+        <Button
+            android:background="@null"
             android:id="@+id/order_cancel"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -86,7 +125,8 @@
             android:layout_height="wrap_content"
             android:background="@color/dialog_order_divider"></View>
 
-        <TextView
+        <Button
+            android:background="@null"
             android:id="@+id/order_ok"
             android:layout_width="0dp"
             android:layout_height="match_parent"

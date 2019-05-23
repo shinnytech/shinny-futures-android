@@ -26,7 +26,6 @@ import com.neovisionaries.ws.client.WebSocketState;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
-import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.accountinfobean.BrokerEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
@@ -43,6 +42,7 @@ import com.shinnytech.futures.model.bean.reqbean.ReqSubscribeQuoteEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqTransferEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.model.receiver.NotificationClickReceiver;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
@@ -65,9 +65,11 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_INSERT_ORDER;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
 import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
+import static com.shinnytech.futures.constants.CommonConstants.MD_TIMEOUT;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_ONLINE;
+import static com.shinnytech.futures.constants.CommonConstants.TD_TIMEOUT;
 
 /**
  * date: 7/9/17
@@ -102,7 +104,7 @@ public class WebSocketService extends Service {
      */
     public static final String TD_BROADCAST_ACTION = WebSocketService.class.getName() + "." + TD_BROADCAST;
 
-    private static final int TIMEOUT = 500;
+    private static final int TIMEOUT = 5000;
     private final IBinder mBinder = new LocalBinder();
     private WebSocket mWebSocketClientMD;
 
@@ -136,8 +138,9 @@ public class WebSocketService extends Service {
             NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             assert manager != null;
             manager.createNotificationChannel(chan);
-            Intent intent = new Intent(this, MainActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+            Intent intent = new Intent(this, NotificationClickReceiver.class);
+            intent.setAction("notification_click");
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
             Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                     .setContentTitle("快期小Q下单软件正在运行")
                     .setContentText("点击返回程序")
@@ -148,8 +151,9 @@ public class WebSocketService extends Service {
                     .build();
             startForeground(1, notification);
         } else {
-            Intent intent = new Intent(this, MainActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+            Intent intent = new Intent(this, NotificationClickReceiver.class);
+            intent.setAction("notification_click");
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
             Notification notification = new NotificationCompat.Builder(this, "service")
                     .setContentTitle("快期小Q下单软件正在运行")
                     .setContentText("点击返回程序")
@@ -241,7 +245,7 @@ public class WebSocketService extends Service {
                                         sendMessage(MD_OFFLINE, MD_BROADCAST);
                                         return;
                                 }
-                                if (!BaseApplication.ismBackGround())sendPeekMessage();
+                                if (!BaseApplication.ismBackGround()) sendPeekMessage();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -256,12 +260,15 @@ public class WebSocketService extends Service {
 
                     })
                     .addHeader("User-Agent", sDataManager.USER_AGENT + " " + sDataManager.APP_VERSION)
+                    .addHeader("SA-Machine", Amplitude.getInstance().getDeviceId())
+                    .addHeader("SA-Session", Amplitude.getInstance().getDeviceId())
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
                     .connectAsynchronously();
             int index = BaseApplication.getIndex() + 1;
             if (index == BaseApplication.getsMDURLs().size()) index = 0;
             BaseApplication.setIndex(index);
         } catch (Exception e) {
+            sendMessage(MD_TIMEOUT, MD_BROADCAST);
             e.printStackTrace();
         }
 
@@ -418,7 +425,7 @@ public class WebSocketService extends Service {
                                         sendMessage(TD_OFFLINE, TD_BROADCAST);
                                         return;
                                 }
-                                if (!BaseApplication.ismBackGround())sendPeekMessageTransaction();
+                                if (!BaseApplication.ismBackGround()) sendPeekMessageTransaction();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -434,8 +441,11 @@ public class WebSocketService extends Service {
                     })
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
                     .addHeader("User-Agent", sDataManager.USER_AGENT + " " + sDataManager.APP_VERSION)
+                    .addHeader("SA-Machine", Amplitude.getInstance().getDeviceId())
+                    .addHeader("SA-Session", Amplitude.getInstance().getDeviceId())
                     .connectAsynchronously();
         } catch (Exception e) {
+            sendMessage(TD_TIMEOUT, TD_BROADCAST);
             e.printStackTrace();
         }
 
@@ -458,7 +468,8 @@ public class WebSocketService extends Service {
             String name = (String) SPUtils.get(context, CommonConstants.CONFIG_ACCOUNT, "");
             String password = (String) SPUtils.get(context, CommonConstants.CONFIG_PASSWORD, "");
             String broker = (String) SPUtils.get(context, CommonConstants.CONFIG_BROKER, "");
-            if (name != null && name.contains(BROKER_ID_VISITOR) && !TimeUtils.getNowTime().equals(date))return;
+            if (name != null && name.contains(BROKER_ID_VISITOR) && !TimeUtils.getNowTime().equals(date))
+                return;
             sendReqLogin(broker, name, password);
         }
 
@@ -584,9 +595,9 @@ public class WebSocketService extends Service {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
             String user_id = DataManager.getInstance().USER_ID;
             UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(user_id);
-            if (userEntity != null){
+            if (userEntity != null) {
                 OrderEntity orderEntity = userEntity.getOrders().get(order_id);
-                if (orderEntity != null){
+                if (orderEntity != null) {
                     JSONObject jsonObject = new JSONObject();
                     try {
                         jsonObject.put(AMP_EVENT_PRICE, orderEntity.getLimit_price());

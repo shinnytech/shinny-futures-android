@@ -126,7 +126,7 @@ public class YAxisRendererKline extends YAxisRenderer {
 
             c.drawPath(limitLinePath, mLimitLinePaint);
             limitLinePath.reset();
-            // a.json.drawLines(pts, mLimitLinePaint);
+            // c.drawLines(pts, mLimitLinePaint);
 
             String label = l.getLabel();
 
@@ -172,7 +172,7 @@ public class YAxisRendererKline extends YAxisRenderer {
                     mLimitLinePaint.setTextAlign(Paint.Align.LEFT);
                     c.drawText(label,
                             mViewPortHandler.offsetLeft() + xOffset,
-                            pts[1], mLimitLinePaint);
+                            pts[1] + yOffset, mLimitLinePaint);
                 }
             }
 

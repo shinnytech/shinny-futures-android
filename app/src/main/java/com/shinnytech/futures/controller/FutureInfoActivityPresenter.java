@@ -23,8 +23,8 @@ import android.widget.TextView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
-import com.shinnytech.futures.controller.activity.CommonSwitchActivity;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
+import com.shinnytech.futures.controller.activity.SubSettingActivity;
 import com.shinnytech.futures.controller.fragment.BaseChartFragment;
 import com.shinnytech.futures.controller.fragment.CurrentDayFragment;
 import com.shinnytech.futures.controller.fragment.HandicapFragment;
@@ -37,6 +37,8 @@ import com.shinnytech.futures.model.adapter.DialogAdapter;
 import com.shinnytech.futures.model.adapter.KlineDurationTitleAdapter;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.VisibilityEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
@@ -56,15 +58,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_COMMON_SWITCH;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_CHART_SETTING;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_FUTURE_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_SEARCH;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.CHART_SETTING;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
 import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.DAY_FRAGMENT;
-import static com.shinnytech.futures.constants.CommonConstants.FUTURE_INFO_ACTIVITY_TO_COMMON_SWITCH_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.FUTURE_INFO_ACTIVITY_TO_CHART_SETTING_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.HOUR_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_10_MINUTE;
@@ -88,6 +90,7 @@ import static com.shinnytech.futures.constants.CommonConstants.KLINE_5_SECOND;
 import static com.shinnytech.futures.constants.CommonConstants.KLINE_7_DAY;
 import static com.shinnytech.futures.constants.CommonConstants.MINUTE_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.SECOND_FRAGMENT;
+import static com.shinnytech.futures.constants.CommonConstants.SUB_SETTING_TYPE;
 
 /**
  * Created on 1/17/18.
@@ -147,13 +150,13 @@ public class FutureInfoActivityPresenter {
             mBinding.vpInfoContent.setVisibility(View.VISIBLE);
             mBinding.rbHandicapInfo.setText(R.string.future_info_activity_handicap_down);
             mBinding.rbPositionInfo.setText(R.string.future_info_activity_position_down);
-            mBinding.rbOrderInfoAlive.setText(R.string.future_info_activity_order_down);
+            mBinding.rbOrderInfoAlive.setText(R.string.future_info_activity_order_down_alive);
             mBinding.rbTransactionInfo.setText(R.string.future_info_activity_transaction_down);
         } else {
             mBinding.vpInfoContent.setVisibility(View.GONE);
             mBinding.rbHandicapInfo.setText(R.string.future_info_activity_handicap_up);
             mBinding.rbPositionInfo.setText(R.string.future_info_activity_position_up);
-            mBinding.rbOrderInfoAlive.setText(R.string.future_info_activity_order_up);
+            mBinding.rbOrderInfoAlive.setText(R.string.future_info_activity_order_up_alive);
             mBinding.rbTransactionInfo.setText(R.string.future_info_activity_transaction_up);
         }
 
@@ -248,8 +251,23 @@ public class FutureInfoActivityPresenter {
                         dialogWindow.setAttributes(lp);
                     }
                     mDialogOptional.setContentView(viewDialog);
-                    mDialogAdapterOptional = new DialogAdapter(mFutureInfoActivity,
-                            new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()), mInstrumentId);
+                    List<String> list = new ArrayList<>(LatestFileManager.getOptionalInsList().keySet());
+                    DataManager dataManager = DataManager.getInstance();
+                    UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.USER_ID);
+                    if (userEntity != null) {
+                        for (PositionEntity positionEntity : userEntity.getPositions().values()) {
+                            try {
+                                int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+                                int volume_short = Integer.parseInt(positionEntity.getVolume_short());
+                                String ins = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
+                                if ((volume_long != 0 || volume_short != 0) && !list.contains(ins))
+                                    list.add(ins);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    mDialogAdapterOptional = new DialogAdapter(mFutureInfoActivity, list, mInstrumentId);
                     mRecyclerViewOptional = viewDialog.findViewById(R.id.dialog_rv);
                     mRecyclerViewOptional.setLayoutManager(
                             new GridLayoutManager(mFutureInfoActivity, 3));
@@ -281,9 +299,25 @@ public class FutureInfoActivityPresenter {
                                         }
                                     }));
 
-                } else
-                    mDialogAdapterOptional.updateList(new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()), mInstrumentId);
-
+                } else {
+                    List<String> list = new ArrayList<>(LatestFileManager.getOptionalInsList().keySet());
+                    DataManager dataManager = DataManager.getInstance();
+                    UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.USER_ID);
+                    if (userEntity != null) {
+                        for (PositionEntity positionEntity : userEntity.getPositions().values()) {
+                            try {
+                                int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+                                int volume_short = Integer.parseInt(positionEntity.getVolume_short());
+                                String ins = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
+                                if ((volume_long != 0 || volume_short != 0) && !list.contains(ins))
+                                    list.add(ins);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    mDialogAdapterOptional.updateList(list, mInstrumentId);
+                }
                 if (!mDialogOptional.isShowing()) mDialogOptional.show();
             }
         });
@@ -317,12 +351,13 @@ public class FutureInfoActivityPresenter {
         mBinding.rbSetUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(mFutureInfoActivity, CommonSwitchActivity.class);
-                mFutureInfoActivity.startActivityForResult(intent, FUTURE_INFO_ACTIVITY_TO_COMMON_SWITCH_ACTIVITY);
+                Intent intent = new Intent(mFutureInfoActivity, SubSettingActivity.class);
+                intent.putExtra(SUB_SETTING_TYPE, CHART_SETTING);
+                mFutureInfoActivity.startActivityForResult(intent, FUTURE_INFO_ACTIVITY_TO_CHART_SETTING_ACTIVITY);
                 JSONObject jsonObject = new JSONObject();
                 try {
                     jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_FUTURE_INFO);
-                    jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_COMMON_SWITCH);
+                    jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_CHART_SETTING);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -473,12 +508,16 @@ public class FutureInfoActivityPresenter {
         return mInstrumentId;
     }
 
+    public void setInstrumentId(String instrumentId) {
+        mInstrumentId = instrumentId;
+    }
+
     public ViewPagerFragmentAdapter getmInfoPagerAdapter() {
         return mInfoPagerAdapter;
     }
 
-    public void setInstrumentId(String instrumentId) {
-        mInstrumentId = instrumentId;
+    public KlineDurationTitleAdapter getmKlineDurationTitleAdapter() {
+        return mKlineDurationTitleAdapter;
     }
 
     private void switchDuration(String durationTitle) {
@@ -508,7 +547,7 @@ public class FutureInfoActivityPresenter {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
         BaseChartFragment fragment = createFragmentByTitle(title, klineType);
         transaction.replace(R.id.fl_content_up, fragment, title);
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).
+        transaction.setTransition(FragmentTransaction.TRANSIT_NONE).
                 commit();
     }
 

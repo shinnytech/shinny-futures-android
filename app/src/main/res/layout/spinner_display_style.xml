@@ -3,8 +3,8 @@
     android:id="@+id/tv_Spinner"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/black_light"
+    android:background="@color/setting_content"
     android:gravity="center_vertical"
     android:padding="@dimen/padding_5dp"
-    android:textColor="@color/white"
+    android:textColor="@color/text_white"
     android:textSize="@dimen/font_size_normal" />

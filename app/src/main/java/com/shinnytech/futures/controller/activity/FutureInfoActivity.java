@@ -19,6 +19,7 @@ import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.FutureInfoActivityPresenter;
 import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.model.bean.eventbusbean.AverageEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
@@ -27,7 +28,7 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -42,7 +43,7 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONA
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_INSTRUMENT_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_COMMON_SWITCH;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_CHART_SETTING;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_FUTURE_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_SEARCH;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
@@ -51,7 +52,7 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
-import static com.shinnytech.futures.constants.CommonConstants.FUTURE_INFO_ACTIVITY_TO_COMMON_SWITCH_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.FUTURE_INFO_ACTIVITY_TO_CHART_SETTING_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
@@ -103,12 +104,12 @@ public class FutureInfoActivity extends BaseActivity {
             quoteEntity = LatestFileManager.calculateCombineQuoteFull(quoteEntity);
         }
         mBinding.setQuote(quoteEntity);
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        refreshMD();
         sendSubscribeQuote(mInstrumentId);
     }
 
@@ -118,7 +119,7 @@ public class FutureInfoActivity extends BaseActivity {
             mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.toolbar));
             mToolbarTitle.setTextColor(Color.WHITE);
             mFutureInfoActivityPresenter.setToolbarTitle();
-            mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
+            mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
         } else {
             mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.off_line));
             mToolbarTitle.setTextColor(Color.BLACK);
@@ -146,7 +147,7 @@ public class FutureInfoActivity extends BaseActivity {
                         mToolbarTitle.setTextColor(Color.WHITE);
                         mFutureInfoActivityPresenter.setToolbarTitle();
                         mToolbarTitle.setTextSize(25);
-                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
+                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
                         break;
                 }
             }
@@ -220,7 +221,7 @@ public class FutureInfoActivity extends BaseActivity {
                         jsonObject.put(AMP_EVENT_OPTIONAL_DIRECTION, AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE);
                         insList.remove(mInstrumentId);
                         LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
-                        ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
+                        ToastUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
                         mMenuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
                     } else {
                         jsonObject.put(AMP_EVENT_OPTIONAL_DIRECTION, AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD);
@@ -228,7 +229,7 @@ public class FutureInfoActivity extends BaseActivity {
                         quoteEntity.setInstrument_id(mInstrumentId);
                         insList.put(mInstrumentId, quoteEntity);
                         LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
-                        ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
+                        ToastUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
                         mMenuItem.setIcon(R.mipmap.ic_favorite_white_24dp);
                     }
                     Amplitude.getInstance().logEvent(AMP_OPTIONAL_FUTURE_INFO, jsonObject);
@@ -331,7 +332,8 @@ public class FutureInfoActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == FUTURE_INFO_ACTIVITY_TO_COMMON_SWITCH_ACTIVITY){
+        if (requestCode == FUTURE_INFO_ACTIVITY_TO_CHART_SETTING_ACTIVITY) {
+            //刷新开关
             boolean mIsPosition = (boolean) SPUtils.get(sContext, CONFIG_POSITION_LINE, true);
             boolean mIsPending = (boolean) SPUtils.get(sContext, CONFIG_ORDER_LINE, true);
             boolean mIsAverage = (boolean) SPUtils.get(sContext, CONFIG_AVERAGE_LINE, true);
@@ -340,10 +342,15 @@ public class FutureInfoActivity extends BaseActivity {
             setUpEvent.setPending(mIsPending);
             setUpEvent.setPosition(mIsPosition);
             EventBus.getDefault().post(setUpEvent);
+            //重绘均线
+            EventBus.getDefault().post(new AverageEvent());
+            //刷新五档行情
             mFutureInfoActivityPresenter.updateMD5ViewVisibility();
+            //刷新k线周期
+            mFutureInfoActivityPresenter.getmKlineDurationTitleAdapter().update();
             JSONObject jsonObject = new JSONObject();
             try {
-                jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_COMMON_SWITCH);
+                jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_CHART_SETTING);
                 jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_FUTURE_INFO);
             } catch (JSONException e) {
                 e.printStackTrace();

@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/text_margin"
             android:text="@string/large_text"
-            android:textColor="@color/white"
+            android:textColor="@color/text_white"
             android:textSize="@dimen/font_size_normal" />
 
     </android.support.v4.widget.NestedScrollView>
@@ -38,7 +38,7 @@
             android:background="@drawable/activity_confirm_selector"
             android:gravity="center"
             android:text="@string/welcome_activity_disagree"
-            android:textColor="@color/white"
+            android:textColor="@color/text_white"
             android:textSize="@dimen/font_size_normal" />
 
         <Button
@@ -50,7 +50,7 @@
             android:background="@drawable/activity_confirm_selector"
             android:gravity="center"
             android:text="@string/welcome_activity_agree"
-            android:textColor="@color/white"
+            android:textColor="@color/text_white"
             android:textSize="@dimen/font_size_normal" />
     </LinearLayout>
 

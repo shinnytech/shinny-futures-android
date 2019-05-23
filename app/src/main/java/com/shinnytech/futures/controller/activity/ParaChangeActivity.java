@@ -13,7 +13,7 @@ import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ActivityParaChangeBinding;
 import com.shinnytech.futures.model.adapter.ParaContentAdapter;
 import com.shinnytech.futures.utils.SPUtils;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,12 +76,12 @@ public class ParaChangeActivity extends BaseActivity {
                         String data = itemViewHolder.mBinding.edValue.getText().toString();
                         int value = Integer.parseInt(data);
                         if (value < 0 && id == R.id.para_ma) {
-                            ToastNotificationUtils.showToast(BaseApplication.getContext(), "参数需要大于等于0");
+                            ToastUtils.showToast(BaseApplication.getContext(), "参数需要大于等于0");
                             return;
                         }
                         paras.add(data);
                     } catch (Exception e) {
-                        ToastNotificationUtils.showToast(BaseApplication.getContext(), "输入参数需为整数");
+                        ToastUtils.showToast(BaseApplication.getContext(), "输入参数需为整数");
                         return;
                     }
                 }
@@ -96,7 +96,7 @@ public class ParaChangeActivity extends BaseActivity {
                     default:
                         break;
                 }
-                ToastNotificationUtils.showToast(sContext, "参数已保存");
+                ToastUtils.showToast(sContext, "参数已保存");
             }
         });
 
@@ -115,7 +115,7 @@ public class ParaChangeActivity extends BaseActivity {
                     default:
                         return;
                 }
-                ToastNotificationUtils.showToast(sContext, "恢复默认");
+                ToastUtils.showToast(sContext, "恢复默认");
             }
         });
     }

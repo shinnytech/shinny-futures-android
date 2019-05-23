@@ -29,7 +29,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -346,7 +345,7 @@ public class LatestFileManager {
                         }
                     }
                     SEARCH_ENTITIES.put(instrument_id, searchEntity);
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                     continue;
                 }
@@ -512,13 +511,14 @@ public class LatestFileManager {
     public static int setTextViewColor(String data, String pre_settlement) {
         try {
             float value = Float.parseFloat(data) - Float.parseFloat(pre_settlement);
-            if (value < 0) return ContextCompat.getColor(BaseApplication.getContext(), R.color.text_green);
+            if (value < 0)
+                return ContextCompat.getColor(BaseApplication.getContext(), R.color.text_green);
             else if (value > 0)
                 return ContextCompat.getColor(BaseApplication.getContext(), R.color.text_red);
-            else return ContextCompat.getColor(BaseApplication.getContext(), R.color.white);
+            else return ContextCompat.getColor(BaseApplication.getContext(), R.color.text_white);
         } catch (Exception e) {
             e.printStackTrace();
-            return ContextCompat.getColor(BaseApplication.getContext(), R.color.white);
+            return ContextCompat.getColor(BaseApplication.getContext(), R.color.text_white);
         }
     }
 
@@ -787,15 +787,17 @@ public class LatestFileManager {
     public static List<String> getBrokerIdFromBuildConfig(String[] brokerIdOrigin) {
         List<String> brokerList = new ArrayList<>();
         if (brokerIdOrigin != null) {
-            for (int i = 0; i < brokerIdOrigin.length; i++) {
-                if (CommonConstants.KUAI_QI_XIAO_Q.equals(BuildConfig.BROKER_ID)
-                        && !BROKER_ID_SIMULATION.equals(brokerIdOrigin[i])) {
-                    brokerList.add(brokerIdOrigin[i]);
-                }else if (brokerIdOrigin[i] != null && brokerIdOrigin[i].contains(BuildConfig.BROKER_ID)) {
-                    brokerList.add(brokerIdOrigin[i]);
+            if (CommonConstants.KUAI_QI_XIAO_Q.equals(BuildConfig.BROKER_ID)) {
+                for (int i = 0; i < brokerIdOrigin.length; i++) {
+                    if (!BROKER_ID_SIMULATION.equals(brokerIdOrigin[i]))
+                        brokerList.add(brokerIdOrigin[i]);
+                }
+            } else {
+                for (int i = 0; i < brokerIdOrigin.length; i++) {
+                    if (brokerIdOrigin[i] != null && brokerIdOrigin[i].contains(BuildConfig.BROKER_ID))
+                        brokerList.add(brokerIdOrigin[i]);
                 }
             }
-
         } else if (BaseApplication.getWebSocketService() != null)
             BaseApplication.getWebSocketService().reConnectTD();
 

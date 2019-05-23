@@ -23,7 +23,7 @@ import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ActivitySettingBinding;
 import com.shinnytech.futures.model.adapter.SettingAdapter;
 import com.shinnytech.futures.model.bean.settingbean.SettingEntity;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -204,10 +204,10 @@ public class SubSettingActivity extends BaseActivity {
             if (activity != null) {
                 switch (msg.what) {
                     case HANDLER_MESSAGE_UPLOAD_SUCCESS:
-                        ToastNotificationUtils.showToast(BaseApplication.getContext(), "日志上传成功");
+                        ToastUtils.showToast(BaseApplication.getContext(), "日志上传成功");
                         break;
                     case HANDLER_MESSAGE_UPLOAD_FAILED:
-                        ToastNotificationUtils.showToast(BaseApplication.getContext(), "日志上传失败");
+                        ToastUtils.showToast(BaseApplication.getContext(), "日志上传失败");
                     default:
                         break;
                 }

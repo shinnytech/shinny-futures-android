@@ -36,6 +36,10 @@ public class OrderEntity implements Comparable<OrderEntity>, Serializable {
 
     private String seqno = "";
 
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
     public String getSeqno() {
         return seqno;
     }

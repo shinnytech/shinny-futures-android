@@ -105,24 +105,21 @@ public class YAxisRendererCurrentDay extends YAxisRenderer {
             }
 
             try {
+                float data = Float.parseFloat(text.replaceAll("[^\\d.-]", ""));
                 if (text.contains("%")) {
-                    if (text.contains("-")) {
-                        if (Float.parseFloat(text.replaceAll("[^\\d.]", "")) == 0) {
-                            text = text.replace("-", "");
-                            mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplication.getContext(), R.color.kline_text));
-                        } else {
-                            mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplication.getContext(), R.color.text_green));
-                        }
+                    if (data == 0) {
+                        text = text.replace("-", "");
+                        mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplication.getContext(), R.color.kline_text));
+                    } else if (data < 0) {
+                        mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplication.getContext(), R.color.text_green));
                     } else {
-                        if (Float.parseFloat(text.replaceAll("[^\\d.]", "")) > 0) {
-                            text = "+" + text;
-                            mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplication.getContext(), R.color.text_red));
-                        }
+                        text = "+" + text;
+                        mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplication.getContext(), R.color.text_red));
                     }
                 } else {
-                    if (Float.parseFloat(text.replaceAll("[^\\d.]", "")) > mYAxis.getBaseValue()) {
+                    if (data > mYAxis.getBaseValue()) {
                         mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplication.getContext(), R.color.text_red));
-                    } else if (Float.parseFloat(text.replaceAll("[^\\d.]", "")) < mYAxis.getBaseValue()) {
+                    } else if (data < mYAxis.getBaseValue()) {
                         mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplication.getContext(), R.color.text_green));
                     } else {
                         mAxisLabelPaint.setColor(ContextCompat.getColor(BaseApplication.getContext(), R.color.kline_text));
@@ -174,6 +171,7 @@ public class YAxisRendererCurrentDay extends YAxisRenderer {
         }
     }
 
+
     /**
      * Draws the LimitLines associated with this axis to the screen.
      *
@@ -190,8 +188,9 @@ public class YAxisRendererCurrentDay extends YAxisRenderer {
         float[] pts = mRenderLimitLinesBuffer;
         pts[0] = 0;
         pts[1] = 0;
-        Path limitLinePath = mRenderLimitLines;
+        final Path limitLinePath = mRenderLimitLines;
         limitLinePath.reset();
+
 
         for (int i = 0; i < limitLines.size(); i++) {
 
@@ -218,8 +217,9 @@ public class YAxisRendererCurrentDay extends YAxisRenderer {
             limitLinePath.lineTo(mViewPortHandler.contentRight(), pts[1]);
 
             c.drawPath(limitLinePath, mLimitLinePaint);
+
             limitLinePath.reset();
-            // a.json.drawLines(pts, mLimitLinePaint);
+            // c.drawLines(pts, mLimitLinePaint);
 
             String label = l.getLabel();
 
@@ -265,11 +265,12 @@ public class YAxisRendererCurrentDay extends YAxisRenderer {
                     mLimitLinePaint.setTextAlign(Paint.Align.LEFT);
                     c.drawText(label,
                             mViewPortHandler.offsetLeft() + xOffset,
-                            pts[1], mLimitLinePaint);
+                            pts[1] + yOffset, mLimitLinePaint);
                 }
             }
 
             c.restoreToCount(clipRestoreCount);
         }
     }
+
 }

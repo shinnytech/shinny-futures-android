@@ -25,7 +25,7 @@
             app:autoSizeStepGranularity="1sp"
             android:paddingBottom="@dimen/padding_4dp"
             android:paddingTop="@dimen/padding_4dp"
-            android:textColor="@color/white"
+            android:textColor="@color/text_yellow"
             android:textSize="@dimen/font_size_normal" />
 
         <TextView
@@ -55,7 +55,7 @@
             app:autoSizeStepGranularity="1sp"
             android:paddingBottom="@dimen/padding_4dp"
             android:paddingTop="@dimen/padding_4dp"
-            android:textColor="@color/white"
+            android:textColor="@color/text_white"
             android:textSize="@dimen/font_size_normal" />
 
         <TextView
@@ -70,7 +70,7 @@
             app:autoSizeStepGranularity="1sp"
             android:paddingBottom="@dimen/padding_4dp"
             android:paddingTop="@dimen/padding_4dp"
-            android:textColor="@color/white"
+            android:textColor="@color/text_white"
             android:textSize="@dimen/font_size_normal" />
 
         <TextView
@@ -85,7 +85,7 @@
             app:autoSizeStepGranularity="1sp"
             android:paddingBottom="@dimen/padding_4dp"
             android:paddingTop="@dimen/padding_4dp"
-            android:textColor="@color/white"
+            android:textColor="@color/text_white"
             android:textSize="@dimen/font_size_normal" />
 
         <TextView

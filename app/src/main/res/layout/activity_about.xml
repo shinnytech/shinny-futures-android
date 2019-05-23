@@ -10,7 +10,7 @@
         android:keepScreenOn="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black_light"
+        android:background="@color/setting_content"
         android:orientation="vertical">
 
         <include layout="@layout/view_toolbar"></include>
@@ -23,6 +23,7 @@
             android:layout_margin="@dimen/margin_10dp">
 
             <ImageView
+                android:id="@+id/icon"
                 android:src="@mipmap/ic_launcher"
                 android:layout_width="100dp"
                 android:layout_height="100dp" />
@@ -32,13 +33,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="快期小Q"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/line_width_half"
-            android:background="@color/black_dark"></View>
+            android:background="@color/quote_dialog_divider"></View>
 
         <LinearLayout
             android:layout_marginTop="@dimen/margin_5dp"
@@ -61,7 +62,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="官方网站"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:gravity="center_vertical|end"
@@ -76,13 +77,13 @@
                 android:layout_height="match_parent"
                 android:autoLink="web"
                 android:text="https://www.shinnytech.com"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/line_width_half"
-            android:background="@color/black_dark"></View>
+            android:background="@color/quote_dialog_divider"></View>
 
         <LinearLayout
             android:layout_marginTop="@dimen/margin_5dp"
@@ -105,7 +106,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="技术支持"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:gravity="center_vertical|end"
@@ -120,13 +121,13 @@
                 android:layout_height="match_parent"
                 android:autoLink="phone"
                 android:text="400-820-7951"
-                android:textColor="@color/gray" />
+                android:textColor="@color/login_gray" />
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/line_width_half"
-            android:background="@color/black_dark"></View>
+            android:background="@color/quote_dialog_divider"></View>
 
         <LinearLayout
             android:layout_marginTop="@dimen/margin_5dp"
@@ -149,7 +150,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="软件版本"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:id="@+id/version"
@@ -164,7 +165,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="1.0.0"
-                android:textColor="@color/gray" />
+                android:textColor="@color/login_gray" />
 
             <TextView
                 android:id="@+id/check_version"
@@ -184,7 +185,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/line_width_half"
-            android:background="@color/black_dark"></View>
+            android:background="@color/quote_dialog_divider"></View>
 
         <LinearLayout
             android:layout_marginBottom="@dimen/margin_10dp"
@@ -200,7 +201,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="信易科技 版权所有"
-                android:textColor="@color/gray" />
+                android:textColor="@color/login_gray" />
 
             <TextView
                 android:gravity="center"
@@ -208,7 +209,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Copyright(c)2006-2019 ShinnyTech. All Rights Reserved"
-                android:textColor="@color/gray" />
+                android:textColor="@color/login_gray" />
         </LinearLayout>
 
     </LinearLayout>

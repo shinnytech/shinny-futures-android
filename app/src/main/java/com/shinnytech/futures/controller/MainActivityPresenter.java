@@ -54,7 +54,7 @@ import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener
 import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.SPUtils;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
@@ -85,8 +85,6 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_MENU_TRANSFER
 import static com.shinnytech.futures.constants.CommonConstants.AMP_MENU_TRANSFER_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_QUOTE_TAB;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_IN;
-import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
@@ -95,6 +93,8 @@ import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.SHANGHAI;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_DIRECTION;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_IN;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOU;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
@@ -169,34 +169,34 @@ public class MainActivityPresenter {
         mBinding.navigationRightRv.setLayoutManager(new LinearLayoutManager(mMainActivity));
         mBinding.navigationRightRv.setItemAnimator(new DefaultItemAnimator());
         NavigationRightEntity menu0 = new NavigationRightEntity();
-        menu0.setIcon(R.mipmap.ic_account_circle_white_18dp);
+        menu0.setIcon(R.mipmap.ic_perm_identity_white_18dp);
         menu0.setContent(CommonConstants.LOGOUT);
         NavigationRightEntity menu1 = new NavigationRightEntity();
         menu1.setIcon(R.mipmap.ic_settings_white_18dp);
         menu1.setContent(CommonConstants.SETTING);
         NavigationRightEntity menu9 = new NavigationRightEntity();
-        menu9.setIcon(R.mipmap.ic_settings_white_18dp);
+        menu9.setIcon(R.mipmap.ic_build_white_18dp);
         menu9.setContent(CommonConstants.OPTIONAL_SETTING);
         NavigationRightEntity menu2 = new NavigationRightEntity();
-        menu2.setIcon(R.mipmap.ic_assessment_white_18dp);
+        menu2.setIcon(R.mipmap.ic_account_balance_white_18dp);
         menu2.setContent(CommonConstants.ACCOUNT);
         NavigationRightEntity menu3 = new NavigationRightEntity();
-        menu3.setIcon(R.mipmap.ic_assignment_turned_in_white_18dp);
+        menu3.setIcon(R.mipmap.ic_fingerprint_white_18dp);
         menu3.setContent(CommonConstants.PASSWORD);
         NavigationRightEntity menu4 = new NavigationRightEntity();
-        menu4.setIcon(R.mipmap.ic_account_balance_white_18dp);
+        menu4.setIcon(R.mipmap.ic_flight_land_white_18dp);
         menu4.setContent(CommonConstants.TRANSFER_IN);
         NavigationRightEntity menu5 = new NavigationRightEntity();
-        menu5.setIcon(R.mipmap.ic_account_balance_white_18dp);
+        menu5.setIcon(R.mipmap.ic_flight_takeoff_white_18dp);
         menu5.setContent(CommonConstants.TRANSFER_OUT);
         NavigationRightEntity menu10 = new NavigationRightEntity();
-        menu10.setIcon(R.mipmap.ic_supervisor_account_white_18dp);
+        menu10.setIcon(R.mipmap.ic_settings_remote_white_18dp);
         menu10.setContent(CommonConstants.CONDITIONAL_ORDER);
         NavigationRightEntity menu6 = new NavigationRightEntity();
         menu6.setIcon(R.mipmap.ic_supervisor_account_white_18dp);
         menu6.setContent(CommonConstants.OPEN_ACCOUNT);
         NavigationRightEntity menu7 = new NavigationRightEntity();
-        menu7.setIcon(R.mipmap.ic_find_in_page_white_18dp);
+        menu7.setIcon(R.mipmap.ic_visibility_white_18dp);
         menu7.setContent(CommonConstants.FEEDBACK);
         NavigationRightEntity menu8 = new NavigationRightEntity();
         menu8.setIcon(R.mipmap.ic_info_white_18dp);
@@ -346,7 +346,7 @@ public class MainActivityPresenter {
                         break;
                     case CommonConstants.CONDITIONAL_ORDER:
                         Amplitude.getInstance().logEvent(AMP_CONDITIONAL_ORDER);
-                        ToastNotificationUtils.showToast(sContext, "敬请期待！");
+                        ToastUtils.showToast(sContext, "敬请期待！");
                         break;
                     case CommonConstants.OPEN_ACCOUNT:
                         try {
@@ -442,8 +442,10 @@ public class MainActivityPresenter {
                                         }
                                     }));
 
-                }else mTitleDialogAdapter.updateList(mTitleList, mToolbarTitle.getText().toString());
-                if (!mTitleDialog.isShowing() && !ACCOUNT_DETAIL.equals(mToolbarTitle.getText().toString())) mTitleDialog.show();
+                } else
+                    mTitleDialogAdapter.updateList(mTitleList, mToolbarTitle.getText().toString());
+                if (!mTitleDialog.isShowing() && !ACCOUNT_DETAIL.equals(mToolbarTitle.getText().toString()))
+                    mTitleDialog.show();
             }
         });
 
@@ -458,7 +460,7 @@ public class MainActivityPresenter {
                         if (OPTIONAL.equals(title)) mBinding.llNavigation.setVisibility(View.GONE);
                         else mBinding.llNavigation.setVisibility(View.VISIBLE);
                         mToolbarTitle.setText(title);
-                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_expand_more_white_36dp, 0);
+                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
                         break;
                     case R.id.trade:
                         Amplitude.getInstance().logEvent(AMP_ACCOUNT_TAB);
@@ -576,7 +578,7 @@ public class MainActivityPresenter {
         Paint textPaint = new Paint();
         textPaint.setTextSize(DensityUtils.sp2px(sContext, 25));
         textPaint.getTextBounds(mTitle, 0, mTitle.length(), bounds);
-        int width = bounds.width() + DensityUtils.dp2px(sContext, 40);
+        int width = bounds.width() + DensityUtils.dp2px(sContext, 25);
         ViewGroup.LayoutParams layoutParams = mToolbarTitle.getLayoutParams();
         layoutParams.height = sContext.getResources().getDimensionPixelSize(R.dimen.text_view_height);
         layoutParams.width = width;

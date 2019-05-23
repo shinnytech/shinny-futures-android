@@ -17,7 +17,7 @@
         android:keepScreenOn="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black_light"
+        android:background="@color/setting_content"
         android:orientation="vertical">
 
         <include layout="@layout/view_toolbar"/>
@@ -39,7 +39,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@string/account_activity_user"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:textAlignment="textEnd"
@@ -54,7 +54,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@{account.user_id}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
         <LinearLayout
@@ -74,7 +74,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@string/account_activity_date"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:textAlignment="textEnd"
@@ -89,7 +89,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@{TimeUtils.nowTime}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
         <LinearLayout
@@ -109,7 +109,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@string/account_activity_static_balance"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:textAlignment="textEnd"
@@ -124,7 +124,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@{MathUtils.round(account.static_balance, 2)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
         <LinearLayout
@@ -144,7 +144,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@string/account_activity_close_profit"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:textAlignment="textEnd"
@@ -159,7 +159,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@{MathUtils.round(account.close_profit, 2)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
         <LinearLayout
@@ -179,7 +179,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@string/account_activity_position_profit"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:textAlignment="textEnd"
@@ -194,7 +194,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@{MathUtils.round(account.position_profit, 2)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
         <LinearLayout
@@ -214,7 +214,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@string/account_activity_commission"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:textAlignment="textEnd"
@@ -229,7 +229,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@{MathUtils.round(account.commission, 2)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
         <View
@@ -255,7 +255,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@string/account_activity_balance"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:textAlignment="textEnd"
@@ -270,7 +270,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@{MathUtils.round(account.balance, 2)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
         <LinearLayout
@@ -290,7 +290,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@string/account_activity_margin_using"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:textAlignment="textEnd"
@@ -305,7 +305,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@{MathUtils.round(account.margin, 2)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
         <LinearLayout
@@ -325,7 +325,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@string/account_activity_margin_frozen"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:textAlignment="textEnd"
@@ -340,7 +340,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@{MathUtils.round(account.frozen_margin, 2)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
         <LinearLayout
@@ -360,7 +360,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@string/account_activity_commission_frozen"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:textAlignment="textEnd"
@@ -375,7 +375,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@{MathUtils.round(account.frozen_commission, 2)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
         <LinearLayout
@@ -395,7 +395,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@string/account_activity_premium_frozen"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:textAlignment="textEnd"
@@ -410,7 +410,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@{MathUtils.round(account.frozen_premium, 2)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
         <View
@@ -436,7 +436,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@string/account_activity_available"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:textAlignment="textEnd"
@@ -451,7 +451,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@{MathUtils.round(account.available, 2)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
         <View
@@ -477,7 +477,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@string/account_activity_deposit"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:textAlignment="textEnd"
@@ -492,7 +492,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@{MathUtils.round(account.deposit, 2)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
         <LinearLayout
@@ -512,7 +512,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@string/account_activity_withdraw"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
 
             <TextView
                 android:textAlignment="textEnd"
@@ -527,7 +527,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:text="@{MathUtils.round(account.withdraw, 2)}"
-                android:textColor="@color/white" />
+                android:textColor="@color/text_white" />
         </LinearLayout>
 
     </LinearLayout>

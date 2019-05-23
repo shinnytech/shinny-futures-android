@@ -90,7 +90,7 @@ public class OptionalAdapter extends RecyclerView.Adapter<OptionalAdapter.ItemVi
             if (mData == null || mData.size() == 0) return;
             String ins = mData.get(getLayoutPosition());
             SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(ins);
-            if (searchEntity == null)mBinding.tvIdDialog.setText(ins);
+            if (searchEntity == null) mBinding.tvIdDialog.setText(ins);
             else mBinding.tvIdDialog.setText(searchEntity.getInstrumentName());
 
 

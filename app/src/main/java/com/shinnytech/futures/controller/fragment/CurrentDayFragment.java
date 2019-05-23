@@ -115,7 +115,8 @@ public class CurrentDayFragment extends BaseChartFragment {
 
         QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(instrument_id);
         try {
-            if (quoteEntity != null) preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
+            if (quoteEntity != null)
+                preSettlement = Float.parseFloat(quoteEntity.getPre_settlement());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -124,8 +125,8 @@ public class CurrentDayFragment extends BaseChartFragment {
     @Override
     protected void initData() {
         super.initData();
-        mColorOneMinuteChart = ContextCompat.getColor(getActivity(), R.color.kline_one_minute);
-        mColorAverageChart = ContextCompat.getColor(getActivity(), R.color.kline_average);
+        mColorOneMinuteChart = ContextCompat.getColor(getActivity(), R.color.text_white);
+        mColorAverageChart = ContextCompat.getColor(getActivity(), R.color.kline_ma2);
         mSimpleDateFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
         mFragmentType = CURRENT_DAY_FRAGMENT;
         mKlineType = CURRENT_DAY;
@@ -214,6 +215,8 @@ public class CurrentDayFragment extends BaseChartFragment {
             @Override
             public void onLongPress(MotionEvent e) {
                 super.onLongPress(e);
+                int height = (int) (mTopChartViewBase.getViewPortHandler().contentHeight());
+                ((CurrentDayMarkerView) mTopChartViewBase.getMarker()).resize(height);
                 mIsLongPress = true;
                 Highlight h = mTopChartViewBase.getHighlightByTouchPoint(e.getX(), e.getY());
                 if (h != null) {
@@ -241,10 +244,10 @@ public class CurrentDayFragment extends BaseChartFragment {
                 // Y轴的坐标位移大于FLING_MIN_DISTANCE，且移动速度大于FLING_MIN_VELOCITY个像素/秒
 
                 String ins = "";
-                if (Math.abs(e1.getX() - e2.getX()) > FLING_MAX_DISTANCE_X)return false;
+                if (Math.abs(e1.getX() - e2.getX()) > FLING_MAX_DISTANCE_X) return false;
 
                 //向上
-                if (e1.getY() - e2.getY() > FLING_MIN_DISTANCE_Y && Math.abs(velocityY) > FLING_MIN_VELOCITY){
+                if (e1.getY() - e2.getY() > FLING_MIN_DISTANCE_Y && Math.abs(velocityY) > FLING_MIN_VELOCITY) {
                     ins = getNextInstrumentId(true);
                 }
                 //向下
@@ -252,7 +255,7 @@ public class CurrentDayFragment extends BaseChartFragment {
                     ins = getNextInstrumentId(false);
                 }
 
-                if (!ins.isEmpty()){
+                if (!ins.isEmpty()) {
                     IdEvent idEvent = new IdEvent();
                     idEvent.setInstrument_id(ins);
                     EventBus.getDefault().post(idEvent);
@@ -389,7 +392,7 @@ public class CurrentDayFragment extends BaseChartFragment {
      * description: 载入数据
      */
     @Override
-    protected void refreshKline() {
+    protected void drawKline() {
         try {
             //开始加载数据
             if (mTopChartViewBase.getData() != null && mTopChartViewBase.getData().getDataSetCount() > 0) {
@@ -516,9 +519,6 @@ public class CurrentDayFragment extends BaseChartFragment {
                 mTopChartViewBase.getXAxis().setAxisMinimum(topCombinedData.getXMin() - 0.35f);
                 ((MyXAxis) mTopChartViewBase.getXAxis()).setXLabels(mStringSparseArray);
                 mTopChartViewBase.invalidate();
-                int height = (int) (mTopChartViewBase.getViewPortHandler().contentHeight() * 0.9);
-                int width = (int) (mTopChartViewBase.getViewPortHandler().contentWidth() / 6);
-                ((CurrentDayMarkerView) mTopChartViewBase.getMarker()).resize(width, height);
 
                 mMiddleChartViewBase.setData(middleCombinedData);//当前屏幕会显示所有的数据
                 mMiddleChartViewBase.setVisibleXRangeMinimum(mTradingDayEndIndex - mTradingDayStartIndex);
@@ -534,6 +534,19 @@ public class CurrentDayFragment extends BaseChartFragment {
             String exception = error.toString();
             LogUtils.e(exception, true);
         }
+    }
+
+    @Override
+    protected void clearKline() {
+        preSettlement = 1;
+        xVals.clear();
+        mStringSparseArray.clear();
+        removeOrderLimitLines();
+        removePositionLimitLines();
+        mTopChartViewBase.clear();
+        mMiddleChartViewBase.clear();
+        mSumVolume = 0.0f;
+        mSumCV = 0.0f;
     }
 
     /**
@@ -602,7 +615,7 @@ public class CurrentDayFragment extends BaseChartFragment {
         if (isHighlight) {
             refreshYAxisRange(set);
             set.setHighlightLineWidth(0.7f);
-            set.setHighLightColor(ContextCompat.getColor(getActivity(), R.color.white));
+            set.setHighLightColor(ContextCompat.getColor(getActivity(), R.color.text_white));
         } else {
             set.setHighlightEnabled(false);
         }
@@ -661,24 +674,20 @@ public class CurrentDayFragment extends BaseChartFragment {
         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id_new);
         if (instrument_id.equals(instrument_id_new)) return;
         instrument_id = instrument_id_new;
-        preSettlement = 1;
-        xVals.clear();
-        mStringSparseArray.clear();
-        removeOrderLimitLines();
-        removePositionLimitLines();
-        mTopChartViewBase.clear();
-        mMiddleChartViewBase.clear();
-        mSumVolume = 0.0f;
-        mSumCV = 0.0f;
-        if (BaseApplication.getWebSocketService() != null)
-            BaseApplication.getWebSocketService().sendSetChart(instrument_id);
+
+        clearKline();
 
         if (instrument_id.contains("KQ") && searchEntity != null)
             instrument_id_transaction = searchEntity.getUnderlying_symbol();
         else instrument_id_transaction = instrument_id;
 
+        drawKline();
+
         if (mIsPosition) addPositionLimitLines();
         if (mIsPending) addOrderLimitLines();
+
+        if (BaseApplication.getWebSocketService() != null)
+            BaseApplication.getWebSocketService().sendSetChart(instrument_id);
     }
 
     /**
@@ -701,27 +710,6 @@ public class CurrentDayFragment extends BaseChartFragment {
         }
 
         mTopChartViewBase.invalidate();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 
     /**
@@ -833,15 +821,15 @@ public class CurrentDayFragment extends BaseChartFragment {
                 try {
                     int volume_delta = Integer.parseInt(volumeDelta);
                     if (volume_delta < 0)
-                        this.volumeDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_green));
+                        this.volumeDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_green));
                     else
-                        this.volumeDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_red));
+                        this.volumeDelta.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_red));
 
                     int oi_delta = Integer.parseInt(deltaOi);
                     if (oi_delta < 0)
-                        this.deltaOi.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_green));
+                        this.deltaOi.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_green));
                     else
-                        this.deltaOi.setTextColor(ContextCompat.getColor(getActivity(), R.color.marker_red));
+                        this.deltaOi.setTextColor(ContextCompat.getColor(getActivity(), R.color.text_red));
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

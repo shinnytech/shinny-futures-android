@@ -9,7 +9,7 @@
         android:keepScreenOn="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black_light"
+        android:background="@color/setting_content"
         android:orientation="vertical">
 
         <include layout="@layout/view_toolbar"></include>
@@ -32,7 +32,7 @@
                         android:id="@+id/para_ma"
                         android:checked="true"
                         android:background="@drawable/activity_para_change_checked_selector"
-                        android:textColor="@color/white"
+                        android:textColor="@color/text_white"
                         android:layout_gravity="center"
                         android:gravity="center"
                         android:text="MA"
@@ -82,7 +82,7 @@
                     android:focusable="true"
                     android:id="@+id/para_save"
                     android:textSize="@dimen/font_size_normal"
-                    android:textColor="@color/white"
+                    android:textColor="@color/text_white"
                     android:background="@drawable/activity_para_change_pressed_selector"
                     android:layout_margin="@dimen/margin_5dp"
                     android:gravity="center"
@@ -96,7 +96,7 @@
                     android:focusable="true"
                     android:id="@+id/para_reset"
                     android:textSize="@dimen/font_size_normal"
-                    android:textColor="@color/white"
+                    android:textColor="@color/text_white"
                     android:background="@drawable/activity_para_change_pressed_selector"
                     android:layout_margin="@dimen/margin_5dp"
                     android:gravity="center"

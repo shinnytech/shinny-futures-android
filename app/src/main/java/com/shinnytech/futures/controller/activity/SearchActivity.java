@@ -30,7 +30,7 @@ import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
-import com.shinnytech.futures.utils.ToastNotificationUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 import com.umeng.analytics.MobclickAgent;
 
 import org.greenrobot.eventbus.EventBus;
@@ -47,7 +47,6 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONA
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_INSTRUMENT_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_FUTURE_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_MAIN;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_SEARCH;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_OPTIONAL_SEARCH;
@@ -146,7 +145,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
                         jsonObject.put(AMP_EVENT_OPTIONAL_DIRECTION, AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE);
                         insList.remove(instrument_id);
                         LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
-                        ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
+                        ToastUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
                         ((ImageView) view).setImageResource(R.mipmap.ic_favorite_border_white_24dp);
                     } else {
                         jsonObject.put(AMP_EVENT_OPTIONAL_DIRECTION, AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD);
@@ -154,7 +153,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
                         quoteEntity.setInstrument_id(instrument_id);
                         insList.put(instrument_id, quoteEntity);
                         LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
-                        ToastNotificationUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
+                        ToastUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
                         ((ImageView) view).setImageResource(R.mipmap.ic_favorite_white_24dp);
                     }
                     Amplitude.getInstance().logEvent(AMP_OPTIONAL_SEARCH, jsonObject);

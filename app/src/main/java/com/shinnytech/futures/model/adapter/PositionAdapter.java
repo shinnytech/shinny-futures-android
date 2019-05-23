@@ -32,10 +32,22 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
 
     private Context sContext;
     private List<com.shinnytech.futures.model.bean.accountinfobean.PositionEntity> mPositionData;
+    private String mHighlightIns;
 
     public PositionAdapter(Context context, List<com.shinnytech.futures.model.bean.accountinfobean.PositionEntity> positionData) {
         this.sContext = context;
         this.mPositionData = positionData;
+    }
+
+    public void setHighlightIns(String ins) {
+        mHighlightIns = ins;
+    }
+
+    public void updateHighlightIns(String ins) {
+        if (ins != null && !ins.equals(mHighlightIns)) {
+            mHighlightIns = ins;
+            notifyDataSetChanged();
+        }
     }
 
     public List<com.shinnytech.futures.model.bean.accountinfobean.PositionEntity> getData() {
@@ -98,18 +110,25 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
             if (positionEntity == null) return;
 
             try {
-                //合约详情页合约高亮
-                boolean isHighlight = positionEntity.isHighlight();
-                if (isHighlight)mBinding.positionBackground.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_highlight_touch_bg));
-                else mBinding.positionBackground.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_touch_bg));
-
                 String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
+
+                if (mHighlightIns != null) {
+                    //合约详情页合约高亮
+                    boolean isHighlight = instrument_id.equals(mHighlightIns);
+                    if (isHighlight)
+                        mBinding.positionBackground.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_highlight_touch_bg));
+                    else
+                        mBinding.positionBackground.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_touch_bg));
+                }
+
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
                 mBinding.positionName.setText(searchEntity == null ? positionEntity.getInstrument_id() : searchEntity.getInstrumentName());
 
-                String available_long = MathUtils.subtract(positionEntity.getVolume_long(), positionEntity.getVolume_long_frozen());
+                String available_long = MathUtils.subtract(positionEntity.getVolume_long(),
+                        MathUtils.add(positionEntity.getVolume_long_frozen_his(), positionEntity.getVolume_long_frozen_today()));
                 int volume_long = Integer.parseInt(positionEntity.getVolume_long());
-                String available_short = MathUtils.subtract(positionEntity.getVolume_short(), positionEntity.getVolume_short_frozen());
+                String available_short = MathUtils.subtract(positionEntity.getVolume_short(),
+                        MathUtils.add(positionEntity.getVolume_short_frozen_his(), positionEntity.getVolume_short_frozen_today()));
                 int volume_short = Integer.parseInt(positionEntity.getVolume_short());
                 float profit = 0;
                 if (volume_long != 0 && volume_short == 0) {
@@ -134,7 +153,7 @@ public class PositionAdapter extends RecyclerView.Adapter<PositionAdapter.ItemVi
                 else if (profit > 0)
                     mBinding.positionProfit.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
                 else
-                    mBinding.positionProfit.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+                    mBinding.positionProfit.setTextColor(ContextCompat.getColor(sContext, R.color.text_white));
 
             } catch (Exception e) {
                 e.printStackTrace();

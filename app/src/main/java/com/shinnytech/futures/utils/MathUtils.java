@@ -1,9 +1,5 @@
 package com.shinnytech.futures.utils;
 
-import android.support.v4.content.ContextCompat;
-
-import com.shinnytech.futures.R;
-
 import java.math.BigDecimal;
 
 /**
@@ -180,10 +176,22 @@ public class MathUtils {
 
     }
 
-    public static boolean lower(String data1, String data2){
+    public static boolean isZero(String data) {
+        try {
+            if (data == null || "".equals(data) || "-".equals(data)) return false;
+            float value = Float.parseFloat(data);
+            if (value == 0) return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean lower(String data1, String data2) {
         try {
             if (data1 == null || data2 == null ||
-                    "".equals(data1)||"-".equals(data1)||"".equals(data2)||"-".equals(data2)) return false;
+                    "".equals(data1) || "-".equals(data1) || "".equals(data2) || "-".equals(data2))
+                return false;
             float value = Float.parseFloat(data1) - Float.parseFloat(data2);
             if (value < 0) return true;
         } catch (Exception e) {
@@ -192,10 +200,11 @@ public class MathUtils {
         return false;
     }
 
-    public static boolean upper(String data1, String data2){
+    public static boolean upper(String data1, String data2) {
         try {
             if (data1 == null || data2 == null ||
-                    "".equals(data1)||"-".equals(data1)||"".equals(data2)||"-".equals(data2)) return false;
+                    "".equals(data1) || "-".equals(data1) || "".equals(data2) || "-".equals(data2))
+                return false;
             float value = Float.parseFloat(data1) - Float.parseFloat(data2);
             if (value > 0) return true;
         } catch (Exception e) {

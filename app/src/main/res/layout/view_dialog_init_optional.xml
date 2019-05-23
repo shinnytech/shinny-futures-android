@@ -1,7 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/optional_dialog_width"
-    android:layout_height="@dimen/optional_dialog_width"
-    android:background="@color/dialog_optional_out"
+    android:layout_height="@dimen/optional_dialog_height"
+    android:background="@drawable/dialog_quote_recommend_background"
     android:orientation="vertical">
 
     <TextView
@@ -13,9 +13,10 @@
         android:layout_margin="@dimen/margin_10dp"
         android:text="@string/init_optional"
         android:textColor="@color/dialog_optional_out_text"
-        android:textSize="@dimen/font_size_normal_high" />
+        android:textSize="@dimen/font_size_normal_more" />
 
     <ProgressBar
+        android:backgroundTint="@color/text_red"
         android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />

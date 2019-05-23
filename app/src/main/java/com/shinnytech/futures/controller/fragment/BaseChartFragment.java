@@ -28,7 +28,6 @@ import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -46,11 +45,14 @@ import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_L
 import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
+import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.SHANGHAI;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_FINISHED;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOU;
@@ -68,7 +70,7 @@ import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST
  */
 public class BaseChartFragment extends LazyLoadFragment {
 
-    protected static final int FLING_MAX_DISTANCE_X = 100;// X轴移动最大距离
+    protected static final int FLING_MAX_DISTANCE_X = 300;// X轴移动最大距离
     protected static final int FLING_MIN_DISTANCE_Y = 200;// Y轴移动最小距离
     protected static final int FLING_MIN_VELOCITY = 200;// 移动最大速度
 
@@ -138,6 +140,11 @@ public class BaseChartFragment extends LazyLoadFragment {
      * description: 挂单合约手数
      */
     protected Map<String, Integer> mOrderVolumes;
+    /**
+     * date: 2019/5/22
+     * description: 目前合约所在的列表
+     */
+    protected List<String> mInsList;
     protected DataManager sDataManager;
     protected BroadcastReceiver mReceiver;
     protected BroadcastReceiver mReceiver1;
@@ -158,7 +165,7 @@ public class BaseChartFragment extends LazyLoadFragment {
         try {
             switch (mDataString) {
                 case MD_MESSAGE:
-                    refreshKline();
+                    drawKline();
                     break;
                 case TD_MESSAGE:
                     refreshTrade();
@@ -182,6 +189,7 @@ public class BaseChartFragment extends LazyLoadFragment {
         EventBus.getDefault().register(this);
         initData();
         initChart();
+        initInsList();
         return mViewDataBinding.getRoot();
     }
 
@@ -202,8 +210,67 @@ public class BaseChartFragment extends LazyLoadFragment {
 
         mIsPosition = (boolean) SPUtils.get(BaseApplication.getContext(), CONFIG_POSITION_LINE, true);
         mIsPending = (boolean) SPUtils.get(BaseApplication.getContext(), CONFIG_ORDER_LINE, true);
-        if (mIsPosition) addPositionLimitLines();
-        if (mIsPending) addOrderLimitLines();
+
+    }
+
+    /**
+     * date: 2019/5/22
+     * author: chenli
+     * description: 初始化本合约所在列表
+     */
+    private void initInsList() {
+        String title = DataManager.getInstance().EXCHANGE_ID;
+        Map<String, QuoteEntity> map = new HashMap<>();
+        switch (title) {
+            case OPTIONAL:
+                map = LatestFileManager.getOptionalInsList();
+                break;
+            case DOMINANT:
+                map = LatestFileManager.getMainInsList();
+                break;
+            case SHANGHAI:
+                map = LatestFileManager.getShangqiInsList();
+                break;
+            case NENGYUAN:
+                map = LatestFileManager.getNengyuanInsList();
+                break;
+            case DALIAN:
+                map = LatestFileManager.getDalianInsList();
+                break;
+            case ZHENGZHOU:
+                map = LatestFileManager.getZhengzhouInsList();
+                break;
+            case ZHONGJIN:
+                map = LatestFileManager.getZhongjinInsList();
+                break;
+            case DALIANZUHE:
+                map = LatestFileManager.getDalianzuheInsList();
+                break;
+            case ZHENGZHOUZUHE:
+                map = LatestFileManager.getZhengzhouzuheInsList();
+                break;
+            default:
+                break;
+        }
+        mInsList = new ArrayList<>(map.keySet());
+        if (OPTIONAL.equals(title)) {
+            DataManager dataManager = DataManager.getInstance();
+            UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.USER_ID);
+            if (userEntity != null) {
+                for (PositionEntity positionEntity : userEntity.getPositions().values()) {
+                    try {
+                        int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+                        int volume_short = Integer.parseInt(positionEntity.getVolume_short());
+                        String ins = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
+                        if ((volume_long != 0 || volume_short != 0) && !mInsList.contains(ins))
+                            mInsList.add(ins);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
     }
 
     protected void initData() {
@@ -288,7 +355,15 @@ public class BaseChartFragment extends LazyLoadFragment {
      * author: chenli
      * description: 刷新行情信息
      */
-    protected void refreshKline() {
+    protected void drawKline() {
+    }
+
+    /**
+     * date: 2019/5/12
+     * author: chenli
+     * description: 清空行情图
+     */
+    protected void clearKline() {
     }
 
     /**
@@ -306,12 +381,13 @@ public class BaseChartFragment extends LazyLoadFragment {
                         (orderEntity.getExchange_id() + "." + orderEntity.getInstrument_id())
                                 .equals(instrument_id_transaction)) {
                     String key = orderEntity.getKey();
+
                     if (!mOrderLimitLines.containsKey(key)) {
-                        if ("ALIVE".equals(orderEntity.getStatus())) {
+                        if (STATUS_ALIVE.equals(orderEntity.getStatus())) {
                             addOneOrderLimitLine(orderEntity);
                         }
                     } else {
-                        if ("FINISHED".equals(orderEntity.getStatus())) {
+                        if (STATUS_FINISHED.equals(orderEntity.getStatus())) {
                             removeOneOrderLimitLine(key);
                         }
                     }
@@ -325,12 +401,12 @@ public class BaseChartFragment extends LazyLoadFragment {
                 //添加多头持仓线
                 addLongPositionLimitLine();
             } else {
-                //刷新空头持仓线
+                //刷新多头持仓线
                 refreshLongPositionLimitLine();
             }
 
             if (!mPositionLimitLines.containsKey(key + "1")) {
-                //添加多头持仓线
+                //添加空持仓线
                 addShortPositionLimitLine();
             } else {
                 //刷新空头持仓线
@@ -365,8 +441,8 @@ public class BaseChartFragment extends LazyLoadFragment {
             int volume_long = Integer.parseInt(positionEntity.getVolume_long());
             if (volume_long != 0) {
                 String limit_long = LatestFileManager.saveScaleByPtick(positionEntity.getOpen_price_long(), key);
-                String label_long = positionEntity.getInstrument_id() + "@" + limit_long + "/" + volume_long + "手";
-                generateLimitLine(Float.valueOf(limit_long), label_long, mColorBuy, key + "0", volume_long);
+                String label_long = limit_long + "/" + volume_long + "手";
+                generateLimitLine(Float.valueOf(limit_long), label_long, mColorBuy, key + "0", volume_long, LimitLine.LimitLabelPosition.LEFT_TOP);
             }
         } catch (NumberFormatException ex) {
             ex.printStackTrace();
@@ -389,8 +465,8 @@ public class BaseChartFragment extends LazyLoadFragment {
             int volume_short = Integer.parseInt(positionEntity.getVolume_short());
             if (volume_short != 0) {
                 String limit_short = LatestFileManager.saveScaleByPtick(positionEntity.getOpen_price_short(), key);
-                String label_short = positionEntity.getInstrument_id() + "@" + limit_short + "/" + volume_short + "手";
-                generateLimitLine(Float.valueOf(limit_short), label_short, mColorSell, key + "1", volume_short);
+                String label_short = limit_short + "/" + volume_short + "手";
+                generateLimitLine(Float.valueOf(limit_short), label_short, mColorSell, key + "1", volume_short, LimitLine.LimitLabelPosition.LEFT_BOTTOM);
             }
         } catch (NumberFormatException ex) {
             ex.printStackTrace();
@@ -400,19 +476,20 @@ public class BaseChartFragment extends LazyLoadFragment {
     /**
      * date: 6/6/18
      * author: chenli
-     * description: 添加limitLine
+     * description: 添加一条持仓线
      */
-    private void generateLimitLine(float limit, String label, int color, String limitKey, Integer volume) {
+    private void generateLimitLine(float limit, String label, int color, String limitKey, Integer volume, LimitLine.LimitLabelPosition position) {
         LimitLine limitLine = new LimitLine(limit, label);
         limitLine.setLineWidth(0.7f);
         limitLine.enableDashedLine(10f, 10f, 0f);
         limitLine.setLineColor(color);
-        limitLine.setLabelPosition(LimitLine.LimitLabelPosition.LEFT_BOTTOM);
+        limitLine.setLabelPosition(position);
         limitLine.setTextSize(10f);
         limitLine.setTextColor(mColorText);
         mPositionLimitLines.put(limitKey, limitLine);
         mPositionVolumes.put(limitKey, volume);
         mTopChartViewBase.getAxisLeft().addLimitLine(limitLine);
+        mTopChartViewBase.invalidate();
     }
 
     /**
@@ -436,14 +513,15 @@ public class BaseChartFragment extends LazyLoadFragment {
                 LimitLine limitLine = mPositionLimitLines.get(limitKey);
                 int volume_long_l = mPositionVolumes.get(limitKey);
                 if (limitLine.getLimit() != limit_long || volume_long_l != volume_long) {
-                    String label_long = positionEntity.getInstrument_id() + "@" + limit_long_S + "/" + volume_long + "手";
+                    String label_long = limit_long_S + "/" + volume_long + "手";
                     mTopChartViewBase.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
                     mPositionLimitLines.remove(limitKey);
                     mPositionVolumes.remove(limitKey);
-                    generateLimitLine(limit_long, label_long, mColorBuy, limitKey, volume_long);
+                    generateLimitLine(limit_long, label_long, mColorBuy, limitKey, volume_long, LimitLine.LimitLabelPosition.LEFT_TOP);
                 }
             } else {
                 mTopChartViewBase.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
+                mTopChartViewBase.invalidate();
                 mPositionLimitLines.remove(limitKey);
                 mPositionVolumes.remove(limitKey);
             }
@@ -474,14 +552,15 @@ public class BaseChartFragment extends LazyLoadFragment {
                 LimitLine limitLine = mPositionLimitLines.get(limitKey);
                 int volume_short_l = mPositionVolumes.get(limitKey);
                 if (limitLine.getLimit() != limit_short || volume_short_l != volume_short) {
-                    String label_short = positionEntity.getInstrument_id() + "@" + limit_short_S + "/" + volume_short + "手";
+                    String label_short = limit_short_S + "/" + volume_short + "手";
                     mTopChartViewBase.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
                     mPositionLimitLines.remove(limitKey);
                     mPositionVolumes.remove(limitKey);
-                    generateLimitLine(limit_short, label_short, mColorSell, limitKey, volume_short);
+                    generateLimitLine(limit_short, label_short, mColorSell, limitKey, volume_short, LimitLine.LimitLabelPosition.LEFT_BOTTOM);
                 }
             } else {
                 mTopChartViewBase.getAxisLeft().removeLimitLine(mPositionLimitLines.get(limitKey));
+                mTopChartViewBase.invalidate();
                 mPositionLimitLines.remove(limitKey);
                 mPositionVolumes.remove(limitKey);
             }
@@ -517,18 +596,22 @@ public class BaseChartFragment extends LazyLoadFragment {
             String key = orderEntity.getKey();
             String limit_price = LatestFileManager.saveScaleByPtick(orderEntity.getLimit_price(), instrument_id_transaction);
             LimitLine limitLine = new LimitLine(Float.parseFloat(limit_price),
-                    orderEntity.getInstrument_id() + "@" + limit_price + "/" + limit_volume + "手");
+                    limit_price + "/" + limit_volume + "手");
             mOrderLimitLines.put(key, limitLine);
             mOrderVolumes.put(key, limit_volume);
             limitLine.setLineWidth(0.7f);
             limitLine.disableDashedLine();
-            if ("BUY".equals(orderEntity.getDirection()))
+            if (DIRECTION_BUY.equals(orderEntity.getDirection())) {
+                limitLine.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_TOP);
                 limitLine.setLineColor(mColorBuy);
-            else limitLine.setLineColor(mColorSell);
-            limitLine.setLabelPosition(LimitLine.LimitLabelPosition.LEFT_BOTTOM);
+            } else {
+                limitLine.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
+                limitLine.setLineColor(mColorSell);
+            }
             limitLine.setTextSize(10f);
             limitLine.setTextColor(mColorText);
             mTopChartViewBase.getAxisLeft().addLimitLine(limitLine);
+            mTopChartViewBase.invalidate();
         } catch (NumberFormatException ex) {
             ex.printStackTrace();
         }
@@ -542,6 +625,7 @@ public class BaseChartFragment extends LazyLoadFragment {
      */
     private void removeOneOrderLimitLine(String key) {
         mTopChartViewBase.getAxisLeft().removeLimitLine(mOrderLimitLines.get(key));
+        mTopChartViewBase.invalidate();
         mOrderLimitLines.remove(key);
         mOrderVolumes.remove(key);
     }
@@ -557,7 +641,7 @@ public class BaseChartFragment extends LazyLoadFragment {
         for (OrderEntity orderEntity :
                 userEntity.getOrders().values()) {
             if (orderEntity != null && (orderEntity.getExchange_id() + "." + orderEntity.getInstrument_id())
-                    .equals(instrument_id_transaction) && "ALIVE".equals(orderEntity.getStatus())) {
+                    .equals(instrument_id_transaction) && STATUS_ALIVE.equals(orderEntity.getStatus())) {
                 addOneOrderLimitLine(orderEntity);
             }
         }
@@ -612,9 +696,12 @@ public class BaseChartFragment extends LazyLoadFragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (mIsPosition) addPositionLimitLines();
+        if (mIsPending) addOrderLimitLines();
+        drawKline();
+
         registerBroaderCast();
         if (BaseApplication.getWebSocketService() == null) return;
-
         if (CURRENT_DAY_FRAGMENT.equals(mFragmentType)) {
             BaseApplication.getWebSocketService().sendSetChart(instrument_id);
         } else {
@@ -670,6 +757,8 @@ public class BaseChartFragment extends LazyLoadFragment {
      */
     @Subscribe
     public void onEventBase(VisibilityEvent data) {
+        //原本在图上的十字光标消失
+        mTopChartViewBase.highlightValue(null);
         if (data.isVisible()) {
             mMiddleChartViewBase.setVisibility(View.VISIBLE);
 //            mBottomChartViewBase.setVisibility(View.VISIBLE);
@@ -684,48 +773,14 @@ public class BaseChartFragment extends LazyLoadFragment {
      * author: chenli
      * description: 上下滑动获取下个合约代码
      */
-    protected String getNextInstrumentId(boolean isNext){
-        String title = DataManager.getInstance().EXCHANGE_ID;
-        Map<String, QuoteEntity> map = new HashMap<>();
-        switch (title) {
-            case OPTIONAL:
-                map = LatestFileManager.getOptionalInsList();
-                break;
-            case DOMINANT:
-                map = LatestFileManager.getMainInsList();
-                break;
-            case SHANGHAI:
-                map = LatestFileManager.getShangqiInsList();
-                break;
-            case NENGYUAN:
-                map = LatestFileManager.getNengyuanInsList();
-                break;
-            case DALIAN:
-                map = LatestFileManager.getDalianInsList();
-                break;
-            case ZHENGZHOU:
-                map = LatestFileManager.getZhengzhouInsList();
-                break;
-            case ZHONGJIN:
-                map = LatestFileManager.getZhongjinInsList();
-                break;
-            case DALIANZUHE:
-                map = LatestFileManager.getDalianzuheInsList();
-                break;
-            case ZHENGZHOUZUHE:
-                map = LatestFileManager.getZhengzhouzuheInsList();
-                break;
-            default:
-                break;
-        }
-        List<String> insList = new ArrayList<>(map.keySet());
-        int index = insList.indexOf(instrument_id);
-        if (index == -1)return "";
+    protected String getNextInstrumentId(boolean isNext) {
+        int index = mInsList.indexOf(instrument_id);
+        if (index == -1) return "";
         if (isNext) index += 1;
         else index -= 1;
-        if (index < 0) index = insList.size() - 1;
-        if (index >= insList.size())index = 0;
-        return insList.get(index);
+        if (index < 0) index = mInsList.size() - 1;
+        if (index >= mInsList.size()) index = 0;
+        return mInsList.get(index);
     }
 
 }

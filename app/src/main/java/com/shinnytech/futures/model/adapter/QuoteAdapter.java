@@ -12,16 +12,13 @@ import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ItemFragmentQuoteBinding;
-import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
-import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
-import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.MathUtils;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
@@ -42,6 +39,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
     private String mTitle;
     private boolean mSwitchChange = false;
     private boolean mSwitchVolume = false;
+    private List<String> highlightList = new ArrayList<>();
 
     public QuoteAdapter(Context context, List<QuoteEntity> data, String title) {
         this.sContext = context;
@@ -55,6 +53,14 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
 
     public void setData(List<QuoteEntity> data) {
         this.mData = data;
+    }
+
+    public void updateHighlightList(List<String> highlightList) {
+        if (!this.highlightList.equals(highlightList)) {
+            this.highlightList.clear();
+            this.highlightList.addAll(highlightList);
+            notifyDataSetChanged();
+        }
     }
 
     /**
@@ -139,14 +145,10 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                 if (instrumentId == null) return;
 
                 //合约高亮
-                DataManager manager = DataManager.getInstance();
-                UserEntity userEntity = manager.getTradeBean().getUsers().get(manager.USER_ID);
-                if (userEntity != null){
-                    Map<String, PositionEntity> positionEntityMap = userEntity.getPositions();
-                    if (positionEntityMap.containsKey(instrumentId))
-                        mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_highlight_touch_bg));
-                    else mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_touch_bg));
-                }
+                if (highlightList.contains(instrumentId))
+                    mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_highlight_touch_bg));
+                else
+                    mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_touch_bg));
 
                 String instrumentName = instrumentId;
                 SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrumentId);
@@ -167,14 +169,16 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                 setTextColor(mBinding.quoteLatest, latest, pre_settlement);
                 if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
                     if (mSwitchChange) {
-                        setTextColor(mBinding.quoteChangePercent, askPrice1, pre_settlement);
+                        mBinding.quoteChangePercent.setText(quoteEntity.getBid_volume1());
+                        mBinding.quoteChangePercent.setTextColor(ContextCompat.getColor(sContext, R.color.text_white));
                     } else {
                         setTextColor(mBinding.quoteChangePercent, bidPrice1, pre_settlement);
                     }
                     if (mSwitchVolume) {
                         mBinding.quoteOpenInterest.setText(quoteEntity.getAsk_volume1());
+                        mBinding.quoteOpenInterest.setTextColor(ContextCompat.getColor(sContext, R.color.text_white));
                     } else {
-                        mBinding.quoteOpenInterest.setText(quoteEntity.getBid_volume1());
+                        setTextColor(mBinding.quoteOpenInterest, askPrice1, pre_settlement);
                     }
                 } else {
                     if (mSwitchChange) {
@@ -196,17 +200,6 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
         }
 
         private void updatePart(Bundle bundle) {
-            String instrumentId = bundle.getString("instrument_id");
-            //合约高亮
-            DataManager manager = DataManager.getInstance();
-            UserEntity userEntity = manager.getTradeBean().getUsers().get(manager.USER_ID);
-            if (userEntity != null){
-                Map<String, PositionEntity> positionEntityMap = userEntity.getPositions();
-                if (positionEntityMap.containsKey(instrumentId))
-                    mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_highlight_touch_bg));
-                else mBinding.llQuote.setBackground(sContext.getResources().getDrawable(R.drawable.fragment_item_touch_bg));
-            }
-
             for (String key :
                     bundle.keySet()) {
                 String value = bundle.getString(key);
@@ -234,24 +227,26 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                             mBinding.quoteOpenInterest.setText(value);
                         }
                         break;
-                    case "ask_price1":
-                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchChange) {
-                            setTextColor(mBinding.quoteChangePercent, value, bundle.getString("pre_settlement"));
-                        }
-                        break;
-                    case "ask_volume1":
-                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchVolume) {
-                            mBinding.quoteOpenInterest.setText(value);
-                        }
-                        break;
                     case "bid_price1":
                         if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && !mSwitchChange) {
                             setTextColor(mBinding.quoteChangePercent, value, bundle.getString("pre_settlement"));
                         }
                         break;
                     case "bid_volume1":
+                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchChange) {
+                            mBinding.quoteChangePercent.setText(value);
+                            mBinding.quoteChangePercent.setTextColor(ContextCompat.getColor(sContext, R.color.text_white));
+                        }
+                        break;
+                    case "ask_price1":
                         if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && !mSwitchVolume) {
+                            setTextColor(mBinding.quoteOpenInterest, value, bundle.getString("pre_settlement"));
+                        }
+                        break;
+                    case "ask_volume1":
+                        if ((DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) && mSwitchVolume) {
                             mBinding.quoteOpenInterest.setText(value);
+                            mBinding.quoteOpenInterest.setTextColor(ContextCompat.getColor(sContext, R.color.text_white));
                         }
                         break;
                     default:
@@ -269,7 +264,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
         public void setChangeTextColor(TextView textView, String data) {
             textView.setText(data);
             if (data == null || data.equals("-")) {
-                textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+                textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_white));
                 return;
             }
             try {
@@ -278,7 +273,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                     textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
                 else if (value > 0)
                     textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
-                else textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+                else textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_white));
             } catch (Exception e) {
                 e.printStackTrace();
 
@@ -294,7 +289,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
             textView.setText(latest);
             if (latest == null || latest.equals("-") ||
                     pre_settlement == null || pre_settlement.equals("-")) {
-                textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+                textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_white));
                 return;
             }
             try {
@@ -303,7 +298,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
                     textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_green));
                 else if (value > 0)
                     textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_red));
-                else textView.setTextColor(ContextCompat.getColor(sContext, R.color.white));
+                else textView.setTextColor(ContextCompat.getColor(sContext, R.color.text_white));
             } catch (Exception e) {
                 e.printStackTrace();
 

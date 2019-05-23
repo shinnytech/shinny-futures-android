@@ -3,13 +3,15 @@
     <dimen xmlns:tools="http://schemas.android.com/tools" name="design_navigation_separator_vertical_padding" tools:override="true">
         0dp
     </dimen>
-    <dimen name="order_dialog_width">240dp</dimen>
+    <dimen name="order_dialog_width">220dp</dimen>
+    <dimen name="order_dialog_height">140dp</dimen>
+    <dimen name="cancel_insert_order_width">200dp</dimen>
+    <dimen name="cancel_insert_order_height">115dp</dimen>
+
     <dimen name="order_dialog_width1">270dp</dimen>
-    <dimen name="order_dialog_height">115dp</dimen>
     <dimen name="order_dialog_height1">120dp</dimen>
     <dimen name="optional_dialog_height">100dp</dimen>
     <dimen name="optional_dialog_width">250dp</dimen>
-    <dimen name="keyboard_dialog_height">400dp</dimen>
 
     <dimen name="margin_1dp">1dp</dimen>
     <dimen name="margin_2dp">2dp</dimen>
@@ -41,11 +43,9 @@
     <dimen name="layout_height_item_activity_broker">50dp</dimen>
     <dimen name="layout_height_item_activity_search_quote">35dp</dimen>
     <dimen name="layout_height_item_fragment_quote">40dp</dimen>
-    <dimen name="layout_height_fragment_quote">30dp</dimen>
-    <dimen name="layout_height_popup_fragment_quote">42dp</dimen>
+    <dimen name="layout_height_fragment_quote">35dp</dimen>
+    <dimen name="layout_height_popup_fragment_quote">40dp</dimen>
     <dimen name="layout_height_item_activity_nav_quote">45dp</dimen>
-    <dimen name="layout_height_view_dialog_cancel_order">115dp</dimen>
-    <dimen name="layout_width_view_dialog_cancel_order">220dp</dimen>
     <dimen name="layout_width_item_activity_nav_quote">40dp</dimen>
 
     <dimen name="scroll_bar_size_small">2dp</dimen>

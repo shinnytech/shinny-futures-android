@@ -38,12 +38,13 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VA
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_TRANSFER;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_IN;
-import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.JUMP_TO_FUTURE_INFO_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_TRANSFER_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_DIRECTION;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_IN;
+import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_OUT;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 public class AccountFragment extends LazyLoadFragment {
@@ -110,7 +111,12 @@ public class AccountFragment extends LazyLoadFragment {
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiverAccount, new IntentFilter(TD_BROADCAST_ACTION));
     }
 
-    private void refreshAccount() {
+    /**
+     * date: 2019/5/17
+     * author: chenli
+     * description: 刷新账户信息
+     */
+    public void refreshAccount() {
         UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
         if (userEntity == null) return;
         AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
@@ -118,9 +124,21 @@ public class AccountFragment extends LazyLoadFragment {
         mBinding.setAccount(accountEntity);
     }
 
+    /**
+     * date: 2019/5/17
+     * author: chenli
+     * description: 刷新持仓、挂单、成交记录
+     */
+    public void refreshAccountDetail() {
+        ((PositionFragment) mViewPagerFragmentAdapter.getItem(0)).update();
+        ((OrderFragment) mViewPagerFragmentAdapter.getItem(1)).update();
+        ((OrderFragment) mViewPagerFragmentAdapter.getItem(2)).update();
+        ((TradeFragment) mViewPagerFragmentAdapter.getItem(3)).update();
+    }
+
     private void initData() {
-        mBinding.tabLayout.setTabTextColors(getResources().getColor(R.color.white),
-                getResources().getColor(R.color.marker_yellow));
+        mBinding.tabLayout.setTabTextColors(getResources().getColor(R.color.text_white),
+                getResources().getColor(R.color.text_yellow));
 
         //初始化盘口、持仓、挂单、交易切换容器，fragment实例保存，有生命周期的变化，默认情况下屏幕外初始化两个fragment
         List<Fragment> fragmentList = new ArrayList<>();
@@ -134,6 +152,7 @@ public class AccountFragment extends LazyLoadFragment {
         fragmentList.add(tradeFragment);
         mViewPagerFragmentAdapter = new ViewPagerFragmentAdapter(getActivity().getSupportFragmentManager(), fragmentList);
         mBinding.vp.setAdapter(mViewPagerFragmentAdapter);
+        mBinding.vp.setOffscreenPageLimit(4);
     }
 
     private void initEvent() {
@@ -174,12 +193,12 @@ public class AccountFragment extends LazyLoadFragment {
         mBinding.accountFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity)getActivity()).getmMainActivityPresenter()
+                ((MainActivity) getActivity()).getmMainActivityPresenter()
                         .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
                 sDataManager.IS_SHOW_VP_CONTENT = true;
                 Intent intentPos = new Intent(getActivity(), FutureInfoActivity.class);
                 intentPos.putExtra(INS_BETWEEN_ACTIVITY, ins);
-                startActivityForResult(intentPos, JUMP_TO_FUTURE_INFO_ACTIVITY);
+                startActivityForResult(intentPos, MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY);
                 mBinding.accountFab.hide();
             }
         });
@@ -198,7 +217,7 @@ public class AccountFragment extends LazyLoadFragment {
                 Amplitude.getInstance().logEvent(AMP_ACCOUNT_TRANSFER_IN);
                 Intent intentBank = new Intent(getActivity(), BankTransferActivity.class);
                 intentBank.putExtra(TRANSFER_DIRECTION, TRANSFER_IN);
-                getActivity().startActivity(intentBank);
+                getActivity().startActivityForResult(intentBank, MAIN_ACTIVITY_TO_TRANSFER_ACTIVITY);
             }
         });
 
@@ -216,7 +235,7 @@ public class AccountFragment extends LazyLoadFragment {
                 Amplitude.getInstance().logEvent(AMP_ACCOUNT_TRANSFER_OUT);
                 Intent intentBank = new Intent(getActivity(), BankTransferActivity.class);
                 intentBank.putExtra(TRANSFER_DIRECTION, TRANSFER_OUT);
-                getActivity().startActivity(intentBank);
+                getActivity().startActivityForResult(intentBank, MAIN_ACTIVITY_TO_TRANSFER_ACTIVITY);
             }
         });
     }

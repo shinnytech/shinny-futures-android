@@ -9,6 +9,11 @@ import com.shinnytech.futures.utils.MathUtils;
 
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_CANCELED_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_FINISHED_ZN;
+
 /**
  * Created on 7/27/17.
  * Created by chenli.
@@ -54,26 +59,42 @@ public class OrderDiffCallback extends DiffUtil.Callback {
     public Object getChangePayload(int oldItemPosition, int newItemPosition) {
         Bundle bundle = new Bundle();
 
-        String status_old = mOldData.get(oldItemPosition).getLast_msg();
-        String volume_origin_old = mOldData.get(oldItemPosition).getVolume_orign();
-        String volume_left_old = mOldData.get(oldItemPosition).getVolume_left();
+        try {
+            String volume_origin_old = mOldData.get(oldItemPosition).getVolume_orign();
+            String volume_left_old = mOldData.get(oldItemPosition).getVolume_left();
+            String status_old;
+            if (STATUS_ALIVE.equals(mOldData.get(oldItemPosition).getStatus()))
+                status_old = STATUS_ALIVE_ZN;
+            else {
+                if (Integer.parseInt(volume_left_old) == 0) status_old = STATUS_FINISHED_ZN;
+                else status_old = STATUS_CANCELED_ZN;
+            }
 
-        String status_new = mNewData.get(newItemPosition).getLast_msg();
-        String volume_origin_new = mNewData.get(newItemPosition).getVolume_orign();
-        String volume_left_new = mNewData.get(newItemPosition).getVolume_left();
+            String volume_origin_new = mNewData.get(newItemPosition).getVolume_orign();
+            String volume_left_new = mNewData.get(newItemPosition).getVolume_left();
+            String status_new;
+            if (STATUS_ALIVE.equals(mNewData.get(newItemPosition).getStatus()))
+                status_new = STATUS_ALIVE_ZN;
+            else {
+                if (Integer.parseInt(volume_left_new) == 0) status_new = STATUS_FINISHED_ZN;
+                else status_new = STATUS_CANCELED_ZN;
+            }
 
+            if (!status_old.equals(status_new))
+                bundle.putString("status", status_new);
 
-        if (!status_old.equals(status_new))
-            bundle.putString("status", status_new);
+            String volume_trade_old = MathUtils.subtract(volume_origin_old, volume_left_old) + "/" + volume_origin_old;
+            String volume_trade_new = MathUtils.subtract(volume_origin_new, volume_left_new) + "/" + volume_origin_new;
+            if (!volume_trade_old.equals(volume_trade_new))
+                bundle.putString("volume_trade", volume_trade_new);
 
-        String volume_trade_old = MathUtils.subtract(volume_origin_old, volume_left_old) + "/" + volume_origin_old;
-        String volume_trade_new = MathUtils.subtract(volume_origin_new, volume_left_new) + "/" + volume_origin_new;
-        if (!volume_trade_old.equals(volume_trade_new))
-            bundle.putString("volume_trade", volume_trade_new);
-
-        if (bundle.size() == 0) {
-            return null;
+            if (bundle.size() == 0) {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
         return bundle;
     }
 
