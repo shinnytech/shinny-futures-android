@@ -13,6 +13,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentQuotePagerBinding;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
+import com.shinnytech.futures.model.engine.DataManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,17 +29,44 @@ import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
 
 
-public class QuotePagerFragment extends Fragment {
+public class QuotePagerFragment extends LazyLoadFragment {
 
     private FragmentQuotePagerBinding mBinding;
     private ViewPagerFragmentAdapter mViewPagerFragmentAdapter;
     private List<String> mTitleList;
     private MainActivity mMainActivity;
     private String mTitle;
+    private boolean mIsInit = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void show() {
+        try {
+            if (!mIsInit) {
+                ((QuoteFragment) mViewPagerFragmentAdapter.getItem(mBinding.quotePager.getCurrentItem())).show();
+            }
+            mIsInit = false;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void leave() {
+        try {
+            if (!mIsInit) {
+                ((QuoteFragment) mViewPagerFragmentAdapter.getItem(mBinding.quotePager.getCurrentItem())).leave();
+            }
+            mIsInit = false;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     @Nullable
@@ -91,6 +119,7 @@ public class QuotePagerFragment extends Fragment {
 
             @Override
             public void onPageSelected(int position) {
+                DataManager.getInstance().IS_POSITIVE = true;
                 mTitle = mTitleList.get(position);
                 mMainActivity.getmMainActivityPresenter().getmToolbarTitle().setText(mTitle);
                 mMainActivity.getmMainActivityPresenter().switchQuotesNavigation(mTitle);
@@ -98,7 +127,6 @@ public class QuotePagerFragment extends Fragment {
 
             @Override
             public void onPageScrollStateChanged(int state) {
-
             }
         });
     }
@@ -114,4 +142,5 @@ public class QuotePagerFragment extends Fragment {
     public void setCurrentItem(int index) {
         mBinding.quotePager.setCurrentItem(index, false);
     }
+
 }

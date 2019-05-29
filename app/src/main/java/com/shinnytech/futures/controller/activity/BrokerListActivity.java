@@ -47,6 +47,13 @@ public class BrokerListActivity extends BaseActivity {
                 .getBrokerIdFromBuildConfig(sDataManager.getBroker().getBrokers());
         mBrokerAdapter = new BrokerAdapter(this, brokers);
         mBinding.rv.setAdapter(mBrokerAdapter);
+        try {
+            String broker = getIntent().getStringExtra("broker");
+            int index = brokers.indexOf(broker);
+            if (index != -1) mBinding.rv.scrollToPosition(index);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -261,6 +261,7 @@ public class MainActivityPresenter {
                 JSONObject jsonObject = new JSONObject();
                 switch (title) {
                     case CommonConstants.LOGOUT:
+                        SPUtils.putAndApply(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
                         Amplitude.getInstance().logEvent(AMP_LOGOUT);
                         try {
                             jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
@@ -269,10 +270,9 @@ public class MainActivityPresenter {
                             e.printStackTrace();
                         }
                         Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
-                        SPUtils.putAndApply(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
-                        BaseApplication.getWebSocketService().reConnectTD();
                         mMainActivity.startActivity(new Intent(mMainActivity, LoginActivity.class));
                         mMainActivity.finish();
+                        BaseApplication.getWebSocketService().reConnectTD();
                         break;
                     case CommonConstants.SETTING:
                         try {
@@ -431,6 +431,7 @@ public class MainActivityPresenter {
                                     new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
                                         @Override
                                         public void onItemClick(View view, int position) {
+                                            DataManager.getInstance().IS_POSITIVE = true;
                                             ((QuotePagerFragment) mViewPagerFragmentAdapter.
                                                     getItem(0)).setCurrentItem(position);
                                             mTitleDialog.dismiss();
@@ -454,17 +455,26 @@ public class MainActivityPresenter {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.market:
+                        DataManager.getInstance().IS_POSITIVE = true;
                         Amplitude.getInstance().logEvent(AMP_QUOTE_TAB);
-                        mBinding.vpContent.setCurrentItem(0, false);
-                        String title = ((QuotePagerFragment) mViewPagerFragmentAdapter.getItem(0)).getmTitle();
+                        QuotePagerFragment quotePagerFragment = ((QuotePagerFragment) mViewPagerFragmentAdapter.getItem(0));
+                        String title = quotePagerFragment.getmTitle();
                         if (OPTIONAL.equals(title)) mBinding.llNavigation.setVisibility(View.GONE);
                         else mBinding.llNavigation.setVisibility(View.VISIBLE);
+                        mBinding.vpContent.setCurrentItem(0, false);
                         mToolbarTitle.setText(title);
                         mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
                         break;
                     case R.id.trade:
+                        DataManager.getInstance().IS_POSITIVE = true;
                         Amplitude.getInstance().logEvent(AMP_ACCOUNT_TAB);
                         mBinding.llNavigation.setVisibility(View.GONE);
+                        AccountFragment accountFragment = ((AccountFragment) mViewPagerFragmentAdapter.getItem(1));
+                        //首次加载不能存在，防止显示事件上报
+                        if (accountFragment.getmBinding().vp.getVisibility() == View.GONE) {
+                            accountFragment.getmBinding().vp.setVisibility(View.VISIBLE);
+                            accountFragment.setmIsInit(true);
+                        }
                         mBinding.vpContent.setCurrentItem(1, false);
                         mToolbarTitle.setText(ACCOUNT_DETAIL);
                         mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);

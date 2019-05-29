@@ -10,8 +10,11 @@ import android.view.ViewGroup;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ItemActivitySettingBinding;
+import com.shinnytech.futures.model.bean.eventbusbean.OrderSettingEvent;
 import com.shinnytech.futures.model.bean.settingbean.SettingEntity;
 import com.shinnytech.futures.utils.SPUtils;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
@@ -156,6 +159,9 @@ public class SettingAdapter extends RecyclerView.Adapter<SettingAdapter.ItemView
                     break;
                 case CommonConstants.CANCEL_ORDER_CONFIRM:
                     SPUtils.putAndApply(sContext, CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM, mBinding.settingToggle.isChecked());
+                    OrderSettingEvent orderSettingEvent = new OrderSettingEvent();
+                    orderSettingEvent.setPopup(mBinding.settingToggle.isChecked());
+                    EventBus.getDefault().post(orderSettingEvent);
                     break;
                 default:
                     break;

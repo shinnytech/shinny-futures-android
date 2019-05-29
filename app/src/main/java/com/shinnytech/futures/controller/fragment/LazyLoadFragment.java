@@ -54,18 +54,23 @@ public abstract class LazyLoadFragment extends Fragment {
         prepareFetchData();
     }
 
-    public abstract void update();
+    public abstract void show();
 
-    public boolean prepareFetchData() {
-        return prepareFetchData(true);
+    public abstract void leave();
+
+    public void prepareFetchData() {
+        prepareFetchData(true);
     }
 
-    public boolean prepareFetchData(boolean forceUpdate) {
+    public void prepareFetchData(boolean forceUpdate) {
         if (mIsVisibleToUser && mIsViewInitiated && (!mIsDataInitiated || forceUpdate)) {
-            update();
+            show();
             mIsDataInitiated = true;
-            return true;
         }
-        return false;
+
+        if (!mIsVisibleToUser && mIsViewInitiated && mIsDataInitiated) {
+            leave();
+        }
+
     }
 }

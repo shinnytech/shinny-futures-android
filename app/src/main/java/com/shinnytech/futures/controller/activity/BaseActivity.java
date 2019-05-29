@@ -22,7 +22,6 @@ import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.utils.NetworkUtils;
-import com.umeng.analytics.MobclickAgent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -126,14 +125,12 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected void onResume() {
         super.onResume();
-        MobclickAgent.onResume(this);
         refreshUI();
         registerBroaderCast();
     }
 
     protected void onPause() {
         super.onPause();
-        MobclickAgent.onPause(this);
         if (mReceiverLocal != null)
             LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLocal);
         if (mReceiverNetwork != null) unregisterReceiver(mReceiverNetwork);

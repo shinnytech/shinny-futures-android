@@ -31,7 +31,6 @@ import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.ToastUtils;
-import com.umeng.analytics.MobclickAgent;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
@@ -171,14 +170,12 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         super.onResume();
         registerBroaderCast();
         updateToolbarFromNetwork();
-        MobclickAgent.onResume(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         unregisterReceiver(mReceiver);
-        MobclickAgent.onPause(this);
     }
 
     /**

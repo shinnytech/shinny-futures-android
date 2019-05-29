@@ -700,8 +700,8 @@ public class KlineFragment extends BaseChartFragment {
     }
 
     @Override
-    public void update() {
-        super.update();
+    public void show() {
+        super.show();
         if (mTopChartViewBase.getViewPortHandler().getScaleX() != mScaleX) {
             mTopChartViewBase.fitScreen();
             mTopChartViewBase.zoom(mScaleX, 1.0f, mLastIndex, 0, YAxis.AxisDependency.LEFT);

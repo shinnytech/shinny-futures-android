@@ -8,6 +8,8 @@ import android.widget.Toast;
 
 import com.shinnytech.futures.R;
 
+import static com.shinnytech.futures.constants.CommonConstants.LOGIN_FAIL;
+
 /**
  * date: 5/31/17
  * author: chenli
@@ -21,17 +23,16 @@ public class ToastUtils {
 
     public static void showToast(Context context,
                                  String content) {
+        if (LOGIN_FAIL.equals(content)) return;
         if (toast != null) {
             toast.cancel();
         }
+        View toastView = View.inflate(context, R.layout.view_toast, null);
+        TextView text = toastView.findViewById(R.id.toast);
+        text.setText(content);
         toast = Toast.makeText(context, content, Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.TOP, 0, 0);
-        View toastView = toast.getView();
-        TextView toastMessage = toastView.findViewById(android.R.id.message);
-        toastMessage.setTextSize(15);
-        toastMessage.setTextColor(context.getResources().getColor(R.color.white));
-        toastMessage.setGravity(Gravity.TOP);
-        toastView.setBackground(context.getResources().getDrawable(R.drawable.application_toast_background));
+        toast.setGravity(Gravity.TOP, 0, 10);
+        toast.setView(toastView);
         toast.show();
     }
 }

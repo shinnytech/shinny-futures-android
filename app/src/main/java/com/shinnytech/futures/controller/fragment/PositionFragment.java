@@ -17,19 +17,26 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentPositionBinding;
 import com.shinnytech.futures.model.adapter.PositionAdapter;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.engine.DataManager;
+import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.PositionDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
+import com.shinnytech.futures.utils.LogUtils;
+import com.shinnytech.futures.utils.MathUtils;
+import com.shinnytech.futures.utils.SPUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -40,13 +47,30 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BALANCE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BROKER_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_IS_INS_IN_OPTIONAL;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_IS_INS_IN_POSITION;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_IS_POSITIVE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_ORDER_COUNT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID_VALUE_ACCOUNT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_FUTURE_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_MAIN;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VISIBLE_TIME;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_POSITION_COUNT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SUB_PAGE_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SUB_PAGE_ID_VALUE_POSITION;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_LEAVE_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_SHOW_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
@@ -65,6 +89,7 @@ public class PositionFragment extends LazyLoadFragment {
     private List<PositionEntity> mNewData = new ArrayList<>();
     private FragmentPositionBinding mBinding;
     private boolean mIsUpdate;
+    private long mShowTime;
 
     @Nullable
     @Override
@@ -242,9 +267,133 @@ public class PositionFragment extends LazyLoadFragment {
     }
 
     @Override
-    public void update() {
+    public void show() {
         refreshPosition();
         mBinding.rv.scrollToPosition(0);
+        showEvent();
+    }
+
+    /**
+     * date: 2019/5/25
+     * author: chenli
+     * description: 显示时上报
+     */
+    public void showEvent() {
+        try {
+            LogUtils.e("PositionShow", true);
+            mShowTime = System.currentTimeMillis();
+            String broker_id = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_BROKER, "");
+            JSONObject jsonObject = new JSONObject();
+            if (getActivity() instanceof MainActivity) {
+                jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_ACCOUNT);
+            } else {
+                String ins = ((FutureInfoActivity) getActivity()).getInstrument_id();
+                boolean isInsInOptional = LatestFileManager.getOptionalInsList().keySet().contains(ins);
+                jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
+                jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);
+            }
+            jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_POSITION);
+            jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
+            jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
+            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().USER_ID);
+            if (userEntity != null) {
+                AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
+                if (accountEntity != null) {
+                    String static_balance = MathUtils.round(accountEntity.getStatic_balance(), 2);
+                    jsonObject.put(AMP_EVENT_BALANCE, static_balance);
+                    int positionCount = 0;
+                    int orderCount = 0;
+                    for (PositionEntity positionEntity :
+                            userEntity.getPositions().values()) {
+                        int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+                        int volume_short = Integer.parseInt(positionEntity.getVolume_short());
+                        if (volume_long != 0 || volume_short != 0) positionCount += 1;
+                    }
+
+                    for (OrderEntity orderEntity :
+                            userEntity.getOrders().values()) {
+                        if (STATUS_ALIVE.equals(orderEntity.getStatus())) orderCount += 1;
+                    }
+                    jsonObject.put(AMP_EVENT_POSITION_COUNT, positionCount);
+                    jsonObject.put(AMP_EVENT_ORDER_COUNT, orderCount);
+
+                    if (getActivity() instanceof FutureInfoActivity) {
+                        String ins = ((FutureInfoActivity) getActivity()).getInstrument_id();
+                        boolean isInsInPosition = userEntity.getPositions().keySet().contains(ins);
+                        jsonObject.put(AMP_EVENT_IS_INS_IN_POSITION, isInsInPosition);
+                    }
+                }
+            }
+            Amplitude.getInstance().logEvent(AMP_SHOW_PAGE, jsonObject);
+            DataManager.getInstance().IS_POSITIVE = false;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Override
+    public void leave() {
+        leaveEvent();
+    }
+
+    /**
+     * date: 2019/5/25
+     * author: chenli
+     * description: 离开时上报
+     */
+    public void leaveEvent() {
+        try {
+            LogUtils.e("PositionLeave", true);
+            long pageVisibleTime = System.currentTimeMillis() - mShowTime;
+            String broker_id = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_BROKER, "");
+            JSONObject jsonObject = new JSONObject();
+            if (getActivity() instanceof MainActivity) {
+                jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_ACCOUNT);
+            } else {
+                String ins = ((FutureInfoActivity) getActivity()).getInstrument_id();
+                boolean isInsInOptional = LatestFileManager.getOptionalInsList().keySet().contains(ins);
+                jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
+                jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);
+            }
+            jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_POSITION);
+            jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
+            jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
+            jsonObject.put(AMP_EVENT_PAGE_VISIBLE_TIME, pageVisibleTime);
+            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().USER_ID);
+            if (userEntity != null) {
+                AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
+                if (accountEntity != null) {
+                    String static_balance = MathUtils.round(accountEntity.getStatic_balance(), 2);
+                    jsonObject.put(AMP_EVENT_BALANCE, static_balance);
+                    int positionCount = 0;
+                    int orderCount = 0;
+                    for (PositionEntity positionEntity :
+                            userEntity.getPositions().values()) {
+                        int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+                        int volume_short = Integer.parseInt(positionEntity.getVolume_short());
+                        if (volume_long != 0 || volume_short != 0) positionCount += 1;
+                    }
+
+                    for (OrderEntity orderEntity :
+                            userEntity.getOrders().values()) {
+                        if (STATUS_ALIVE.equals(orderEntity.getStatus())) orderCount += 1;
+                    }
+                    jsonObject.put(AMP_EVENT_POSITION_COUNT, positionCount);
+                    jsonObject.put(AMP_EVENT_ORDER_COUNT, orderCount);
+
+                    if (getActivity() instanceof FutureInfoActivity) {
+                        String ins = ((FutureInfoActivity) getActivity()).getInstrument_id();
+                        boolean isInsInPosition = userEntity.getPositions().keySet().contains(ins);
+                        jsonObject.put(AMP_EVENT_IS_INS_IN_POSITION, isInsInPosition);
+                    }
+
+                }
+            }
+            Amplitude.getInstance().logEvent(AMP_LEAVE_PAGE, jsonObject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

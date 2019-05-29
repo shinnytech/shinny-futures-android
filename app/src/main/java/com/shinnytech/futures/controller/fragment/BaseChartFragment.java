@@ -346,8 +346,12 @@ public class BaseChartFragment extends LazyLoadFragment {
     }
 
     @Override
-    public void update() {
+    public void show() {
+    }
 
+
+    @Override
+    public void leave() {
     }
 
     /**

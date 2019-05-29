@@ -18,6 +18,7 @@ import com.shinnytech.futures.model.bean.futureinfobean.DiffEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.FutureBean;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.ToastUtils;
 
 import org.json.JSONArray;
@@ -32,10 +33,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import static com.shinnytech.futures.constants.CommonConstants.CHANGE_PASSWORD_SUCCEED;
+import static com.shinnytech.futures.constants.CommonConstants.LOGIN_FAIL;
+import static com.shinnytech.futures.constants.CommonConstants.LOGIN_SUCCEED;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_CHANGE_SUCCESS;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_FAIL;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_SUCCEED;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_WEAK_PASSWORD;
 import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST;
@@ -91,6 +96,11 @@ public class DataManager {
      * description: 判断是否显示登录成功弹框
      */
     public boolean IS_SHOW_LOGIN_SUCCESS = false;
+    /**
+     * date: 2019/5/24
+     * description: 判断用户是否主动切换页面
+     */
+    public boolean IS_POSITIVE = false;
     /**
      * date: 2019/3/18
      * description: 用户最后一次发送的订阅请求
@@ -408,7 +418,7 @@ public class DataManager {
                                 final String content = notify.optString("content");
                                 String type = notify.optString("type");
                                 int code = notify.optInt("code");
-                                if (content.equals("修改密码成功")) {
+                                if (content.equals(CHANGE_PASSWORD_SUCCEED)) {
                                     if (BaseApplication.getWebSocketService() != null)
                                         BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_CHANGE_SUCCESS, TD_BROADCAST);
                                 }
@@ -417,14 +427,19 @@ public class DataManager {
                                         BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_WEAK_PASSWORD, TD_BROADCAST);
                                 }
                                 if ("SETTLEMENT".equals(type)) {
+                                    LogUtils.e(content, true);
                                     BROKER.setSettlement(content);
                                     if (BaseApplication.getWebSocketService() != null)
                                         BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_SETTLEMENT, TD_BROADCAST);
                                 } else {
-                                    if (content.equals("登录成功")) {
-                                        //断线重连不弹框
+                                    if (LOGIN_SUCCEED.equals(content)) {
+                                        //游客模式不显示登录成功弹出框
                                         if (IS_SHOW_LOGIN_SUCCESS) IS_SHOW_LOGIN_SUCCESS = false;
                                         else continue;
+                                    }
+                                    if (LOGIN_FAIL.equals(content)) {
+                                        if (BaseApplication.getWebSocketService() != null)
+                                            BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
                                     }
                                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                                         @Override
@@ -472,7 +487,7 @@ public class DataManager {
                                             USER_ID = userId;
                                             userEntity.setUser_id(userId);
                                             if (BaseApplication.getWebSocketService() != null)
-                                                BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_LOGIN, TD_BROADCAST);
+                                                BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_LOGIN_SUCCEED, TD_BROADCAST);
                                             break;
                                         default:
                                             break;

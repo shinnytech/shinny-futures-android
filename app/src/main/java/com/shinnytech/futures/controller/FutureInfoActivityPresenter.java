@@ -192,7 +192,7 @@ public class FutureInfoActivityPresenter {
         //盘口页和交易页相差两个页面，所以当显示其中一个的时候，另一个一定会消亡，所以打开时会初始化得到活动的最新合约代码。但是当通过
         //持仓页改变合约代码时会直接跳转到交易页，这个过程和活动更新合约代码同时发生，所以交易页通过初始化可能得不到最新合约代码， 必须
         //通过eventBus实时监控才行，所以要保持页面实例从而可以调用onEvent()方法
-        mBinding.vpInfoContent.setOffscreenPageLimit(3);
+        mBinding.vpInfoContent.setOffscreenPageLimit(4);
     }
 
     /**
@@ -374,6 +374,7 @@ public class FutureInfoActivityPresenter {
 
             @Override
             public void onPageSelected(int position) {
+                DataManager.getInstance().IS_POSITIVE = true;
                 //滑动完成
                 switch (position) {
                     case 0:
@@ -434,6 +435,8 @@ public class FutureInfoActivityPresenter {
      * description: 控制交易相关页的显示
      */
     public void controlTransactionPageVisibility(int index) {
+        DataManager.getInstance().IS_POSITIVE = true;
+        mFutureInfoActivity.setmIsVpLoaded(true);
         VisibilityEvent data = new VisibilityEvent();
         if (mBinding.vpInfoContent.getCurrentItem() == index) {
             if (mBinding.vpInfoContent.getVisibility() == View.GONE) {
@@ -521,7 +524,6 @@ public class FutureInfoActivityPresenter {
     }
 
     private void switchDuration(String durationTitle) {
-
         if (CommonConstants.KLINE_DURATION_DAY.equals(durationTitle))
             switchUpFragment(CURRENT_DAY_FRAGMENT, "");
         else {

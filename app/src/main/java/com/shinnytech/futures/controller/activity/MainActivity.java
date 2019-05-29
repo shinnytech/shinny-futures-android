@@ -11,11 +11,13 @@ import android.support.v4.view.GravityCompat;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.MainActivityPresenter;
 import com.shinnytech.futures.controller.fragment.AccountFragment;
+import com.shinnytech.futures.controller.fragment.LazyLoadFragment;
 import com.shinnytech.futures.controller.fragment.QuoteFragment;
 import com.shinnytech.futures.controller.fragment.QuotePagerFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
@@ -58,6 +60,7 @@ public class MainActivity extends BaseActivity {
     private long mExitTime = 0;
     private ActivityMainDrawerBinding mBinding;
     private MainActivityPresenter mMainActivityPresenter;
+    private boolean mIsInit = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +73,6 @@ public class MainActivity extends BaseActivity {
         mBinding = (ActivityMainDrawerBinding) mViewDataBinding;
         mTitle = OPTIONAL;
         mMainActivityPresenter = new MainActivityPresenter(this, sContext, mBinding, mTitle, mToolbarTitle);
-
     }
 
     @Override
@@ -85,6 +87,10 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (!mIsInit) {
+            int index = mBinding.vpContent.getCurrentItem();
+            ((LazyLoadFragment) mMainActivityPresenter.getmViewPagerFragmentAdapter().getItem(index)).show();
+        }
     }
 
     @Override
@@ -136,6 +142,9 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        int index = mBinding.vpContent.getCurrentItem();
+        ((LazyLoadFragment) mMainActivityPresenter.getmViewPagerFragmentAdapter().getItem(index)).leave();
+        mIsInit = false;
     }
 
     @Override
@@ -246,7 +255,6 @@ public class MainActivity extends BaseActivity {
             AccountFragment accountFragment = (AccountFragment) mMainActivityPresenter.
                     getmViewPagerFragmentAdapter().getItem(1);
             accountFragment.refreshAccount();
-            accountFragment.refreshAccountDetail();
         }
 
         //主页到搜索页的返回

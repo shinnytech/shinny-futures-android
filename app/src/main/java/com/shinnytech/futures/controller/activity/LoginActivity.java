@@ -62,18 +62,22 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_ACCOUNT_
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_ACCOUNT_ID_LAST;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID_FIRST;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID_LAST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_LOGIN_SUCCESS_TIME_FIRST;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_LOGIN_TIME_FIRST;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_VISIT;
+import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMNOW;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMULATION;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_INIT_TIME;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PASSWORD;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN_ACTIVITY_TO_BROKER_LIST_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN_ACTIVITY_TO_CHANGE_PASSWORD_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_FAIL;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_SUCCEED;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_WEAK_PASSWORD;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
@@ -124,6 +128,9 @@ public class LoginActivity extends AppCompatActivity {
         sContext = BaseApplication.getContext();
         sDataManager = DataManager.getInstance();
         mHandler = new MyHandler(this);
+
+        //控制是否显示登录成功弹出框
+        sDataManager.IS_SHOW_LOGIN_SUCCESS = false;
 
         List<String> brokers = LatestFileManager.getBrokerIdFromBuildConfig(sDataManager.getBroker().getBrokers());
         if (brokers.isEmpty()) return;
@@ -182,6 +189,7 @@ public class LoginActivity extends AppCompatActivity {
         mBinding.visitor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mBinding.visitor.setEnabled(false);
                 Amplitude.getInstance().logEvent(AMP_VISIT);
                 //随机生成8位字符串
                 String data = "";
@@ -208,16 +216,28 @@ public class LoginActivity extends AppCompatActivity {
         mBinding.broker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intentBroker = new Intent(LoginActivity.this, BrokerListActivity.class);
-                startActivityForResult(intentBroker, LOGIN_ACTIVITY_TO_BROKER_LIST_ACTIVITY);
+                try {
+                    String broker = mBinding.broker.getText().toString();
+                    Intent intentBroker = new Intent(LoginActivity.this, BrokerListActivity.class);
+                    intentBroker.putExtra("broker", broker);
+                    startActivityForResult(intentBroker, LOGIN_ACTIVITY_TO_BROKER_LIST_ACTIVITY);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
         });
 
         mBinding.selectBroker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intentBroker = new Intent(LoginActivity.this, BrokerListActivity.class);
-                startActivityForResult(intentBroker, LOGIN_ACTIVITY_TO_BROKER_LIST_ACTIVITY);
+                try {
+                    String broker = mBinding.broker.getText().toString();
+                    Intent intentBroker = new Intent(LoginActivity.this, BrokerListActivity.class);
+                    intentBroker.putExtra("broker", broker);
+                    startActivityForResult(intentBroker, LOGIN_ACTIVITY_TO_BROKER_LIST_ACTIVITY);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -381,8 +401,17 @@ public class LoginActivity extends AppCompatActivity {
             // form field with an error.
             focusView.requestFocus();
         } else {
+            if (mBrokerName != null && !(mBrokerName.equals(BROKER_ID_SIMULATION) || mBrokerName.equals(BROKER_ID_SIMNOW))) {
+                Identify identify = new Identify();
+                long currentTime = System.currentTimeMillis();
+                long initTime = (long) SPUtils.get(sContext, CONFIG_INIT_TIME, currentTime);
+                long loginTime = currentTime - initTime;
+                identify.setOnce(AMP_USER_LOGIN_TIME_FIRST, loginTime);
+                Amplitude.getInstance().identify(identify);
+            }
             Amplitude.getInstance().logEvent(AMP_LOGIN);
             sDataManager.IS_SHOW_LOGIN_SUCCESS = true;
+            mBinding.buttonIdLogin.setEnabled(false);
 
             // Show a progress spinner, and kick off a background task to
             // perform the user fragment_home attempt.
@@ -390,7 +419,7 @@ public class LoginActivity extends AppCompatActivity {
                 BaseApplication.getWebSocketService().sendReqLogin(mBrokerName, mPhoneNumber, mPassword);
 
             //超时检测
-            mHandler.sendEmptyMessageDelayed(2, 5000);
+            mHandler.sendEmptyMessageDelayed(3, 5000);
 
             //关闭键盘
             View view = getWindow().getCurrentFocus();
@@ -415,7 +444,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
                 String msg = intent.getStringExtra("msg");
                 switch (msg) {
-                    case TD_MESSAGE_LOGIN:
+                    case TD_MESSAGE_LOGIN_SUCCEED:
                         //登录成功
                         mHandler.sendEmptyMessageDelayed(0, 2000);
                         break;
@@ -438,6 +467,10 @@ public class LoginActivity extends AppCompatActivity {
                             }
 
                         } else mBinding.broker.setText(brokers.get(0));
+                        break;
+                    case TD_MESSAGE_LOGIN_FAIL:
+                        //登录失败
+                        mHandler.sendEmptyMessage(2);
                         break;
                     default:
                         break;
@@ -576,11 +609,16 @@ public class LoginActivity extends AppCompatActivity {
                         else broker_id = activity.mBrokerName;
                         Amplitude.getInstance().setUserId(broker_id + activity.mPhoneNumber);
                         Identify identify = new Identify()
-                                .setOnce(AMP_USER_LOGIN_TIME_FIRST, TimeUtils.getNowTimeSecond())
                                 .setOnce(AMP_USER_ACCOUNT_ID_FIRST, activity.mPhoneNumber)
                                 .set(AMP_USER_ACCOUNT_ID_LAST, activity.mPhoneNumber)
                                 .setOnce(AMP_USER_BROKER_ID_FIRST, broker_id)
                                 .set(AMP_USER_BROKER_ID_LAST, broker_id);
+                        if (broker_id != null && !(broker_id.contains(BROKER_ID_SIMULATION) || broker_id.equals(BROKER_ID_SIMNOW))) {
+                            long currentTime = System.currentTimeMillis();
+                            long initTime = (long) SPUtils.get(activity.sContext, CONFIG_INIT_TIME, currentTime);
+                            long loginTime = currentTime - initTime;
+                            identify.setOnce(AMP_USER_LOGIN_SUCCESS_TIME_FIRST, loginTime);
+                        }
                         Amplitude.getInstance().identify(identify);
                         JSONObject jsonObject = new JSONObject();
                         try {
@@ -617,6 +655,10 @@ public class LoginActivity extends AppCompatActivity {
                         activity.startActivityForResult(intent, LOGIN_ACTIVITY_TO_CHANGE_PASSWORD_ACTIVITY);
                         break;
                     case 2:
+                        activity.mBinding.visitor.setEnabled(true);
+                        activity.mBinding.buttonIdLogin.setEnabled(true);
+                        break;
+                    case 3:
                         if (activity.sDataManager.USER_ID.isEmpty())
                             Amplitude.getInstance().logEvent(AMP_LOGIN_FAILED);
                         break;

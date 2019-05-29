@@ -6,63 +6,53 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
-import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.utils.SPUtils;
 
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
+import java.lang.ref.WeakReference;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_FAIL;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_SUCCEED;
+import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 public class SplashActivity extends AppCompatActivity {
-    private BroadcastReceiver mReceiverTransaction;
     private BroadcastReceiver mReceiverLogin;
-    private boolean isToMainActivity = true;
+    private Handler mHandler;
+    private Timer mTimer;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+        mHandler = new MyHandler(this);
+        mTimer = new Timer();
 
         final Context context = BaseApplication.getContext();
-
-        //新用户
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
-                    Intent loginIntent = new Intent(SplashActivity.this, LoginActivity.class);
-                    SplashActivity.this.startActivity(loginIntent);
-                    SplashActivity.this.finish();
-                } else {
-                    String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
-                    if (date.isEmpty()) {
-                        Intent loginIntent = new Intent(SplashActivity.this, LoginActivity.class);
-                        SplashActivity.this.startActivity(loginIntent);
-                        SplashActivity.this.finish();
-                    } else {
-                        //ws连接超时判断
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (DataManager.getInstance().USER_ID.isEmpty()) {
-                                    Intent loginIntent = new Intent(SplashActivity.this, LoginActivity.class);
-                                    SplashActivity.this.startActivity(loginIntent);
-                                    SplashActivity.this.finish();
-                                }
-                            }
-                        }, 7000);
+        if (!SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
+            mHandler.sendEmptyMessageDelayed(0, 2000);
+        } else {
+            String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
+            if (date.isEmpty()) mHandler.sendEmptyMessageDelayed(0, 2000);
+            else {
+                TimerTask timerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        mHandler.sendEmptyMessage(0);
                     }
-                }
+                };
+                mTimer.schedule(timerTask, 10000);
             }
-        }, 2000);
-
-
+        }
     }
 
     @Override
@@ -74,8 +64,6 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (mReceiverTransaction != null)
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverTransaction);
         if (mReceiverLogin != null)
             LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLogin);
     }
@@ -86,37 +74,32 @@ public class SplashActivity extends AppCompatActivity {
      * description: 监听结算单弹出、登录成功事件
      */
     private void registerBroaderCast() {
-        //交易服务器断线重连广播
-        mReceiverTransaction = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String mDataString = intent.getStringExtra("msg");
-                switch (mDataString) {
-                    case TD_MESSAGE_SETTLEMENT:
-                        isToMainActivity = false;
-                        Intent intent1 = new Intent(context, ConfirmActivity.class);
-                        startActivity(intent1);
-                        SplashActivity.this.finish();
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverTransaction, new IntentFilter(TD_BROADCAST_ACTION));
 
         mReceiverLogin = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String msg = intent.getStringExtra("msg");
                 switch (msg) {
-                    case TD_MESSAGE_LOGIN:
+                    case TD_MESSAGE_LOGIN_SUCCEED:
                         //登录成功
-                        if (isToMainActivity) {
-                            Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
-                            SplashActivity.this.startActivity(mainIntent);
-                            SplashActivity.this.finish();
-                        }
+                        mTimer.cancel();
+                        Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
+                        SplashActivity.this.startActivity(mainIntent);
+                        SplashActivity.this.finish();
+                        break;
+                    case TD_MESSAGE_LOGIN_FAIL:
+                        //登录失败
+                        mTimer.cancel();
+                        Intent loginIntent = new Intent(SplashActivity.this, LoginActivity.class);
+                        SplashActivity.this.startActivity(loginIntent);
+                        SplashActivity.this.finish();
+                        break;
+                    case TD_OFFLINE:
+                        //超时检测，连接失败
+                        mTimer.cancel();
+                        Intent loginIntent1 = new Intent(SplashActivity.this, LoginActivity.class);
+                        SplashActivity.this.startActivity(loginIntent1);
+                        SplashActivity.this.finish();
                         break;
                     default:
                         break;
@@ -125,5 +108,36 @@ public class SplashActivity extends AppCompatActivity {
         };
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverLogin, new IntentFilter(TD_BROADCAST_ACTION));
 
+    }
+
+    /**
+     * date: 6/1/18
+     * author: chenli
+     * description: 点击登录后服务器返回处理
+     * version:
+     * state:
+     */
+    static class MyHandler extends Handler {
+        WeakReference<SplashActivity> mActivityReference;
+
+        MyHandler(SplashActivity activity) {
+            mActivityReference = new WeakReference<>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final SplashActivity activity = mActivityReference.get();
+            if (activity != null) {
+                switch (msg.what) {
+                    case 0:
+                        Intent loginIntent = new Intent(activity, LoginActivity.class);
+                        activity.startActivity(loginIntent);
+                        activity.finish();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
 }

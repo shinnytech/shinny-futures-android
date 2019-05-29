@@ -54,6 +54,7 @@ public class AccountFragment extends LazyLoadFragment {
     private FragmentAccountBinding mBinding;
     private ViewPagerFragmentAdapter mViewPagerFragmentAdapter;
     private String ins;
+    private boolean mIsInit = true;
 
     public static AccountFragment newInstance() {
         AccountFragment fragment = new AccountFragment();
@@ -68,8 +69,30 @@ public class AccountFragment extends LazyLoadFragment {
     }
 
     @Override
-    public void update() {
+    public void show() {
         refreshAccount();
+        try {
+            if (!mIsInit) {
+                ((LazyLoadFragment) mViewPagerFragmentAdapter.getItem(mBinding.vp.getCurrentItem())).show();
+            }
+            mIsInit = false;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void leave() {
+        try {
+            if (!mIsInit) {
+                ((LazyLoadFragment) mViewPagerFragmentAdapter.getItem(mBinding.vp.getCurrentItem())).leave();
+            }
+            mIsInit = false;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -124,18 +147,6 @@ public class AccountFragment extends LazyLoadFragment {
         mBinding.setAccount(accountEntity);
     }
 
-    /**
-     * date: 2019/5/17
-     * author: chenli
-     * description: 刷新持仓、挂单、成交记录
-     */
-    public void refreshAccountDetail() {
-        ((PositionFragment) mViewPagerFragmentAdapter.getItem(0)).update();
-        ((OrderFragment) mViewPagerFragmentAdapter.getItem(1)).update();
-        ((OrderFragment) mViewPagerFragmentAdapter.getItem(2)).update();
-        ((TradeFragment) mViewPagerFragmentAdapter.getItem(3)).update();
-    }
-
     private void initData() {
         mBinding.tabLayout.setTabTextColors(getResources().getColor(R.color.text_white),
                 getResources().getColor(R.color.text_yellow));
@@ -164,6 +175,7 @@ public class AccountFragment extends LazyLoadFragment {
 
             @Override
             public void onPageSelected(int position) {
+                DataManager.getInstance().IS_POSITIVE = true;
                 mBinding.tabLayout.getTabAt(position).select();
             }
 
@@ -176,6 +188,7 @@ public class AccountFragment extends LazyLoadFragment {
         mBinding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                DataManager.getInstance().IS_POSITIVE = true;
                 mBinding.vp.setCurrentItem(tab.getPosition(), false);
             }
 
@@ -246,5 +259,9 @@ public class AccountFragment extends LazyLoadFragment {
 
     public void setIns(String ins) {
         this.ins = ins;
+    }
+
+    public void setmIsInit(boolean mIsInit) {
+        this.mIsInit = mIsInit;
     }
 }

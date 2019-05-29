@@ -171,13 +171,13 @@ public class WebSocketService extends Service {
             @Override
             public void run() {
 
-                if ((System.currentTimeMillis() / 1000 - mMDLastPong) >= 20) {
+                if ((System.currentTimeMillis() / 1000 - mMDLastPong) >= 7) {
                     sendMessage(MD_OFFLINE, MD_BROADCAST);
                 } else {
                     if (mWebSocketClientMD != null) mWebSocketClientMD.sendPing();
                 }
 
-                if ((System.currentTimeMillis() / 1000 - mTDLastPong) >= 20) {
+                if ((System.currentTimeMillis() / 1000 - mTDLastPong) >= 7) {
                     sendMessage(TD_OFFLINE, TD_BROADCAST);
                 } else {
                     if (mWebSocketClientTD != null) mWebSocketClientTD.sendPing();
@@ -185,7 +185,7 @@ public class WebSocketService extends Service {
 
             }
         };
-        timer.schedule(timerTask, 15000, 15000);
+        timer.schedule(timerTask, 5000, 5000);
     }
 
     @Override
@@ -238,11 +238,10 @@ public class WebSocketService extends Service {
                                         sendSubscribeAfterConnect();
                                         break;
                                     case "rtn_data":
-                                        BaseApplication.setIndex(0);
+                                        BaseApplication.setsIndex(0);
                                         sDataManager.refreshFutureBean(jsonObject);
                                         break;
                                     default:
-                                        sendMessage(MD_OFFLINE, MD_BROADCAST);
                                         return;
                                 }
                                 if (!BaseApplication.ismBackGround()) sendPeekMessage();
@@ -264,9 +263,9 @@ public class WebSocketService extends Service {
                     .addHeader("SA-Session", Amplitude.getInstance().getDeviceId())
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
                     .connectAsynchronously();
-            int index = BaseApplication.getIndex() + 1;
+            int index = BaseApplication.getsIndex() + 1;
             if (index == BaseApplication.getsMDURLs().size()) index = 0;
-            BaseApplication.setIndex(index);
+            BaseApplication.setsIndex(index);
         } catch (Exception e) {
             sendMessage(MD_TIMEOUT, MD_BROADCAST);
             e.printStackTrace();
@@ -422,7 +421,6 @@ public class WebSocketService extends Service {
                                         sDataManager.refreshTradeBean(jsonObject);
                                         break;
                                     default:
-                                        sendMessage(TD_OFFLINE, TD_BROADCAST);
                                         return;
                                 }
                                 if (!BaseApplication.ismBackGround()) sendPeekMessageTransaction();

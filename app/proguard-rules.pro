@@ -196,22 +196,6 @@
 -keep public class com.tencent.bugly.**{*;}
 -keep class android.support.**{*;}
 
-#umeng
--keep class com.umeng.** {*;}
--keepclassmembers class * {
-   public <init> (org.json.JSONObject);
-}
--keepclassmembers enum * {
-    public static **[] values();
-    public static ** valueOf(java.lang.String);
-}
--keep public class com.shinnytech.futures.R$*{
-public static final int *;
-}
-
-#baidu
--keep class com.baidu.mobstat.** { *; }
-
 #OSS
 -keep class com.alibaba.sdk.android.oss.** { *; }
 -dontwarn okio.**

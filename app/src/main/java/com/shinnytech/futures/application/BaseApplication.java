@@ -3,6 +3,7 @@ package com.shinnytech.futures.application;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
+import android.app.Dialog;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
@@ -21,13 +22,14 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
+import android.view.View;
+import android.widget.TextView;
 
 import com.aliyun.sls.android.sdk.ClientConfiguration;
 import com.aliyun.sls.android.sdk.LOGClient;
 import com.aliyun.sls.android.sdk.SLSDatabaseManager;
 import com.aliyun.sls.android.sdk.SLSLog;
 import com.aliyun.sls.android.sdk.core.auth.PlainTextAKSKCredentialProvider;
-import com.baidu.mobstat.StatService;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.cache.CacheEntity;
 import com.lzy.okgo.cache.CacheMode;
@@ -36,6 +38,7 @@ import com.lzy.okgo.cookie.store.SPCookieStore;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
 import com.shinnytech.futures.BuildConfig;
+import com.shinnytech.futures.R;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
@@ -54,7 +57,6 @@ import com.shinnytech.futures.utils.ToastUtils;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.tencent.bugly.crashreport.CrashReport;
-import com.umeng.commonsdk.UMConfigure;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -78,11 +80,13 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BALANCE_
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_INIT_TIME_FIRST;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_PACKAGE_ID_FIRST;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_PACKAGE_ID_LAST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_SURVIVAL_TIME_TOTAL;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_TYPE_FIRST;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_TYPE_FIRST_PURE_NEWBIE_VALUE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_TYPE_FIRST_TRADER_VALUE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_INIT_TIME;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_INSERT_ORDER_CONFIRM;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_DURATION_DEFAULT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
@@ -98,6 +102,7 @@ import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_4;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.MD_ONLINE;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_INS_LIST;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_ONLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_URL;
@@ -116,7 +121,7 @@ public class BaseApplication extends Application implements ServiceConnection {
     private static Context sContext;
     private static WebSocketService sWebSocketService;
     private static List<String> sMDURLs = new ArrayList<>();
-    private static int index = 0;
+    private static int sIndex = 0;
     private static LOGClient mLOGClient;
     private static boolean mBackGround = false;
     private boolean mServiceBound = false;
@@ -124,14 +129,15 @@ public class BaseApplication extends Application implements ServiceConnection {
     private BroadcastReceiver mReceiverTransaction;
     private BroadcastReceiver mReceiverNetwork;
     private MyHandler mMyHandler = new MyHandler();
-    private AppLifecycleObserver appLifecycleObserver = new AppLifecycleObserver();
+    private AppLifecycleObserver mAppLifecycleObserver = new AppLifecycleObserver();
+    private Context mSettlementContext;
 
-    public static int getIndex() {
-        return index;
+    public static int getsIndex() {
+        return sIndex;
     }
 
-    public static void setIndex(int index) {
-        BaseApplication.index = index;
+    public static void setsIndex(int sIndex) {
+        BaseApplication.sIndex = sIndex;
     }
 
     public static List<String> getsMDURLs() {
@@ -160,7 +166,7 @@ public class BaseApplication extends Application implements ServiceConnection {
         super.onCreate();
         if (sContext == null) sContext = getApplicationContext();
 
-        ProcessLifecycleOwner.get().getLifecycle().addObserver(appLifecycleObserver);
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(mAppLifecycleObserver);
 
         //获取版本号
         initAppVersion();
@@ -232,6 +238,10 @@ public class BaseApplication extends Application implements ServiceConnection {
             SPUtils.putAndApply(sContext, CONFIG_KLINE_DURATION_DEFAULT, kline);
         }
 
+        if (!SPUtils.contains(sContext, CONFIG_INIT_TIME)) {
+            SPUtils.putAndApply(sContext, CONFIG_INIT_TIME, System.currentTimeMillis());
+        }
+
         if (!SPUtils.contains(sContext, CONFIG_RECOMMEND)) {
             SPUtils.putAndApply(sContext, CONFIG_RECOMMEND, true);
         }
@@ -294,7 +304,7 @@ public class BaseApplication extends Application implements ServiceConnection {
             e.printStackTrace();
         }
         //连接行情服务器
-        sWebSocketService.connectMD(sMDURLs.get(index));
+        sWebSocketService.connectMD(sMDURLs.get(sIndex));
         //连接交易服务器
         sWebSocketService.connectTD();
         mServiceBound = true;
@@ -367,8 +377,6 @@ public class BaseApplication extends Application implements ServiceConnection {
             String TRANSACTION_URL_L = (String) cl.getMethod("getTransactionUrl").invoke(null);
             String JSON_FILE_URL_L = (String) cl.getMethod("getJsonFileUrl").invoke(null);
             String BUGLY_KEY = (String) cl.getMethod("getBuglyKey").invoke(null);
-            String UMENG_KEY = (String) cl.getMethod("getUmengKey").invoke(null);
-            String BAIDU_KEY = (String) cl.getMethod("getBaiduKey").invoke(null);
             String AMP_KEY = (String) cl.getMethod("getAmpKey").invoke(null);
             String AK = (String) cl.getMethod("getAK").invoke(null);
             String SK = (String) cl.getMethod("getSK").invoke(null);
@@ -379,9 +387,6 @@ public class BaseApplication extends Application implements ServiceConnection {
             sMDURLs.add(MARKET_URL_8);
             TRANSACTION_URL = TRANSACTION_URL_L;
             JSON_FILE_URL = JSON_FILE_URL_L;
-            UMConfigure.init(sContext, UMENG_KEY, "ShinnyTech", UMConfigure.DEVICE_TYPE_PHONE, "");
-            StatService.setAppKey(BAIDU_KEY);
-            StatService.start(this);
             Amplitude.getInstance().initialize(this, AMP_KEY).enableForegroundTracking(this);
             Identify identify = new Identify()
                     .setOnce(AMP_USER_PACKAGE_ID_FIRST, BuildConfig.FLAVOR)
@@ -430,16 +435,29 @@ public class BaseApplication extends Application implements ServiceConnection {
         this.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-
+                if (activity.getParent() != null) {//如果这个视图是嵌入的子视图
+                    mSettlementContext = activity.getParent();
+                } else {
+                    mSettlementContext = activity;
+                }
             }
 
             @Override
             public void onActivityStarted(Activity activity) {
-
+                if (activity.getParent() != null) {//如果这个视图是嵌入的子视图
+                    mSettlementContext = activity.getParent();
+                } else {
+                    mSettlementContext = activity;
+                }
             }
 
             @Override
             public void onActivityResumed(Activity activity) {
+                if (activity.getParent() != null) {//如果这个视图是嵌入的子视图
+                    mSettlementContext = activity.getParent();
+                } else {
+                    mSettlementContext = activity;
+                }
             }
 
             @Override
@@ -497,7 +515,8 @@ public class BaseApplication extends Application implements ServiceConnection {
             mBackGround = false;
             if (!sWebSocketService.isTDConnected()) sWebSocketService.connectTD();
             else sWebSocketService.sendPeekMessage();
-            if (!sWebSocketService.isMDConnected()) sWebSocketService.connectMD(sMDURLs.get(index));
+            if (!sWebSocketService.isMDConnected())
+                sWebSocketService.connectMD(sMDURLs.get(sIndex));
             else sWebSocketService.sendPeekMessageTransaction();
         }
     }
@@ -510,6 +529,32 @@ public class BaseApplication extends Application implements ServiceConnection {
     private void notifyBackground() {
         //后台
         mBackGround = true;
+        long currentTime = System.currentTimeMillis();
+        long initTime = (long) SPUtils.get(sContext, CONFIG_INIT_TIME, currentTime);
+        long survivalTime = currentTime - initTime;
+        Identify identify = new Identify();
+        identify.set(AMP_USER_SURVIVAL_TIME_TOTAL, survivalTime);
+        UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().USER_ID);
+        if (userEntity != null) {
+            AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
+            if (accountEntity != null) {
+                String static_balance = MathUtils.round(accountEntity.getStatic_balance(), 2);
+                String pre_balance = MathUtils.round(accountEntity.getPre_balance(), 2);
+                if (!"-".equals(static_balance)) {
+                    identify.setOnce(AMP_USER_BALANCE_FIRST, static_balance)
+                            .set(AMP_USER_BALANCE_LAST, static_balance);
+                }
+                String settlement = DataManager.getInstance().getBroker().getSettlement();
+                if (!"-".equals(pre_balance)) {
+                    if (MathUtils.isZero(pre_balance) && settlement == null) {
+                        identify.setOnce(AMP_USER_TYPE_FIRST, AMP_USER_TYPE_FIRST_PURE_NEWBIE_VALUE);
+                    } else {
+                        identify.setOnce(AMP_USER_TYPE_FIRST, AMP_USER_TYPE_FIRST_TRADER_VALUE);
+                    }
+                }
+            }
+        }
+        Amplitude.getInstance().identify(identify);
     }
 
     /**
@@ -586,6 +631,25 @@ public class BaseApplication extends Application implements ServiceConnection {
                         else
                             ToastUtils.showToast(sContext, "无网络，请检查网络设置");
                         break;
+                    case TD_MESSAGE_SETTLEMENT:
+                        final Dialog dialog = new Dialog(mSettlementContext, R.style.responsibilityDialog);
+                        View viewDialog = View.inflate(mSettlementContext, R.layout.view_dialog_confirm, null);
+                        dialog.setContentView(viewDialog);
+                        TextView settlement = viewDialog.findViewById(R.id.settlement_info);
+                        settlement.setText(DataManager.getInstance().getBroker().getSettlement());
+                        dialog.setCanceledOnTouchOutside(false);
+                        viewDialog.findViewById(R.id.confirm).setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if (BaseApplication.getWebSocketService() != null)
+                                    BaseApplication.getWebSocketService().sendReqConfirmSettlement();
+                                dialog.dismiss();
+                            }
+                        });
+                        if (!dialog.isShowing()) {
+                            dialog.show();
+                        }
+                        break;
                     default:
                         break;
 
@@ -606,7 +670,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                     case 1:
                         if (sWebSocketService != null) {
                             //连接行情服务器
-                            sWebSocketService.reConnectMD(sMDURLs.get(index));
+                            sWebSocketService.reConnectMD(sMDURLs.get(sIndex));
                             //连接交易服务器
                             sWebSocketService.reConnectTD();
                             LogUtils.e("连接打开", true);
@@ -621,30 +685,6 @@ public class BaseApplication extends Application implements ServiceConnection {
 
     }
 
-    private void refreshAmpUserProperty() {
-        UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().USER_ID);
-        if (userEntity == null) return;
-        AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
-        if (accountEntity == null) return;
-        Identify identify = new Identify();
-        String static_balance = MathUtils.round(accountEntity.getStatic_balance(), 2);
-        String pre_balance = MathUtils.round(accountEntity.getPre_balance(), 2);
-        if (!"-".equals(static_balance)) {
-            identify.setOnce(AMP_USER_BALANCE_FIRST, static_balance)
-                    .set(AMP_USER_BALANCE_LAST, static_balance);
-        }
-
-        String settlement = DataManager.getInstance().getBroker().getSettlement();
-        if (!"-".equals(pre_balance)) {
-            if (MathUtils.isZero(pre_balance) && settlement == null) {
-                identify.setOnce(AMP_USER_TYPE_FIRST, AMP_USER_TYPE_FIRST_PURE_NEWBIE_VALUE);
-            } else {
-                identify.setOnce(AMP_USER_TYPE_FIRST, AMP_USER_TYPE_FIRST_TRADER_VALUE);
-            }
-        }
-        Amplitude.getInstance().identify(identify);
-    }
-
     /**
      * date: 6/1/18
      * author: chenli
@@ -656,7 +696,7 @@ public class BaseApplication extends Application implements ServiceConnection {
             switch (msg.what) {
                 case 0:
                     if (sWebSocketService != null)
-                        sWebSocketService.reConnectMD(sMDURLs.get(index));
+                        sWebSocketService.reConnectMD(sMDURLs.get(sIndex));
                     break;
                 case 1:
                     if (sWebSocketService != null) sWebSocketService.reConnectTD();
@@ -677,7 +717,6 @@ public class BaseApplication extends Application implements ServiceConnection {
         @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
         public void onEnterBackground() {
             notifyBackground();
-            refreshAmpUserProperty();
             Amplitude.getInstance().logEvent(AMP_BACKGROUND);
         }
     }

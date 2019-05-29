@@ -21,12 +21,6 @@
     <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- 百度统计使用 -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
-    <uses-permission android:name="android.permission.GET_TASKS" />
-
     <!-- 前台服务 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
@@ -102,9 +96,6 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".controller.activity.FeedBackActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".controller.activity.ConfirmActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".controller.activity.BankTransferActivity"

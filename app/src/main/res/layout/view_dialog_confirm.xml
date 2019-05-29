@@ -3,12 +3,11 @@
 
     <data></data>
 
-    <LinearLayout xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:keepScreenOn="true"
-        android:orientation="vertical"
-        tools:context=".controller.activity.ConfirmActivity">
+        android:orientation="vertical">
 
         <ScrollView
             android:layout_width="match_parent"
@@ -35,7 +34,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/black_dark"
+            android:background="@color/toolbar"
             android:orientation="horizontal"
             android:padding="@dimen/padding_4dp">
 

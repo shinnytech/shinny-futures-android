@@ -12,11 +12,13 @@ import android.support.v4.view.ViewPager;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.RadioGroup;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.FutureInfoActivityPresenter;
+import com.shinnytech.futures.controller.fragment.LazyLoadFragment;
 import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.eventbusbean.AverageEvent;
@@ -24,6 +26,7 @@ import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
+import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
@@ -71,6 +74,9 @@ public class FutureInfoActivity extends BaseActivity {
     private FutureInfoActivityPresenter mFutureInfoActivityPresenter;
     private String mInstrumentId;
     private BroadcastReceiver mReceiver;
+    private boolean mIsInit = true;
+    private boolean mIsVpLoaded = false;
+    private DataManager sDataManager = DataManager.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +90,8 @@ public class FutureInfoActivity extends BaseActivity {
         mBinding = (ActivityFutureInfoBinding) mViewDataBinding;
         mFutureInfoActivityPresenter = new FutureInfoActivityPresenter(this, sContext, mBinding, mToolbarTitle);
         mInstrumentId = mFutureInfoActivityPresenter.getInstrumentId();
+        //判断vp是否加载完毕
+        mIsVpLoaded = mBinding.vpInfoContent.getVisibility() == View.VISIBLE ? true : false;
     }
 
     @Override
@@ -111,6 +119,10 @@ public class FutureInfoActivity extends BaseActivity {
         super.onResume();
         refreshMD();
         sendSubscribeQuote(mInstrumentId);
+        if (!mIsInit && mIsVpLoaded) {
+            int index = mBinding.vpInfoContent.getCurrentItem();
+            ((LazyLoadFragment) mFutureInfoActivityPresenter.getmInfoPagerAdapter().getItem(index)).show();
+        }
     }
 
     @Override
@@ -175,6 +187,11 @@ public class FutureInfoActivity extends BaseActivity {
     protected void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
+        if (mIsVpLoaded) {
+            int index = mBinding.vpInfoContent.getCurrentItem();
+            ((LazyLoadFragment) mFutureInfoActivityPresenter.getmInfoPagerAdapter().getItem(index)).leave();
+            mIsInit = false;
+        }
     }
 
     @Override
@@ -328,6 +345,10 @@ public class FutureInfoActivity extends BaseActivity {
 
     public RadioGroup getTabsInfo() {
         return mBinding.rgTabInfo;
+    }
+
+    public void setmIsVpLoaded(boolean mIsVpLoaded) {
+        this.mIsVpLoaded = mIsVpLoaded;
     }
 
     @Override

@@ -18,7 +18,8 @@ public final class CommonConstants {
     public static final String TD_OFFLINE = "TD_OFFLINE";
     public static final String TD_MESSAGE = "TD_MESSAGE";
     public static final String TD_TIMEOUT = "TD_TIMEOUT";
-    public static final String TD_MESSAGE_LOGIN = "TD_MESSAGE_LOGIN";
+    public static final String TD_MESSAGE_LOGIN_SUCCEED = "TD_MESSAGE_LOGIN_SUCCEED";
+    public static final String TD_MESSAGE_LOGIN_FAIL = "TD_MESSAGE_LOGIN_FAIL";
     public static final String TD_MESSAGE_WEAK_PASSWORD = "TD_MESSAGE_WEAK_PASSWORD";
     public static final String TD_MESSAGE_SETTLEMENT = "TD_MESSAGE_SETTLEMENT";
     public static final String TD_MESSAGE_BROKER_INFO = "TD_MESSAGE_BROKER_INFO";
@@ -99,10 +100,15 @@ public final class CommonConstants {
     public static final String OPTIONAL_INS_LIST = "optionalInsList";
     //银期转帐方向
     public static final String TRANSFER_DIRECTION = "transferDirection";
+    //notify
+    public static final String CHANGE_PASSWORD_SUCCEED = "修改密码成功";
+    public static final String LOGIN_SUCCEED = "登录成功";
+    public static final String LOGIN_FAIL = "用户登录失败!";
 
     //登录页
     public static final String BROKER_ID_VISITOR = "游客";
     public static final String BROKER_ID_SIMULATION = "快期模拟";
+    public static final String BROKER_ID_SIMNOW = "simnow";
     //设置页
     public static final String CONFIG_KLINE_DURATION_DEFAULT = "klineDurationDefault";
     public static final String CONFIG_PARA_MA = "ma";
@@ -118,6 +124,7 @@ public final class CommonConstants {
     public static final String CONFIG_LOGIN_DATE = "loginDate";
     public static final String CONFIG_RECOMMEND_OPTIONAL = "recommendOptional";
     public static final String CONFIG_RECOMMEND = "recommend";
+    public static final String CONFIG_INIT_TIME = "initTime";
     //设置页信息
     public static final String CHART_SETTING = "图表设置";
     public static final String TRANSACTION_SETTING = "交易设置";
@@ -226,6 +233,8 @@ public final class CommonConstants {
     public static final String AMP_SWITCH_PAGE = "amp_switch_page";
     public static final String AMP_PRICE_KEY = "amp_price_key";
     public static final String AMP_VOLUME_KEY = "amp_volume_key";
+    public static final String AMP_SHOW_PAGE = "amp_show_page";
+    public static final String AMP_LEAVE_PAGE = "amp_leave_page";
 
     //amp event property
     public static final String AMP_EVENT_BROKER_ID_SELECTED = "broker_id_selected";
@@ -298,11 +307,34 @@ public final class CommonConstants {
     public static final String AMP_EVENT_VOLUME_KEY_VALUE_PLUS = "volume_key_plus";
     public static final String AMP_EVENT_VOLUME_KEY_VALUE_CLEAR = "volume_key_clear";
 
+    public static final String AMP_EVENT_PAGE_ID = "page_id";
+    public static final String AMP_EVENT_PAGE_ID_VALUE_MAIN = "main";
+    public static final String AMP_EVENT_PAGE_ID_VALUE_ACCOUNT = "account";
+    public static final String AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO = "future_info";
+    public static final String AMP_EVENT_SUB_PAGE_ID = "sub_page_id";
+    public static final String AMP_EVENT_SUB_PAGE_ID_VALUE_QUOTE = "quote";
+    public static final String AMP_EVENT_SUB_PAGE_ID_VALUE_HANDICAP = "handicap";
+    public static final String AMP_EVENT_SUB_PAGE_ID_VALUE_POSITION = "position";
+    public static final String AMP_EVENT_SUB_PAGE_ID_VALUE_ALIVE = "alive";
+    public static final String AMP_EVENT_SUB_PAGE_ID_VALUE_ORDER = "order";
+    public static final String AMP_EVENT_SUB_PAGE_ID_VALUE_TRADE = "trade";
+    public static final String AMP_EVENT_SUB_PAGE_ID_VALUE_TRANSACTION = "transaction";
+    public static final String AMP_EVENT_IS_POSITIVE = "is_positive";
+    public static final String AMP_EVENT_IS_INS_IN_POSITION = "is_ins_in_position";
+    public static final String AMP_EVENT_IS_INS_IN_OPTIONAL = "is_ins_in_optional";
+    public static final String AMP_EVENT_BROKER_ID = "broker_id";
+    public static final String AMP_EVENT_BALANCE = "balance";
+    public static final String AMP_EVENT_POSITION_COUNT = "position_count";
+    public static final String AMP_EVENT_ORDER_COUNT = "order_count";
+    public static final String AMP_EVENT_PAGE_VISIBLE_TIME = "page_visible_time";
+
     //amp user property
     public static final String AMP_USER_PACKAGE_ID_FIRST = "package_id_first";
     public static final String AMP_USER_PACKAGE_ID_LAST = "package_id_last";
     public static final String AMP_USER_INIT_TIME_FIRST = "init_time_first";
+    public static final String AMP_USER_SURVIVAL_TIME_TOTAL = "survival_time_total";
     public static final String AMP_USER_LOGIN_TIME_FIRST = "login_time_first";
+    public static final String AMP_USER_LOGIN_SUCCESS_TIME_FIRST = "login_success_time_first";
     public static final String AMP_USER_ACCOUNT_ID_FIRST = "account_id_first";
     public static final String AMP_USER_ACCOUNT_ID_LAST = "account_id_last";
     public static final String AMP_USER_BROKER_ID_FIRST = "broker_id_first";
