@@ -9,6 +9,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
+    <!--定位权限​-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <!-- SD卡读写入数据权限 -->
     <uses-permission android:name="android.permission.REORDER_TASKS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -25,11 +29,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
-        android:networkSecurityConfig="@xml/network_security_config"
         android:name=".application.BaseApplication"
-        android:allowBackup="true"
         android:icon="${app_icon}"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
@@ -103,32 +106,32 @@
             android:theme="@style/LoginActivityTheme"
             android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
-            android:screenOrientation="portrait"
-            android:name=".controller.activity.AboutActivity" />
+            android:name=".controller.activity.AboutActivity"
+            android:screenOrientation="portrait" />
         <activity
-            android:screenOrientation="portrait"
-            android:name=".controller.activity.ChangePasswordActivity" />
+            android:name=".controller.activity.ChangePasswordActivity"
+            android:screenOrientation="portrait" />
         <activity
-            android:screenOrientation="portrait"
-            android:name=".controller.activity.BrokerListActivity" />
+            android:name=".controller.activity.BrokerListActivity"
+            android:screenOrientation="portrait" />
         <activity
-            android:screenOrientation="portrait"
-            android:name=".controller.activity.OpenAccountActivity" />
+            android:name=".controller.activity.OpenAccountActivity"
+            android:screenOrientation="portrait" />
         <activity
-            android:screenOrientation="portrait"
-            android:name=".controller.activity.SettingActivity" />
+            android:name=".controller.activity.SettingActivity"
+            android:screenOrientation="portrait" />
         <activity
-            android:screenOrientation="portrait"
-            android:name=".controller.activity.ParaChangeActivity" />
+            android:name=".controller.activity.ParaChangeActivity"
+            android:screenOrientation="portrait" />
         <activity
-            android:screenOrientation="portrait"
-            android:name=".controller.activity.KlineDurationActivity" />
+            android:name=".controller.activity.KlineDurationActivity"
+            android:screenOrientation="portrait" />
         <activity
-            android:screenOrientation="portrait"
-            android:name=".controller.activity.AddKlineDurationActivity" />
+            android:name=".controller.activity.AddKlineDurationActivity"
+            android:screenOrientation="portrait" />
         <activity
-            android:screenOrientation="portrait"
-            android:name=".controller.activity.SplashActivity">
+            android:name=".controller.activity.SplashActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -136,14 +139,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:screenOrientation="portrait"
-            android:name=".controller.activity.SubSettingActivity" />
+            android:name=".controller.activity.SubSettingActivity"
+            android:screenOrientation="portrait" />
         <activity
-            android:screenOrientation="portrait"
-            android:name=".controller.activity.OptionalActivity" />
+            android:name=".controller.activity.OptionalActivity"
+            android:screenOrientation="portrait" />
         <activity
-            android:screenOrientation="portrait"
-            android:name=".controller.activity.CommonSwitchActivity"></activity>
+            android:name=".controller.activity.CommonSwitchActivity"
+            android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>
