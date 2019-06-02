@@ -37,10 +37,12 @@ import com.lzy.okgo.callback.FileCallback;
 import com.lzy.okgo.cookie.store.SPCookieStore;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
+import com.sfit.ctp.info.DeviceInfoManager;
 import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.MainActivity;
+import com.shinnytech.futures.controller.activity.SplashActivity;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.amplitude.api.Identify;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
@@ -48,6 +50,7 @@ import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.service.WebSocketService;
+import com.shinnytech.futures.utils.Base64;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
@@ -94,6 +97,7 @@ import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PARA_MA;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_RECOMMEND;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_SYSTEM_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.JSON_FILE_URL;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_1;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_2;
@@ -498,11 +502,17 @@ public class BaseApplication extends Application implements ServiceConnection {
                         LogUtils.e("解除绑定", true);
                         mServiceBound = false;
                     }
-                    System.exit(0);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            System.exit(0);
+                        }
+                    }, 500);
                 }
             }
         });
     }
+
 
     /**
      * date: 7/21/17
@@ -510,7 +520,15 @@ public class BaseApplication extends Application implements ServiceConnection {
      * description: 前台任务--连接服务器
      */
     private void notifyForeground() {
-        //前台
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                byte[] info = DeviceInfoManager.getCollectInfo(sContext);
+                String encodeInfo = Base64.encode(info);
+                SPUtils.putAndApply(sContext, CONFIG_SYSTEM_INFO, encodeInfo);
+            }
+        }).start();
+
         if (mServiceBound && mBackGround && sWebSocketService != null) {
             mBackGround = false;
             if (!sWebSocketService.isTDConnected()) sWebSocketService.connectTD();
@@ -632,22 +650,24 @@ public class BaseApplication extends Application implements ServiceConnection {
                             ToastUtils.showToast(sContext, "无网络，请检查网络设置");
                         break;
                     case TD_MESSAGE_SETTLEMENT:
-                        final Dialog dialog = new Dialog(mSettlementContext, R.style.responsibilityDialog);
-                        View viewDialog = View.inflate(mSettlementContext, R.layout.view_dialog_confirm, null);
-                        dialog.setContentView(viewDialog);
-                        TextView settlement = viewDialog.findViewById(R.id.settlement_info);
-                        settlement.setText(DataManager.getInstance().getBroker().getSettlement());
-                        dialog.setCanceledOnTouchOutside(false);
-                        viewDialog.findViewById(R.id.confirm).setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                if (BaseApplication.getWebSocketService() != null)
-                                    BaseApplication.getWebSocketService().sendReqConfirmSettlement();
-                                dialog.dismiss();
+                        if (mSettlementContext != null){
+                            final Dialog dialog = new Dialog(mSettlementContext, R.style.responsibilityDialog);
+                            View viewDialog = View.inflate(mSettlementContext, R.layout.view_dialog_confirm, null);
+                            dialog.setContentView(viewDialog);
+                            TextView settlement = viewDialog.findViewById(R.id.settlement_info);
+                            settlement.setText(DataManager.getInstance().getBroker().getSettlement());
+                            dialog.setCanceledOnTouchOutside(false);
+                            viewDialog.findViewById(R.id.confirm).setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    if (BaseApplication.getWebSocketService() != null)
+                                        BaseApplication.getWebSocketService().sendReqConfirmSettlement();
+                                    dialog.dismiss();
+                                }
+                            });
+                            if (!dialog.isShowing()) {
+                                dialog.show();
                             }
-                        });
-                        if (!dialog.isShowing()) {
-                            dialog.show();
                         }
                         break;
                     default:

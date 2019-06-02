@@ -221,54 +221,60 @@ public class MainActivity extends BaseActivity {
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //交易页的超链接
-        if (data != null) {
-            boolean isAccountPage = data.getBooleanExtra(BACK_TO_ACCOUNT_DETAIL, false);
-            String ins = data.getStringExtra(INS_BETWEEN_ACTIVITY);
-            if (isAccountPage) {
-                mBinding.bottomNavigation.setSelectedItemId(R.id.trade);
-                AccountFragment accountFragment = (AccountFragment) mMainActivityPresenter.getmViewPagerFragmentAdapter().getItem(1);
-                accountFragment.getmBinding().accountFab.show();
-                accountFragment.setIns(ins);
+        try {
+            //交易页的超链接
+            if (data != null) {
+                boolean isAccountPage = data.getBooleanExtra(BACK_TO_ACCOUNT_DETAIL, false);
+                String ins = data.getStringExtra(INS_BETWEEN_ACTIVITY);
+                if (isAccountPage) {
+                    mBinding.bottomNavigation.setSelectedItemId(R.id.trade);
+                    AccountFragment accountFragment = (AccountFragment) mMainActivityPresenter.getmViewPagerFragmentAdapter().getItem(1);
+                    if (accountFragment != null && accountFragment.getmBinding().accountFab != null){
+                        accountFragment.getmBinding().accountFab.show();
+                        accountFragment.setIns(ins);
+                    }
+
+                }
             }
-        }
 
-        //二级页、搜索页、自选管理页返回重新订阅行情
-        if (requestCode == MAIN_ACTIVITY_TO_SEARCH_ACTIVITY
-                || requestCode == MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY
-                || requestCode == MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY) {
-            QuoteFragment quoteFragment = ((QuotePagerFragment) mMainActivityPresenter.
-                    getmViewPagerFragmentAdapter().getItem(0)).getCurrentItem();
-            quoteFragment.refreshTD();
-            String mIns = mMainActivityPresenter.getPreSubscribedQuotes();
-            if (OPTIONAL.equals(quoteFragment.getTitle())) {
-                quoteFragment.refreshOptional();
-            } else if (mIns != null && !mIns.equals(sDataManager.getRtnData().getIns_list())
-                    && BaseApplication.getWebSocketService() != null) {
-                BaseApplication.getWebSocketService().sendSubscribeQuote(mIns);
+            //二级页、搜索页、自选管理页返回重新订阅行情
+            if (requestCode == MAIN_ACTIVITY_TO_SEARCH_ACTIVITY
+                    || requestCode == MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY
+                    || requestCode == MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY) {
+                String mIns = mMainActivityPresenter.getPreSubscribedQuotes();
+                QuoteFragment quoteFragment = ((QuotePagerFragment) mMainActivityPresenter.
+                        getmViewPagerFragmentAdapter().getItem(0)).getCurrentItem();
+                if (quoteFragment != null) quoteFragment.refreshTD();
+                if (quoteFragment != null && OPTIONAL.equals(quoteFragment.getTitle())) {
+                    quoteFragment.refreshOptional();
+                } else if (mIns != null && !mIns.equals(sDataManager.getRtnData().getIns_list())
+                        && BaseApplication.getWebSocketService() != null) {
+                    BaseApplication.getWebSocketService().sendSubscribeQuote(mIns);
+                }
             }
-        }
 
-        //二级页、银期转帐页刷新账户信息
-        if (requestCode == MAIN_ACTIVITY_TO_TRANSFER_ACTIVITY
-                || requestCode == MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY) {
-            AccountFragment accountFragment = (AccountFragment) mMainActivityPresenter.
-                    getmViewPagerFragmentAdapter().getItem(1);
-            accountFragment.refreshAccount();
-        }
-
-        //主页到搜索页的返回
-        if (requestCode == MAIN_ACTIVITY_TO_SEARCH_ACTIVITY) {
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_SEARCH);
-                jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-            } catch (JSONException e) {
-                e.printStackTrace();
+            //二级页、银期转帐页刷新账户信息
+            if (requestCode == MAIN_ACTIVITY_TO_TRANSFER_ACTIVITY
+                    || requestCode == MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY) {
+                AccountFragment accountFragment = (AccountFragment) mMainActivityPresenter.
+                        getmViewPagerFragmentAdapter().getItem(1);
+                if (accountFragment != null) accountFragment.refreshAccount();
             }
-            Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
-        }
 
+            //主页到搜索页的返回
+            if (requestCode == MAIN_ACTIVITY_TO_SEARCH_ACTIVITY) {
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_SEARCH);
+                    jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public MainActivityPresenter getmMainActivityPresenter() {

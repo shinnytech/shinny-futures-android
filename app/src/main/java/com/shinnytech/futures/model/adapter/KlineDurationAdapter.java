@@ -104,8 +104,13 @@ public class KlineDurationAdapter extends RecyclerView.Adapter<KlineDurationAdap
             mBinding.ivDrag.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        if (itemTouchHelper != null) itemTouchHelper.startDrag(ItemViewHolder.this);
+                    try {
+                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                            if (itemTouchHelper != null)
+                                itemTouchHelper.startDrag(ItemViewHolder.this);
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
                     }
                     return false;
                 }
@@ -114,17 +119,32 @@ public class KlineDurationAdapter extends RecyclerView.Adapter<KlineDurationAdap
             mBinding.ivTop.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onItemMove(getLayoutPosition(), 0);
-                    saveDurationList();
+                    try {
+                        int index = getLayoutPosition();
+                        if (index >= 0 && index < getItemCount()){
+                            onItemMove(index, 0);
+                            saveDurationList();
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
                 }
             });
 
             mBinding.ivCut.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mData.remove(getLayoutPosition());
-                    notifyItemRemoved(getLayoutPosition());
-                    saveDurationList();
+                    try {
+                        int index = getLayoutPosition();
+                        if (index >= 0 && index < getItemCount()){
+                            mData.remove(index);
+                            notifyItemRemoved(index);
+                            saveDurationList();
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
                 }
             });
         }

@@ -12,7 +12,12 @@ android {
         resValue("string", "app_name", "ShinnyFutures")
         flavorDimensions("shinny")
         vectorDrawables.useSupportLibrary = true
+
+        ndk {
+            abiFilters "armeabi", "armeabi-v7a"
+        }
     }
+
     signingConfigs {
         config {
             if (System.properties['keyStore'] != null) {
@@ -735,6 +740,6 @@ dependencies {
     implementation 'org.greenrobot:greendao:3.2.2'
     implementation 'com.alibaba:fastjson:1.2.56'
     implementation 'android.arch.lifecycle:extensions:1.1.1'
-    implementation(name: 'InfoCollection_single_release_v1.4-2019-03-06', ext: 'aar')
+    implementation(name: 'InfoCollection_single_release_v1.5-2019-05-27', ext: 'aar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

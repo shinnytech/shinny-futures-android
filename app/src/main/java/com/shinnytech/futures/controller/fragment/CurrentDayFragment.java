@@ -385,7 +385,6 @@ public class CurrentDayFragment extends BaseChartFragment {
 
     }
 
-
     /**
      * date: 7/9/17
      * author: chenli

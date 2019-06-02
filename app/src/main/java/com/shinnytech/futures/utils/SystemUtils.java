@@ -63,12 +63,16 @@ public class SystemUtils {
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningAppProcessInfo> appProcessInfoList = activityManager.getRunningAppProcesses();
         /**枚举进程*/
-        for (ActivityManager.RunningAppProcessInfo appProcessInfo : appProcessInfoList) {
-            if (appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
-                if (appProcessInfo.processName.equals(context.getApplicationInfo().processName)) {
-                    return true;
+        try {
+            for (ActivityManager.RunningAppProcessInfo appProcessInfo : appProcessInfoList) {
+                if (appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                    if (appProcessInfo.processName.equals(context.getApplicationInfo().processName)) {
+                        return true;
+                    }
                 }
             }
+        }catch (Exception e){
+            e.printStackTrace();
         }
         return false;
     }

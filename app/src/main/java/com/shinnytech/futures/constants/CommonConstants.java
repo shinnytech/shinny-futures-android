@@ -125,6 +125,8 @@ public final class CommonConstants {
     public static final String CONFIG_RECOMMEND_OPTIONAL = "recommendOptional";
     public static final String CONFIG_RECOMMEND = "recommend";
     public static final String CONFIG_INIT_TIME = "initTime";
+    public static final String CONFIG_VERSION_CODE = "versionCode";
+    public static final String CONFIG_SYSTEM_INFO = "systemInfo";
     //设置页信息
     public static final String CHART_SETTING = "图表设置";
     public static final String TRANSACTION_SETTING = "交易设置";
@@ -206,8 +208,10 @@ public final class CommonConstants {
     public static final String AMP_SELECT_BROKER = "amp_select_broker";
     public static final String AMP_LOGIN = "amp_login";
     public static final String AMP_VISIT = "amp_visit";
+    public static final String AMP_AUTO = "amp_auto";
     public static final String AMP_LOGIN_SUCCEEDED = "amp_login_succeeded";
     public static final String AMP_LOGIN_FAILED = "amp_login_failed";
+    public static final String AMP_LOGIN_TIME_OUT = "amp_login_time_out";
     public static final String AMP_FOREGROUND = "amp_foreground";
     public static final String AMP_BACKGROUND = "amp_background";
     public static final String AMP_LOGOUT = "amp_logout";
@@ -237,8 +241,14 @@ public final class CommonConstants {
     public static final String AMP_LEAVE_PAGE = "amp_leave_page";
 
     //amp event property
-    public static final String AMP_EVENT_BROKER_ID_SELECTED = "broker_id_selected";
-    public static final String AMP_EVENT_BROKER_ID_SUCCEEDED = "broker_id_succeeded";
+    public static final String AMP_EVENT_SELECT_BROKER_ID = "broker_id";
+    public static final String AMP_EVENT_LOGIN_BROKER_ID = "broker_id";
+    public static final String AMP_EVENT_LOGIN_USER_ID = "user_id";
+    public static final String AMP_EVENT_LOGIN_TIME = "login_time";
+    public static final String AMP_EVENT_LOGIN_TYPE = "login_type";
+    public static final String AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN = "login";
+    public static final String AMP_EVENT_LOGIN_TYPE_VALUE_VISIT = "visit";
+    public static final String AMP_EVENT_LOGIN_TYPE_VALUE_AUTO = "auto";
 
     public static final String AMP_EVENT_PRICE = "price";
     public static final String AMP_EVENT_INSTRUMENT_ID = "instrument_id";

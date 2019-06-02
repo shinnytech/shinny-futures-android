@@ -90,6 +90,7 @@ public class PositionFragment extends LazyLoadFragment {
     private FragmentPositionBinding mBinding;
     private boolean mIsUpdate;
     private long mShowTime;
+    private String mInstrumentId;
 
     @Nullable
     @Override
@@ -109,8 +110,10 @@ public class PositionFragment extends LazyLoadFragment {
                 new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
         mAdapter = new PositionAdapter(getActivity(), mOldData);
         mBinding.rv.setAdapter(mAdapter);
+        mInstrumentId = "";
         if (getActivity() instanceof FutureInfoActivity) {
-            mAdapter.setHighlightIns(((FutureInfoActivity) getActivity()).getInstrument_id());
+            mInstrumentId = ((FutureInfoActivity) getActivity()).getInstrument_id();
+            mAdapter.setHighlightIns(mInstrumentId);
             //注册EventBus
             EventBus.getDefault().register(this);
         }
@@ -122,35 +125,37 @@ public class PositionFragment extends LazyLoadFragment {
                 new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        PositionEntity positionEntity = mAdapter.getData().get(position);
-                        if (positionEntity == null) return;
-                        sDataManager.POSITION_DIRECTION = ((TextView) view.findViewById(R.id.position_direction))
-                                .getText().toString();
-                        String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
-                        //添加判断，防止自选合约列表为空时产生无效的点击事件
-                        if (instrument_id != null) {
-                            if (getActivity() instanceof MainActivity) {
-                                ((MainActivity) getActivity()).getmMainActivityPresenter()
-                                        .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
-                                sDataManager.IS_SHOW_VP_CONTENT = true;
-                                Intent intentPos = new Intent(getActivity(), FutureInfoActivity.class);
-                                intentPos.putExtra(INS_BETWEEN_ACTIVITY, instrument_id);
-                                getActivity().startActivityForResult(intentPos, MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY);
-                                JSONObject jsonObject = new JSONObject();
-                                try {
-                                    jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                                    jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_FUTURE_INFO);
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                                Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
-                            } else {
-                                mAdapter.updateHighlightIns(instrument_id);
-                                IdEvent idEvent = new IdEvent();
-                                idEvent.setInstrument_id(instrument_id);
-                                EventBus.getDefault().post(idEvent);
-                                ((FutureInfoActivity) getActivity()).getViewPager().setCurrentItem(4, false);
+                        if (position >= 0 && position < mAdapter.getItemCount()){
+                            PositionEntity positionEntity = mAdapter.getData().get(position);
+                            if (positionEntity == null) return;
+                            sDataManager.POSITION_DIRECTION = ((TextView) view.findViewById(R.id.position_direction))
+                                    .getText().toString();
+                            String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
+                            //添加判断，防止自选合约列表为空时产生无效的点击事件
+                            if (instrument_id != null) {
+                                if (getActivity() instanceof MainActivity) {
+                                    ((MainActivity) getActivity()).getmMainActivityPresenter()
+                                            .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
+                                    sDataManager.IS_SHOW_VP_CONTENT = true;
+                                    Intent intentPos = new Intent(getActivity(), FutureInfoActivity.class);
+                                    intentPos.putExtra(INS_BETWEEN_ACTIVITY, instrument_id);
+                                    getActivity().startActivityForResult(intentPos, MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY);
+                                    JSONObject jsonObject = new JSONObject();
+                                    try {
+                                        jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                                        jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_FUTURE_INFO);
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+                                } else {
+                                    mAdapter.updateHighlightIns(instrument_id);
+                                    IdEvent idEvent = new IdEvent();
+                                    idEvent.setInstrument_id(instrument_id);
+                                    EventBus.getDefault().post(idEvent);
+                                    ((FutureInfoActivity) getActivity()).getViewPager().setCurrentItem(4, false);
 
+                                }
                             }
                         }
                     }
@@ -268,9 +273,12 @@ public class PositionFragment extends LazyLoadFragment {
 
     @Override
     public void show() {
-        refreshPosition();
-        mBinding.rv.scrollToPosition(0);
-        showEvent();
+        try {
+            refreshPosition();
+            showEvent();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -287,7 +295,7 @@ public class PositionFragment extends LazyLoadFragment {
             if (getActivity() instanceof MainActivity) {
                 jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_ACCOUNT);
             } else {
-                String ins = ((FutureInfoActivity) getActivity()).getInstrument_id();
+                String ins = mInstrumentId;
                 boolean isInsInOptional = LatestFileManager.getOptionalInsList().keySet().contains(ins);
                 jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
                 jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);
@@ -351,7 +359,7 @@ public class PositionFragment extends LazyLoadFragment {
             if (getActivity() instanceof MainActivity) {
                 jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_ACCOUNT);
             } else {
-                String ins = ((FutureInfoActivity) getActivity()).getInstrument_id();
+                String ins = mInstrumentId;
                 boolean isInsInOptional = LatestFileManager.getOptionalInsList().keySet().contains(ins);
                 jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
                 jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);

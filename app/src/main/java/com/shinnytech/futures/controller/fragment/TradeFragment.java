@@ -85,8 +85,12 @@ public class TradeFragment extends LazyLoadFragment {
 
     @Override
     public void show() {
-        refreshAccount();
-        showEvent();
+        try {
+            refreshAccount();
+            showEvent();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void showEvent() {
@@ -267,24 +271,26 @@ public class TradeFragment extends LazyLoadFragment {
         mBinding.rv.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rv, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                TradeEntity tradeEntity = mAdapter.getData().get(position);
-                if (tradeEntity == null) return;
-                if (getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).getmMainActivityPresenter()
-                            .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
+                if (position >= 0 && position < mAdapter.getItemCount()){
+                    TradeEntity tradeEntity = mAdapter.getData().get(position);
+                    if (tradeEntity == null) return;
+                    if (getActivity() instanceof MainActivity) {
+                        ((MainActivity) getActivity()).getmMainActivityPresenter()
+                                .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
+                    }
+                    sDataManager.IS_SHOW_VP_CONTENT = true;
+                    Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
+                    intent.putExtra(INS_BETWEEN_ACTIVITY, tradeEntity.getExchange_id() + "." + tradeEntity.getInstrument_id());
+                    getActivity().startActivityForResult(intent, MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY);
+                    JSONObject jsonObject = new JSONObject();
+                    try {
+                        jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                        jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_FUTURE_INFO);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                 }
-                sDataManager.IS_SHOW_VP_CONTENT = true;
-                Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
-                intent.putExtra(INS_BETWEEN_ACTIVITY, tradeEntity.getExchange_id() + "." + tradeEntity.getInstrument_id());
-                getActivity().startActivityForResult(intent, MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY);
-                JSONObject jsonObject = new JSONObject();
-                try {
-                    jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                    jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_FUTURE_INFO);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
             }
 
             @Override

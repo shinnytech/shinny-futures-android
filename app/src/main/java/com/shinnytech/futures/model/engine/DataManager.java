@@ -4,6 +4,8 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.model.amplitude.api.Identify;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.BankEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.BrokerEntity;
@@ -19,6 +21,7 @@ import com.shinnytech.futures.model.bean.futureinfobean.FutureBean;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.utils.LogUtils;
+import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastUtils;
 
 import org.json.JSONArray;
@@ -33,7 +36,23 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BROKER_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_BROKER_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TIME;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_USER_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_FAILED;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_SUCCEEDED;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_ACCOUNT_ID_FIRST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_ACCOUNT_ID_LAST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID_FIRST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID_LAST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_LOGIN_SUCCESS_TIME_FIRST;
+import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMNOW;
+import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMULATION;
 import static com.shinnytech.futures.constants.CommonConstants.CHANGE_PASSWORD_SUCCEED;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_INIT_TIME;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN_FAIL;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN_SUCCEED;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
@@ -97,6 +116,17 @@ public class DataManager {
      */
     public boolean IS_SHOW_LOGIN_SUCCESS = false;
     /**
+     * date: 2019/6/1
+     * description: 登录入口
+     */
+    public String LOGIN_TYPE = AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
+    /**
+     * date: 2019/6/1
+     * description: 主动登录事件期货公司及账号
+     */
+    public String LOGIN_BROKER_ID = "";
+    public String LOGIN_USER_ID = "";
+    /**
      * date: 2019/5/24
      * description: 判断用户是否主动切换页面
      */
@@ -107,7 +137,6 @@ public class DataManager {
      */
     public String QUOTES = "";
     public String CHARTS = "";
-
     /**
      * date: 2019/4/19
      * description: 用户最后一次切换的交易所
@@ -438,6 +467,16 @@ public class DataManager {
                                         else continue;
                                     }
                                     if (LOGIN_FAIL.equals(content)) {
+                                        JSONObject jsonObject = new JSONObject();
+                                        try {
+                                            jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, LOGIN_BROKER_ID);
+                                            jsonObject.put(AMP_EVENT_LOGIN_USER_ID, LOGIN_USER_ID);
+                                            jsonObject.put(AMP_EVENT_LOGIN_TIME, System.currentTimeMillis());
+                                            jsonObject.put(AMP_EVENT_LOGIN_TYPE, LOGIN_TYPE);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                        Amplitude.getInstance().logEvent(AMP_LOGIN_FAILED, jsonObject);
                                         if (BaseApplication.getWebSocketService() != null)
                                             BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
                                     }
@@ -486,8 +525,35 @@ public class DataManager {
                                             String userId = user.getJSONObject("session").optString("user_id");
                                             USER_ID = userId;
                                             userEntity.setUser_id(userId);
-                                            if (BaseApplication.getWebSocketService() != null)
-                                                BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_LOGIN_SUCCEED, TD_BROADCAST);
+                                            if (LOGIN_USER_ID.equals(userId)){
+                                                Amplitude.getInstance().setUserId(LOGIN_BROKER_ID + LOGIN_USER_ID);
+                                                Identify identify = new Identify()
+                                                        .setOnce(AMP_USER_ACCOUNT_ID_FIRST, LOGIN_USER_ID)
+                                                        .set(AMP_USER_ACCOUNT_ID_LAST, LOGIN_USER_ID)
+                                                        .setOnce(AMP_USER_BROKER_ID_FIRST, LOGIN_BROKER_ID)
+                                                        .set(AMP_USER_BROKER_ID_LAST, LOGIN_BROKER_ID);
+                                                if (!(BROKER_ID_SIMULATION.equals(LOGIN_BROKER_ID) || BROKER_ID_SIMNOW.equals(LOGIN_BROKER_ID))) {
+                                                    long currentTime = System.currentTimeMillis();
+                                                    long initTime = (long) SPUtils.get(BaseApplication.getContext(), CONFIG_INIT_TIME, currentTime);
+                                                    long loginTime = currentTime - initTime;
+                                                    identify.setOnce(AMP_USER_LOGIN_SUCCESS_TIME_FIRST, loginTime);
+                                                }
+                                                Amplitude.getInstance().identify(identify);
+
+                                                JSONObject jsonObject = new JSONObject();
+                                                try {
+                                                    jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, LOGIN_BROKER_ID);
+                                                    jsonObject.put(AMP_EVENT_LOGIN_USER_ID, LOGIN_USER_ID);
+                                                    jsonObject.put(AMP_EVENT_LOGIN_TIME, System.currentTimeMillis());
+                                                    jsonObject.put(AMP_EVENT_LOGIN_TYPE, LOGIN_TYPE);
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                                Amplitude.getInstance().logEvent(AMP_LOGIN_SUCCEEDED, jsonObject);
+                                                if (BaseApplication.getWebSocketService() != null)
+                                                    BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_LOGIN_SUCCEED, TD_BROADCAST);
+                                            }
+
                                             break;
                                         default:
                                             break;

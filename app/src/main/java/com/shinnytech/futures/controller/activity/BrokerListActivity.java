@@ -20,7 +20,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BROKER_ID_SELECTED;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SELECT_BROKER_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SELECT_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_LIST;
 
@@ -65,7 +65,7 @@ public class BrokerListActivity extends BaseActivity {
                         String broker = mBrokerAdapter.getData().get(position);
                         JSONObject jsonObject = new JSONObject();
                         try {
-                            jsonObject.put(AMP_EVENT_BROKER_ID_SELECTED, broker);
+                            jsonObject.put(AMP_EVENT_SELECT_BROKER_ID, broker);
                             Amplitude.getInstance().logEvent(AMP_SELECT_BROKER, jsonObject);
                         } catch (JSONException e) {
                             e.printStackTrace();

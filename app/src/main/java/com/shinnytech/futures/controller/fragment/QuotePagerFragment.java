@@ -136,11 +136,22 @@ public class QuotePagerFragment extends LazyLoadFragment {
     }
 
     public QuoteFragment getCurrentItem() {
-        return (QuoteFragment) mViewPagerFragmentAdapter.getItem(mBinding.quotePager.getCurrentItem());
+        try {
+            if (mBinding.quotePager != null){
+                int index = mBinding.quotePager.getCurrentItem();
+                return (QuoteFragment) mViewPagerFragmentAdapter.getItem(index);
+            }else return null;
+        }catch (Exception e){
+            return null;
+        }
     }
 
     public void setCurrentItem(int index) {
-        mBinding.quotePager.setCurrentItem(index, false);
+        try {
+            if (mBinding.quotePager != null) mBinding.quotePager.setCurrentItem(index, false);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

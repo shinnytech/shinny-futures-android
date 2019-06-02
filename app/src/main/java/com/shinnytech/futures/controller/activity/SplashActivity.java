@@ -36,22 +36,22 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
         mHandler = new MyHandler(this);
         mTimer = new Timer();
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                mHandler.sendEmptyMessage(0);
+            }
+        };
+        mTimer.schedule(timerTask, 10000);
 
         final Context context = BaseApplication.getContext();
+        //没有登录过
         if (!SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
             mHandler.sendEmptyMessageDelayed(0, 2000);
         } else {
+            //关闭软件前退出登录
             String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
             if (date.isEmpty()) mHandler.sendEmptyMessageDelayed(0, 2000);
-            else {
-                TimerTask timerTask = new TimerTask() {
-                    @Override
-                    public void run() {
-                        mHandler.sendEmptyMessage(0);
-                    }
-                };
-                mTimer.schedule(timerTask, 10000);
-            }
         }
     }
 
@@ -82,24 +82,15 @@ public class SplashActivity extends AppCompatActivity {
                 switch (msg) {
                     case TD_MESSAGE_LOGIN_SUCCEED:
                         //登录成功
-                        mTimer.cancel();
-                        Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
-                        SplashActivity.this.startActivity(mainIntent);
-                        SplashActivity.this.finish();
+                        toMain();
                         break;
                     case TD_MESSAGE_LOGIN_FAIL:
                         //登录失败
-                        mTimer.cancel();
-                        Intent loginIntent = new Intent(SplashActivity.this, LoginActivity.class);
-                        SplashActivity.this.startActivity(loginIntent);
-                        SplashActivity.this.finish();
+                        toLogin();
                         break;
                     case TD_OFFLINE:
                         //超时检测，连接失败
-                        mTimer.cancel();
-                        Intent loginIntent1 = new Intent(SplashActivity.this, LoginActivity.class);
-                        SplashActivity.this.startActivity(loginIntent1);
-                        SplashActivity.this.finish();
+                        toLogin();
                         break;
                     default:
                         break;
@@ -130,14 +121,26 @@ public class SplashActivity extends AppCompatActivity {
             if (activity != null) {
                 switch (msg.what) {
                     case 0:
-                        Intent loginIntent = new Intent(activity, LoginActivity.class);
-                        activity.startActivity(loginIntent);
-                        activity.finish();
+                        activity.toLogin();
                         break;
                     default:
                         break;
                 }
             }
         }
+    }
+
+    private void toLogin(){
+        mTimer.cancel();
+        Intent loginIntent = new Intent(SplashActivity.this, LoginActivity.class);
+        SplashActivity.this.startActivity(loginIntent);
+        SplashActivity.this.finish();
+    }
+
+    private void toMain(){
+        mTimer.cancel();
+        Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
+        SplashActivity.this.startActivity(mainIntent);
+        SplashActivity.this.finish();
     }
 }

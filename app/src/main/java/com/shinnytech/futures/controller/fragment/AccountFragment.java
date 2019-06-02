@@ -70,8 +70,8 @@ public class AccountFragment extends LazyLoadFragment {
 
     @Override
     public void show() {
-        refreshAccount();
         try {
+            refreshAccount();
             if (!mIsInit) {
                 ((LazyLoadFragment) mViewPagerFragmentAdapter.getItem(mBinding.vp.getCurrentItem())).show();
             }

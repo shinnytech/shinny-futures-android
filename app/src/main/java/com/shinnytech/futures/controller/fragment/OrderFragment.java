@@ -112,6 +112,7 @@ public class OrderFragment extends LazyLoadFragment {
     private boolean mIsShowCancelPop;
     private boolean mIsOrdersAlive;
     private long mShowTime;
+    private String mInstrumentId;
 
     public static OrderFragment newInstance(boolean mIsOrdersAlive) {
         OrderFragment fragment = new OrderFragment();
@@ -148,9 +149,10 @@ public class OrderFragment extends LazyLoadFragment {
         mAdapter = new OrderAdapter(getActivity(), mOldData);
         mBinding.rv.setAdapter(mAdapter);
         mIsShowCancelPop = (boolean) SPUtils.get(BaseApplication.getContext(), CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM, true);
-
+        mInstrumentId = "";
         if (getActivity() instanceof FutureInfoActivity) {
-            mAdapter.setHighlightIns(((FutureInfoActivity) getActivity()).getInstrument_id());
+            mInstrumentId = ((FutureInfoActivity) getActivity()).getInstrument_id();
+            mAdapter.setHighlightIns(mInstrumentId);
         }
         EventBus.getDefault().register(this);
     }
@@ -179,30 +181,30 @@ public class OrderFragment extends LazyLoadFragment {
         mBinding.rv.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rv, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                OrderEntity orderEntity = mAdapter.getData().get(position);
-                if (orderEntity == null) return;
+                if (position >= 0 && position < mAdapter.getItemCount()){
+                    OrderEntity orderEntity = mAdapter.getData().get(position);
+                    if (orderEntity == null) return;
+                    if (mIsOrdersAlive) {
+                        checkPassword(view, orderEntity);
+                    } else {
+                        ((MainActivity) getActivity()).getmMainActivityPresenter()
+                                .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
 
-                if (mIsOrdersAlive) {
-                    checkPassword(view, orderEntity);
-                } else {
-                    ((MainActivity) getActivity()).getmMainActivityPresenter()
-                            .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
-
-                    sDataManager.IS_SHOW_VP_CONTENT = true;
-                    Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
-                    intent.putExtra(INS_BETWEEN_ACTIVITY, orderEntity.getExchange_id()
-                            + "." + orderEntity.getInstrument_id());
-                    getActivity().startActivityForResult(intent, MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY);
-                    JSONObject jsonObject = new JSONObject();
-                    try {
-                        jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                        jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_FUTURE_INFO);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                        sDataManager.IS_SHOW_VP_CONTENT = true;
+                        Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
+                        intent.putExtra(INS_BETWEEN_ACTIVITY, orderEntity.getExchange_id()
+                                + "." + orderEntity.getInstrument_id());
+                        getActivity().startActivityForResult(intent, MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY);
+                        JSONObject jsonObject = new JSONObject();
+                        try {
+                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
+                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_FUTURE_INFO);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                     }
-                    Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                 }
-
             }
 
             @Override
@@ -284,9 +286,12 @@ public class OrderFragment extends LazyLoadFragment {
 
     @Override
     public void show() {
-        refreshOrder();
-        mBinding.rv.scrollToPosition(0);
-        showEvent();
+        try {
+            refreshOrder();
+            showEvent();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void showEvent() {
@@ -298,7 +303,7 @@ public class OrderFragment extends LazyLoadFragment {
             if (getActivity() instanceof MainActivity) {
                 jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_ACCOUNT);
             } else {
-                String ins = ((FutureInfoActivity) getActivity()).getInstrument_id();
+                String ins = mInstrumentId;
                 boolean isInsInOptional = LatestFileManager.getOptionalInsList().keySet().contains(ins);
                 jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
                 jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);
@@ -359,7 +364,7 @@ public class OrderFragment extends LazyLoadFragment {
             if (getActivity() instanceof MainActivity) {
                 jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_ACCOUNT);
             } else {
-                String ins = ((FutureInfoActivity) getActivity()).getInstrument_id();
+                String ins = mInstrumentId;
                 boolean isInsInOptional = LatestFileManager.getOptionalInsList().keySet().contains(ins);
                 jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
                 jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);

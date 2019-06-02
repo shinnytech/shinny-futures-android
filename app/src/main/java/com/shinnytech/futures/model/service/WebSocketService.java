@@ -1,5 +1,6 @@
 package com.shinnytech.futures.model.service;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -7,12 +8,15 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 
@@ -55,18 +59,29 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.shinnytech.futures.constants.CommonConstants.AMP_AUTO;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_CANCEL_ORDER;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_DIRECTION;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_INSTRUMENT_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_BROKER_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TIME;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_VISIT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_USER_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OFFSET;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_VOLUME;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_INSERT_ORDER;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_VISIT;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
 import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_SYSTEM_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.MD_TIMEOUT;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_FAIL;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_ONLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_TIMEOUT;
@@ -235,7 +250,7 @@ public class WebSocketService extends Service {
                                 switch (aid) {
                                     case "rsp_login":
                                         mWebSocketClientMD.sendPing();
-                                        sendSubscribeAfterConnect();
+//                                        sendSubscribeAfterConnect();
                                         break;
                                     case "rtn_data":
                                         BaseApplication.setsIndex(0);
@@ -466,8 +481,31 @@ public class WebSocketService extends Service {
             String name = (String) SPUtils.get(context, CommonConstants.CONFIG_ACCOUNT, "");
             String password = (String) SPUtils.get(context, CommonConstants.CONFIG_PASSWORD, "");
             String broker = (String) SPUtils.get(context, CommonConstants.CONFIG_BROKER, "");
-            if (name != null && name.contains(BROKER_ID_VISITOR) && !TimeUtils.getNowTime().equals(date))
+            boolean isPermissionDenied = ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.READ_PHONE_STATE)
+                    != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED;
+            if ((name != null && name.contains(BROKER_ID_VISITOR) && !TimeUtils.getNowTime().equals(date)) || isPermissionDenied){
+                sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
                 return;
+            }
+
+            sDataManager.LOGIN_BROKER_ID = broker;
+            sDataManager.LOGIN_USER_ID = name;
+            sDataManager.LOGIN_TYPE = AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, broker);
+                jsonObject.put(AMP_EVENT_LOGIN_USER_ID, name);
+                jsonObject.put(AMP_EVENT_LOGIN_TIME, System.currentTimeMillis());
+                jsonObject.put(AMP_EVENT_LOGIN_TYPE, AMP_EVENT_LOGIN_TYPE_VALUE_AUTO);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            Amplitude.getInstance().logEvent(AMP_AUTO, jsonObject);
             sendReqLogin(broker, name, password);
         }
 
@@ -515,11 +553,14 @@ public class WebSocketService extends Service {
      */
     public void sendReqLogin(String bid, String user_name, String password) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
+            String systemInfo = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_SYSTEM_INFO, "");
             ReqLoginEntity reqLoginEntity = new ReqLoginEntity();
             reqLoginEntity.setAid("req_login");
             reqLoginEntity.setBid(bid);
             reqLoginEntity.setUser_name(user_name);
             reqLoginEntity.setPassword(password);
+            reqLoginEntity.setClient_system_info(systemInfo);
+            reqLoginEntity.setClient_app_id("SHINNY_XQ_1.0");
             String reqLogin = new Gson().toJson(reqLoginEntity);
             mWebSocketClientTD.sendText(reqLogin);
             LogUtils.e(reqLogin, true);

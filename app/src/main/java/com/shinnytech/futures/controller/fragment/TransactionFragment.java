@@ -378,10 +378,14 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
 
     @Override
     public void show() {
-        refreshPrice();
-        refreshAccount();
-        initPosition();
-        showEvent();
+        try {
+            refreshPrice();
+            refreshAccount();
+            initPosition();
+            showEvent();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void showEvent() {
@@ -390,7 +394,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             mShowTime = System.currentTimeMillis();
             String broker_id = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_BROKER, "");
             JSONObject jsonObject = new JSONObject();
-            String ins = ((FutureInfoActivity) getActivity()).getInstrument_id();
+            String ins = mInstrumentId;
             boolean isInsInOptional = LatestFileManager.getOptionalInsList().keySet().contains(ins);
             jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
             jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);
@@ -442,7 +446,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             long pageVisibleTime = System.currentTimeMillis() - mShowTime;
             String broker_id = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_BROKER, "");
             JSONObject jsonObject = new JSONObject();
-            String ins = ((FutureInfoActivity) getActivity()).getInstrument_id();
+            String ins = mInstrumentId;
             boolean isInsInOptional = LatestFileManager.getOptionalInsList().keySet().contains(ins);
             jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
             jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);

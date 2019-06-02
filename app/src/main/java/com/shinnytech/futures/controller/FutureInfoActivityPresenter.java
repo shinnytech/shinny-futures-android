@@ -343,7 +343,7 @@ public class FutureInfoActivityPresenter {
                 int position = mKlineDurationTitleAdapter.next();
                 mBinding.rvDurationTitle.scrollToPosition(position);
                 String durationTitle = mKlineDurationTitleAdapter.getDurationTitle();
-                switchDuration(durationTitle);
+                if (durationTitle != null) switchDuration(durationTitle);
             }
         });
 

@@ -3,30 +3,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.shinnytech.futures">
 
-    <!-- 网络权限 -->
+    <!--location dangerous​-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- storage dangerous -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!-- phone dangerous -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!-- network -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-
-    <!--定位权限​-->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-    <!-- SD卡读写入数据权限 -->
-    <uses-permission android:name="android.permission.REORDER_TASKS" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
-    <!-- 电话权限 -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-
-    <!-- VISIBILITY_HIDDEN表示不显示任何通知栏提示的权限 -->
+    <!-- 不显示任何通知栏提示 -->
     <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
+    <!--vibrate-->
     <uses-permission android:name="android.permission.VIBRATE" />
-
     <!-- 前台服务 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!--前后台切换-->
+    <uses-permission android:name="android.permission.REORDER_TASKS" />
+
 
     <application
         android:name=".application.BaseApplication"

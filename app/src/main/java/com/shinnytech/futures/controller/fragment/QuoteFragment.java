@@ -143,7 +143,6 @@ public class QuoteFragment extends LazyLoadFragment {
                     return 1;
                 } else return 1;
             } catch (Exception e) {
-                e.printStackTrace();
                 return 1;
             }
         }
@@ -234,9 +233,14 @@ public class QuoteFragment extends LazyLoadFragment {
 
             //配置推荐合约列表
             for (String ins : LatestFileManager.getMainInsList().keySet()) {
-                QuoteEntity quoteEntity = CloneUtils.clone(DataManager.getInstance().getRtnData().getQuotes().get(ins));
-                if (!LatestFileManager.getOptionalInsList().containsKey(ins))
-                    sortedRecommend.put(ins, quoteEntity);
+                try {
+                    QuoteEntity quoteEntity = CloneUtils.clone(DataManager.getInstance().getRtnData().getQuotes().get(ins));
+                    if (!LatestFileManager.getOptionalInsList().containsKey(ins))
+                        sortedRecommend.put(ins, quoteEntity);
+                }catch (Exception e){
+                    continue;
+                }
+
             }
 
             mNewDataRecommend.putAll(sortedRecommend);
@@ -522,34 +526,37 @@ public class QuoteFragment extends LazyLoadFragment {
         mBinding.rvQuoteRecommend.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rvQuoteRecommend, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                QuoteEntity quoteEntity0 = mAdapterRecommend.getData().get(position);
-                if (quoteEntity0 == null) return;
-                String instrument_id = quoteEntity0.getInstrument_id();
-                if (instrument_id == null || "".equals(instrument_id)) return;
-                Map<String, QuoteEntity> insListOptional = LatestFileManager.getOptionalInsList();
-                if (!insListOptional.containsKey(instrument_id)) {
-                    JSONObject jsonObject = new JSONObject();
-                    try {
-                        jsonObject.put(AMP_EVENT_OPTIONAL_INSTRUMENT_ID, instrument_id);
-                        jsonObject.put(AMP_EVENT_OPTIONAL_DIRECTION, AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    Amplitude.getInstance().logEvent(AMP_OPTIONAL_RECOMMEND, jsonObject);
-                    QuoteEntity quoteEntity = new QuoteEntity();
-                    quoteEntity.setInstrument_id(instrument_id);
-                    insListOptional.put(instrument_id, quoteEntity);
-                    LatestFileManager.saveInsListToFile(new ArrayList<>(insListOptional.keySet()));
-                    mNewDataRecommend.remove(instrument_id);
-                    refreshOptional();
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ToastUtils.showToast(BaseApplication.getContext(),
-                                    "该合约已添加到自选列表");
+                if (position >= 0 && position < mAdapterRecommend.getItemCount()) {
+                    QuoteEntity quoteEntity0 = mAdapterRecommend.getData().get(position);
+                    if (quoteEntity0 == null) return;
+                    String instrument_id = quoteEntity0.getInstrument_id();
+                    if (instrument_id == null || "".equals(instrument_id)) return;
+                    Map<String, QuoteEntity> insListOptional = LatestFileManager.getOptionalInsList();
+                    if (!insListOptional.containsKey(instrument_id)) {
+                        JSONObject jsonObject = new JSONObject();
+                        try {
+                            jsonObject.put(AMP_EVENT_OPTIONAL_INSTRUMENT_ID, instrument_id);
+                            jsonObject.put(AMP_EVENT_OPTIONAL_DIRECTION, AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                    });
+                        Amplitude.getInstance().logEvent(AMP_OPTIONAL_RECOMMEND, jsonObject);
+                        QuoteEntity quoteEntity = new QuoteEntity();
+                        quoteEntity.setInstrument_id(instrument_id);
+                        insListOptional.put(instrument_id, quoteEntity);
+                        LatestFileManager.saveInsListToFile(new ArrayList<>(insListOptional.keySet()));
+                        mNewDataRecommend.remove(instrument_id);
+                        refreshOptional();
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ToastUtils.showToast(BaseApplication.getContext(),
+                                        "该合约已添加到自选列表");
+                            }
+                        });
+                    }
                 }
+
             }
 
             @Override
@@ -632,7 +639,7 @@ public class QuoteFragment extends LazyLoadFragment {
 
                     @Override
                     public void onItemClick(View view, int position) {
-                        if (mAdapter.getData().get(position) != null) {
+                        if (position >= 0 && position < mAdapter.getItemCount()) {
                             QuoteEntity quoteEntity = mAdapter.getData().get(position);
                             if (quoteEntity == null) return;
                             String instrument_id = quoteEntity.getInstrument_id();
@@ -894,21 +901,25 @@ public class QuoteFragment extends LazyLoadFragment {
         try {
             String[] insList = mDataManager.getRtnData().getIns_list().split(",");
             for (String ins : insList) {
-                //防止合约页切换时,前一页的数据加载
-                if (mNewData.containsKey(ins)) {
-                    QuoteEntity quoteEntity = CloneUtils.clone(mDataManager.getRtnData().getQuotes().get(ins));
-                    if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle) || OPTIONAL.equals(mTitle)) {
+                try {
+                    //防止合约页切换时,前一页的数据加载
+                    if (mNewData.containsKey(ins)) {
+                        QuoteEntity quoteEntity = CloneUtils.clone(mDataManager.getRtnData().getQuotes().get(ins));
+                        if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle) || OPTIONAL.equals(mTitle)) {
+                            if (ins.contains("&") && ins.contains(" "))
+                                quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
+                        }
+                        mNewData.put(ins, quoteEntity);
+                    }
+
+                    if (OPTIONAL.equals(title) && mNewDataRecommend.containsKey(ins)) {
+                        QuoteEntity quoteEntity = CloneUtils.clone(mDataManager.getRtnData().getQuotes().get(ins));
                         if (ins.contains("&") && ins.contains(" "))
                             quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
+                        mNewDataRecommend.put(ins, quoteEntity);
                     }
-                    mNewData.put(ins, quoteEntity);
-                }
-
-                if (OPTIONAL.equals(title) && mNewDataRecommend.containsKey(ins)) {
-                    QuoteEntity quoteEntity = CloneUtils.clone(mDataManager.getRtnData().getQuotes().get(ins));
-                    if (ins.contains("&") && ins.contains(" "))
-                        quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
-                    mNewDataRecommend.put(ins, quoteEntity);
+                }catch (Exception e){
+                    continue;
                 }
             }
 

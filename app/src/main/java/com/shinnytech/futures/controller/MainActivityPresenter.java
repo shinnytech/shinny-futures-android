@@ -272,7 +272,8 @@ public class MainActivityPresenter {
                         Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                         mMainActivity.startActivity(new Intent(mMainActivity, LoginActivity.class));
                         mMainActivity.finish();
-                        BaseApplication.getWebSocketService().reConnectTD();
+                        if (BaseApplication.getWebSocketService() != null)
+                            BaseApplication.getWebSocketService().reConnectTD();
                         break;
                     case CommonConstants.SETTING:
                         try {
@@ -455,29 +456,38 @@ public class MainActivityPresenter {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.market:
-                        DataManager.getInstance().IS_POSITIVE = true;
-                        Amplitude.getInstance().logEvent(AMP_QUOTE_TAB);
-                        QuotePagerFragment quotePagerFragment = ((QuotePagerFragment) mViewPagerFragmentAdapter.getItem(0));
-                        String title = quotePagerFragment.getmTitle();
-                        if (OPTIONAL.equals(title)) mBinding.llNavigation.setVisibility(View.GONE);
-                        else mBinding.llNavigation.setVisibility(View.VISIBLE);
-                        mBinding.vpContent.setCurrentItem(0, false);
-                        mToolbarTitle.setText(title);
-                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
+                        try {
+                            DataManager.getInstance().IS_POSITIVE = true;
+                            Amplitude.getInstance().logEvent(AMP_QUOTE_TAB);
+                            QuotePagerFragment quotePagerFragment = ((QuotePagerFragment) mViewPagerFragmentAdapter.getItem(0));
+                            String title = quotePagerFragment.getmTitle();
+                            if (OPTIONAL.equals(title)) mBinding.llNavigation.setVisibility(View.GONE);
+                            else mBinding.llNavigation.setVisibility(View.VISIBLE);
+                            mBinding.vpContent.setCurrentItem(0, false);
+                            mToolbarTitle.setText(title);
+                            mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
                         break;
                     case R.id.trade:
-                        DataManager.getInstance().IS_POSITIVE = true;
-                        Amplitude.getInstance().logEvent(AMP_ACCOUNT_TAB);
-                        mBinding.llNavigation.setVisibility(View.GONE);
-                        AccountFragment accountFragment = ((AccountFragment) mViewPagerFragmentAdapter.getItem(1));
-                        //首次加载不能存在，防止显示事件上报
-                        if (accountFragment.getmBinding().vp.getVisibility() == View.GONE) {
-                            accountFragment.getmBinding().vp.setVisibility(View.VISIBLE);
-                            accountFragment.setmIsInit(true);
+                        try {
+                            DataManager.getInstance().IS_POSITIVE = true;
+                            Amplitude.getInstance().logEvent(AMP_ACCOUNT_TAB);
+                            mBinding.llNavigation.setVisibility(View.GONE);
+                            AccountFragment accountFragment = ((AccountFragment) mViewPagerFragmentAdapter.getItem(1));
+                            //首次加载不能存在，防止显示事件上报
+                            if (accountFragment != null && accountFragment.getmBinding().vp != null &&
+                                    accountFragment.getmBinding().vp.getVisibility() == View.GONE) {
+                                accountFragment.getmBinding().vp.setVisibility(View.VISIBLE);
+                                accountFragment.setmIsInit(true);
+                            }
+                            mBinding.vpContent.setCurrentItem(1, false);
+                            mToolbarTitle.setText(ACCOUNT_DETAIL);
+                            mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                        }catch (Exception e){
+                            e.printStackTrace();
                         }
-                        mBinding.vpContent.setCurrentItem(1, false);
-                        mToolbarTitle.setText(ACCOUNT_DETAIL);
-                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                         break;
                     default:
                         break;
