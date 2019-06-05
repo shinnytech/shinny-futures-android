@@ -40,8 +40,8 @@ import com.shinnytech.futures.model.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.amplitude.api.Identify;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.Base64;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
@@ -67,12 +67,9 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VA
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_MAIN;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_FAILED;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_SUCCEEDED;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_TIME_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_LOGIN_TIME_FIRST;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_VISIT;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMNOW;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMULATION;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
@@ -105,8 +102,8 @@ public class LoginActivity extends AppCompatActivity {
     private static final int LOGIN_FAIL = 3;
     private static final int LOGIN_TO_CHANGE_PASSWORD = 4;
     private static final int LOGIN_TIME_OUT = 5;
-    private static final int LOGIN_PERMISSIONS_DENIED = 6;
-    private static final int EXIT_APP = 7;
+    private static final int EXIT_APP = 6;
+    private static final int MY_PERMISSIONS_REQUEST_DENIED = 7;
     protected Context sContext;
     protected DataManager sDataManager;
     /**
@@ -138,7 +135,6 @@ public class LoginActivity extends AppCompatActivity {
         initData();
         initEvent();
         checkResponsibility();
-        checkNetwork();
         checkPermissions();
     }
 
@@ -160,36 +156,14 @@ public class LoginActivity extends AppCompatActivity {
         mBinding.llFirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mBinding.firm.setTextColor(getResources().getColor(R.color.white));
-                mBinding.firmUnderline.setVisibility(View.VISIBLE);
-                mBinding.simulation.setTextColor(getResources().getColor(R.color.login_gray));
-                mBinding.simulationUnderline.setVisibility(View.INVISIBLE);
-
-                mBinding.tvBroker.setVisibility(View.VISIBLE);
-                mBinding.llBroker.setVisibility(View.VISIBLE);
-                mBinding.tvAccount.setText("账号");
-                mBinding.simulationHint.setVisibility(View.GONE);
-                setStatusBarColor(R.color.colorPrimaryDark);
-
-                mIsFirm = true;
+                switchFirm();
             }
         });
 
         mBinding.llSimulation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mBinding.simulation.setTextColor(getResources().getColor(R.color.white));
-                mBinding.simulationUnderline.setVisibility(View.VISIBLE);
-                mBinding.firm.setTextColor(getResources().getColor(R.color.login_gray));
-                mBinding.firmUnderline.setVisibility(View.INVISIBLE);
-
-                mBinding.tvBroker.setVisibility(View.GONE);
-                mBinding.llBroker.setVisibility(View.GONE);
-                mBinding.tvAccount.setText("手机号码");
-                mBinding.simulationHint.setVisibility(View.VISIBLE);
-                setStatusBarColor(R.color.login_simulation_hint);
-
-                mIsFirm = false;
+                switchSimulator();
             }
         });
 
@@ -214,14 +188,13 @@ public class LoginActivity extends AppCompatActivity {
                 try {
                     jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, mBrokerName);
                     jsonObject.put(AMP_EVENT_LOGIN_USER_ID, mPhoneNumber);
-                    jsonObject.put(AMP_EVENT_LOGIN_TIME, System.currentTimeMillis());
+                    jsonObject.put(AMP_EVENT_LOGIN_TIME, TimeUtils.getAmpTime());
                     jsonObject.put(AMP_EVENT_LOGIN_TYPE, AMP_EVENT_LOGIN_TYPE_VALUE_VISIT);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                Amplitude.getInstance().logEvent(AMP_VISIT, jsonObject);
-                if (BaseApplication.getWebSocketService() != null)
-                    BaseApplication.getWebSocketService().sendReqLogin(mBrokerName, mPhoneNumber, mPassword);
+                Amplitude.getInstance().logEvent(AMP_LOGIN, jsonObject);
+                WebSocketService.sendReqLogin(mBrokerName, mPhoneNumber, mPassword);
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
@@ -240,7 +213,7 @@ public class LoginActivity extends AppCompatActivity {
                     Intent intentBroker = new Intent(LoginActivity.this, BrokerListActivity.class);
                     intentBroker.putExtra("broker", broker);
                     startActivityForResult(intentBroker, LOGIN_ACTIVITY_TO_BROKER_LIST_ACTIVITY);
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -254,7 +227,7 @@ public class LoginActivity extends AppCompatActivity {
                     Intent intentBroker = new Intent(LoginActivity.this, BrokerListActivity.class);
                     intentBroker.putExtra("broker", broker);
                     startActivityForResult(intentBroker, LOGIN_ACTIVITY_TO_BROKER_LIST_ACTIVITY);
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -362,8 +335,7 @@ public class LoginActivity extends AppCompatActivity {
                 ToastUtils.showToast(BaseApplication.getContext(), getString(R.string.main_activity_exit));
                 mExitTime = System.currentTimeMillis();
             } else {
-                LoginActivity.this.finish();
-                mHandler.sendEmptyMessageDelayed(EXIT_APP, 500);
+                mHandler.sendEmptyMessage(EXIT_APP);
             }
             return true;
         }
@@ -373,6 +345,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        checkNetwork();
         registerBroaderCast();
     }
 
@@ -433,7 +406,7 @@ public class LoginActivity extends AppCompatActivity {
             try {
                 jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, mBrokerName);
                 jsonObject.put(AMP_EVENT_LOGIN_USER_ID, mPhoneNumber);
-                jsonObject.put(AMP_EVENT_LOGIN_TIME, System.currentTimeMillis());
+                jsonObject.put(AMP_EVENT_LOGIN_TIME, TimeUtils.getAmpTime());
                 jsonObject.put(AMP_EVENT_LOGIN_TYPE, AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -447,8 +420,7 @@ public class LoginActivity extends AppCompatActivity {
 
             // Show a progress spinner, and kick off a background task to
             // perform the user fragment_home attempt.
-            if (BaseApplication.getWebSocketService() != null)
-                BaseApplication.getWebSocketService().sendReqLogin(mBrokerName, mPhoneNumber, mPassword);
+            WebSocketService.sendReqLogin(mBrokerName, mPhoneNumber, mPassword);
 
             //超时检测
             mHandler.sendEmptyMessageDelayed(LOGIN_TIME_OUT, 5000);
@@ -545,14 +517,6 @@ public class LoginActivity extends AppCompatActivity {
                         dialog.dismiss();
                     }
                 });
-                view.findViewById(R.id.disagree).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                        LoginActivity.this.finish();
-                        mHandler.sendEmptyMessageDelayed(EXIT_APP, 500);
-                    }
-                });
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -574,7 +538,6 @@ public class LoginActivity extends AppCompatActivity {
             dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    LoginActivity.this.finish();
                     mHandler.sendEmptyMessageDelayed(EXIT_APP, 500);
                 }
             });
@@ -604,6 +567,136 @@ public class LoginActivity extends AppCompatActivity {
             window.setStatusBarColor(ContextCompat.getColor(this, color));
         }
     }
+
+    /**
+     * date: 2019/4/2
+     * author: chenli
+     * description: 穿透视监管动态权限检查
+     */
+    private void checkPermissions() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_PHONE_STATE)
+                != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_PHONE_STATE,
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION},
+                    MY_PERMISSIONS_REQUEST);
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST:
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 2
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[2] == PackageManager.PERMISSION_GRANTED) {
+
+                    getSystemInfo();
+
+                } else {
+                    mHandler.sendEmptyMessageDelayed(MY_PERMISSIONS_REQUEST_DENIED, 1000);
+                }
+                break;
+            default:
+                break;
+
+        }
+    }
+
+    /**
+     * date: 2019/5/30
+     * author: chenli
+     * description: 穿透式监管信息
+     */
+    private void getSystemInfo() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                byte[] info = DeviceInfoManager.getCollectInfo(LoginActivity.this);
+                String encodeInfo = Base64.encode(info);
+                SPUtils.putAndApply(sContext, CONFIG_SYSTEM_INFO, encodeInfo);
+            }
+        }).start();
+    }
+
+    /**
+     * date: 2019/5/30
+     * author: chenli
+     * description: 初始化期货公司、账户
+     */
+    private void initBrokerName() {
+        List<String> brokers = LatestFileManager.getBrokerIdFromBuildConfig(sDataManager.getBroker().getBrokers());
+        if (brokers.isEmpty()) return;
+        //获取用户登录成功后保存在sharedPreference里的期货公司
+        if (SPUtils.contains(sContext, CONFIG_BROKER)) {
+            String brokerName = (String) SPUtils.get(sContext, CONFIG_BROKER, "");
+            String account = (String) SPUtils.get(sContext, CONFIG_ACCOUNT, "");
+            if (BROKER_ID_SIMULATION.equals(brokerName)) {
+                mBinding.broker.setText(brokers.get(0));
+                switchSimulator();
+            }
+            else{
+                mBinding.broker.setText(brokerName);
+                switchFirm();
+            }
+            if (account.contains(BROKER_ID_VISITOR))return;
+            mBinding.account.setText(account);
+            mBinding.account.setSelection(account.length());
+            if (!account.isEmpty()) mBinding.deleteAccount.setVisibility(View.VISIBLE);
+        } else mBinding.broker.setText(brokers.get(0));
+    }
+
+
+    /**
+     * date: 2019/6/4
+     * author: chenli
+     * description: 切换模拟
+     */
+    private void switchSimulator() {
+        mBinding.simulation.setTextColor(getResources().getColor(R.color.white));
+        mBinding.simulationUnderline.setVisibility(View.VISIBLE);
+        mBinding.firm.setTextColor(getResources().getColor(R.color.login_gray));
+        mBinding.firmUnderline.setVisibility(View.INVISIBLE);
+
+        mBinding.tvBroker.setVisibility(View.GONE);
+        mBinding.llBroker.setVisibility(View.GONE);
+        mBinding.tvAccount.setText("手机号码");
+        mBinding.simulationHint.setVisibility(View.VISIBLE);
+        setStatusBarColor(R.color.login_simulation_hint);
+
+        mIsFirm = false;
+    }
+
+    /**
+     * date: 2019/6/4
+     * author: chenli
+     * description: 切换实盘
+     */
+    private void switchFirm() {
+        mBinding.firm.setTextColor(getResources().getColor(R.color.white));
+        mBinding.firmUnderline.setVisibility(View.VISIBLE);
+        mBinding.simulation.setTextColor(getResources().getColor(R.color.login_gray));
+        mBinding.simulationUnderline.setVisibility(View.INVISIBLE);
+
+        mBinding.tvBroker.setVisibility(View.VISIBLE);
+        mBinding.llBroker.setVisibility(View.VISIBLE);
+        mBinding.tvAccount.setText("资金账号");
+        mBinding.simulationHint.setVisibility(View.GONE);
+        setStatusBarColor(R.color.colorPrimaryDark);
+
+        mIsFirm = true;
+    }
+
 
     /**
      * date: 6/1/18
@@ -657,12 +750,12 @@ public class LoginActivity extends AppCompatActivity {
                         activity.startActivityForResult(intent, LOGIN_ACTIVITY_TO_CHANGE_PASSWORD_ACTIVITY);
                         break;
                     case LOGIN_TIME_OUT:
-                        if (activity.sDataManager.USER_ID.isEmpty()){
+                        if (activity.sDataManager.LOGIN_USER_ID.isEmpty()) {
                             JSONObject jsonObject = new JSONObject();
                             try {
                                 jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, activity.mBrokerName);
                                 jsonObject.put(AMP_EVENT_LOGIN_USER_ID, activity.mPhoneNumber);
-                                jsonObject.put(AMP_EVENT_LOGIN_TIME, System.currentTimeMillis());
+                                jsonObject.put(AMP_EVENT_LOGIN_TIME, TimeUtils.getAmpTime());
                                 jsonObject.put(AMP_EVENT_LOGIN_TYPE, activity.sDataManager.LOGIN_TYPE);
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -670,103 +763,20 @@ public class LoginActivity extends AppCompatActivity {
                             Amplitude.getInstance().logEvent(AMP_LOGIN_TIME_OUT, jsonObject);
                         }
                         break;
-                    case LOGIN_PERMISSIONS_DENIED:
-                        activity.finish();
-                        break;
                     case EXIT_APP:
-                        System.exit(0);
+                        Intent startMain = new Intent(Intent.ACTION_MAIN);
+                        startMain.addCategory(Intent.CATEGORY_HOME);
+                        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        activity.startActivity(startMain);
+                        break;
+                    case  MY_PERMISSIONS_REQUEST_DENIED:
+                        activity.checkPermissions();
                         break;
                     default:
                         break;
                 }
             }
         }
-    }
-
-
-    /**
-     * date: 2019/4/2
-     * author: chenli
-     * description: 穿透视监管动态权限检查
-     */
-    private void checkPermissions() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_PHONE_STATE)
-                != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_PHONE_STATE,
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION},
-                    MY_PERMISSIONS_REQUEST);
-        }
-
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST:
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 2
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                        && grantResults[1] == PackageManager.PERMISSION_GRANTED
-                        && grantResults[2] == PackageManager.PERMISSION_GRANTED) {
-
-                    getSystemInfo();
-
-                } else {
-                    ToastUtils.showToast(sContext, "没有获取相应权限，即将退出～");
-                    mHandler.sendEmptyMessageDelayed(LOGIN_PERMISSIONS_DENIED, 2000);
-                    mHandler.sendEmptyMessageDelayed(EXIT_APP, 2500);
-                }
-                break;
-            default:
-                break;
-
-        }
-    }
-
-    /**
-     * date: 2019/5/30
-     * author: chenli
-     * description: 穿透式监管信息
-     */
-    private void getSystemInfo(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                byte[] info = DeviceInfoManager.getCollectInfo(LoginActivity.this);
-                String encodeInfo = Base64.encode(info);
-                SPUtils.putAndApply(sContext, CONFIG_SYSTEM_INFO, encodeInfo);
-            }
-        }).start();
-    }
-
-    /**
-     * date: 2019/5/30
-     * author: chenli
-     * description: 初始化期货公司
-     */
-    private void initBrokerName(){
-        List<String> brokers = LatestFileManager.getBrokerIdFromBuildConfig(sDataManager.getBroker().getBrokers());
-        if (brokers.isEmpty()) return;
-        //获取用户登录成功后保存在sharedPreference里的期货公司
-        if (SPUtils.contains(sContext, CONFIG_LOGIN_DATE)) {
-            String loginDate = (String) SPUtils.get(sContext, CONFIG_LOGIN_DATE, "");
-            if (loginDate.isEmpty()) mBinding.broker.setText(brokers.get(0));
-            else {
-                String brokerName = (String) SPUtils.get(sContext, CONFIG_BROKER, "");
-                if (BROKER_ID_SIMULATION.equals(brokerName))
-                    mBinding.broker.setText(brokers.get(0));
-                else mBinding.broker.setText(brokerName);
-            }
-
-        } else mBinding.broker.setText(brokers.get(0));
     }
 
 }

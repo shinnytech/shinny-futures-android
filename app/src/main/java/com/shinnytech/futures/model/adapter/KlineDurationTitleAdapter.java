@@ -53,7 +53,7 @@ public class KlineDurationTitleAdapter extends RecyclerView.Adapter<KlineDuratio
 
 
     public void update(int position) {
-        if (position >= 0 && position < getItemCount()){
+        if (position >= 0 && position < getItemCount()) {
             index = position;
             notifyDataSetChanged();
         }
@@ -67,7 +67,7 @@ public class KlineDurationTitleAdapter extends RecyclerView.Adapter<KlineDuratio
     }
 
     public String getDurationTitle() {
-        if (index >= 0 && index < getItemCount())return mData.get(index);
+        if (index >= 0 && index < getItemCount()) return mData.get(index);
         else return null;
     }
 

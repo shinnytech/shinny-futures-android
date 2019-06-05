@@ -5,20 +5,17 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.support.v4.app.ActivityCompat;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 
 import com.google.gson.Gson;
 import com.neovisionaries.ws.client.WebSocket;
@@ -50,16 +47,18 @@ import com.shinnytech.futures.model.receiver.NotificationClickReceiver;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
+import com.xdandroid.hellodaemon.AbsWorkService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_AUTO;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
+
 import static com.shinnytech.futures.constants.CommonConstants.AMP_CANCEL_ORDER;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_DIRECTION;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_INSTRUMENT_ID;
@@ -67,14 +66,12 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_B
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TIME;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_VISIT;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_USER_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OFFSET;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_VOLUME;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_INSERT_ORDER;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_VISIT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
 import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_SYSTEM_INFO;
@@ -83,7 +80,6 @@ import static com.shinnytech.futures.constants.CommonConstants.MD_TIMEOUT;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_FAIL;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
-import static com.shinnytech.futures.constants.CommonConstants.TD_ONLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_TIMEOUT;
 
 /**
@@ -93,7 +89,7 @@ import static com.shinnytech.futures.constants.CommonConstants.TD_TIMEOUT;
  * version:
  * state: done
  */
-public class WebSocketService extends Service {
+public class WebSocketService extends AbsWorkService {
 
     /**
      * date: 7/9/17
@@ -120,100 +116,17 @@ public class WebSocketService extends Service {
     public static final String TD_BROADCAST_ACTION = WebSocketService.class.getName() + "." + TD_BROADCAST;
 
     private static final int TIMEOUT = 5000;
-    private final IBinder mBinder = new LocalBinder();
-    private WebSocket mWebSocketClientMD;
+    //是否 任务完成, 不再需要服务运行?
+    public static boolean sShouldStopService = false;
+    public static Disposable sDisposable;
+    private static WebSocket mWebSocketClientMD;
+    private static WebSocket mWebSocketClientTD;
+    private static DataManager sDataManager = DataManager.getInstance();
+    private static LocalBroadcastManager mLocalBroadcastManager = LocalBroadcastManager.getInstance(BaseApplication.getContext());
+    private static long mMDLastPong = System.currentTimeMillis() / 1000;
+    private static long mTDLastPong = System.currentTimeMillis() / 1000;
 
-    private WebSocket mWebSocketClientTD;
-
-    private DataManager sDataManager = DataManager.getInstance();
-
-    private LocalBroadcastManager mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
-
-    private long mMDLastPong = System.currentTimeMillis() / 1000;
-
-    private long mTDLastPong = System.currentTimeMillis() / 1000;
-
-    public WebSocketService() {
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String NOTIFICATION_CHANNEL_ID = "com.shinnytech.futures";
-            String channelName = "WebSocketService";
-            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
-            chan.setLightColor(Color.BLUE);
-            chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            assert manager != null;
-            manager.createNotificationChannel(chan);
-            Intent intent = new Intent(this, NotificationClickReceiver.class);
-            intent.setAction("notification_click");
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-            Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-                    .setContentTitle("快期小Q下单软件正在运行")
-                    .setContentText("点击返回程序")
-                    .setWhen(System.currentTimeMillis())
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-                    .setContentIntent(pendingIntent)
-                    .build();
-            startForeground(1, notification);
-        } else {
-            Intent intent = new Intent(this, NotificationClickReceiver.class);
-            intent.setAction("notification_click");
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-            Notification notification = new NotificationCompat.Builder(this, "service")
-                    .setContentTitle("快期小Q下单软件正在运行")
-                    .setContentText("点击返回程序")
-                    .setWhen(System.currentTimeMillis())
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-                    .setContentIntent(pendingIntent)
-                    .build();
-            startForeground(1, notification);
-        }
-
-
-        Timer timer = new Timer();
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-
-                if ((System.currentTimeMillis() / 1000 - mMDLastPong) >= 7) {
-                    sendMessage(MD_OFFLINE, MD_BROADCAST);
-                } else {
-                    if (mWebSocketClientMD != null) mWebSocketClientMD.sendPing();
-                }
-
-                if ((System.currentTimeMillis() / 1000 - mTDLastPong) >= 7) {
-                    sendMessage(TD_OFFLINE, TD_BROADCAST);
-                } else {
-                    if (mWebSocketClientTD != null) mWebSocketClientTD.sendPing();
-                }
-
-            }
-        };
-        timer.schedule(timerTask, 5000, 5000);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    public void sendMessage(String message, String type) {
+    public static void sendMessage(String message, String type) {
         switch (type) {
             case MD_BROADCAST:
                 Intent intent = new Intent(MD_BROADCAST_ACTION);
@@ -234,7 +147,7 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 连接行情服务器
      */
-    public void connectMD(String url) {
+    public static void connectMD(String url) {
         try {
             mWebSocketClientMD = new WebSocketFactory()
                     .setConnectionTimeout(TIMEOUT)
@@ -250,7 +163,7 @@ public class WebSocketService extends Service {
                                 switch (aid) {
                                     case "rsp_login":
                                         mWebSocketClientMD.sendPing();
-//                                        sendSubscribeAfterConnect();
+                                        sendSubscribeAfterConnect();
                                         break;
                                     case "rtn_data":
                                         BaseApplication.setsIndex(0);
@@ -293,15 +206,9 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 首次连接行情服务器与断开重连的行情订阅处理
      */
-    private void sendSubscribeAfterConnect() {
+    private static void sendSubscribeAfterConnect() {
         if (!sDataManager.QUOTES.isEmpty() && mWebSocketClientMD != null) {
             mWebSocketClientMD.sendText(sDataManager.QUOTES);
-        } else {
-            List<String> list = LatestFileManager.getCombineInsList(
-                    new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
-            //推荐列表刷新
-            list.addAll(LatestFileManager.getMainInsList().keySet());
-            sendSubscribeQuote(TextUtils.join(",", list));
         }
 
         if (!sDataManager.CHARTS.isEmpty() && mWebSocketClientMD != null) {
@@ -309,23 +216,14 @@ public class WebSocketService extends Service {
         }
     }
 
-    public boolean isMDConnected() {
-        if (mWebSocketClientMD != null) {
-            return mWebSocketClientMD.isOpen();
-        } else {
-            return false;
-        }
-    }
-
-    public void reConnectMD(String url) {
+    public static void reConnectMD(String url) {
         disConnectMD();
         connectMD(url);
     }
 
-    public void disConnectMD() {
-        if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
+    public static void disConnectMD() {
+        if (mWebSocketClientMD != null) {
             mWebSocketClientMD.disconnect();
-            mWebSocketClientMD = null;
         }
     }
 
@@ -334,7 +232,7 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 行情订阅
      */
-    public void sendSubscribeQuote(String insList) {
+    public static void sendSubscribeQuote(String insList) {
         if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
             ReqSubscribeQuoteEntity reqSubscribeQuoteEntity = new ReqSubscribeQuoteEntity();
             reqSubscribeQuoteEntity.setAid("subscribe_quote");
@@ -342,7 +240,7 @@ public class WebSocketService extends Service {
             String subScribeQuote = new Gson().toJson(reqSubscribeQuoteEntity);
             mWebSocketClientMD.sendText(subScribeQuote);
             sDataManager.QUOTES = subScribeQuote;
-            LogUtils.e(subScribeQuote, true);
+            LogUtils.e(subScribeQuote, false);
         }
     }
 
@@ -351,7 +249,7 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 获取合约信息
      */
-    public void sendPeekMessage() {
+    public static void sendPeekMessage() {
         if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
             ReqPeekMessageEntity reqPeekMessageEntity = new ReqPeekMessageEntity();
             reqPeekMessageEntity.setAid("peek_message");
@@ -366,7 +264,7 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 分时图
      */
-    public void sendSetChart(String ins_list) {
+    public static void sendSetChart(String ins_list) {
         if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
             ReqSetChartEntity reqSetChartEntity = new ReqSetChartEntity();
             reqSetChartEntity.setAid("set_chart");
@@ -387,7 +285,7 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: k线图
      */
-    public void sendSetChartKline(String ins_list, int view_width, String duration) {
+    public static void sendSetChartKline(String ins_list, int view_width, String duration) {
         if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
             try {
                 long duration_l = Long.parseLong(duration);
@@ -412,7 +310,7 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 连接交易服务器
      */
-    public void connectTD() {
+    public static void connectTD() {
         try {
             mWebSocketClientTD = new WebSocketFactory()
                     .setConnectionTimeout(TIMEOUT)
@@ -428,7 +326,6 @@ public class WebSocketService extends Service {
                                 String aid = jsonObject.getString("aid");
                                 switch (aid) {
                                     case "rtn_brokers":
-                                        sendMessage(TD_ONLINE, TD_BROADCAST);
                                         mWebSocketClientTD.sendPing();
                                         loginConfig(message);
                                         break;
@@ -469,7 +366,7 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 登录设置，自动登录
      */
-    private void loginConfig(String message) {
+    private static void loginConfig(String message) {
         BrokerEntity brokerInfo = new Gson().fromJson(message, BrokerEntity.class);
         sDataManager.getBroker().setBrokers(brokerInfo.getBrokers());
         sendMessage(TD_MESSAGE_BROKER_INFO, TD_BROADCAST);
@@ -481,14 +378,14 @@ public class WebSocketService extends Service {
             String name = (String) SPUtils.get(context, CommonConstants.CONFIG_ACCOUNT, "");
             String password = (String) SPUtils.get(context, CommonConstants.CONFIG_PASSWORD, "");
             String broker = (String) SPUtils.get(context, CommonConstants.CONFIG_BROKER, "");
-            boolean isPermissionDenied = ContextCompat.checkSelfPermission(this,
+            boolean isPermissionDenied = ContextCompat.checkSelfPermission(BaseApplication.getContext(),
                     Manifest.permission.READ_PHONE_STATE)
-                    != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this,
+                    != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(BaseApplication.getContext(),
                     Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this,
+                    != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(BaseApplication.getContext(),
                     Manifest.permission.ACCESS_COARSE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED;
-            if ((name != null && name.contains(BROKER_ID_VISITOR) && !TimeUtils.getNowTime().equals(date)) || isPermissionDenied){
+            if ((name != null && name.contains(BROKER_ID_VISITOR) && !TimeUtils.getNowTime().equals(date)) || isPermissionDenied) {
                 sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
                 return;
             }
@@ -500,32 +397,24 @@ public class WebSocketService extends Service {
             try {
                 jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, broker);
                 jsonObject.put(AMP_EVENT_LOGIN_USER_ID, name);
-                jsonObject.put(AMP_EVENT_LOGIN_TIME, System.currentTimeMillis());
+                jsonObject.put(AMP_EVENT_LOGIN_TIME, TimeUtils.getAmpTime());
                 jsonObject.put(AMP_EVENT_LOGIN_TYPE, AMP_EVENT_LOGIN_TYPE_VALUE_AUTO);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            Amplitude.getInstance().logEvent(AMP_AUTO, jsonObject);
+            Amplitude.getInstance().logEvent(AMP_LOGIN, jsonObject);
             sendReqLogin(broker, name, password);
         }
 
     }
 
-    public boolean isTDConnected() {
-        if (mWebSocketClientTD != null) {
-            return mWebSocketClientTD.isOpen();
-        } else {
-            return false;
-        }
-    }
-
-    public void reConnectTD() {
+    public static void reConnectTD() {
         disConnectTD();
         connectTD();
     }
 
-    public void disConnectTD() {
-        if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
+    public static void disConnectTD() {
+        if (mWebSocketClientTD != null) {
             mWebSocketClientTD.disconnect();
             DataManager.getInstance().clearAccount();
         }
@@ -536,7 +425,7 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 获取合约信息
      */
-    public void sendPeekMessageTransaction() {
+    public static void sendPeekMessageTransaction() {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
             ReqPeekMessageEntity reqPeekMessageEntity = new ReqPeekMessageEntity();
             reqPeekMessageEntity.setAid("peek_message");
@@ -551,7 +440,7 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 用户登录
      */
-    public void sendReqLogin(String bid, String user_name, String password) {
+    public static void sendReqLogin(String bid, String user_name, String password) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
             String systemInfo = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_SYSTEM_INFO, "");
             ReqLoginEntity reqLoginEntity = new ReqLoginEntity();
@@ -573,7 +462,7 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 确认结算单
      */
-    public void sendReqConfirmSettlement() {
+    public static void sendReqConfirmSettlement() {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
             ReqConfirmSettlementEntity reqConfirmSettlementEntity = new ReqConfirmSettlementEntity();
             reqConfirmSettlementEntity.setAid("confirm_settlement");
@@ -584,14 +473,13 @@ public class WebSocketService extends Service {
         }
     }
 
-
     /**
      * date: 7/9/17
      * author: chenli
      * description: 下单
      */
-    public void sendReqInsertOrder(String exchange_id, String instrument_id, String direction,
-                                   String offset, int volume, String price_type, double price) {
+    public static void sendReqInsertOrder(String exchange_id, String instrument_id, String direction,
+                                          String offset, int volume, String price_type, double price) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
             JSONObject jsonObject = new JSONObject();
             try {
@@ -604,7 +492,7 @@ public class WebSocketService extends Service {
                 e.printStackTrace();
             }
             Amplitude.getInstance().logEvent(AMP_INSERT_ORDER, jsonObject);
-            String user_id = DataManager.getInstance().USER_ID;
+            String user_id = DataManager.getInstance().LOGIN_USER_ID;
             ReqInsertOrderEntity reqInsertOrderEntity = new ReqInsertOrderEntity();
             reqInsertOrderEntity.setAid("insert_order");
             reqInsertOrderEntity.setUser_id(user_id);
@@ -630,9 +518,9 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 撤单
      */
-    public void sendReqCancelOrder(String order_id) {
+    public static void sendReqCancelOrder(String order_id) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
-            String user_id = DataManager.getInstance().USER_ID;
+            String user_id = DataManager.getInstance().LOGIN_USER_ID;
             UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(user_id);
             if (userEntity != null) {
                 OrderEntity orderEntity = userEntity.getOrders().get(order_id);
@@ -666,8 +554,8 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 银期转帐
      */
-    public void sendReqTransfer(String future_account, String future_password, String bank_id,
-                                String bank_password, String currency, float amount) {
+    public static void sendReqTransfer(String future_account, String future_password, String bank_id,
+                                       String bank_password, String currency, float amount) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
             ReqTransferEntity reqTransferEntity = new ReqTransferEntity();
             reqTransferEntity.setAid("req_transfer");
@@ -689,7 +577,7 @@ public class WebSocketService extends Service {
      * author: chenli
      * description: 修改密码
      */
-    public void sendReqPassword(String new_password, String old_password) {
+    public static void sendReqPassword(String new_password, String old_password) {
         if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
             ReqPasswordEntity reqPasswordEntity = new ReqPasswordEntity();
             reqPasswordEntity.setAid("change_password");
@@ -702,9 +590,137 @@ public class WebSocketService extends Service {
         }
     }
 
-    public class LocalBinder extends Binder {
-        public WebSocketService getService() {
-            return WebSocketService.this;
+    /**
+     * date: 2019/6/4
+     * author: chenli
+     * description: 停止服务
+     */
+    public static void stopService() {
+        LogUtils.e("stopService", true);
+        //我们现在不再需要服务运行了, 将标志位置为 true
+        sShouldStopService = true;
+        //取消对任务的订阅
+        if (sDisposable != null) sDisposable.dispose();
+        //取消 Job / Alarm / Subscription
+        cancelJobAlarmSub();
+    }
+
+    /**
+     * 是否 任务完成, 不再需要服务运行?
+     *
+     * @return 应当停止服务, true; 应当启动服务, false; 无法判断, 什么也不做, null.
+     */
+    @Override
+    public Boolean shouldStopService(Intent intent, int flags, int startId) {
+        return sShouldStopService;
+    }
+
+    @Override
+    public void startWork(Intent intent, int flags, int startId) {
+        connectTD();
+        connectMD(BaseApplication.getsMDURLs().get((BaseApplication.getsIndex())));
+        sDisposable = Observable
+                .interval(5, TimeUnit.SECONDS)
+                //取消任务时取消定时唤醒
+                .doOnDispose(new Action() {
+                    @Override
+                    public void run() {
+                        cancelJobAlarmSub();
+                    }
+                })
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(Long aLong) {
+                        if ((System.currentTimeMillis() / 1000 - mMDLastPong) >= 7) {
+                            sendMessage(MD_OFFLINE, MD_BROADCAST);
+                        } else {
+                            if (mWebSocketClientMD != null) mWebSocketClientMD.sendPing();
+                        }
+
+                        if ((System.currentTimeMillis() / 1000 - mTDLastPong) >= 7) {
+                            sendMessage(TD_OFFLINE, TD_BROADCAST);
+                        } else {
+                            if (mWebSocketClientTD != null) mWebSocketClientTD.sendPing();
+                        }
+                    }
+                });
+    }
+
+    @Override
+    public void stopWork(Intent intent, int flags, int startId) {
+        stopService();
+    }
+
+    /**
+     * 任务是否正在运行?
+     *
+     * @return 任务正在运行, true; 任务当前不在运行, false; 无法判断, 什么也不做, null.
+     */
+    @Override
+    public Boolean isWorkRunning(Intent intent, int flags, int startId) {
+        //若还没有取消订阅, 就说明任务仍在运行.
+        return sDisposable != null && !sDisposable.isDisposed();
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent, Void alwaysNull) {
+        return null;
+    }
+
+    @Override
+    public void onServiceKilled(Intent rootIntent) {
+
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String NOTIFICATION_CHANNEL_ID = "com.shinnytech.futures";
+            String channelName = "WebSocketService";
+            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+            chan.setLightColor(Color.BLUE);
+            chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            assert manager != null;
+            manager.createNotificationChannel(chan);
+            Intent intent = new Intent(this, NotificationClickReceiver.class);
+            intent.setAction("notification_click");
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+            Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                    .setContentTitle("快期小Q下单软件正在运行")
+                    .setContentText("点击返回程序")
+                    .setWhen(System.currentTimeMillis())
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+                    .setContentIntent(pendingIntent)
+                    .build();
+            startForeground(1, notification);
+        } else {
+            Intent intent = new Intent(this, NotificationClickReceiver.class);
+            intent.setAction("notification_click");
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+            Notification notification = new NotificationCompat.Builder(this, "service")
+                    .setContentTitle("快期小Q下单软件正在运行")
+                    .setContentText("点击返回程序")
+                    .setWhen(System.currentTimeMillis())
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+                    .setContentIntent(pendingIntent)
+                    .build();
+            startForeground(1, notification);
         }
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return super.onStartCommand(intent, flags, startId);
+    }
+
 }

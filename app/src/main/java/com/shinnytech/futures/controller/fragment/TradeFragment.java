@@ -88,7 +88,7 @@ public class TradeFragment extends LazyLoadFragment {
         try {
             refreshAccount();
             showEvent();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -103,7 +103,7 @@ public class TradeFragment extends LazyLoadFragment {
             jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_TRADE);
             jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
             jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
-            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().USER_ID);
+            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().LOGIN_USER_ID);
             if (userEntity != null) {
                 AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
                 if (accountEntity != null) {
@@ -150,7 +150,7 @@ public class TradeFragment extends LazyLoadFragment {
             jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
             jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
             jsonObject.put(AMP_EVENT_PAGE_VISIBLE_TIME, pageVisibleTime);
-            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().USER_ID);
+            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().LOGIN_USER_ID);
             if (userEntity != null) {
                 AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
                 if (accountEntity != null) {
@@ -221,7 +221,7 @@ public class TradeFragment extends LazyLoadFragment {
     private void refreshAccount() {
         if (!mIsUpdate) return;
         try {
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
             if (userEntity == null) return;
             mNewData.clear();
             for (TradeEntity tradeEntity :
@@ -271,7 +271,7 @@ public class TradeFragment extends LazyLoadFragment {
         mBinding.rv.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rv, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if (position >= 0 && position < mAdapter.getItemCount()){
+                if (position >= 0 && position < mAdapter.getItemCount()) {
                     TradeEntity tradeEntity = mAdapter.getData().get(position);
                     if (tradeEntity == null) return;
                     if (getActivity() instanceof MainActivity) {

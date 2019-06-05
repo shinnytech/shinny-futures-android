@@ -37,18 +37,16 @@ public class SystemUtils {
      * @param context
      */
     public static void setTopApp(Context context) {
-        if (!isRunningForeground(context)) {
-            /**获取ActivityManager*/
-            ActivityManager activityManager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
+        /**获取ActivityManager*/
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
 
-            /**获得当前运行的task(任务)*/
-            List<ActivityManager.RunningTaskInfo> taskInfoList = activityManager.getRunningTasks(100);
-            for (ActivityManager.RunningTaskInfo taskInfo : taskInfoList) {
-                /**找到本应用的 task，并将它切换到前台*/
-                if (taskInfo.topActivity.getPackageName().equals(context.getPackageName())) {
-                    activityManager.moveTaskToFront(taskInfo.id, 0);
-                    break;
-                }
+        /**获得当前运行的task(任务)*/
+        List<ActivityManager.RunningTaskInfo> taskInfoList = activityManager.getRunningTasks(100);
+        for (ActivityManager.RunningTaskInfo taskInfo : taskInfoList) {
+            /**找到本应用的 task，并将它切换到前台*/
+            if (taskInfo.topActivity.getPackageName().equals(context.getPackageName())) {
+                activityManager.moveTaskToFront(taskInfo.id, 0);
+                break;
             }
         }
     }
@@ -71,7 +69,7 @@ public class SystemUtils {
                     }
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;

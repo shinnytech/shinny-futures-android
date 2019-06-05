@@ -125,7 +125,7 @@ public class PositionFragment extends LazyLoadFragment {
                 new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        if (position >= 0 && position < mAdapter.getItemCount()){
+                        if (position >= 0 && position < mAdapter.getItemCount()) {
                             PositionEntity positionEntity = mAdapter.getData().get(position);
                             if (positionEntity == null) return;
                             sDataManager.POSITION_DIRECTION = ((TextView) view.findViewById(R.id.position_direction))
@@ -200,7 +200,7 @@ public class PositionFragment extends LazyLoadFragment {
     protected void refreshPosition() {
         try {
             if (!mIsUpdate) return;
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
             if (userEntity == null) return;
             mNewData.clear();
 
@@ -276,7 +276,7 @@ public class PositionFragment extends LazyLoadFragment {
         try {
             refreshPosition();
             showEvent();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -303,7 +303,7 @@ public class PositionFragment extends LazyLoadFragment {
             jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_POSITION);
             jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
             jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
-            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().USER_ID);
+            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().LOGIN_USER_ID);
             if (userEntity != null) {
                 AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
                 if (accountEntity != null) {
@@ -368,7 +368,7 @@ public class PositionFragment extends LazyLoadFragment {
             jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
             jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
             jsonObject.put(AMP_EVENT_PAGE_VISIBLE_TIME, pageVisibleTime);
-            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().USER_ID);
+            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().LOGIN_USER_ID);
             if (userEntity != null) {
                 AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
                 if (accountEntity != null) {

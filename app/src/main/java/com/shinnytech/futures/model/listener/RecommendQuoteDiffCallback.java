@@ -69,12 +69,15 @@ public class RecommendQuoteDiffCallback extends DiffUtil.Callback {
                 getUpDownRate(latest_new, mNewData.get(newItemPosition).getPre_settlement()), 2);
 
         String pre_settlement_new = LatestFileManager.saveScaleByPtick(mNewData.get(newItemPosition).getPre_settlement(), instrumentId);
-        bundle.putString("pre_settlement", pre_settlement_new);
 
         if (latest_old != null && latest_new != null) {
-            if (!latest_old.equals(latest_new)) bundle.putString("latest", latest_new);
+            if (!latest_old.equals(latest_new)) {
+                bundle.putString("latest", latest_new);
+                bundle.putString("pre_settlement", pre_settlement_new);
+            }
         } else if (latest_old == null && latest_new != null) {
             bundle.putString("latest", latest_new);
+            bundle.putString("pre_settlement", pre_settlement_new);
         }
 
         if (change_percent_old != null && change_percent_new != null) {

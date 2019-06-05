@@ -26,7 +26,6 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.AboutActivity;
 import com.shinnytech.futures.controller.activity.AccountActivity;
@@ -51,9 +50,11 @@ import com.shinnytech.futures.model.bean.settingbean.NavigationRightEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
+import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.TimeUtils;
 import com.shinnytech.futures.utils.ToastUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -69,6 +70,10 @@ import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT_DETAIL;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_ACCOUNT_TAB;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_CONDITIONAL_ORDER;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_BROKER_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_USER_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGOUT_TIME;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_ABOUT;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_CHANGE_PASSWORD;
@@ -262,7 +267,16 @@ public class MainActivityPresenter {
                 switch (title) {
                     case CommonConstants.LOGOUT:
                         SPUtils.putAndApply(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
-                        Amplitude.getInstance().logEvent(AMP_LOGOUT);
+                        JSONObject jsonObject1 = new JSONObject();
+                        try {
+                            jsonObject1.put(AMP_EVENT_LOGIN_BROKER_ID, DataManager.getInstance().LOGIN_BROKER_ID);
+                            jsonObject1.put(AMP_EVENT_LOGIN_USER_ID, DataManager.getInstance().LOGIN_USER_ID);
+                            jsonObject1.put(AMP_EVENT_LOGIN_TYPE, DataManager.getInstance().LOGIN_TYPE);
+                            jsonObject1.put(AMP_EVENT_LOGOUT_TIME, TimeUtils.getAmpTime());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEvent(AMP_LOGOUT, jsonObject1);
                         try {
                             jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
                             jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_LOGIN);
@@ -272,8 +286,7 @@ public class MainActivityPresenter {
                         Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                         mMainActivity.startActivity(new Intent(mMainActivity, LoginActivity.class));
                         mMainActivity.finish();
-                        if (BaseApplication.getWebSocketService() != null)
-                            BaseApplication.getWebSocketService().reConnectTD();
+                        WebSocketService.reConnectTD();
                         break;
                     case CommonConstants.SETTING:
                         try {
@@ -320,27 +333,33 @@ public class MainActivityPresenter {
                         mMainActivity.startActivity(intentChange);
                         break;
                     case CommonConstants.TRANSFER_IN:
+                        JSONObject jsonObject2 = new JSONObject();
                         try {
+                            jsonObject2.put(AMP_EVENT_LOGIN_BROKER_ID, DataManager.getInstance().LOGIN_BROKER_ID);
+                            jsonObject2.put(AMP_EVENT_LOGIN_USER_ID, DataManager.getInstance().LOGIN_USER_ID);
                             jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
                             jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_TRANSFER);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                         Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
-                        Amplitude.getInstance().logEvent(AMP_MENU_TRANSFER_IN);
+                        Amplitude.getInstance().logEvent(AMP_MENU_TRANSFER_IN, jsonObject2);
                         Intent intentBank = new Intent(mMainActivity, BankTransferActivity.class);
                         intentBank.putExtra(TRANSFER_DIRECTION, TRANSFER_IN);
                         mMainActivity.startActivity(intentBank);
                         break;
                     case CommonConstants.TRANSFER_OUT:
+                        JSONObject jsonObject3 = new JSONObject();
                         try {
+                            jsonObject3.put(AMP_EVENT_LOGIN_BROKER_ID, DataManager.getInstance().LOGIN_BROKER_ID);
+                            jsonObject3.put(AMP_EVENT_LOGIN_USER_ID, DataManager.getInstance().LOGIN_USER_ID);
                             jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
                             jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_TRANSFER);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                         Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
-                        Amplitude.getInstance().logEvent(AMP_MENU_TRANSFER_OUT);
+                        Amplitude.getInstance().logEvent(AMP_MENU_TRANSFER_OUT, jsonObject3);
                         Intent intentBankOut = new Intent(mMainActivity, BankTransferActivity.class);
                         intentBankOut.putExtra(TRANSFER_DIRECTION, TRANSFER_OUT);
                         mMainActivity.startActivity(intentBankOut);
@@ -461,12 +480,13 @@ public class MainActivityPresenter {
                             Amplitude.getInstance().logEvent(AMP_QUOTE_TAB);
                             QuotePagerFragment quotePagerFragment = ((QuotePagerFragment) mViewPagerFragmentAdapter.getItem(0));
                             String title = quotePagerFragment.getmTitle();
-                            if (OPTIONAL.equals(title)) mBinding.llNavigation.setVisibility(View.GONE);
+                            if (OPTIONAL.equals(title))
+                                mBinding.llNavigation.setVisibility(View.GONE);
                             else mBinding.llNavigation.setVisibility(View.VISIBLE);
                             mBinding.vpContent.setCurrentItem(0, false);
                             mToolbarTitle.setText(title);
                             mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                         break;
@@ -485,7 +505,7 @@ public class MainActivityPresenter {
                             mBinding.vpContent.setCurrentItem(1, false);
                             mToolbarTitle.setText(ACCOUNT_DETAIL);
                             mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                         break;

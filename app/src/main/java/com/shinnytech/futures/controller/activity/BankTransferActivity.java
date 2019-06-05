@@ -1,16 +1,18 @@
 package com.shinnytech.futures.controller.activity;
 
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ArrayAdapter;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityBankTransferBinding;
 import com.shinnytech.futures.model.adapter.BankTransferAdapter;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
@@ -19,6 +21,7 @@ import com.shinnytech.futures.model.bean.accountinfobean.BankEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.TransferEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.listener.TransferDiffCallback;
+import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.ToastUtils;
@@ -34,6 +37,8 @@ import java.util.Map;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_AMOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BANK;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENCY;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_BROKER_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_USER_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_TRANSFER_IN;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_TRANSFER_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BANK_FIRST;
@@ -53,6 +58,8 @@ public class BankTransferActivity extends BaseActivity {
     private BankTransferAdapter mAdapter;
     private boolean mIsUpdate;
     private Map<String, String> mBankId;
+    private View mRootView;  //activity的根视图
+    private boolean mIsKeyboardShowing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +68,7 @@ public class BankTransferActivity extends BaseActivity {
         if (intent != null) {
             mTitle = intent.getStringExtra(TRANSFER_DIRECTION);
         }
+        mRootView = this.getWindow().getDecorView();
         super.onCreate(savedInstanceState);
     }
 
@@ -99,7 +107,7 @@ public class BankTransferActivity extends BaseActivity {
         mBinding.futureBank.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String futureAccount = sDataManager.USER_ID;
+                String futureAccount = sDataManager.LOGIN_USER_ID;
                 String bank = (String) mBinding.spinnerBank.getSelectedItem();
                 String bankId = mBankId.get(bank);
                 String accountPassword = mBinding.etAccountPassword.getText().toString();
@@ -108,12 +116,14 @@ public class BankTransferActivity extends BaseActivity {
                 String currency = (String) mBinding.spinnerCurrency.getSelectedItem();
                 try {
                     float amountF = -abs(Float.parseFloat(amount));
-                    BaseApplication.getWebSocketService().sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
+                    WebSocketService.sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
                     Identify identify = new Identify()
                             .setOnce(AMP_USER_BANK_FIRST, bank)
                             .set(AMP_USER_BANK_LAST, bank);
                     Amplitude.getInstance().identify(identify);
                     JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, sDataManager.LOGIN_BROKER_ID);
+                    jsonObject.put(AMP_EVENT_LOGIN_USER_ID, sDataManager.LOGIN_USER_ID);
                     jsonObject.put(AMP_EVENT_BANK, bank);
                     jsonObject.put(AMP_EVENT_AMOUNT, amountF);
                     jsonObject.put(AMP_EVENT_CURRENCY, currency);
@@ -127,7 +137,7 @@ public class BankTransferActivity extends BaseActivity {
         mBinding.bankFuture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String futureAccount = sDataManager.USER_ID;
+                String futureAccount = sDataManager.LOGIN_USER_ID;
                 String bank = (String) mBinding.spinnerBank.getSelectedItem();
                 String bankId = mBankId.get(bank);
                 String accountPassword = mBinding.etAccountPassword.getText().toString();
@@ -136,12 +146,14 @@ public class BankTransferActivity extends BaseActivity {
                 String currency = (String) mBinding.spinnerCurrency.getSelectedItem();
                 try {
                     float amountF = abs(Float.parseFloat(amount));
-                    BaseApplication.getWebSocketService().sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
+                    WebSocketService.sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
                     Identify identify = new Identify()
                             .setOnce(AMP_USER_BANK_FIRST, bank)
                             .set(AMP_USER_BANK_LAST, bank);
                     Amplitude.getInstance().identify(identify);
                     JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, sDataManager.LOGIN_BROKER_ID);
+                    jsonObject.put(AMP_EVENT_LOGIN_USER_ID, sDataManager.LOGIN_USER_ID);
                     jsonObject.put(AMP_EVENT_BANK, bank);
                     jsonObject.put(AMP_EVENT_AMOUNT, amountF);
                     jsonObject.put(AMP_EVENT_CURRENCY, currency);
@@ -170,6 +182,32 @@ public class BankTransferActivity extends BaseActivity {
             }
         });
 
+        mRootView.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+
+                        Rect r = new Rect();
+                        mRootView.getWindowVisibleDisplayFrame(r);
+                        int screenHeight = mRootView.getRootView().getHeight();
+
+                        int keypadHeight = screenHeight - r.bottom;
+
+                        if (keypadHeight > screenHeight * 0.15) { // 0.15 ratio is perhaps enough to determine keypad height.
+                            // keyboard is opened
+                            if (!mIsKeyboardShowing) {
+                                mIsKeyboardShowing = true;
+                            }
+                        }
+                        else {
+                            // keyboard is closed
+                            if (mIsKeyboardShowing) {
+                                mIsKeyboardShowing = false;
+                            }
+                        }
+                    }
+                });
+
     }
 
     @Override
@@ -185,7 +223,7 @@ public class BankTransferActivity extends BaseActivity {
     }
 
     private void refreshBank() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
         if (userEntity == null) return;
         mBankId.clear();
         mBankSpinnerAdapter.clear();
@@ -201,7 +239,7 @@ public class BankTransferActivity extends BaseActivity {
     }
 
     private void refreshCurrency() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
         if (userEntity == null) return;
         mCurrencySpinnerAdapter.clear();
         List<String> currencyList = new ArrayList<>();
@@ -215,7 +253,7 @@ public class BankTransferActivity extends BaseActivity {
 
     private void refreshTransfer() {
         try {
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
             if (userEntity == null) return;
             mNewData.clear();
             for (TransferEntity transferEntity :
@@ -235,15 +273,9 @@ public class BankTransferActivity extends BaseActivity {
 
     }
 
-    /**
-     * date: 2019/3/15
-     * author: chenli
-     * description: 进入登录页如果不登陆返回，则退出本页
-     */
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        finish();
-        super.onActivityResult(requestCode, resultCode, data);
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (mIsKeyboardShowing)return true;
+        else return super.onKeyDown(keyCode, event);
     }
-
 }

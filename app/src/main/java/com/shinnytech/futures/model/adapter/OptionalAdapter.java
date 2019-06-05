@@ -99,9 +99,10 @@ public class OptionalAdapter extends RecyclerView.Adapter<OptionalAdapter.ItemVi
                 public boolean onTouch(View v, MotionEvent event) {
                     try {
                         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                            if (itemTouchHelper != null) itemTouchHelper.startDrag(ItemViewHolder.this);
+                            if (itemTouchHelper != null)
+                                itemTouchHelper.startDrag(ItemViewHolder.this);
                         }
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                     return false;
@@ -113,11 +114,11 @@ public class OptionalAdapter extends RecyclerView.Adapter<OptionalAdapter.ItemVi
                 public void onClick(View v) {
                     try {
                         int index = getLayoutPosition();
-                        if (index >= 0 && index < getItemCount()){
+                        if (index >= 0 && index < getItemCount()) {
                             onItemMove(index, 0);
                             saveOptionalList();
                         }
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
@@ -129,12 +130,12 @@ public class OptionalAdapter extends RecyclerView.Adapter<OptionalAdapter.ItemVi
                 public void onClick(View v) {
                     try {
                         int index = getLayoutPosition();
-                        if (index >= 0 && index < getItemCount()){
+                        if (index >= 0 && index < getItemCount()) {
                             mData.remove(index);
                             notifyItemRemoved(index);
                             saveOptionalList();
                         }
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 

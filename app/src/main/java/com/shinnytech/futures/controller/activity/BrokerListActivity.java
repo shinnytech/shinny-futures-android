@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import java.util.List;
 
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SELECT_BROKER_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SELECT_IS_ADDED;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SELECT_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_LIST;
 
@@ -51,7 +52,7 @@ public class BrokerListActivity extends BaseActivity {
             String broker = getIntent().getStringExtra("broker");
             int index = brokers.indexOf(broker);
             if (index != -1) mBinding.rv.scrollToPosition(index);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -63,17 +64,26 @@ public class BrokerListActivity extends BaseActivity {
                     @Override
                     public void onItemClick(View view, int position) {
                         String broker = mBrokerAdapter.getData().get(position);
+                        if (broker == null)return;
+
                         JSONObject jsonObject = new JSONObject();
                         try {
                             jsonObject.put(AMP_EVENT_SELECT_BROKER_ID, broker);
-                            Amplitude.getInstance().logEvent(AMP_SELECT_BROKER, jsonObject);
+                            if (broker.contains(" ")) {
+                                jsonObject.put(AMP_EVENT_SELECT_IS_ADDED, false);
+                            }else {
+                                jsonObject.put(AMP_EVENT_SELECT_IS_ADDED, true);
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        if (broker != null && broker.contains(" ")) {
+                        Amplitude.getInstance().logEvent(AMP_SELECT_BROKER, jsonObject);
+
+                        if (broker.contains(" ")) {
                             ToastUtils.showToast(sContext, "请联系期货公司申请！");
                             return;
                         }
+
                         Intent intent = new Intent();
                         intent.putExtra("broker", broker);
                         setResult(RESULT_OK, intent);

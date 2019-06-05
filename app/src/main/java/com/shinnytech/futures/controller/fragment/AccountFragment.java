@@ -34,6 +34,8 @@ import java.util.List;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_ACCOUNT_TRANSFER_IN;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_ACCOUNT_TRANSFER_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_BROKER_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_USER_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_MAIN;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_TRANSFER;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
@@ -76,7 +78,7 @@ public class AccountFragment extends LazyLoadFragment {
                 ((LazyLoadFragment) mViewPagerFragmentAdapter.getItem(mBinding.vp.getCurrentItem())).show();
             }
             mIsInit = false;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -89,7 +91,7 @@ public class AccountFragment extends LazyLoadFragment {
                 ((LazyLoadFragment) mViewPagerFragmentAdapter.getItem(mBinding.vp.getCurrentItem())).leave();
             }
             mIsInit = false;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -140,7 +142,7 @@ public class AccountFragment extends LazyLoadFragment {
      * description: 刷新账户信息
      */
     public void refreshAccount() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
         if (userEntity == null) return;
         AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
         if (accountEntity == null) return;
@@ -220,14 +222,17 @@ public class AccountFragment extends LazyLoadFragment {
             @Override
             public void onClick(View v) {
                 JSONObject jsonObject = new JSONObject();
+                JSONObject jsonObject1 = new JSONObject();
                 try {
+                    jsonObject1.put(AMP_EVENT_LOGIN_BROKER_ID, sDataManager.LOGIN_BROKER_ID);
+                    jsonObject1.put(AMP_EVENT_LOGIN_USER_ID, sDataManager.LOGIN_USER_ID);
                     jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
                     jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_TRANSFER);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
-                Amplitude.getInstance().logEvent(AMP_ACCOUNT_TRANSFER_IN);
+                Amplitude.getInstance().logEvent(AMP_ACCOUNT_TRANSFER_IN, jsonObject1);
                 Intent intentBank = new Intent(getActivity(), BankTransferActivity.class);
                 intentBank.putExtra(TRANSFER_DIRECTION, TRANSFER_IN);
                 getActivity().startActivityForResult(intentBank, MAIN_ACTIVITY_TO_TRANSFER_ACTIVITY);
@@ -238,14 +243,17 @@ public class AccountFragment extends LazyLoadFragment {
             @Override
             public void onClick(View v) {
                 JSONObject jsonObject = new JSONObject();
+                JSONObject jsonObject1 = new JSONObject();
                 try {
+                    jsonObject1.put(AMP_EVENT_LOGIN_BROKER_ID, sDataManager.LOGIN_BROKER_ID);
+                    jsonObject1.put(AMP_EVENT_LOGIN_USER_ID, sDataManager.LOGIN_USER_ID);
                     jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
                     jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_TRANSFER);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
-                Amplitude.getInstance().logEvent(AMP_ACCOUNT_TRANSFER_OUT);
+                Amplitude.getInstance().logEvent(AMP_ACCOUNT_TRANSFER_OUT, jsonObject1);
                 Intent intentBank = new Intent(getActivity(), BankTransferActivity.class);
                 intentBank.putExtra(TRANSFER_DIRECTION, TRANSFER_OUT);
                 getActivity().startActivityForResult(intentBank, MAIN_ACTIVITY_TO_TRANSFER_ACTIVITY);

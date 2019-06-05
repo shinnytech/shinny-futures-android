@@ -1,7 +1,9 @@
 package com.shinnytech.futures.controller.activity;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -13,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
 import java.lang.ref.WeakReference;
@@ -43,21 +46,36 @@ public class SplashActivity extends AppCompatActivity {
             }
         };
         mTimer.schedule(timerTask, 10000);
-
-        final Context context = BaseApplication.getContext();
-        //没有登录过
-        if (!SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
-            mHandler.sendEmptyMessageDelayed(0, 2000);
-        } else {
-            //关闭软件前退出登录
-            String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
-            if (date.isEmpty()) mHandler.sendEmptyMessageDelayed(0, 2000);
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        final Context context = BaseApplication.getContext();
+        if (!NetworkUtils.isNetworkConnected(context)) {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setTitle("登录结果");
+            dialog.setMessage("网络故障，无法连接到服务器");
+            dialog.setCancelable(false);
+            dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    SplashActivity.this.finish();
+                    mHandler.sendEmptyMessageDelayed(1, 500);
+                }
+            });
+            dialog.show();
+        }else {
+            //没有登录过
+            if (!SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
+                mHandler.sendEmptyMessageDelayed(0, 2000);
+            } else {
+                //关闭软件前退出登录
+                String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
+                if (date.isEmpty()) mHandler.sendEmptyMessageDelayed(0, 2000);
+            }
+        }
         registerBroaderCast();
     }
 
@@ -101,6 +119,20 @@ public class SplashActivity extends AppCompatActivity {
 
     }
 
+    private void toLogin() {
+        mTimer.cancel();
+        Intent loginIntent = new Intent(SplashActivity.this, LoginActivity.class);
+        SplashActivity.this.startActivity(loginIntent);
+        SplashActivity.this.finish();
+    }
+
+    private void toMain() {
+        mTimer.cancel();
+        Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
+        SplashActivity.this.startActivity(mainIntent);
+        SplashActivity.this.finish();
+    }
+
     /**
      * date: 6/1/18
      * author: chenli
@@ -123,24 +155,17 @@ public class SplashActivity extends AppCompatActivity {
                     case 0:
                         activity.toLogin();
                         break;
+                    case 1:
+                        activity.mTimer.cancel();
+                        Intent startMain = new Intent(Intent.ACTION_MAIN);
+                        startMain.addCategory(Intent.CATEGORY_HOME);
+                        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        activity.startActivity(startMain);
+                        break;
                     default:
                         break;
                 }
             }
         }
-    }
-
-    private void toLogin(){
-        mTimer.cancel();
-        Intent loginIntent = new Intent(SplashActivity.this, LoginActivity.class);
-        SplashActivity.this.startActivity(loginIntent);
-        SplashActivity.this.finish();
-    }
-
-    private void toMain(){
-        mTimer.cancel();
-        Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
-        SplashActivity.this.startActivity(mainIntent);
-        SplashActivity.this.finish();
     }
 }

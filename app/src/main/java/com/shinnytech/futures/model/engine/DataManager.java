@@ -20,8 +20,10 @@ import com.shinnytech.futures.model.bean.futureinfobean.DiffEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.FutureBean;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
+import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.TimeUtils;
 import com.shinnytech.futures.utils.ToastUtils;
 
 import org.json.JSONArray;
@@ -36,14 +38,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BROKER_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_BROKER_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TIME;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_USER_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_NOTIFY_CODE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_NOTIFY_CONTENT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_NOTIFY_LEVEL;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_NOTIFY_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_FAILED;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_SUCCEEDED;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_NOTIFY;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_ACCOUNT_ID_FIRST;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_ACCOUNT_ID_LAST;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID_FIRST;
@@ -75,11 +81,6 @@ import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST
 public class DataManager {
 
     private static final DataManager INSTANCE = new DataManager();
-    /**
-     * date: 9/1/18
-     * description: 账户id
-     */
-    public String USER_ID = "";
     /**
      * date: 2018/11/7
      * description: appVersion
@@ -126,6 +127,7 @@ public class DataManager {
      */
     public String LOGIN_BROKER_ID = "";
     public String LOGIN_USER_ID = "";
+
     /**
      * date: 2019/5/24
      * description: 判断用户是否主动切换页面
@@ -190,7 +192,7 @@ public class DataManager {
     }
 
     public void clearAccount() {
-        USER_ID = "";
+        LOGIN_USER_ID = "";
         TRADE_DATA = new TradeBean();
     }
 
@@ -234,8 +236,7 @@ public class DataManager {
                     }
                 }
             }
-            if (BaseApplication.getWebSocketService() != null)
-                BaseApplication.getWebSocketService().sendMessage(MD_MESSAGE, MD_BROADCAST);
+            WebSocketService.sendMessage(MD_MESSAGE, MD_BROADCAST);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -446,20 +447,29 @@ public class DataManager {
                                 JSONObject notify = data.getJSONObject(notifyKey);
                                 final String content = notify.optString("content");
                                 String type = notify.optString("type");
+                                String level = notify.optString("level");
                                 int code = notify.optInt("code");
+                                JSONObject jsonObject1 = new JSONObject();
+                                try {
+                                    jsonObject1.put(AMP_EVENT_NOTIFY_CODE, code);
+                                    jsonObject1.put(AMP_EVENT_NOTIFY_CONTENT, content);
+                                    jsonObject1.put(AMP_EVENT_NOTIFY_LEVEL, level);
+                                    jsonObject1.put(AMP_EVENT_NOTIFY_TYPE, type);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                Amplitude.getInstance().logEvent(AMP_NOTIFY, jsonObject1);
+
                                 if (content.equals(CHANGE_PASSWORD_SUCCEED)) {
-                                    if (BaseApplication.getWebSocketService() != null)
-                                        BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_CHANGE_SUCCESS, TD_BROADCAST);
+                                    WebSocketService.sendMessage(TD_MESSAGE_CHANGE_SUCCESS, TD_BROADCAST);
                                 }
                                 if ((code == 140) || (code == 131)) {
-                                    if (BaseApplication.getWebSocketService() != null)
-                                        BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_WEAK_PASSWORD, TD_BROADCAST);
+                                    WebSocketService.sendMessage(TD_MESSAGE_WEAK_PASSWORD, TD_BROADCAST);
                                 }
                                 if ("SETTLEMENT".equals(type)) {
                                     LogUtils.e(content, true);
                                     BROKER.setSettlement(content);
-                                    if (BaseApplication.getWebSocketService() != null)
-                                        BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_SETTLEMENT, TD_BROADCAST);
+                                    WebSocketService.sendMessage(TD_MESSAGE_SETTLEMENT, TD_BROADCAST);
                                 } else {
                                     if (LOGIN_SUCCEED.equals(content)) {
                                         //游客模式不显示登录成功弹出框
@@ -471,14 +481,13 @@ public class DataManager {
                                         try {
                                             jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, LOGIN_BROKER_ID);
                                             jsonObject.put(AMP_EVENT_LOGIN_USER_ID, LOGIN_USER_ID);
-                                            jsonObject.put(AMP_EVENT_LOGIN_TIME, System.currentTimeMillis());
+                                            jsonObject.put(AMP_EVENT_LOGIN_TIME, TimeUtils.getAmpTime());
                                             jsonObject.put(AMP_EVENT_LOGIN_TYPE, LOGIN_TYPE);
                                         } catch (JSONException e) {
                                             e.printStackTrace();
                                         }
                                         Amplitude.getInstance().logEvent(AMP_LOGIN_FAILED, jsonObject);
-                                        if (BaseApplication.getWebSocketService() != null)
-                                            BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
+                                        WebSocketService.sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
                                     }
                                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                                         @Override
@@ -523,9 +532,8 @@ public class DataManager {
                                             break;
                                         case "session":
                                             String userId = user.getJSONObject("session").optString("user_id");
-                                            USER_ID = userId;
-                                            userEntity.setUser_id(userId);
-                                            if (LOGIN_USER_ID.equals(userId)){
+                                            if (LOGIN_USER_ID.equals(userId)) {
+                                                userEntity.setUser_id(userId);
                                                 Amplitude.getInstance().setUserId(LOGIN_BROKER_ID + LOGIN_USER_ID);
                                                 Identify identify = new Identify()
                                                         .setOnce(AMP_USER_ACCOUNT_ID_FIRST, LOGIN_USER_ID)
@@ -544,14 +552,13 @@ public class DataManager {
                                                 try {
                                                     jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, LOGIN_BROKER_ID);
                                                     jsonObject.put(AMP_EVENT_LOGIN_USER_ID, LOGIN_USER_ID);
-                                                    jsonObject.put(AMP_EVENT_LOGIN_TIME, System.currentTimeMillis());
+                                                    jsonObject.put(AMP_EVENT_LOGIN_TIME, TimeUtils.getAmpTime());
                                                     jsonObject.put(AMP_EVENT_LOGIN_TYPE, LOGIN_TYPE);
                                                 } catch (JSONException e) {
                                                     e.printStackTrace();
                                                 }
                                                 Amplitude.getInstance().logEvent(AMP_LOGIN_SUCCEEDED, jsonObject);
-                                                if (BaseApplication.getWebSocketService() != null)
-                                                    BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE_LOGIN_SUCCEED, TD_BROADCAST);
+                                                WebSocketService.sendMessage(TD_MESSAGE_LOGIN_SUCCEED, TD_BROADCAST);
                                             }
 
                                             break;
@@ -560,9 +567,7 @@ public class DataManager {
                                     }
                                 }
                                 userEntities.put(userKey, userEntity);
-                                if (BaseApplication.getWebSocketService() != null) {
-                                    BaseApplication.getWebSocketService().sendMessage(TD_MESSAGE, TD_BROADCAST);
-                                }
+                                WebSocketService.sendMessage(TD_MESSAGE, TD_BROADCAST);
                             }
                             break;
                         default:

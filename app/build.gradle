@@ -6,8 +6,8 @@ android {
         applicationId "com.shinnytech.futures"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 40
-        versionName "1.20.0"
+        versionCode 41
+        versionName "1.21.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         resValue("string", "app_name", "ShinnyFutures")
         flavorDimensions("shinny")
@@ -34,9 +34,8 @@ android {
             applicationIdSuffix ".debug"
         }
         release {
-            minifyEnabled true
+            minifyEnabled false
             zipAlignEnabled true
-            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             applicationIdSuffix ".release"
             signingConfig signingConfigs.config
@@ -742,4 +741,5 @@ dependencies {
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     implementation(name: 'InfoCollection_single_release_v1.5-2019-05-27', ext: 'aar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.xdandroid:hellodaemon:+'
 }

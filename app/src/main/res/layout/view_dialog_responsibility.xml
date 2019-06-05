@@ -28,24 +28,10 @@
         android:layout_gravity="bottom"
         android:orientation="horizontal"
         android:padding="@dimen/padding_4dp">
-
-        <Button
-            android:id="@+id/disagree"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginEnd="@dimen/margin_10dp"
-            android:layout_weight="1"
-            android:background="@drawable/activity_confirm_selector"
-            android:gravity="center"
-            android:text="@string/welcome_activity_disagree"
-            android:textColor="@color/text_white"
-            android:textSize="@dimen/font_size_normal" />
-
         <Button
             android:id="@+id/agree"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/margin_10dp"
             android:layout_weight="1"
             android:background="@drawable/activity_confirm_selector"
             android:gravity="center"

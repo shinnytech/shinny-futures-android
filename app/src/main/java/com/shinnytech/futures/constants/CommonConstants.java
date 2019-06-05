@@ -207,8 +207,6 @@ public final class CommonConstants {
     public static final String AMP_INIT = "amp_init";
     public static final String AMP_SELECT_BROKER = "amp_select_broker";
     public static final String AMP_LOGIN = "amp_login";
-    public static final String AMP_VISIT = "amp_visit";
-    public static final String AMP_AUTO = "amp_auto";
     public static final String AMP_LOGIN_SUCCEEDED = "amp_login_succeeded";
     public static final String AMP_LOGIN_FAILED = "amp_login_failed";
     public static final String AMP_LOGIN_TIME_OUT = "amp_login_time_out";
@@ -239,9 +237,11 @@ public final class CommonConstants {
     public static final String AMP_VOLUME_KEY = "amp_volume_key";
     public static final String AMP_SHOW_PAGE = "amp_show_page";
     public static final String AMP_LEAVE_PAGE = "amp_leave_page";
+    public static final String AMP_NOTIFY = "amp_notify";
 
     //amp event property
     public static final String AMP_EVENT_SELECT_BROKER_ID = "broker_id";
+    public static final String AMP_EVENT_SELECT_IS_ADDED = "is_added";
     public static final String AMP_EVENT_LOGIN_BROKER_ID = "broker_id";
     public static final String AMP_EVENT_LOGIN_USER_ID = "user_id";
     public static final String AMP_EVENT_LOGIN_TIME = "login_time";
@@ -249,6 +249,7 @@ public final class CommonConstants {
     public static final String AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN = "login";
     public static final String AMP_EVENT_LOGIN_TYPE_VALUE_VISIT = "visit";
     public static final String AMP_EVENT_LOGIN_TYPE_VALUE_AUTO = "auto";
+    public static final String AMP_EVENT_LOGOUT_TIME = "logout_time";
 
     public static final String AMP_EVENT_PRICE = "price";
     public static final String AMP_EVENT_INSTRUMENT_ID = "instrument_id";
@@ -337,6 +338,16 @@ public final class CommonConstants {
     public static final String AMP_EVENT_POSITION_COUNT = "position_count";
     public static final String AMP_EVENT_ORDER_COUNT = "order_count";
     public static final String AMP_EVENT_PAGE_VISIBLE_TIME = "page_visible_time";
+
+    public static final String AMP_EVENT_CRASH_TYPE = "crash_type";
+    public static final String AMP_EVENT_ERROR_TYPE = "error_type";
+    public static final String AMP_EVENT_ERROR_MESSAGE = "error_message";
+    public static final String AMP_EVENT_ERROR_STACK = "error_stack";
+
+    public static final String AMP_EVENT_NOTIFY_TYPE = "notify_type";
+    public static final String AMP_EVENT_NOTIFY_LEVEL = "notify_level";
+    public static final String AMP_EVENT_NOTIFY_CONTENT = "notify_content";
+    public static final String AMP_EVENT_NOTIFY_CODE = "notify_code";
 
     //amp user property
     public static final String AMP_USER_PACKAGE_ID_FIRST = "package_id_first";

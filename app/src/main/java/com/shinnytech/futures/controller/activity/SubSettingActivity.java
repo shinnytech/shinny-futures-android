@@ -142,7 +142,7 @@ public class SubSettingActivity extends BaseActivity {
 
     private void upload() {
         /* 创建logGroup */
-        final LogGroup logGroup = new LogGroup("user log", "V" + sDataManager.APP_VERSION + " User Id: " + sDataManager.USER_ID);
+        final LogGroup logGroup = new LogGroup("user log", "V" + sDataManager.APP_VERSION + " User Id: " + sDataManager.LOGIN_USER_ID);
 
         List<LogEntity> list = SLSDatabaseManager.getInstance().queryRecordFromDB();
         for (LogEntity logEntity : list) {

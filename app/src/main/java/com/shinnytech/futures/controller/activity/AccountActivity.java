@@ -38,7 +38,7 @@ public class AccountActivity extends BaseActivity {
     }
 
     protected void refreshUI() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
         if (userEntity == null) return;
         AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
         ((ActivityAccountBinding) mViewDataBinding).setAccount(accountEntity);

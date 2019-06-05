@@ -44,6 +44,7 @@ import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.LogUtils;
@@ -383,7 +384,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             refreshAccount();
             initPosition();
             showEvent();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -401,7 +402,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_TRANSACTION);
             jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
             jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
-            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().USER_ID);
+            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().LOGIN_USER_ID);
             if (userEntity != null) {
                 AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
                 if (accountEntity != null) {
@@ -454,7 +455,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
             jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
             jsonObject.put(AMP_EVENT_PAGE_VISIBLE_TIME, pageVisibleTime);
-            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().USER_ID);
+            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().LOGIN_USER_ID);
             if (userEntity != null) {
                 AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
                 if (accountEntity != null) {
@@ -497,7 +498,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 mBinding.price.setText(OPPONENT_PRICE);
             else mBinding.price.setText(sDataManager.PRICE_TYPE);
             String key = mInstrumentIdTransaction;
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
             if (userEntity == null) return;
             PositionEntity positionEntity = userEntity.getPositions().get(key);
             if (positionEntity == null) {
@@ -585,7 +586,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     private void refreshPosition() {
         try {
             String key = mInstrumentIdTransaction;
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
             if (userEntity == null) return;
             PositionEntity positionEntity = userEntity.getPositions().get(key);
             if (positionEntity == null) {
@@ -708,7 +709,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      * description: 刷新账户信息
      */
     private void refreshAccount() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
         if (userEntity == null) return;
         AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
         if (accountEntity == null) return;
@@ -1033,7 +1034,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 final int volumeN = Integer.parseInt(volume);
                 final double priceN = Double.parseDouble(price);
                 final String instrumentId = mInstrumentIdTransaction.split("\\.")[1];
-                UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+                UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
                 if (userEntity == null) return;
                 PositionEntity positionEntity = userEntity.getPositions().get(mInstrumentIdTransaction);
                 if (positionEntity == null) return;
@@ -1183,10 +1184,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (BaseApplication.getWebSocketService() != null) {
-                        BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
-                        BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, price);
-                    }
+                    WebSocketService.sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
+                    WebSocketService.sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, price);
                     refreshPosition();
                     dialog.dismiss();
                     mIsRefreshPosition = true;
@@ -1202,10 +1201,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             });
             dialog.show();
         } else {
-            if (BaseApplication.getWebSocketService() != null) {
-                BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
-                BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, price);
-            }
+            WebSocketService.sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
+            WebSocketService.sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, price);
             refreshPosition();
             mIsRefreshPosition = true;
         }
@@ -1252,8 +1249,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (BaseApplication.getWebSocketService() != null)
-                        BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
+                    WebSocketService.sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
                     refreshPosition();
                     dialog.dismiss();
                     mIsRefreshPosition = true;
@@ -1269,8 +1265,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             });
             dialog.show();
         } else {
-            if (BaseApplication.getWebSocketService() != null)
-                BaseApplication.getWebSocketService().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
+            WebSocketService.sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
             refreshPosition();
             mIsRefreshPosition = true;
         }
@@ -1317,7 +1312,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 @Override
                 public void onClick(View v) {
                     for (String order_id : orderIds) {
-                        BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
+                        WebSocketService.sendReqCancelOrder(order_id);
                     }
                     dialog.dismiss();
                     Amplitude.getInstance().logEvent(AMP_CANCEL_CLOSE_CONFIRMED);
@@ -1345,7 +1340,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         String volume = mBinding.volume.getText().toString();
         final String direction = DIRECTION_BUY_ZN.equals(mDirection) ? DIRECTION_SELL : DIRECTION_BUY;
         final int volumeN = Integer.parseInt(volume);
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
         if (userEntity == null) return false;
         PositionEntity positionEntity = userEntity.getPositions().get(mInstrumentIdTransaction);
         if (positionEntity == null) return false;

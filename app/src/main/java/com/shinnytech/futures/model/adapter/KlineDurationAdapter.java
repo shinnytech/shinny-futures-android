@@ -109,7 +109,7 @@ public class KlineDurationAdapter extends RecyclerView.Adapter<KlineDurationAdap
                             if (itemTouchHelper != null)
                                 itemTouchHelper.startDrag(ItemViewHolder.this);
                         }
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                     return false;
@@ -121,11 +121,11 @@ public class KlineDurationAdapter extends RecyclerView.Adapter<KlineDurationAdap
                 public void onClick(View v) {
                     try {
                         int index = getLayoutPosition();
-                        if (index >= 0 && index < getItemCount()){
+                        if (index >= 0 && index < getItemCount()) {
                             onItemMove(index, 0);
                             saveDurationList();
                         }
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -136,12 +136,12 @@ public class KlineDurationAdapter extends RecyclerView.Adapter<KlineDurationAdap
                 public void onClick(View v) {
                     try {
                         int index = getLayoutPosition();
-                        if (index >= 0 && index < getItemCount()){
+                        if (index >= 0 && index < getItemCount()) {
                             mData.remove(index);
                             notifyItemRemoved(index);
                             saveDurationList();
                         }
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 

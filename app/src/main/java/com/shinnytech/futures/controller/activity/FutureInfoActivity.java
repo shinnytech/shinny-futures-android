@@ -28,6 +28,7 @@ import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
@@ -331,8 +332,7 @@ public class FutureInfoActivity extends BaseActivity {
                 ins = ins + "," + leg1_symbol + "," + leg2_symbol;
             }
         }
-        if (BaseApplication.getWebSocketService() != null)
-            BaseApplication.getWebSocketService().sendSubscribeQuote(ins);
+        WebSocketService.sendSubscribeQuote(ins);
     }
 
     public ViewPager getViewPager() {

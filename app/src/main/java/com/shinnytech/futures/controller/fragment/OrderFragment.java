@@ -43,6 +43,7 @@ import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.OrderDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
+import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DensityUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
@@ -181,7 +182,7 @@ public class OrderFragment extends LazyLoadFragment {
         mBinding.rv.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rv, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if (position >= 0 && position < mAdapter.getItemCount()){
+                if (position >= 0 && position < mAdapter.getItemCount()) {
                     OrderEntity orderEntity = mAdapter.getData().get(position);
                     if (orderEntity == null) return;
                     if (mIsOrdersAlive) {
@@ -257,7 +258,7 @@ public class OrderFragment extends LazyLoadFragment {
     protected void refreshOrder() {
         try {
             if (!mIsUpdate) return;
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
             if (userEntity == null) return;
             mNewData.clear();
 
@@ -289,7 +290,7 @@ public class OrderFragment extends LazyLoadFragment {
         try {
             refreshOrder();
             showEvent();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -313,7 +314,7 @@ public class OrderFragment extends LazyLoadFragment {
             else jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_ORDER);
             jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
             jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
-            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().USER_ID);
+            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().LOGIN_USER_ID);
             if (userEntity != null) {
                 AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
                 if (accountEntity != null) {
@@ -375,7 +376,7 @@ public class OrderFragment extends LazyLoadFragment {
             jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
             jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
             jsonObject.put(AMP_EVENT_PAGE_VISIBLE_TIME, pageVisibleTime);
-            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().USER_ID);
+            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().LOGIN_USER_ID);
             if (userEntity != null) {
                 AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
                 if (accountEntity != null) {
@@ -486,7 +487,7 @@ public class OrderFragment extends LazyLoadFragment {
                     initDialog(order_id, ins_name, direction_title, volume, price);
                     popWindow.dismiss();
                 } else {
-                    BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
+                    WebSocketService.sendReqCancelOrder(order_id);
                     popWindow.dismiss();
                 }
             }
@@ -526,8 +527,7 @@ public class OrderFragment extends LazyLoadFragment {
             @Override
             public void onClick(View v) {
                 try {
-                    if (BaseApplication.getWebSocketService() != null)
-                        BaseApplication.getWebSocketService().sendReqCancelOrder(order_id);
+                    WebSocketService.sendReqCancelOrder(order_id);
                 } catch (NumberFormatException ex) {
                     ex.printStackTrace();
                 }

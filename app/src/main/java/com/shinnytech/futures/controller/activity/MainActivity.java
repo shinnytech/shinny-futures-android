@@ -1,5 +1,6 @@
 package com.shinnytech.futures.controller.activity;
 
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -22,7 +23,10 @@ import com.shinnytech.futures.controller.fragment.QuoteFragment;
 import com.shinnytech.futures.controller.fragment.QuotePagerFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.model.engine.DataManager;
+import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.NetworkUtils;
+import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastUtils;
 
 import org.json.JSONException;
@@ -34,6 +38,7 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VA
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.BACK_TO_ACCOUNT_DETAIL;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_VERSION_CODE;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY;
@@ -73,6 +78,7 @@ public class MainActivity extends BaseActivity {
         mBinding = (ActivityMainDrawerBinding) mViewDataBinding;
         mTitle = OPTIONAL;
         mMainActivityPresenter = new MainActivityPresenter(this, sContext, mBinding, mTitle, mToolbarTitle);
+        checkResponsibility();
     }
 
     @Override
@@ -206,12 +212,45 @@ public class MainActivity extends BaseActivity {
                     ToastUtils.showToast(BaseApplication.getContext(), getString(R.string.main_activity_exit));
                     mExitTime = System.currentTimeMillis();
                 } else {
-                    finish();
+                    Intent startMain = new Intent(Intent.ACTION_MAIN);
+                    startMain.addCategory(Intent.CATEGORY_HOME);
+                    startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(startMain);
                 }
                 return true;
             }
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    /**
+     * date: 1/16/18
+     * author: chenli
+     * description: 检查是否第一次启动APP,弹出免责条款框
+     */
+    public void checkResponsibility() {
+        try {
+            final float nowVersionCode = DataManager.getInstance().APP_CODE;
+            float versionCode = (float) SPUtils.get(sContext, CONFIG_VERSION_CODE, 0.0f);
+            if (nowVersionCode > versionCode) {
+                final Dialog dialog = new Dialog(this, R.style.responsibilityDialog);
+                View view = View.inflate(this, R.layout.view_dialog_responsibility, null);
+                dialog.setContentView(view);
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.setCancelable(false);
+                dialog.show();
+                view.findViewById(R.id.agree).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        SPUtils.putAndApply(MainActivity.this, CONFIG_VERSION_CODE, nowVersionCode);
+                        dialog.dismiss();
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -229,7 +268,7 @@ public class MainActivity extends BaseActivity {
                 if (isAccountPage) {
                     mBinding.bottomNavigation.setSelectedItemId(R.id.trade);
                     AccountFragment accountFragment = (AccountFragment) mMainActivityPresenter.getmViewPagerFragmentAdapter().getItem(1);
-                    if (accountFragment != null && accountFragment.getmBinding().accountFab != null){
+                    if (accountFragment != null && accountFragment.getmBinding().accountFab != null) {
                         accountFragment.getmBinding().accountFab.show();
                         accountFragment.setIns(ins);
                     }
@@ -247,9 +286,8 @@ public class MainActivity extends BaseActivity {
                 if (quoteFragment != null) quoteFragment.refreshTD();
                 if (quoteFragment != null && OPTIONAL.equals(quoteFragment.getTitle())) {
                     quoteFragment.refreshOptional();
-                } else if (mIns != null && !mIns.equals(sDataManager.getRtnData().getIns_list())
-                        && BaseApplication.getWebSocketService() != null) {
-                    BaseApplication.getWebSocketService().sendSubscribeQuote(mIns);
+                } else if (mIns != null && !mIns.equals(sDataManager.getRtnData().getIns_list())) {
+                    WebSocketService.sendSubscribeQuote(mIns);
                 }
             }
 
@@ -272,7 +310,7 @@ public class MainActivity extends BaseActivity {
                 }
                 Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

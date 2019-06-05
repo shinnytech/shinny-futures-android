@@ -100,7 +100,7 @@ public class QuoteAdapter extends RecyclerView.Adapter<QuoteAdapter.ItemViewHold
     @Override
     public void onBindViewHolder(ItemViewHolder itemViewHolder, int position, List<Object> payloads) {
         if (payloads.isEmpty()) {
-            onBindViewHolder(itemViewHolder, position);
+            itemViewHolder.update();
         } else {
             Bundle bundle = (Bundle) payloads.get(0);
             itemViewHolder.updatePart(bundle);

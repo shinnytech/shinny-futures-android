@@ -87,17 +87,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:gravity="center"
-                    android:text="@string/transaction_fragment_low"
+                    android:text="@string/transaction_fragment_high"
                     android:textColor="@color/text_white"
                     android:textSize="@dimen/font_size_small_high" />
 
                 <TextView
-                    android:id="@+id/tv_id_transaction_low"
+                    android:id="@+id/tv_id_transaction_high"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="end|center"
-                    android:text="@{LatestFileManager.saveScaleByPtick(quote.lowest, quote.instrument_id)}"
+                    android:text="@{LatestFileManager.saveScaleByPtick(quote.highest, quote.instrument_id)}"
                     android:textColor="@color/text_white"
                     android:textSize="@dimen/font_size_small_high" />
             </LinearLayout>
@@ -111,17 +111,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:gravity="center"
-                    android:text="@string/transaction_fragment_high"
+                    android:text="@string/transaction_fragment_low"
                     android:textColor="@color/text_white"
                     android:textSize="@dimen/font_size_small_high" />
 
                 <TextView
-                    android:id="@+id/tv_id_transaction_high"
+                    android:id="@+id/tv_id_transaction_low"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="end|center"
-                    android:text="@{LatestFileManager.saveScaleByPtick(quote.highest, quote.instrument_id)}"
+                    android:text="@{LatestFileManager.saveScaleByPtick(quote.lowest, quote.instrument_id)}"
                     android:textColor="@color/text_white"
                     android:textSize="@dimen/font_size_small_high" />
             </LinearLayout>

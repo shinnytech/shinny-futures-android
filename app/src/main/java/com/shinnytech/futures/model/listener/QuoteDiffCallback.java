@@ -92,12 +92,15 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
         String bid_volume1_new = mNewData.get(newItemPosition).getBid_volume1();
 
         String pre_settlement_new = LatestFileManager.saveScaleByPtick(mNewData.get(newItemPosition).getPre_settlement(), instrumentId);
-        bundle.putString("pre_settlement", pre_settlement_new);
 
         if (latest_old != null && latest_new != null) {
-            if (!latest_old.equals(latest_new)) bundle.putString("latest", latest_new);
+            if (!latest_old.equals(latest_new)) {
+                bundle.putString("latest", latest_new);
+                bundle.putString("pre_settlement", pre_settlement_new);
+            }
         } else if (latest_old == null && latest_new != null) {
             bundle.putString("latest", latest_new);
+            bundle.putString("pre_settlement", pre_settlement_new);
         }
 
         if (change_old != null && change_new != null) {
@@ -127,10 +130,13 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
         }
 
         if (ask_price1_old != null && ask_price1_new != null) {
-            if (!ask_price1_old.equals(ask_price1_new))
+            if (!ask_price1_old.equals(ask_price1_new)) {
                 bundle.putString("ask_price1", ask_price1_new);
+                bundle.putString("pre_settlement", pre_settlement_new);
+            }
         } else if (ask_price1_old == null && ask_price1_new != null) {
             bundle.putString("ask_price1", ask_price1_new);
+            bundle.putString("pre_settlement", pre_settlement_new);
         }
 
         if (ask_volume1_old != null && ask_volume1_new != null) {
@@ -141,10 +147,13 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
         }
 
         if (bid_price1_old != null && bid_price1_new != null) {
-            if (!bid_price1_old.equals(bid_price1_new))
+            if (!bid_price1_old.equals(bid_price1_new)) {
                 bundle.putString("bid_price1", bid_price1_new);
+                bundle.putString("pre_settlement", pre_settlement_new);
+            }
         } else if (bid_price1_old == null && bid_price1_new != null) {
             bundle.putString("bid_price1", bid_price1_new);
+            bundle.putString("pre_settlement", pre_settlement_new);
         }
 
         if (bid_volume1_old != null && bid_volume1_new != null) {
@@ -154,10 +163,10 @@ public class QuoteDiffCallback extends DiffUtil.Callback {
             bundle.putString("bid_volume1", bid_volume1_new);
         }
 
-
         if (bundle.size() == 0) {
             return null;
         }
+
         return bundle;
     }
 }

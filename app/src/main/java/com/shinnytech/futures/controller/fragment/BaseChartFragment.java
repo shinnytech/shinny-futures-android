@@ -23,11 +23,13 @@ import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
+import com.shinnytech.futures.model.bean.eventbusbean.RedrawEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.VisibilityEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.SPUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -255,7 +257,7 @@ public class BaseChartFragment extends LazyLoadFragment {
         mInsList = new ArrayList<>(map.keySet());
         if (OPTIONAL.equals(title)) {
             DataManager dataManager = DataManager.getInstance();
-            UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.USER_ID);
+            UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.LOGIN_USER_ID);
             if (userEntity != null) {
                 for (PositionEntity positionEntity : userEntity.getPositions().values()) {
                     try {
@@ -376,7 +378,7 @@ public class BaseChartFragment extends LazyLoadFragment {
      * description: 刷新账户信息
      */
     private void refreshTrade() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
         if (userEntity == null) return;
         if (mIsPending) {
             for (OrderEntity orderEntity :
@@ -437,7 +439,7 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void addLongPositionLimitLine() {
         try {
             String key = instrument_id_transaction;
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
             if (userEntity == null) return;
             PositionEntity positionEntity = userEntity.getPositions().get(key);
 
@@ -461,7 +463,7 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void addShortPositionLimitLine() {
         try {
             String key = instrument_id_transaction;
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
             if (userEntity == null) return;
             PositionEntity positionEntity = userEntity.getPositions().get(key);
             if (positionEntity == null) return;
@@ -504,7 +506,7 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void refreshLongPositionLimitLine() {
         try {
             String key = instrument_id_transaction;
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
             if (userEntity == null) return;
             PositionEntity positionEntity = userEntity.getPositions().get(key);
             String limitKey = key + "0";
@@ -543,7 +545,7 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void refreshShortPositionLimitLine() {
         try {
             String key = instrument_id_transaction;
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
             if (userEntity == null) return;
             PositionEntity positionEntity = userEntity.getPositions().get(key);
             String limitKey = key + "1";
@@ -640,7 +642,7 @@ public class BaseChartFragment extends LazyLoadFragment {
      * description: 增加挂单线
      */
     protected void addOrderLimitLines() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
         if (userEntity == null) return;
         for (OrderEntity orderEntity :
                 userEntity.getOrders().values()) {
@@ -705,11 +707,10 @@ public class BaseChartFragment extends LazyLoadFragment {
         drawKline();
 
         registerBroaderCast();
-        if (BaseApplication.getWebSocketService() == null) return;
         if (CURRENT_DAY_FRAGMENT.equals(mFragmentType)) {
-            BaseApplication.getWebSocketService().sendSetChart(instrument_id);
+            WebSocketService.sendSetChart(instrument_id);
         } else {
-            BaseApplication.getWebSocketService().sendSetChartKline(instrument_id, VIEW_WIDTH, mKlineType);
+            WebSocketService.sendSetChartKline(instrument_id, VIEW_WIDTH, mKlineType);
         }
     }
 
@@ -771,6 +772,18 @@ public class BaseChartFragment extends LazyLoadFragment {
 //            mBottomChartViewBase.setVisibility(View.GONE);
         }
     }
+
+    /**
+     * date: 2019/6/4
+     * author: chenli
+     * description: 切前台重绘界面
+     */
+    @Subscribe
+    public void onEventRedraw(RedrawEvent data) {
+        clearKline();
+        drawKline();
+    }
+
 
     /**
      * date: 2019/4/19

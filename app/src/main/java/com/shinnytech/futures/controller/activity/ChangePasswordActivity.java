@@ -13,8 +13,8 @@ import android.text.TextWatcher;
 import android.view.View;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityChangePasswordBinding;
+import com.shinnytech.futures.model.service.WebSocketService;
 import com.shinnytech.futures.utils.ToastUtils;
 
 import java.lang.ref.WeakReference;
@@ -176,11 +176,6 @@ public class ChangePasswordActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
 
-                if (BaseApplication.getWebSocketService() == null) {
-                    ToastUtils.showToast(sContext, "连接断开，请重启");
-                    return;
-                }
-
                 String old_password = mBinding.etOldPassword.getText().toString();
                 if (old_password == null || old_password.isEmpty()) {
                     ToastUtils.showToast(sContext, "旧密码不能为空");
@@ -203,7 +198,7 @@ public class ChangePasswordActivity extends BaseActivity {
                     return;
                 }
 
-                BaseApplication.getWebSocketService().sendReqPassword(new_password, old_password);
+                WebSocketService.sendReqPassword(new_password, old_password);
 
             }
         });
