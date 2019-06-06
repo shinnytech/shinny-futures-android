@@ -28,9 +28,13 @@ import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
 
 public class SplashActivity extends AppCompatActivity {
+    private final int TO_LOGIN = 0;
+    private final int TO_MAIN = 1;
+    private final int TO_SCREEN = 2;
     private BroadcastReceiver mReceiverLogin;
     private Handler mHandler;
     private Timer mTimer;
+    private TimerTask mTimerTask;
 
 
     @Override
@@ -39,13 +43,12 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
         mHandler = new MyHandler(this);
         mTimer = new Timer();
-        TimerTask timerTask = new TimerTask() {
+        mTimerTask = new TimerTask() {
             @Override
             public void run() {
-                mHandler.sendEmptyMessage(0);
+                mHandler.sendEmptyMessage(TO_LOGIN);
             }
         };
-        mTimer.schedule(timerTask, 10000);
     }
 
     @Override
@@ -61,19 +64,26 @@ public class SplashActivity extends AppCompatActivity {
             dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    SplashActivity.this.finish();
-                    mHandler.sendEmptyMessageDelayed(1, 500);
+                    mHandler.sendEmptyMessageDelayed(TO_SCREEN, 500);
+                    dialog.dismiss();
                 }
             });
             dialog.show();
         }else {
+            mTimer.schedule(mTimerTask, 10000);
+
             //没有登录过
             if (!SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
-                mHandler.sendEmptyMessageDelayed(0, 2000);
+                mHandler.sendEmptyMessageDelayed(TO_LOGIN, 2000);
             } else {
                 //关闭软件前退出登录
                 String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
-                if (date.isEmpty()) mHandler.sendEmptyMessageDelayed(0, 2000);
+                if (date.isEmpty()) mHandler.sendEmptyMessageDelayed(TO_LOGIN, 2000);
+                else {
+                    String broker = (String) SPUtils.get(context, CommonConstants.CONFIG_BROKER, "");
+                    String user = (String) SPUtils.get(context, CommonConstants.CONFIG_ACCOUNT, "");
+                    if (!broker.isEmpty() && !user.isEmpty())mHandler.sendEmptyMessageDelayed(TO_MAIN, 2000);
+                }
             }
         }
         registerBroaderCast();
@@ -133,6 +143,13 @@ public class SplashActivity extends AppCompatActivity {
         SplashActivity.this.finish();
     }
 
+    private void toScreen() {
+        Intent startMain = new Intent(Intent.ACTION_MAIN);
+        startMain.addCategory(Intent.CATEGORY_HOME);
+        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(startMain);
+    }
+
     /**
      * date: 6/1/18
      * author: chenli
@@ -156,11 +173,10 @@ public class SplashActivity extends AppCompatActivity {
                         activity.toLogin();
                         break;
                     case 1:
-                        activity.mTimer.cancel();
-                        Intent startMain = new Intent(Intent.ACTION_MAIN);
-                        startMain.addCategory(Intent.CATEGORY_HOME);
-                        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        activity.startActivity(startMain);
+                        activity.toMain();
+                        break;
+                    case 2:
+                        activity.toScreen();
                         break;
                     default:
                         break;

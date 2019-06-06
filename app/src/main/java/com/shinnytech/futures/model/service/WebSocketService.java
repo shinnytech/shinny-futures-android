@@ -1,30 +1,22 @@
 package com.shinnytech.futures.model.service;
 
 import android.Manifest;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.gson.Gson;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
+import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketExtension;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
 import com.neovisionaries.ws.client.WebSocketState;
-import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.model.amplitude.api.Amplitude;
@@ -43,7 +35,6 @@ import com.shinnytech.futures.model.bean.reqbean.ReqSubscribeQuoteEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqTransferEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.model.receiver.NotificationClickReceiver;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
@@ -348,6 +339,11 @@ public class WebSocketService extends AbsWorkService {
                             LogUtils.e("TDPong", true);
                         }
 
+                        @Override
+                        public void onConnectError(WebSocket websocket, WebSocketException exception) throws Exception {
+                            LogUtils.e(exception.getMessage(), true);
+                            super.onConnectError(websocket, exception);
+                        }
                     })
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
                     .addHeader("User-Agent", sDataManager.USER_AGENT + " " + sDataManager.APP_VERSION)
@@ -676,41 +672,6 @@ public class WebSocketService extends AbsWorkService {
     @Override
     public void onCreate() {
         super.onCreate();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String NOTIFICATION_CHANNEL_ID = "com.shinnytech.futures";
-            String channelName = "WebSocketService";
-            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
-            chan.setLightColor(Color.BLUE);
-            chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            assert manager != null;
-            manager.createNotificationChannel(chan);
-            Intent intent = new Intent(this, NotificationClickReceiver.class);
-            intent.setAction("notification_click");
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-            Notification notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-                    .setContentTitle("快期小Q下单软件正在运行")
-                    .setContentText("点击返回程序")
-                    .setWhen(System.currentTimeMillis())
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-                    .setContentIntent(pendingIntent)
-                    .build();
-            startForeground(1, notification);
-        } else {
-            Intent intent = new Intent(this, NotificationClickReceiver.class);
-            intent.setAction("notification_click");
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-            Notification notification = new NotificationCompat.Builder(this, "service")
-                    .setContentTitle("快期小Q下单软件正在运行")
-                    .setContentText("点击返回程序")
-                    .setWhen(System.currentTimeMillis())
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-                    .setContentIntent(pendingIntent)
-                    .build();
-            startForeground(1, notification);
-        }
     }
 
     @Override

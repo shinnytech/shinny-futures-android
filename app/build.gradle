@@ -594,6 +594,14 @@ android {
             dimension "shinny"
         }
 
+        kuaiqixiaoq15Test {
+            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
+            resValue("string", "app_name", "快期小Q15测试")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+            applicationIdSuffix ".kuaiqixiaoq15Test"
+            dimension "shinny"
+        }
+
 //        tencent_store {
 //            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
 //            resValue("string", "app_name", "快期小Q")
