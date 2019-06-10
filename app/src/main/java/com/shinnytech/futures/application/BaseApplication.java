@@ -9,12 +9,15 @@ import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.lifecycle.ProcessLifecycleOwner;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.TextView;
@@ -35,14 +38,15 @@ import com.sfit.ctp.info.DeviceInfoManager;
 import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.constants.CommonConstants;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
-import com.shinnytech.futures.model.amplitude.api.Identify;
+import com.shinnytech.futures.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Identify;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.RedrawEvent;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.model.service.WebSocketService;
+import com.shinnytech.futures.service.ForegroundService;
+import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.Base64;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
@@ -53,7 +57,6 @@ import com.shinnytech.futures.utils.ToastUtils;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.tencent.bugly.crashreport.CrashReport;
-import com.xdandroid.hellodaemon.DaemonEnv;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
@@ -89,10 +92,13 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_SURVIVAL
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_TYPE_FIRST;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_TYPE_FIRST_PURE_NEWBIE_VALUE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_TYPE_FIRST_TRADER_VALUE;
+import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMULATION;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_INIT_TIME;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_INSERT_ORDER_CONFIRM;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_IS_FIRM;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_DURATION_DEFAULT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
@@ -110,9 +116,9 @@ import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_INS_LIST
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_URL;
-import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
-import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
-import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
+import static com.shinnytech.futures.receiver.NetworkReceiver.NETWORK_STATE;
+import static com.shinnytech.futures.service.WebSocketService.MD_BROADCAST_ACTION;
+import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * Created on 12/21/17.
@@ -120,13 +126,13 @@ import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST
  * Description: Tinker框架下的application类的具体实现
  */
 
-public class BaseApplication extends Application {
+public class BaseApplication extends Application implements ServiceConnection {
 
     private static Context sContext;
     private static List<String> sMDURLs = new ArrayList<>();
     private static int sIndex = 0;
-    private static LOGClient mLOGClient;
-    private static boolean mBackGround = false;
+    private static LOGClient sLOGClient;
+    private static boolean sBackGround = false;
     private BroadcastReceiver mReceiverMarket;
     private BroadcastReceiver mReceiverTransaction;
     private BroadcastReceiver mReceiverNetwork;
@@ -149,12 +155,12 @@ public class BaseApplication extends Application {
         return sContext;
     }
 
-    public static boolean ismBackGround() {
-        return mBackGround;
+    public static boolean issBackGround() {
+        return sBackGround;
     }
 
     public static LOGClient getLOGClient() {
-        return mLOGClient;
+        return sLOGClient;
     }
 
     @Override
@@ -208,7 +214,7 @@ public class BaseApplication extends Application {
         SLSLog.enableLog(); // log打印在控制台
 
         String endpoint = "https://cn-shanghai.log.aliyuncs.com";
-        mLOGClient = new LOGClient(sContext, endpoint, credentialProvider, conf);
+        sLOGClient = new LOGClient(sContext, endpoint, credentialProvider, conf);
     }
 
     /**
@@ -232,6 +238,16 @@ public class BaseApplication extends Application {
             kline = kline.replace("钟", "");
             kline = kline.replace("小", "");
             SPUtils.putAndApply(sContext, CONFIG_KLINE_DURATION_DEFAULT, kline);
+        }
+
+        if (!SPUtils.contains(sContext, CONFIG_IS_FIRM)) {
+            if (SPUtils.contains(sContext, CONFIG_BROKER)){
+                String broker = (String) SPUtils.get(sContext, CONFIG_BROKER, "");
+                if (!broker.isEmpty()){
+                    if (broker.equals(BROKER_ID_SIMULATION))SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, false);
+                    else SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, true);
+                }else SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, true);
+            }else SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, true);
         }
 
         if (!SPUtils.contains(sContext, CONFIG_INIT_TIME)) {
@@ -359,6 +375,7 @@ public class BaseApplication extends Application {
                     .setOnce(AMP_USER_INIT_TIME_FIRST, TimeUtils.getNowTimeSecond());
             Amplitude.getInstance().identify(identify);
             Amplitude.getInstance().logEvent(AMP_INIT);
+            LogUtils.e("AMP_INIT", true);
             CrashReport.UserStrategy strategy = new CrashReport.UserStrategy(sContext);
             strategy.setCrashHandleCallback(new CrashReport.CrashHandleCallback() {
                 public Map<String, String> onCrashHandleStart(int crashType, String errorType,
@@ -472,9 +489,14 @@ public class BaseApplication extends Application {
         }).start();
 
         EventBus.getDefault().post(new RedrawEvent());
-        mBackGround = false;
+        sBackGround = false;
         WebSocketService.sendPeekMessage();
         WebSocketService.sendPeekMessageTransaction();
+
+        Amplitude.getInstance().logEvent(AMP_FOREGROUND);
+
+        Intent intent = new Intent(sContext, ForegroundService.class);
+        stopService(intent);
     }
 
     /**
@@ -484,7 +506,7 @@ public class BaseApplication extends Application {
      */
     private void notifyBackground() {
         //后台
-        mBackGround = true;
+        sBackGround = true;
         long currentTime = System.currentTimeMillis();
         long initTime = (long) SPUtils.get(sContext, CONFIG_INIT_TIME, currentTime);
         long survivalTime = currentTime - initTime;
@@ -511,6 +533,11 @@ public class BaseApplication extends Application {
             }
         }
         Amplitude.getInstance().identify(identify);
+        Amplitude.getInstance().logEvent(AMP_BACKGROUND);
+
+        Intent intent = new Intent(sContext, ForegroundService.class);
+        startService(intent);
+
     }
 
     /**
@@ -528,8 +555,8 @@ public class BaseApplication extends Application {
                             @Override
                             public void run() {
                                 LatestFileManager.initInsList(response.body());
-                                DaemonEnv.initialize(sContext, WebSocketService.class, DaemonEnv.DEFAULT_WAKE_UP_INTERVAL);
-                                DaemonEnv.startServiceMayBind(WebSocketService.class);
+                                Intent intent = new Intent(sContext, WebSocketService.class);
+                                sContext.bindService(intent, BaseApplication.this, Context.BIND_AUTO_CREATE);
                             }
                         }).start();
 
@@ -632,17 +659,39 @@ public class BaseApplication extends Application {
 
     }
 
+    @Override
+    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName componentName) {
+        Intent intent = new Intent(sContext, WebSocketService.class);
+        sContext.bindService(intent, BaseApplication.this, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    public void onBindingDied(ComponentName name) {
+        Intent intent = new Intent(sContext, WebSocketService.class);
+        sContext.bindService(intent, BaseApplication.this, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    public void onNullBinding(ComponentName name) {
+
+    }
+
     class AppLifecycleObserver implements LifecycleObserver {
         @OnLifecycleEvent(Lifecycle.Event.ON_START)
         public void onEnterForeground() {
+            LogUtils.e("onEnterForeground", true);
             notifyForeground();
-            Amplitude.getInstance().logEvent(AMP_FOREGROUND);
         }
 
         @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
         public void onEnterBackground() {
+            LogUtils.e("onEnterBackground", true);
             notifyBackground();
-            Amplitude.getInstance().logEvent(AMP_BACKGROUND);
         }
     }
 

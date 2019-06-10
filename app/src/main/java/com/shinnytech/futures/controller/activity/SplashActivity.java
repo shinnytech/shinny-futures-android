@@ -6,11 +6,18 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
@@ -22,10 +29,12 @@ import java.lang.ref.WeakReference;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_IS_FIRM;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_FAIL;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_SUCCEED;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
-import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
+import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
+import static com.shinnytech.futures.utils.ScreenUtils.getStatusBarHeight;
 
 public class SplashActivity extends AppCompatActivity {
     private final int TO_LOGIN = 0;
@@ -41,6 +50,8 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+        boolean isFirm = (boolean) SPUtils.get(BaseApplication.getContext(), CONFIG_IS_FIRM, true);
+        changeStatusBarColor(isFirm);
         mHandler = new MyHandler(this);
         mTimer = new Timer();
         mTimerTask = new TimerTask() {
@@ -94,6 +105,32 @@ public class SplashActivity extends AppCompatActivity {
         super.onPause();
         if (mReceiverLogin != null)
             LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLogin);
+    }
+
+
+    private void changeStatusBarColor(boolean isFirm) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            Window w = getWindow();
+            w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            int statusBarHeight = getStatusBarHeight(BaseApplication.getContext());
+
+            View view = new View(this);
+            view.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            view.getLayoutParams().height = statusBarHeight;
+            ((ViewGroup) w.getDecorView()).addView(view);
+            if (isFirm) view.setBackground(getResources().getDrawable(R.color.colorPrimaryDark));
+            else view.setBackground(getResources().getDrawable(R.color.login_simulation_hint));
+
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+            if (isFirm) window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+            else  window.setStatusBarColor(ContextCompat.getColor(this, R.color.login_simulation_hint));
+        }
     }
 
     /**

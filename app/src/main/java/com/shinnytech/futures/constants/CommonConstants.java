@@ -127,6 +127,7 @@ public final class CommonConstants {
     public static final String CONFIG_INIT_TIME = "initTime";
     public static final String CONFIG_VERSION_CODE = "versionCode";
     public static final String CONFIG_SYSTEM_INFO = "systemInfo";
+    public static final String CONFIG_IS_FIRM = "isFirm";
     //设置页信息
     public static final String CHART_SETTING = "图表设置";
     public static final String TRANSACTION_SETTING = "交易设置";

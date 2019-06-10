@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.shinnytech.futures">
 
-    <!--location dangerous​-->
+    <!-- location dangerous​ -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -21,14 +21,13 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <!-- 不显示任何通知栏提示 -->
     <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
-    <!--vibrate-->
+    <!-- vibrate -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- 前台服务 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <!--前后台切换-->
+    <!-- 前后台切换 -->
     <uses-permission android:name="android.permission.REORDER_TASKS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
 
     <application
         android:name=".application.BaseApplication"
@@ -48,10 +47,18 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
-        <service android:name=".model.service.WebSocketService" />
+        <service
+            android:exported="false"
+            android:name=".service.WebSocketService"
+            android:priority="1000" />
+
+        <service
+            android:priority="1000"
+            android:name=".service.ForegroundService"
+            android:exported="false"/>
 
         <receiver
-            android:name=".model.receiver.NetworkReceiver"
+            android:name=".receiver.NetworkReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
@@ -59,12 +66,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
-
         <receiver
-            android:name=".model.receiver.NotificationClickReceiver"
+            android:name=".receiver.NotificationClickReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="notification_click" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
@@ -79,9 +86,9 @@
             android:screenOrientation="portrait"
             android:theme="@style/MainActivityTheme" />
         <activity
+            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.FutureInfoActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".controller.activity.LoginActivity"
             android:label="@string/login_activity_title_login"
@@ -94,43 +101,49 @@
             android:screenOrientation="portrait"
             android:theme="@style/SearchActivityTheme"
             android:windowSoftInputMode="stateVisible" />
-
         <activity
+            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.AccountActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.FeedBackActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".controller.activity.BankTransferActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/LoginActivityTheme"
+            android:theme="@style/MainActivityTheme"
             android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
+            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.AboutActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.ChangePasswordActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.BrokerListActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".controller.activity.OpenAccountActivity"
-            android:screenOrientation="portrait" />
-        <activity
+            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.SettingActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.ParaChangeActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.KlineDurationActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.AddKlineDurationActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.SplashActivity"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -140,14 +153,18 @@
             </intent-filter>
         </activity>
         <activity
+            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.SubSettingActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.OptionalActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.CommonSwitchActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
+
     </application>
 
 </manifest>

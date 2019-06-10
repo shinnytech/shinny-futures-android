@@ -43,15 +43,15 @@ import com.shinnytech.futures.model.adapter.DialogAdapter;
 import com.shinnytech.futures.model.adapter.NavigationRightAdapter;
 import com.shinnytech.futures.model.adapter.QuoteNavAdapter;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
 import com.shinnytech.futures.model.bean.settingbean.NavigationRightEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
-import com.shinnytech.futures.model.service.WebSocketService;
-import com.shinnytech.futures.utils.DensityUtils;
+import com.shinnytech.futures.service.WebSocketService;
+import com.shinnytech.futures.utils.ScreenUtils;
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
@@ -376,7 +376,6 @@ public class MainActivityPresenter {
                             e.printStackTrace();
                         }
                         Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
-//                        Intent intentOpenAccount = new Intent(mMainActivity, OpenAccountActivity.class);
                         Intent intentOpenAccount = mMainActivity.getPackageManager().getLaunchIntentForPackage("com.cfmmc.app.sjkh");
                         if (intentOpenAccount != null)
                             mMainActivity.startActivity(intentOpenAccount);
@@ -616,9 +615,9 @@ public class MainActivityPresenter {
         mToolbarTitle.setText(mTitle);
         Rect bounds = new Rect();
         Paint textPaint = new Paint();
-        textPaint.setTextSize(DensityUtils.sp2px(sContext, 25));
+        textPaint.setTextSize(ScreenUtils.sp2px(sContext, 25));
         textPaint.getTextBounds(mTitle, 0, mTitle.length(), bounds);
-        int width = bounds.width() + DensityUtils.dp2px(sContext, 25);
+        int width = bounds.width() + ScreenUtils.dp2px(sContext, 25);
         ViewGroup.LayoutParams layoutParams = mToolbarTitle.getLayoutParams();
         layoutParams.height = sContext.getResources().getDimensionPixelSize(R.dimen.text_view_height);
         layoutParams.width = width;
@@ -668,7 +667,7 @@ public class MainActivityPresenter {
         if (mMainActivity.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
             return TypedValue.complexToDimensionPixelSize(tv.data, mMainActivity.getResources().getDisplayMetrics());
         }
-        return DensityUtils.dp2px(sContext, 56);
+        return ScreenUtils.dp2px(sContext, 56);
     }
 
     public String getPreSubscribedQuotes() {

@@ -16,7 +16,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.databinding.FragmentHandicapBinding;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
@@ -52,7 +52,7 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_SHOW_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
-import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
+import static com.shinnytech.futures.service.WebSocketService.MD_BROADCAST_ACTION;
 
 /**
  * date: 7/9/17

@@ -1,4 +1,4 @@
-package com.shinnytech.futures.model.amplitude.security;
+package com.shinnytech.futures.amplitude.security;
 
 /* @(#)MD5.java	1.13 2006-02-11
  * This file was freely contributed to the LimeWire project  and is covered

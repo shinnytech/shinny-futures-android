@@ -1,4 +1,4 @@
-package com.shinnytech.futures.model.amplitude.api;
+package com.shinnytech.futures.amplitude.api;
 
 import org.json.JSONArray;
 import org.json.JSONException;

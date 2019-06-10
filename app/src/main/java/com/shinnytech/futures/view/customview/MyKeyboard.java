@@ -4,7 +4,7 @@ import android.content.Context;
 import android.inputmethodservice.Keyboard;
 
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.utils.DensityUtils;
+import com.shinnytech.futures.utils.ScreenUtils;
 
 public class MyKeyboard extends Keyboard {
     public MyKeyboard(Context context, int xmlLayoutResId) {
@@ -24,7 +24,7 @@ public class MyKeyboard extends Keyboard {
     }
 
     public void setKeyHeight() {
-        setKeyHeight(DensityUtils.dp2px(BaseApplication.getContext(), 900));
+        setKeyHeight(ScreenUtils.dp2px(BaseApplication.getContext(), 900));
     }
 
 

@@ -1,4 +1,4 @@
-package com.shinnytech.futures.model.amplitude.api;
+package com.shinnytech.futures.amplitude.api;
 
 import android.content.ContentResolver;
 import android.content.Context;

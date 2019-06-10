@@ -29,7 +29,7 @@ import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.model.service.WebSocketService;
+import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.SPUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -60,8 +60,8 @@ import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOU;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
-import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
-import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
+import static com.shinnytech.futures.service.WebSocketService.MD_BROADCAST_ACTION;
+import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 9/20/17

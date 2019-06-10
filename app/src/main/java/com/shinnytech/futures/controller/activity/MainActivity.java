@@ -22,9 +22,9 @@ import com.shinnytech.futures.controller.fragment.LazyLoadFragment;
 import com.shinnytech.futures.controller.fragment.QuoteFragment;
 import com.shinnytech.futures.controller.fragment.QuotePagerFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.model.service.WebSocketService;
+import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastUtils;
@@ -46,7 +46,7 @@ import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_
 import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_TRANSFER_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
-import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
+import static com.shinnytech.futures.receiver.NetworkReceiver.NETWORK_STATE;
 
 /**
  * date: 6/14/17

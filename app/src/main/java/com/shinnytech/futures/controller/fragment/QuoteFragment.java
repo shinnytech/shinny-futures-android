@@ -36,8 +36,7 @@ import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentQuoteBinding;
 import com.shinnytech.futures.model.adapter.DragDialogAdapter;
 import com.shinnytech.futures.model.adapter.QuoteAdapter;
-import com.shinnytech.futures.model.adapter.QuoteAdapterRecommend;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
@@ -48,11 +47,10 @@ import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.QuoteDiffCallback;
-import com.shinnytech.futures.model.listener.RecommendQuoteDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
-import com.shinnytech.futures.model.service.WebSocketService;
+import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.CloneUtils;
-import com.shinnytech.futures.utils.DensityUtils;
+import com.shinnytech.futures.utils.ScreenUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
@@ -65,11 +63,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BALANCE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BROKER_ID;
@@ -91,18 +87,15 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SUB_PAG
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_LEAVE_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_OPTIONAL_QUOTE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_OPTIONAL_RECOMMEND;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SHOW_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_RECOMMEND;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_RECOMMEND_OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
-import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_RECOMMEND_NUM;
 import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
@@ -113,8 +106,8 @@ import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOU;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
-import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
-import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
+import static com.shinnytech.futures.service.WebSocketService.MD_BROADCAST_ACTION;
+import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 7/9/17
@@ -130,43 +123,20 @@ public class QuoteFragment extends LazyLoadFragment {
      * description: 页面标题
      */
     private static final String KEY_FRAGMENT_TITLE = "title";
-    private static Comparator<String> comparator = new Comparator<String>() {
-        @Override
-        public int compare(String instrumentId1, String instrumentId2) {
-            try {
-                QuoteEntity quoteEntity1 = DataManager.getInstance().getRtnData().getQuotes().get(instrumentId1);
-                QuoteEntity quoteEntity2 = DataManager.getInstance().getRtnData().getQuotes().get(instrumentId2);
-                String change1 = MathUtils.divide(MathUtils.subtract(quoteEntity1.getLast_price(), quoteEntity1.getPre_settlement()), quoteEntity1.getPre_settlement());
-                String change2 = MathUtils.divide(MathUtils.subtract(quoteEntity2.getLast_price(), quoteEntity2.getPre_settlement()), quoteEntity2.getPre_settlement());
-                if (MathUtils.upper(change1, change2)) {
-                    return -1;
-                } else if (MathUtils.lower(change1, change2)) {
-                    return 1;
-                } else return 1;
-            } catch (Exception e) {
-                return 1;
-            }
-        }
-    };
     /**
      * date: 7/9/17
      * description: 数据刷新控制标志
      */
     private boolean mIsUpdate = true;
     private QuoteAdapter mAdapter;
-    private QuoteAdapterRecommend mAdapterRecommend;
     private DataManager mDataManager = DataManager.getInstance();
     private BroadcastReceiver mReceiver;
     private BroadcastReceiver mReceiverTrade;
     private String mTitle = DOMINANT;
     private TextView mToolbarTitle;
     private List<String> mInsList = new ArrayList<>();
-    private List<String> mInsListRecommend = new ArrayList<>();
     private List<QuoteEntity> mOldData = new ArrayList<>();
-    private List<QuoteEntity> mOldDataRecommend = new ArrayList<>();
     private Map<String, QuoteEntity> mNewData = new LinkedHashMap<>();
-    private Map<String, QuoteEntity> mNewDataRecommend = new LinkedHashMap<>();
-    private Map<String, QuoteEntity> sortedRecommend = new TreeMap<>(comparator);
     private FragmentQuoteBinding mBinding;
     private Dialog mDialog;
     private RecyclerView mRecyclerView;
@@ -210,43 +180,6 @@ public class QuoteFragment extends LazyLoadFragment {
         mBinding.rvQuote.setItemAnimator(new DefaultItemAnimator());
         mAdapter = new QuoteAdapter(getActivity(), mOldData, mTitle);
         mBinding.rvQuote.setAdapter(mAdapter);
-
-        mBinding.rvQuoteRecommend.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mBinding.rvQuoteRecommend.addItemDecoration(
-                new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
-        mBinding.rvQuoteRecommend.setItemAnimator(null);
-        mAdapterRecommend = new QuoteAdapterRecommend(getActivity(), mOldDataRecommend);
-        mBinding.rvQuoteRecommend.setAdapter(mAdapterRecommend);
-
-        if (OPTIONAL.equals(mTitle)) {
-            //控制合约推荐显示与否
-            boolean isShow = (boolean) SPUtils.get(BaseApplication.getContext(), CONFIG_RECOMMEND, true);
-            if (isShow) {
-                mBinding.quoteFab.setImageResource(R.mipmap.ic_expand_more_white_24dp);
-                mBinding.llRecommend.setVisibility(View.VISIBLE);
-            } else {
-                mBinding.quoteFab.setImageResource(R.mipmap.ic_expand_less_white_24dp);
-                mBinding.llRecommend.setVisibility(View.GONE);
-            }
-            mBinding.quoteFab.show();
-            //新用户设置自选合约
-            initConfigOptional();
-
-            //配置推荐合约列表
-            for (String ins : LatestFileManager.getMainInsList().keySet()) {
-                try {
-                    QuoteEntity quoteEntity = CloneUtils.clone(DataManager.getInstance().getRtnData().getQuotes().get(ins));
-                    if (!LatestFileManager.getOptionalInsList().containsKey(ins))
-                        sortedRecommend.put(ins, quoteEntity);
-                } catch (Exception e) {
-                    continue;
-                }
-
-            }
-
-            mNewDataRecommend.putAll(sortedRecommend);
-            mInsListRecommend = new ArrayList<>(mNewDataRecommend.keySet());
-        }
 
         switch (mTitle) {
             case OPTIONAL:
@@ -296,24 +229,17 @@ public class QuoteFragment extends LazyLoadFragment {
                 mBinding.tvOpenInterest.setText(R.string.quote_fragment_open_interest);
             }
 
+            refreshMD(mToolbarTitle.getText().toString());
             refreshTD();
 
             mBinding.rvQuote.scrollToPosition(0);
-            mBinding.rvQuoteRecommend.scrollToPosition(0);
             if (OPTIONAL.equals(mTitle)) {
                 List<String> ins;
                 if (mInsList.size() <= LOAD_QUOTE_NUM) {
                     ins = mInsList;
                 } else {
-                    ins = mInsList.subList(0, LOAD_QUOTE_RECOMMEND_NUM);
+                    ins = mInsList.subList(0, LOAD_QUOTE_NUM);
                 }
-                List<String> insRecommend;
-                if (mInsListRecommend.size() <= LOAD_QUOTE_NUM) {
-                    insRecommend = mInsListRecommend;
-                } else {
-                    insRecommend = mInsListRecommend.subList(0, LOAD_QUOTE_RECOMMEND_NUM);
-                }
-                ins.addAll(insRecommend);
                 sendSubscribeQuotes(ins);
             } else {
                 if (mInsList.size() <= LOAD_QUOTE_NUM) {
@@ -449,21 +375,6 @@ public class QuoteFragment extends LazyLoadFragment {
      */
     private void initEvent() {
 
-        mBinding.quoteFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mBinding.llRecommend.getVisibility() == View.VISIBLE) {
-                    mBinding.llRecommend.setVisibility(View.GONE);
-                    mBinding.quoteFab.setImageResource(R.mipmap.ic_expand_less_white_24dp);
-                    SPUtils.putAndApply(BaseApplication.getContext(), CONFIG_RECOMMEND, false);
-                } else {
-                    mBinding.llRecommend.setVisibility(View.VISIBLE);
-                    mBinding.quoteFab.setImageResource(R.mipmap.ic_expand_more_white_24dp);
-                    SPUtils.putAndApply(BaseApplication.getContext(), CONFIG_RECOMMEND, true);
-                }
-            }
-        });
-
         mBinding.tvChangePercent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -523,81 +434,6 @@ public class QuoteFragment extends LazyLoadFragment {
             }
         });
 
-        mBinding.rvQuoteRecommend.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rvQuoteRecommend, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                if (position >= 0 && position < mAdapterRecommend.getItemCount()) {
-                    QuoteEntity quoteEntity0 = mAdapterRecommend.getData().get(position);
-                    if (quoteEntity0 == null) return;
-                    String instrument_id = quoteEntity0.getInstrument_id();
-                    if (instrument_id == null || "".equals(instrument_id)) return;
-                    Map<String, QuoteEntity> insListOptional = LatestFileManager.getOptionalInsList();
-                    if (!insListOptional.containsKey(instrument_id)) {
-                        JSONObject jsonObject = new JSONObject();
-                        try {
-                            jsonObject.put(AMP_EVENT_OPTIONAL_INSTRUMENT_ID, instrument_id);
-                            jsonObject.put(AMP_EVENT_OPTIONAL_DIRECTION, AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        Amplitude.getInstance().logEvent(AMP_OPTIONAL_RECOMMEND, jsonObject);
-                        QuoteEntity quoteEntity = new QuoteEntity();
-                        quoteEntity.setInstrument_id(instrument_id);
-                        insListOptional.put(instrument_id, quoteEntity);
-                        LatestFileManager.saveInsListToFile(new ArrayList<>(insListOptional.keySet()));
-                        mNewDataRecommend.remove(instrument_id);
-                        refreshOptional();
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ToastUtils.showToast(BaseApplication.getContext(),
-                                        "该合约已添加到自选列表");
-                            }
-                        });
-                    }
-                }
-
-            }
-
-            @Override
-            public void onItemLongClick(View view, int position) {
-
-            }
-        }));
-
-        mBinding.rvQuoteRecommend.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                switch (newState) {
-                    case RecyclerView.SCROLL_STATE_IDLE:
-                        mIsUpdate = true;
-                        try {
-                            LinearLayoutManager lmRecommend = (LinearLayoutManager) recyclerView.getLayoutManager();
-                            int firstVisibleItemPositionRecommend = lmRecommend.findFirstVisibleItemPosition();
-                            int lastVisibleItemPositionRecommend = lmRecommend.findLastVisibleItemPosition();
-                            List<String> insListRecommend = mInsListRecommend.subList(firstVisibleItemPositionRecommend, lastVisibleItemPositionRecommend + 1);
-                            LinearLayoutManager lm = (LinearLayoutManager) mBinding.rvQuote.getLayoutManager();
-                            int firstVisibleItemPosition = lm.findFirstVisibleItemPosition();
-                            int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
-                            List<String> insList = mInsList.subList(firstVisibleItemPosition, lastVisibleItemPosition + 1);
-                            insList.addAll(insListRecommend);
-                            sendSubscribeQuotes(insList);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        break;
-                    case RecyclerView.SCROLL_STATE_DRAGGING:
-                        mIsUpdate = false;
-                        break;
-                    case RecyclerView.SCROLL_STATE_SETTLING:
-                        mIsUpdate = false;
-                        break;
-                }
-            }
-
-        });
-
         mBinding.rvQuote.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -610,13 +446,6 @@ public class QuoteFragment extends LazyLoadFragment {
                             int firstVisibleItemPosition = lm.findFirstVisibleItemPosition();
                             int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
                             List<String> insList = mInsList.subList(firstVisibleItemPosition, lastVisibleItemPosition + 1);
-                            if (OPTIONAL.equals(mTitle)) {
-                                LinearLayoutManager lmRecommend = (LinearLayoutManager) mBinding.rvQuoteRecommend.getLayoutManager();
-                                int firstVisibleItemPositionRecommend = lmRecommend.findFirstVisibleItemPosition();
-                                int lastVisibleItemPositionRecommend = lmRecommend.findLastVisibleItemPosition();
-                                List<String> insListRecommend = mInsListRecommend.subList(firstVisibleItemPositionRecommend, lastVisibleItemPositionRecommend + 1);
-                                insList.addAll(insListRecommend);
-                            }
                             sendSubscribeQuotes(insList);
                         } catch (IndexOutOfBoundsException e) {
                             e.printStackTrace();
@@ -685,7 +514,7 @@ public class QuoteFragment extends LazyLoadFragment {
                         //构造一个添加自选合约合约的PopupWindow
                         final View popUpView = View.inflate(getActivity(), R.layout.popup_fragment_quote, null);
                         final PopupWindow popWindow = new PopupWindow(popUpView,
-                                ViewGroup.LayoutParams.MATCH_PARENT, DensityUtils.dp2px(getActivity(), 42), true);
+                                ViewGroup.LayoutParams.MATCH_PARENT, ScreenUtils.dp2px(getActivity(), 42), true);
                         //设置动画，淡入淡出
                         popWindow.setAnimationStyle(R.style.anim_menu_quote);
                         //点击空白处popupWindow消失
@@ -911,13 +740,6 @@ public class QuoteFragment extends LazyLoadFragment {
                         }
                         mNewData.put(ins, quoteEntity);
                     }
-
-                    if (OPTIONAL.equals(title) && mNewDataRecommend.containsKey(ins)) {
-                        QuoteEntity quoteEntity = CloneUtils.clone(mDataManager.getRtnData().getQuotes().get(ins));
-                        if (ins.contains("&") && ins.contains(" "))
-                            quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
-                        mNewDataRecommend.put(ins, quoteEntity);
-                    }
                 } catch (Exception e) {
                     continue;
                 }
@@ -929,15 +751,6 @@ public class QuoteFragment extends LazyLoadFragment {
             diffResult.dispatchUpdatesTo(mAdapter);
             mOldData.clear();
             mOldData.addAll(newData);
-
-            if (OPTIONAL.equals(title)) {
-                List<QuoteEntity> newDataRecommend = new ArrayList<>(mNewDataRecommend.values());
-                DiffUtil.DiffResult diffResultRecommend = DiffUtil.calculateDiff(new RecommendQuoteDiffCallback(mOldDataRecommend, newDataRecommend), false);
-                mAdapterRecommend.setData(newDataRecommend);
-                diffResultRecommend.dispatchUpdatesTo(mAdapterRecommend);
-                mOldDataRecommend.clear();
-                mOldDataRecommend.addAll(newDataRecommend);
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1099,15 +912,6 @@ public class QuoteFragment extends LazyLoadFragment {
         diffResult.dispatchUpdatesTo(mAdapter);
         mOldData.clear();
         mOldData.addAll(newData);
-
-        mInsListRecommend = new ArrayList<>(mNewDataRecommend.keySet());
-        List<QuoteEntity> newDataRecommend = new ArrayList<>(mNewDataRecommend.values());
-        DiffUtil.DiffResult diffResultRecommend = DiffUtil.calculateDiff(new RecommendQuoteDiffCallback(mOldDataRecommend, newDataRecommend), false);
-        mAdapterRecommend.setData(newDataRecommend);
-        diffResultRecommend.dispatchUpdatesTo(mAdapterRecommend);
-        mOldDataRecommend.clear();
-        mOldDataRecommend.addAll(newDataRecommend);
-
         try {
             List<String> insList;
             if (mInsList.size() < LOAD_QUOTE_NUM) insList = mInsList;
@@ -1117,11 +921,6 @@ public class QuoteFragment extends LazyLoadFragment {
                 int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
                 insList = mInsList.subList(firstVisibleItemPosition, lastVisibleItemPosition + 1);
             }
-            LinearLayoutManager lmRecommend = (LinearLayoutManager) mBinding.rvQuoteRecommend.getLayoutManager();
-            int firstVisibleItemPositionRecommend = lmRecommend.findFirstVisibleItemPosition();
-            int lastVisibleItemPositionRecommend = lmRecommend.findLastVisibleItemPosition();
-            List<String> insListRecommend = mInsListRecommend.subList(firstVisibleItemPositionRecommend, lastVisibleItemPositionRecommend + 1);
-            insList.addAll(insListRecommend);
             sendSubscribeQuotes(insList);
         } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();

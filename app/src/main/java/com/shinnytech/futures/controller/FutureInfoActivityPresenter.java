@@ -36,7 +36,7 @@ import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
 import com.shinnytech.futures.model.adapter.DialogAdapter;
 import com.shinnytech.futures.model.adapter.KlineDurationTitleAdapter;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
@@ -46,7 +46,7 @@ import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
-import com.shinnytech.futures.utils.DensityUtils;
+import com.shinnytech.futures.utils.ScreenUtils;
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
@@ -498,9 +498,9 @@ public class FutureInfoActivityPresenter {
         String mTitle = mToolbarTitle.getText().toString();
         Rect bounds = new Rect();
         Paint textPaint = new Paint();
-        textPaint.setTextSize(DensityUtils.sp2px(sContext, 20));
+        textPaint.setTextSize(ScreenUtils.sp2px(sContext, 20));
         textPaint.getTextBounds(mTitle, 0, mTitle.length(), bounds);
-        int width = bounds.width() + DensityUtils.dp2px(sContext, 40);
+        int width = bounds.width() + ScreenUtils.dp2px(sContext, 40);
         ViewGroup.LayoutParams layoutParams = mToolbarTitle.getLayoutParams();
         layoutParams.height = sContext.getResources().getDimensionPixelSize(R.dimen.text_view_height);
         layoutParams.width = width;
@@ -599,7 +599,7 @@ public class FutureInfoActivityPresenter {
         if (mFutureInfoActivity.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
             return TypedValue.complexToDimensionPixelSize(tv.data, mFutureInfoActivity.getResources().getDisplayMetrics());
         }
-        return DensityUtils.dp2px(sContext, 56);
+        return ScreenUtils.dp2px(sContext, 56);
     }
 
 }

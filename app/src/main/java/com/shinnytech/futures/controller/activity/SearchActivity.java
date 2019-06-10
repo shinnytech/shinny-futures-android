@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
@@ -16,20 +17,25 @@ import android.support.v7.widget.SearchView;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivitySearchBinding;
 import com.shinnytech.futures.model.adapter.SearchAdapter;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
+import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -50,9 +56,11 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VA
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_OPTIONAL_SEARCH;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_IS_FIRM;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
-import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
+import static com.shinnytech.futures.receiver.NetworkReceiver.NETWORK_STATE;
+import static com.shinnytech.futures.utils.ScreenUtils.getStatusBarHeight;
 
 /**
  * date: 6/21/17
@@ -87,6 +95,9 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
+
+        boolean isFirm = (boolean) SPUtils.get(sContext, CONFIG_IS_FIRM, true);
+        changeStatusBarColor(isFirm);
 
         mBinding.rvSearchQuoteList.setLayoutManager(new LinearLayoutManager(this));
         mBinding.rvSearchQuoteList.addItemDecoration(
@@ -238,6 +249,32 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     public boolean onQueryTextChange(String newText) {
         mSearchAdapter.filter(newText);
         return true;
+    }
+
+
+    private void changeStatusBarColor(boolean isFirm) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            Window w = getWindow();
+            w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            int statusBarHeight = getStatusBarHeight(BaseApplication.getContext());
+
+            View view = new View(this);
+            view.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            view.getLayoutParams().height = statusBarHeight;
+            ((ViewGroup) w.getDecorView()).addView(view);
+            if (isFirm) view.setBackground(getResources().getDrawable(R.color.colorPrimaryDark));
+            else view.setBackground(getResources().getDrawable(R.color.login_simulation_hint));
+
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+            if (isFirm) window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+            else  window.setStatusBarColor(ContextCompat.getColor(this, R.color.login_simulation_hint));
+        }
     }
 
 

@@ -749,5 +749,5 @@ dependencies {
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     implementation(name: 'InfoCollection_single_release_v1.5-2019-05-27', ext: 'aar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.xdandroid:hellodaemon:+'
+    implementation 'io.reactivex.rxjava2:rxjava:2.+'
 }

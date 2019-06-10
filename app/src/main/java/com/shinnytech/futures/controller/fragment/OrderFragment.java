@@ -31,7 +31,7 @@ import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentOrderBinding;
 import com.shinnytech.futures.model.adapter.OrderAdapter;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
@@ -43,9 +43,9 @@ import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.OrderDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
-import com.shinnytech.futures.model.service.WebSocketService;
+import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.CloneUtils;
-import com.shinnytech.futures.utils.DensityUtils;
+import com.shinnytech.futures.utils.ScreenUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
@@ -89,7 +89,7 @@ import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIV
 import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
-import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
+import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 5/10/17
@@ -462,7 +462,7 @@ public class OrderFragment extends LazyLoadFragment {
     private void initPopUp(final View view, final OrderEntity orderEntity) {
         final View popUpView = View.inflate(getActivity(), R.layout.popup_fragment_order, null);
         final PopupWindow popWindow = new PopupWindow(popUpView,
-                ViewGroup.LayoutParams.MATCH_PARENT, DensityUtils.dp2px(getActivity(), 42), true);
+                ViewGroup.LayoutParams.MATCH_PARENT, ScreenUtils.dp2px(getActivity(), 42), true);
         //设置动画，淡入淡出
         popWindow.setAnimationStyle(R.style.anim_menu_quote);
         //点击空白处popupWindow消失

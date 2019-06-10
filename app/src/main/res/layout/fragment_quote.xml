@@ -95,55 +95,12 @@
             android:layout_marginTop="@dimen/layout_height_fragment_quote"
             android:id="@+id/rv_quote"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:background="@color/quote_background"
             android:fadeScrollbars="false"
             android:scrollbarSize="@dimen/scroll_bar_size_small"
             android:scrollbarThumbVertical="@color/text_gray_light"
             android:scrollbars="vertical" />
-
-        <LinearLayout
-            android:visibility="gone"
-            android:layout_gravity="bottom"
-            android:id="@+id/ll_recommend"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:paddingBottom="@dimen/padding_4dp"
-                android:paddingTop="@dimen/padding_4dp"
-                android:background="@drawable/fragment_quote_recommend_background"
-                android:id="@+id/recommend_title"
-                android:textSize="@dimen/font_size_normal"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:textColor="@color/title_white"
-                android:text="推荐合约"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <android.support.v7.widget.RecyclerView
-                android:background="@color/quote_recommend_background"
-                android:id="@+id/rv_quote_recommend"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"/>
-
-        </LinearLayout>
-
-
-        <com.shinnytech.futures.view.customview.MovableFloatingActionButton
-            app:backgroundTint="@color/text_red"
-            android:visibility="gone"
-            android:id="@+id/quote_fab"
-            app:fabSize="mini"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|right"
-            android:layout_margin="8dp"
-            android:src="@mipmap/ic_expand_more_white_24dp"
-            app:layout_anchorGravity="bottom|right" />
-
 
     </android.support.design.widget.CoordinatorLayout>
 

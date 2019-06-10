@@ -21,7 +21,7 @@ import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentTradeBinding;
 import com.shinnytech.futures.model.adapter.TradeAdapter;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
@@ -65,7 +65,7 @@ import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIV
 import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
-import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
+import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
 public class TradeFragment extends LazyLoadFragment {
 

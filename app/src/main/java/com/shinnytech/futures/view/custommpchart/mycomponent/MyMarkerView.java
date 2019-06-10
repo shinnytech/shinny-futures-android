@@ -16,7 +16,7 @@ import com.github.mikephil.charting.utils.MPPointF;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.utils.DensityUtils;
+import com.shinnytech.futures.utils.ScreenUtils;
 
 import java.lang.ref.WeakReference;
 
@@ -66,17 +66,17 @@ public class MyMarkerView extends RelativeLayout implements IMarker {
         linearLayout.getLayoutParams().height = height;
         if (layoutResource == R.layout.view_marker_current_day) {
             if (DataManager.getInstance().IS_SHOW_VP_CONTENT) {
-                linearLayout.getLayoutParams().width = DensityUtils.dp2px(BaseApplication.getContext(), 40);
+                linearLayout.getLayoutParams().width = ScreenUtils.dp2px(BaseApplication.getContext(), 40);
             } else {
-                linearLayout.getLayoutParams().width = DensityUtils.dp2px(BaseApplication.getContext(), 60);
+                linearLayout.getLayoutParams().width = ScreenUtils.dp2px(BaseApplication.getContext(), 60);
             }
         }
 
         if (layoutResource == R.layout.view_marker_kline) {
             if (DataManager.getInstance().IS_SHOW_VP_CONTENT) {
-                linearLayout.getLayoutParams().width = DensityUtils.dp2px(BaseApplication.getContext(), 45);
+                linearLayout.getLayoutParams().width = ScreenUtils.dp2px(BaseApplication.getContext(), 45);
             } else {
-                linearLayout.getLayoutParams().width = DensityUtils.dp2px(BaseApplication.getContext(), 65);
+                linearLayout.getLayoutParams().width = ScreenUtils.dp2px(BaseApplication.getContext(), 65);
             }
         }
 

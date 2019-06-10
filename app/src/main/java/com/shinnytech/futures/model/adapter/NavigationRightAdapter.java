@@ -11,7 +11,7 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ItemRightNavigationBinding;
 import com.shinnytech.futures.model.bean.settingbean.NavigationRightEntity;
-import com.shinnytech.futures.utils.DensityUtils;
+import com.shinnytech.futures.utils.ScreenUtils;
 
 import java.util.List;
 
@@ -81,7 +81,7 @@ public class NavigationRightAdapter extends RecyclerView.Adapter<NavigationRight
             if (CommonConstants.LOGIN.equals(content) || CommonConstants.LOGOUT.equals(content)
                     || CommonConstants.SETTING.equals(content)) {
                 ViewGroup.LayoutParams layoutParams = mBinding.divider.getLayoutParams();
-                layoutParams.height = DensityUtils.dp2px(sContext, 3);
+                layoutParams.height = ScreenUtils.dp2px(sContext, 3);
                 mBinding.divider.setLayoutParams(layoutParams);
             }
 

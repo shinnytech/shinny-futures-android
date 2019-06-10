@@ -4,8 +4,8 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
-import com.shinnytech.futures.model.amplitude.api.Identify;
+import com.shinnytech.futures.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Identify;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.BankEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.BrokerEntity;
@@ -20,7 +20,7 @@ import com.shinnytech.futures.model.bean.futureinfobean.DiffEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.FutureBean;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
-import com.shinnytech.futures.model.service.WebSocketService;
+import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
@@ -68,8 +68,8 @@ import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_SUCCEED;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_WEAK_PASSWORD;
-import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST;
-import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST;
+import static com.shinnytech.futures.service.WebSocketService.MD_BROADCAST;
+import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST;
 
 /**
  * date: 7/9/17

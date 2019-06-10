@@ -20,7 +20,7 @@ import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.FutureInfoActivityPresenter;
 import com.shinnytech.futures.controller.fragment.LazyLoadFragment;
 import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.eventbusbean.AverageEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
@@ -28,7 +28,7 @@ import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.model.service.WebSocketService;
+import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
@@ -59,8 +59,8 @@ import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_L
 import static com.shinnytech.futures.constants.CommonConstants.FUTURE_INFO_ACTIVITY_TO_CHART_SETTING_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
-import static com.shinnytech.futures.model.receiver.NetworkReceiver.NETWORK_STATE;
-import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
+import static com.shinnytech.futures.receiver.NetworkReceiver.NETWORK_STATE;
+import static com.shinnytech.futures.service.WebSocketService.MD_BROADCAST_ACTION;
 
 /**
  * date: 7/7/17

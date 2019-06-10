@@ -14,14 +14,14 @@ import android.view.View;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ActivityChangePasswordBinding;
-import com.shinnytech.futures.model.service.WebSocketService;
+import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.ToastUtils;
 
 import java.lang.ref.WeakReference;
 
 import static com.shinnytech.futures.constants.CommonConstants.PASSWORD;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_CHANGE_SUCCESS;
-import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
+import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
 public class ChangePasswordActivity extends BaseActivity {
 

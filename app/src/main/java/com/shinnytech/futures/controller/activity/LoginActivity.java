@@ -36,14 +36,15 @@ import com.sfit.ctp.info.DeviceInfoManager;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityLoginBinding;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
-import com.shinnytech.futures.model.amplitude.api.Identify;
+import com.shinnytech.futures.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Identify;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.model.service.WebSocketService;
+import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.Base64;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.ScreenUtils;
 import com.shinnytech.futures.utils.TimeUtils;
 import com.shinnytech.futures.utils.ToastUtils;
 
@@ -76,6 +77,7 @@ import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_INIT_TIME;
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_IS_FIRM;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PASSWORD;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_SYSTEM_INFO;
@@ -86,7 +88,8 @@ import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_FAIL;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_SUCCEED;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_WEAK_PASSWORD;
-import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
+import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
+import static com.shinnytech.futures.utils.ScreenUtils.getStatusBarHeight;
 
 /**
  * date: 6/1/17
@@ -117,16 +120,7 @@ public class LoginActivity extends AppCompatActivity {
     private ActivityLoginBinding mBinding;
     private String mPassword;
     private long mExitTime = 0;
-    private boolean mIsFirm = true;
-
-    public static int getStatusBarHeight(Activity context) {
-        int result = 0;
-        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = context.getResources().getDimensionPixelSize(resourceId);
-        }
-        return result;
-    }
+    private boolean mIsFirm;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -147,6 +141,9 @@ public class LoginActivity extends AppCompatActivity {
         sDataManager.IS_SHOW_LOGIN_SUCCESS = false;
         //登录入口
         sDataManager.LOGIN_TYPE = AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
+
+        mIsFirm = (boolean) SPUtils.get(sContext, CONFIG_IS_FIRM, true);
+        changeStatusBarColor(mIsFirm);
 
         initBrokerName();
     }
@@ -184,6 +181,8 @@ public class LoginActivity extends AppCompatActivity {
                 sDataManager.LOGIN_TYPE = AMP_EVENT_LOGIN_TYPE_VALUE_VISIT;
                 sDataManager.LOGIN_BROKER_ID = mBrokerName;
                 sDataManager.LOGIN_USER_ID = mPhoneNumber;
+                SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, false);
+                changeStatusBarColor(false);
                 JSONObject jsonObject = new JSONObject();
                 try {
                     jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, mBrokerName);
@@ -545,29 +544,6 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void setStatusBarColor(int color) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            Window w = getWindow();
-            w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            int statusBarHeight = getStatusBarHeight(this);
-
-            View view = new View(this);
-            view.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            view.getLayoutParams().height = statusBarHeight;
-            ((ViewGroup) w.getDecorView()).addView(view);
-            view.setBackground(getResources().getDrawable(color));
-
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = this.getWindow();
-
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-
-            window.setStatusBarColor(ContextCompat.getColor(this, color));
-        }
-    }
-
     /**
      * date: 2019/4/2
      * author: chenli
@@ -672,8 +648,9 @@ public class LoginActivity extends AppCompatActivity {
         mBinding.llBroker.setVisibility(View.GONE);
         mBinding.tvAccount.setText("手机号码");
         mBinding.simulationHint.setVisibility(View.VISIBLE);
-        setStatusBarColor(R.color.login_simulation_hint);
 
+        SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, false);
+        changeStatusBarColor(false);
         mIsFirm = false;
     }
 
@@ -692,11 +669,36 @@ public class LoginActivity extends AppCompatActivity {
         mBinding.llBroker.setVisibility(View.VISIBLE);
         mBinding.tvAccount.setText("资金账号");
         mBinding.simulationHint.setVisibility(View.GONE);
-        setStatusBarColor(R.color.colorPrimaryDark);
 
+        SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, true);
+        changeStatusBarColor(true);
         mIsFirm = true;
     }
 
+    private void changeStatusBarColor(boolean isFirm) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            Window w = getWindow();
+            w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            int statusBarHeight = getStatusBarHeight(sContext);
+
+            View view = new View(this);
+            view.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            view.getLayoutParams().height = statusBarHeight;
+            ((ViewGroup) w.getDecorView()).addView(view);
+            if (isFirm) view.setBackground(getResources().getDrawable(R.color.colorPrimaryDark));
+            else view.setBackground(getResources().getDrawable(R.color.login_simulation_hint));
+
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+            if (isFirm) window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+            else  window.setStatusBarColor(ContextCompat.getColor(this, R.color.login_simulation_hint));
+        }
+    }
 
     /**
      * date: 6/1/18

@@ -33,26 +33,34 @@
                     android:layout_height="match_parent">
 
                     <TextView
+                        android:id="@+id/broker"
                         android:layout_marginStart="@dimen/margin_5dp"
-                        android:id="@+id/future_info_activity_last"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="center|start"
+                        android:textColor="@color/text_white"
+                        android:textSize="@dimen/font_size_small" />
+
+                    <TextView
+                        android:layout_marginStart="@dimen/margin_5dp"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
                         android:gravity="center|start"
                         android:textColor="@color/text_white"
                         android:text="@{account.user_id}"
-                        android:textSize="@dimen/font_size_normal" />
+                        android:textSize="@dimen/font_size_small" />
 
                     <TextView
                         android:layout_marginEnd="@dimen/margin_5dp"
-                        android:id="@+id/future_info_activity_change"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1.5"
                         android:gravity="center|end"
                         android:textColor="@color/text_yellow"
                         android:text='@{"¥ " + MathUtils.round(account.balance, 0)}'
-                        android:textSize="@dimen/font_size_large" />
+                        android:textSize="@dimen/font_size_normal_high" />
 
                 </LinearLayout>
 

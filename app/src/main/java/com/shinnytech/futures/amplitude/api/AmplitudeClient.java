@@ -1,4 +1,4 @@
-package com.shinnytech.futures.model.amplitude.api;
+package com.shinnytech.futures.amplitude.api;
 
 import android.app.Application;
 import android.content.Context;
@@ -8,7 +8,7 @@ import android.location.Location;
 import android.os.Build;
 import android.util.Pair;
 
-import com.shinnytech.futures.model.amplitude.security.MD5;
+import com.shinnytech.futures.amplitude.security.MD5;
 
 import org.json.JSONArray;
 import org.json.JSONException;

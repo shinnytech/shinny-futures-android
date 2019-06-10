@@ -1,13 +1,13 @@
-package com.shinnytech.futures.model.amplitude.unity.plugins;
+package com.shinnytech.futures.amplitude.unity.plugins;
 
 import android.app.Application;
 import android.content.Context;
 
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
-import com.shinnytech.futures.model.amplitude.api.Identify;
-import com.shinnytech.futures.model.amplitude.api.Revenue;
-import com.shinnytech.futures.model.amplitude.api.TrackingOptions;
-import com.shinnytech.futures.model.amplitude.api.Utils;
+import com.shinnytech.futures.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Identify;
+import com.shinnytech.futures.amplitude.api.Revenue;
+import com.shinnytech.futures.amplitude.api.TrackingOptions;
+import com.shinnytech.futures.amplitude.api.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;

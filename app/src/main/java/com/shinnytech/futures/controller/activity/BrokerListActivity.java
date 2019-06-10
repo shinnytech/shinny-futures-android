@@ -9,7 +9,7 @@ import android.view.View;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ActivityBrokerListBinding;
 import com.shinnytech.futures.model.adapter.BrokerAdapter;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;

@@ -1,4 +1,4 @@
-package com.shinnytech.futures.model.receiver;
+package com.shinnytech.futures.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

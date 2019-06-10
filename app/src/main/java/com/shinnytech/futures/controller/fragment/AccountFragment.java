@@ -20,7 +20,7 @@ import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentAccountBinding;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.engine.DataManager;
@@ -47,7 +47,7 @@ import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_DIRECTION;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_IN;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_OUT;
-import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
+import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
 public class AccountFragment extends LazyLoadFragment {
 
@@ -147,6 +147,7 @@ public class AccountFragment extends LazyLoadFragment {
         AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
         if (accountEntity == null) return;
         mBinding.setAccount(accountEntity);
+        mBinding.broker.setText(sDataManager.LOGIN_BROKER_ID);
     }
 
     private void initData() {

@@ -34,7 +34,7 @@ import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.databinding.FragmentTransactionBinding;
-import com.shinnytech.futures.model.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
@@ -44,9 +44,9 @@ import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.model.service.WebSocketService;
+import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.CloneUtils;
-import com.shinnytech.futures.utils.DensityUtils;
+import com.shinnytech.futures.utils.ScreenUtils;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.SPUtils;
@@ -150,8 +150,8 @@ import static com.shinnytech.futures.constants.CommonConstants.STATUS_FIRST_OPEN
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_LOCK;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.USER_PRICE;
-import static com.shinnytech.futures.model.service.WebSocketService.MD_BROADCAST_ACTION;
-import static com.shinnytech.futures.model.service.WebSocketService.TD_BROADCAST_ACTION;
+import static com.shinnytech.futures.service.WebSocketService.MD_BROADCAST_ACTION;
+import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 6/8/17
@@ -1463,8 +1463,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             dialogWindow.setGravity(Gravity.BOTTOM);
             WindowManager.LayoutParams lp = dialogWindow.getAttributes();
             lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
-            lp.height = DensityUtils.dp2px(sContext, 236);
-            lp.x = DensityUtils.dp2px(sContext, 100);
+            lp.height = ScreenUtils.dp2px(sContext, 236);
+            lp.x = ScreenUtils.dp2px(sContext, 100);
             dialogWindow.setAttributes(lp);
         }
         Keyboard mKeyboard = new Keyboard(getActivity(), idKeyboard);
