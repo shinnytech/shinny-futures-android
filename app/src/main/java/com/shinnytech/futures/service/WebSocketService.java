@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -12,14 +13,13 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.google.gson.Gson;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
-import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketExtension;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
 import com.neovisionaries.ws.client.WebSocketState;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
-import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.accountinfobean.BrokerEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
@@ -42,12 +42,8 @@ import com.shinnytech.futures.utils.TimeUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.concurrent.TimeUnit;
-
-import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Action;
-import io.reactivex.functions.Consumer;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.shinnytech.futures.constants.CommonConstants.AMP_CANCEL_ORDER;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_DIRECTION;
@@ -59,9 +55,14 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_T
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_USER_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OFFSET;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_RECONNECT_SERVER_TYPE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_MD;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_TD;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_RECONNECT_TIME;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_VOLUME;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_INSERT_ORDER;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_RECONNECT;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
 import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_SYSTEM_INFO;
@@ -106,13 +107,13 @@ public class WebSocketService extends Service {
     public static final String TD_BROADCAST_ACTION = WebSocketService.class.getName() + "." + TD_BROADCAST;
 
     private static final int TIMEOUT = 5000;
-    private static Disposable sDisposable;
     private static WebSocket mWebSocketClientMD;
     private static WebSocket mWebSocketClientTD;
     private static DataManager sDataManager = DataManager.getInstance();
     private static LocalBroadcastManager mLocalBroadcastManager = LocalBroadcastManager.getInstance(BaseApplication.getContext());
-    private static long mMDLastPong = System.currentTimeMillis() / 1000;
-    private static long mTDLastPong = System.currentTimeMillis() / 1000;
+    private static boolean mMDPongSucceed = false;
+    private static boolean mTDPongSucceed = false;
+    private final IBinder mBinder = new LocalBinder();
 
     public static void sendMessage(String message, String type) {
         switch (type) {
@@ -140,6 +141,7 @@ public class WebSocketService extends Service {
             mWebSocketClientMD = new WebSocketFactory()
                     .setConnectionTimeout(TIMEOUT)
                     .createSocket(url)
+                    .setMissingCloseFrameAllowed(false)
                     .addListener(new WebSocketAdapter() {
 
                         // A text message arrived from the server.
@@ -150,7 +152,8 @@ public class WebSocketService extends Service {
                                 String aid = jsonObject.getString("aid");
                                 switch (aid) {
                                     case "rsp_login":
-                                        mWebSocketClientMD.sendPing();
+                                        if (mWebSocketClientMD != null)
+                                            mWebSocketClientMD.sendPing();
                                         sendSubscribeAfterConnect();
                                         break;
                                     case "rtn_data":
@@ -169,10 +172,19 @@ public class WebSocketService extends Service {
                         @Override
                         public void onPongFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
                             super.onPongFrame(websocket, frame);
-                            mMDLastPong = System.currentTimeMillis() / 1000;
+                            mMDPongSucceed = true;
                             LogUtils.e("MDPong", true);
                         }
 
+                        @Override
+                        public void onCloseFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
+                            super.onCloseFrame(websocket, frame);
+                        }
+
+                        @Override
+                        public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
+                            super.onDisconnected(websocket, serverCloseFrame, clientCloseFrame, closedByServer);
+                        }
                     })
                     .addHeader("User-Agent", sDataManager.USER_AGENT + " " + sDataManager.APP_VERSION)
                     .addHeader("SA-Machine", Amplitude.getInstance().getDeviceId())
@@ -195,16 +207,26 @@ public class WebSocketService extends Service {
      * description: 首次连接行情服务器与断开重连的行情订阅处理
      */
     private static void sendSubscribeAfterConnect() {
-        if (!sDataManager.QUOTES.isEmpty() && mWebSocketClientMD != null) {
+        if (mWebSocketClientMD == null) return;
+        if (!sDataManager.QUOTES.isEmpty()) {
             mWebSocketClientMD.sendText(sDataManager.QUOTES);
         }
 
-        if (!sDataManager.CHARTS.isEmpty() && mWebSocketClientMD != null) {
+        if (!sDataManager.CHARTS.isEmpty()) {
             mWebSocketClientMD.sendText(sDataManager.CHARTS);
         }
     }
 
     public static void reConnectMD(String url) {
+        LogUtils.e("reConnectMD", true);
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put(AMP_EVENT_RECONNECT_SERVER_TYPE, AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_MD);
+            jsonObject.put(AMP_EVENT_RECONNECT_TIME, TimeUtils.getAmpTime());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Amplitude.getInstance().logEvent(AMP_RECONNECT, jsonObject);
         disConnectMD();
         connectMD(url);
     }
@@ -221,7 +243,7 @@ public class WebSocketService extends Service {
      * description: 行情订阅
      */
     public static void sendSubscribeQuote(String insList) {
-        if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClientMD != null && mWebSocketClientMD.isOpen()) {
             ReqSubscribeQuoteEntity reqSubscribeQuoteEntity = new ReqSubscribeQuoteEntity();
             reqSubscribeQuoteEntity.setAid("subscribe_quote");
             reqSubscribeQuoteEntity.setIns_list(insList);
@@ -253,7 +275,7 @@ public class WebSocketService extends Service {
      * description: 分时图
      */
     public static void sendSetChart(String ins_list) {
-        if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClientMD != null && mWebSocketClientMD.isOpen()) {
             ReqSetChartEntity reqSetChartEntity = new ReqSetChartEntity();
             reqSetChartEntity.setAid("set_chart");
             reqSetChartEntity.setChart_id(CHART_ID);
@@ -274,7 +296,7 @@ public class WebSocketService extends Service {
      * description: k线图
      */
     public static void sendSetChartKline(String ins_list, int view_width, String duration) {
-        if (mWebSocketClientMD != null && mWebSocketClientMD.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClientMD != null && mWebSocketClientMD.isOpen()) {
             try {
                 long duration_l = Long.parseLong(duration);
                 ReqSetChartKlineEntity reqSetChartKlineEntity = new ReqSetChartKlineEntity();
@@ -303,6 +325,7 @@ public class WebSocketService extends Service {
             mWebSocketClientTD = new WebSocketFactory()
                     .setConnectionTimeout(TIMEOUT)
                     .createSocket(CommonConstants.TRANSACTION_URL)
+                    .setMissingCloseFrameAllowed(false)
                     .addListener(new WebSocketAdapter() {
                         @Override
 
@@ -314,7 +337,8 @@ public class WebSocketService extends Service {
                                 String aid = jsonObject.getString("aid");
                                 switch (aid) {
                                     case "rtn_brokers":
-                                        mWebSocketClientTD.sendPing();
+                                        if (mWebSocketClientTD != null)
+                                            mWebSocketClientTD.sendPing();
                                         loginConfig(message);
                                         break;
                                     case "rtn_data":
@@ -332,15 +356,10 @@ public class WebSocketService extends Service {
                         @Override
                         public void onPongFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
                             super.onPongFrame(websocket, frame);
-                            mTDLastPong = System.currentTimeMillis() / 1000;
+                            mTDPongSucceed = true;
                             LogUtils.e("TDPong", true);
                         }
 
-                        @Override
-                        public void onConnectError(WebSocket websocket, WebSocketException exception) throws Exception {
-                            LogUtils.e(exception.getMessage(), true);
-                            super.onConnectError(websocket, exception);
-                        }
                     })
                     .addExtension(WebSocketExtension.PERMESSAGE_DEFLATE)
                     .addHeader("User-Agent", sDataManager.USER_AGENT + " " + sDataManager.APP_VERSION)
@@ -403,6 +422,15 @@ public class WebSocketService extends Service {
     }
 
     public static void reConnectTD() {
+        LogUtils.e("reConnectTD", true);
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put(AMP_EVENT_RECONNECT_SERVER_TYPE, AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_TD);
+            jsonObject.put(AMP_EVENT_RECONNECT_TIME, TimeUtils.getAmpTime());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Amplitude.getInstance().logEvent(AMP_RECONNECT, jsonObject);
         disConnectTD();
         connectTD();
     }
@@ -435,7 +463,7 @@ public class WebSocketService extends Service {
      * description: 用户登录
      */
     public static void sendReqLogin(String bid, String user_name, String password) {
-        if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClientTD != null && mWebSocketClientTD.isOpen()) {
             String systemInfo = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_SYSTEM_INFO, "");
             ReqLoginEntity reqLoginEntity = new ReqLoginEntity();
             reqLoginEntity.setAid("req_login");
@@ -457,7 +485,7 @@ public class WebSocketService extends Service {
      * description: 确认结算单
      */
     public static void sendReqConfirmSettlement() {
-        if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClientTD != null && mWebSocketClientTD.isOpen()) {
             ReqConfirmSettlementEntity reqConfirmSettlementEntity = new ReqConfirmSettlementEntity();
             reqConfirmSettlementEntity.setAid("confirm_settlement");
             String confirmSettlement = new Gson().toJson(reqConfirmSettlementEntity);
@@ -474,7 +502,7 @@ public class WebSocketService extends Service {
      */
     public static void sendReqInsertOrder(String exchange_id, String instrument_id, String direction,
                                           String offset, int volume, String price_type, double price) {
-        if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClientTD != null && mWebSocketClientTD.isOpen()) {
             JSONObject jsonObject = new JSONObject();
             try {
                 jsonObject.put(AMP_EVENT_PRICE, price);
@@ -513,7 +541,7 @@ public class WebSocketService extends Service {
      * description: 撤单
      */
     public static void sendReqCancelOrder(String order_id) {
-        if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClientTD != null && mWebSocketClientTD.isOpen()) {
             String user_id = DataManager.getInstance().LOGIN_USER_ID;
             UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(user_id);
             if (userEntity != null) {
@@ -550,7 +578,7 @@ public class WebSocketService extends Service {
      */
     public static void sendReqTransfer(String future_account, String future_password, String bank_id,
                                        String bank_password, String currency, float amount) {
-        if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClientTD != null && mWebSocketClientTD.isOpen()) {
             ReqTransferEntity reqTransferEntity = new ReqTransferEntity();
             reqTransferEntity.setAid("req_transfer");
             reqTransferEntity.setFuture_account(future_account);
@@ -572,7 +600,7 @@ public class WebSocketService extends Service {
      * description: 修改密码
      */
     public static void sendReqPassword(String new_password, String old_password) {
-        if (mWebSocketClientTD != null && mWebSocketClientTD.getState() == WebSocketState.OPEN) {
+        if (mWebSocketClientTD != null && mWebSocketClientTD.isOpen()) {
             ReqPasswordEntity reqPasswordEntity = new ReqPasswordEntity();
             reqPasswordEntity.setAid("change_password");
             reqPasswordEntity.setNew_password(new_password);
@@ -596,32 +624,35 @@ public class WebSocketService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        connectTD();
-        connectMD(BaseApplication.getsMDURLs().get((BaseApplication.getsIndex())));
-        sDisposable = Observable
-                .interval(5, TimeUnit.SECONDS)
-                //取消任务时取消定时唤醒
-                .doOnDispose(new Action() {
-                    @Override
-                    public void run() {
-                    }
-                })
-                .subscribe(new Consumer<Long>() {
-                    @Override
-                    public void accept(Long aLong) {
-                        if ((System.currentTimeMillis() / 1000 - mMDLastPong) >= 7) {
-                            sendMessage(MD_OFFLINE, MD_BROADCAST);
-                        } else {
-                            if (mWebSocketClientMD != null) mWebSocketClientMD.sendPing();
-                        }
+        Timer timer = new Timer();
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                if (BaseApplication.issBackGround()) return;
 
-                        if ((System.currentTimeMillis() / 1000 - mTDLastPong) >= 7) {
-                            sendMessage(TD_OFFLINE, TD_BROADCAST);
-                        } else {
-                            if (mWebSocketClientTD != null) mWebSocketClientTD.sendPing();
-                        }
-                    }
-                });
-        return null;
+                if (mWebSocketClientMD == null || !mWebSocketClientMD.isOpen() || !mMDPongSucceed)
+                    sendMessage(MD_OFFLINE, MD_BROADCAST);
+                else {
+                    mWebSocketClientMD.sendPing();
+                    mMDPongSucceed = false;
+                }
+
+                if (mWebSocketClientTD == null || !mWebSocketClientTD.isOpen() || !mTDPongSucceed)
+                    sendMessage(TD_OFFLINE, TD_BROADCAST);
+                else {
+                    mWebSocketClientTD.sendPing();
+                    mTDPongSucceed = false;
+                }
+
+            }
+        };
+        timer.schedule(timerTask, 5000, 5000);
+        return mBinder;
+    }
+
+    public class LocalBinder extends Binder {
+        public WebSocketService getService() {
+            return WebSocketService.this;
+        }
     }
 }

@@ -13,10 +13,10 @@ import android.view.ViewTreeObserver;
 import android.widget.ArrayAdapter;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.databinding.ActivityBankTransferBinding;
-import com.shinnytech.futures.model.adapter.BankTransferAdapter;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.amplitude.api.Identify;
+import com.shinnytech.futures.databinding.ActivityBankTransferBinding;
+import com.shinnytech.futures.model.adapter.BankTransferAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.BankEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.TransferEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
@@ -198,8 +198,7 @@ public class BankTransferActivity extends BaseActivity {
                             if (!mIsKeyboardShowing) {
                                 mIsKeyboardShowing = true;
                             }
-                        }
-                        else {
+                        } else {
                             // keyboard is closed
                             if (mIsKeyboardShowing) {
                                 mIsKeyboardShowing = false;
@@ -275,7 +274,7 @@ public class BankTransferActivity extends BaseActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mIsKeyboardShowing)return true;
+        if (mIsKeyboardShowing) return true;
         else return super.onKeyDown(keyCode, event);
     }
 }

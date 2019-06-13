@@ -47,7 +47,7 @@ public final class CommonConstants {
     public static final String CONDITIONAL_ORDER = "云条件单";
     public static final String FEEDBACK = "问题反馈";
     public static final String ABOUT = "关于";
-    public static final String OFFLINE = "交易、行情网络未连接！";
+    public static final String OFFLINE = "网络故障";
     public static final String BROKER_LIST = "期货公司";
     //行情图类型
     public static final String CHART_ID = "CHART_ID";
@@ -82,7 +82,7 @@ public final class CommonConstants {
     public static final int VIEW_WIDTH = 200;
     //订阅合约数
     public static final int LOAD_QUOTE_NUM = 24;
-    public static final int LOAD_QUOTE_RECOMMEND_NUM = 10;
+
     //页面跳转标志
     public static final int MAIN_ACTIVITY_TO_SEARCH_ACTIVITY = 1;
     public static final int MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY = 2;
@@ -94,6 +94,9 @@ public final class CommonConstants {
     public static final int FUTURE_INFO_ACTIVITY_TO_CHART_SETTING_ACTIVITY = 8;
     public static final String BACK_TO_ACCOUNT_DETAIL = "checkAccount";
     public static final String INS_BETWEEN_ACTIVITY = "instrument_id";
+    //推荐标的
+    public static final String RECOMMEND_INS = "螺纹,豆粕,菜粕,甲醇,铁矿,沪深,玉米," +
+            "红枣,PTA,白糖,燃油,橡胶";
     //app名称
     public static final String KUAI_QI_XIAO_Q = "快期小Q";
     //本地自选合约文件名
@@ -239,6 +242,7 @@ public final class CommonConstants {
     public static final String AMP_SHOW_PAGE = "amp_show_page";
     public static final String AMP_LEAVE_PAGE = "amp_leave_page";
     public static final String AMP_NOTIFY = "amp_notify";
+    public static final String AMP_RECONNECT = "amp_reconnect";
 
     //amp event property
     public static final String AMP_EVENT_SELECT_BROKER_ID = "broker_id";
@@ -349,6 +353,11 @@ public final class CommonConstants {
     public static final String AMP_EVENT_NOTIFY_LEVEL = "notify_level";
     public static final String AMP_EVENT_NOTIFY_CONTENT = "notify_content";
     public static final String AMP_EVENT_NOTIFY_CODE = "notify_code";
+
+    public static final String AMP_EVENT_RECONNECT_SERVER_TYPE = "server_type";
+    public static final String AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_MD = "MD";
+    public static final String AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_TD = "TD";
+    public static final String AMP_EVENT_RECONNECT_TIME = "reconnect_time";
 
     //amp user property
     public static final String AMP_USER_PACKAGE_ID_FIRST = "package_id_first";

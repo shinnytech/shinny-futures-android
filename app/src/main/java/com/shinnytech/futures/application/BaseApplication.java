@@ -37,9 +37,9 @@ import com.lzy.okgo.model.HttpHeaders;
 import com.sfit.ctp.info.DeviceInfoManager;
 import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.amplitude.api.Identify;
+import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.RedrawEvent;
@@ -116,7 +116,6 @@ import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_INS_LIST
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_URL;
-import static com.shinnytech.futures.receiver.NetworkReceiver.NETWORK_STATE;
 import static com.shinnytech.futures.service.WebSocketService.MD_BROADCAST_ACTION;
 import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
@@ -135,9 +134,9 @@ public class BaseApplication extends Application implements ServiceConnection {
     private static boolean sBackGround = false;
     private BroadcastReceiver mReceiverMarket;
     private BroadcastReceiver mReceiverTransaction;
-    private BroadcastReceiver mReceiverNetwork;
     private AppLifecycleObserver mAppLifecycleObserver = new AppLifecycleObserver();
     private Context mSettlementContext;
+    private int mBindingCount = 0;
 
     public static int getsIndex() {
         return sIndex;
@@ -241,13 +240,14 @@ public class BaseApplication extends Application implements ServiceConnection {
         }
 
         if (!SPUtils.contains(sContext, CONFIG_IS_FIRM)) {
-            if (SPUtils.contains(sContext, CONFIG_BROKER)){
+            if (SPUtils.contains(sContext, CONFIG_BROKER)) {
                 String broker = (String) SPUtils.get(sContext, CONFIG_BROKER, "");
-                if (!broker.isEmpty()){
-                    if (broker.equals(BROKER_ID_SIMULATION))SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, false);
+                if (!broker.isEmpty()) {
+                    if (broker.equals(BROKER_ID_SIMULATION))
+                        SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, false);
                     else SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, true);
-                }else SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, true);
-            }else SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, true);
+                } else SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, true);
+            } else SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, true);
         }
 
         if (!SPUtils.contains(sContext, CONFIG_INIT_TIME)) {
@@ -634,46 +634,47 @@ public class BaseApplication extends Application implements ServiceConnection {
         };
         LocalBroadcastManager.getInstance(sContext).registerReceiver(mReceiverTransaction, new IntentFilter(TD_BROADCAST_ACTION));
 
-        //网络状态变化监听广播
-        mReceiverNetwork = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int networkStatus = intent.getIntExtra("networkStatus", 0);
-                switch (networkStatus) {
-                    case 0:
-                        LogUtils.e("连接断开", true);
-                        break;
-                    case 1:
-                        //连接行情服务器
-                        WebSocketService.reConnectMD(sMDURLs.get(sIndex));
-                        //连接交易服务器
-                        WebSocketService.reConnectTD();
-                        LogUtils.e("连接打开", true);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-        sContext.registerReceiver(mReceiverNetwork, new IntentFilter(NETWORK_STATE));
-
     }
 
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-
+        mBindingCount++;
+        //连接行情服务器
+        WebSocketService.connectMD(sMDURLs.get(sIndex));
+        //连接交易服务器
+        WebSocketService.connectTD();
     }
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
-        Intent intent = new Intent(sContext, WebSocketService.class);
-        sContext.bindService(intent, BaseApplication.this, Context.BIND_AUTO_CREATE);
+        if (mBindingCount < 5) {
+            Intent intent = new Intent(sContext, WebSocketService.class);
+            sContext.bindService(intent, BaseApplication.this, Context.BIND_AUTO_CREATE);
+        } else {
+            ToastUtils.showToast(sContext, "系统异常，即将退出，请重新打开");
+            new android.os.Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    System.exit(0);
+                }
+            }, 2000);
+        }
     }
 
     @Override
     public void onBindingDied(ComponentName name) {
-        Intent intent = new Intent(sContext, WebSocketService.class);
-        sContext.bindService(intent, BaseApplication.this, Context.BIND_AUTO_CREATE);
+        if (mBindingCount < 5) {
+            Intent intent = new Intent(sContext, WebSocketService.class);
+            sContext.bindService(intent, BaseApplication.this, Context.BIND_AUTO_CREATE);
+        } else {
+            ToastUtils.showToast(sContext, "系统异常，即将退出，请重新打开");
+            new android.os.Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    System.exit(0);
+                }
+            }, 2000);
+        }
     }
 
     @Override

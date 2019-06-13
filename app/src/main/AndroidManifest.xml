@@ -58,15 +58,6 @@
             android:exported="false"/>
 
         <receiver
-            android:name=".receiver.NetworkReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </receiver>
-        <receiver
             android:name=".receiver.NotificationClickReceiver"
             android:exported="false">
             <intent-filter>

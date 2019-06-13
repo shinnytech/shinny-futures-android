@@ -1,11 +1,8 @@
 package com.shinnytech.futures.controller.activity;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -25,10 +22,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivitySearchBinding;
 import com.shinnytech.futures.model.adapter.SearchAdapter;
-import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
@@ -58,8 +55,6 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_OPTIONAL_SEAR
 import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_IS_FIRM;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
-import static com.shinnytech.futures.receiver.NetworkReceiver.NETWORK_STATE;
 import static com.shinnytech.futures.utils.ScreenUtils.getStatusBarHeight;
 
 /**
@@ -72,7 +67,6 @@ import static com.shinnytech.futures.utils.ScreenUtils.getStatusBarHeight;
 public class SearchActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     private SearchAdapter mSearchAdapter;
-    private BroadcastReceiver mReceiver;
     private Context sContext;
     private ActivitySearchBinding mBinding;
     private boolean mIsFromFutureInfoActivity;
@@ -179,14 +173,12 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     @Override
     protected void onResume() {
         super.onResume();
-        registerBroaderCast();
         updateToolbarFromNetwork();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(mReceiver);
     }
 
     /**
@@ -272,8 +264,10 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
 
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
-            if (isFirm) window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
-            else  window.setStatusBarColor(ContextCompat.getColor(this, R.color.login_simulation_hint));
+            if (isFirm)
+                window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+            else
+                window.setStatusBarColor(ContextCompat.getColor(this, R.color.login_simulation_hint));
         }
     }
 
@@ -286,40 +280,9 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     private void updateToolbarFromNetwork() {
         if (NetworkUtils.isNetworkConnected(sContext)) {
             mBinding.toolbarSearch.setBackgroundColor(ContextCompat.getColor(sContext, R.color.toolbar));
-            mBinding.titleToolbar.setVisibility(View.GONE);
         } else {
-            mBinding.toolbarSearch.setBackgroundColor(ContextCompat.getColor(sContext, R.color.off_line));
-            mBinding.titleToolbar.setVisibility(View.VISIBLE);
-            mBinding.titleToolbar.setTextColor(Color.BLACK);
-            mBinding.titleToolbar.setText(OFFLINE);
+            mBinding.toolbarSearch.setBackgroundColor(ContextCompat.getColor(sContext, R.color.login_simulation_hint));
         }
-    }
-
-    /**
-     * date: 7/7/17
-     * author: chenli
-     * description: 监听网络状态
-     */
-    private void registerBroaderCast() {
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int networkStatus = intent.getIntExtra("networkStatus", 0);
-                switch (networkStatus) {
-                    case 0:
-                        mBinding.toolbarSearch.setBackgroundColor(ContextCompat.getColor(context, R.color.off_line));
-                        mBinding.titleToolbar.setVisibility(View.VISIBLE);
-                        mBinding.titleToolbar.setTextColor(Color.BLACK);
-                        mBinding.titleToolbar.setText(OFFLINE);
-                        break;
-                    case 1:
-                        mBinding.toolbarSearch.setBackgroundColor(ContextCompat.getColor(context, R.color.toolbar));
-                        mBinding.titleToolbar.setVisibility(View.GONE);
-                        break;
-                }
-            }
-        };
-        registerReceiver(mReceiver, new IntentFilter(NETWORK_STATE));
     }
 
 }

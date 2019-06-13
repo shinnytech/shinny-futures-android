@@ -5,6 +5,7 @@
     <data></data>
 
     <LinearLayout
+        android:background="@drawable/fragment_quote_dialog_rectangle"
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="@dimen/layout_height_popup_fragment_quote"
@@ -21,7 +22,6 @@
                 android:layout_height="match_parent"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="@drawable/fragment_popup_item_touch_bg"
                 android:gravity="center"
                 android:scaleType="center"
                 android:src="@mipmap/ic_content_cut_white_18dp" />
@@ -35,7 +35,6 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:background="@drawable/fragment_popup_item_touch_bg"
                 android:maxLines="1"
                 app:autoSizeTextType="uniform"
                 app:autoSizeMaxTextSize="@dimen/font_size_normal_high"
@@ -50,7 +49,6 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
-                android:background="@drawable/fragment_popup_item_touch_bg"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
@@ -65,7 +63,6 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:background="@drawable/fragment_popup_item_touch_bg"
                 android:scaleType="center"
                 android:src="@mipmap/ic_format_line_spacing_white_18dp"/>
         </LinearLayout>

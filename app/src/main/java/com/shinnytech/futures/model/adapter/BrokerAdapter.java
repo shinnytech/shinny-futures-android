@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * date: 7/9/17
  * author: chenli
- * description: 搜索页列表适配器
+ * description: 选择期货公司列表适配器
  * version:
  * state: done
  */

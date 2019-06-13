@@ -25,8 +25,8 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.amplitude.api.Amplitude;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
@@ -49,7 +49,6 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_IS_FIRM;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
-import static com.shinnytech.futures.receiver.NetworkReceiver.NETWORK_STATE;
 import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
@@ -67,7 +66,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected ViewDataBinding mViewDataBinding;
     protected Context sContext;
     protected BroadcastReceiver mReceiverLocal;
-    protected BroadcastReceiver mReceiverNetwork;
     protected DataManager sDataManager;
 
 
@@ -77,29 +75,6 @@ public abstract class BaseActivity extends AppCompatActivity {
      * description: 注册账户广播，监听账户实时信息
      */
     protected void registerBroaderCast() {
-        mReceiverNetwork = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int networkStatus = intent.getIntExtra("networkStatus", 0);
-                switch (networkStatus) {
-                    case 0:
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.off_line));
-                        mToolbarTitle.setTextColor(Color.BLACK);
-                        mToolbarTitle.setText(OFFLINE);
-                        mToolbarTitle.setTextSize(20);
-                        break;
-                    case 1:
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.toolbar));
-                        mToolbarTitle.setTextColor(Color.WHITE);
-                        mToolbarTitle.setText(mTitle);
-                        mToolbarTitle.setTextSize(25);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-        registerReceiver(mReceiverNetwork, new IntentFilter(NETWORK_STATE));
 
         mReceiverLocal = new BroadcastReceiver() {
             @Override
@@ -144,7 +119,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onPause();
         if (mReceiverLocal != null)
             LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLocal);
-        if (mReceiverNetwork != null) unregisterReceiver(mReceiverNetwork);
     }
 
     /**
@@ -159,7 +133,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             mToolbarTitle.setText(title);
             mToolbarTitle.setTextSize(25);
         } else {
-            mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.off_line));
+            mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.login_simulation_hint));
             mToolbarTitle.setTextColor(Color.BLACK);
             mToolbarTitle.setText(OFFLINE);
             mToolbarTitle.setTextSize(20);
@@ -186,8 +160,10 @@ public abstract class BaseActivity extends AppCompatActivity {
 
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
-            if (isFirm) window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
-            else  window.setStatusBarColor(ContextCompat.getColor(this, R.color.login_simulation_hint));
+            if (isFirm)
+                window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+            else
+                window.setStatusBarColor(ContextCompat.getColor(this, R.color.login_simulation_hint));
         }
     }
 

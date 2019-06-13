@@ -14,7 +14,6 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.receiver.NotificationClickReceiver;
 
 public class ForegroundService extends Service {

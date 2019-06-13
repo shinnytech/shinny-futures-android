@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -30,13 +31,14 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentQuoteBinding;
 import com.shinnytech.futures.model.adapter.DragDialogAdapter;
 import com.shinnytech.futures.model.adapter.QuoteAdapter;
-import com.shinnytech.futures.amplitude.api.Amplitude;
+import com.shinnytech.futures.model.adapter.QuoteAdapterRecommend;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
@@ -50,11 +52,11 @@ import com.shinnytech.futures.model.listener.QuoteDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.CloneUtils;
-import com.shinnytech.futures.utils.ScreenUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.ScreenUtils;
 import com.shinnytech.futures.utils.ToastUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -100,6 +102,7 @@ import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
+import static com.shinnytech.futures.constants.CommonConstants.RECOMMEND_INS;
 import static com.shinnytech.futures.constants.CommonConstants.SHANGHAI;
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
@@ -180,46 +183,63 @@ public class QuoteFragment extends LazyLoadFragment {
         mBinding.rvQuote.setItemAnimator(new DefaultItemAnimator());
         mAdapter = new QuoteAdapter(getActivity(), mOldData, mTitle);
         mBinding.rvQuote.setAdapter(mAdapter);
+    }
 
-        switch (mTitle) {
-            case OPTIONAL:
-                mNewData = LatestFileManager.getOptionalInsList();
-                break;
-            case DOMINANT:
-                mNewData.putAll(LatestFileManager.getMainInsList());
-                break;
-            case SHANGHAI:
-                //添加一下，不要一直排序
-                mNewData.putAll(LatestFileManager.getShangqiInsList());
-                break;
-            case NENGYUAN:
-                mNewData.putAll(LatestFileManager.getNengyuanInsList());
-                break;
-            case DALIAN:
-                mNewData.putAll(LatestFileManager.getDalianInsList());
-                break;
-            case ZHENGZHOU:
-                mNewData.putAll(LatestFileManager.getZhengzhouInsList());
-                break;
-            case ZHONGJIN:
-                mNewData.putAll(LatestFileManager.getZhongjinInsList());
-                break;
-            case DALIANZUHE:
-                mNewData.putAll(LatestFileManager.getDalianzuheInsList());
-                break;
-            case ZHENGZHOUZUHE:
-                mNewData.putAll(LatestFileManager.getZhengzhouzuheInsList());
-                break;
-            default:
-                break;
+    /**
+     * date: 2019/6/11
+     * author: chenli
+     * description: 初始化合约列表
+     */
+    private void initInsList() {
+        try {
+            if (!mNewData.isEmpty()) return;
+            switch (mTitle) {
+                case OPTIONAL:
+                    mNewData = LatestFileManager.getOptionalInsList();
+                    break;
+                case DOMINANT:
+                    mNewData.putAll(LatestFileManager.getMainInsList());
+                    break;
+                case SHANGHAI:
+                    //添加一下，不要一直排序
+                    mNewData.putAll(LatestFileManager.getShangqiInsList());
+                    break;
+                case NENGYUAN:
+                    mNewData.putAll(LatestFileManager.getNengyuanInsList());
+                    break;
+                case DALIAN:
+                    mNewData.putAll(LatestFileManager.getDalianInsList());
+                    break;
+                case ZHENGZHOU:
+                    mNewData.putAll(LatestFileManager.getZhengzhouInsList());
+                    break;
+                case ZHONGJIN:
+                    mNewData.putAll(LatestFileManager.getZhongjinInsList());
+                    break;
+                case DALIANZUHE:
+                    mNewData.putAll(LatestFileManager.getDalianzuheInsList());
+                    break;
+                case ZHENGZHOUZUHE:
+                    mNewData.putAll(LatestFileManager.getZhengzhouzuheInsList());
+                    break;
+                default:
+                    break;
+            }
+            mInsList = new ArrayList<>(mNewData.keySet());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        mInsList = new ArrayList<>(mNewData.keySet());
     }
 
     @Override
     public void show() {
         try {
+            initInsList();
             showEvent();
+            refreshMD(mToolbarTitle.getText().toString());
+            refreshTD();
+
+            if (OPTIONAL.equals(mTitle)) initConfigOptional();
 
             if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
                 mBinding.tvChangePercent.setText(R.string.quote_fragment_bid_price1);
@@ -228,9 +248,6 @@ public class QuoteFragment extends LazyLoadFragment {
                 mBinding.tvChangePercent.setText(R.string.quote_fragment_up_down_rate);
                 mBinding.tvOpenInterest.setText(R.string.quote_fragment_open_interest);
             }
-
-            refreshMD(mToolbarTitle.getText().toString());
-            refreshTD();
 
             mBinding.rvQuote.scrollToPosition(0);
             if (OPTIONAL.equals(mTitle)) {
@@ -262,7 +279,7 @@ public class QuoteFragment extends LazyLoadFragment {
      */
     public void showEvent() {
         try {
-            LogUtils.e("quoteShow", true);
+            LogUtils.e("quoteShow" + mTitle, true);
             mShowTime = System.currentTimeMillis();
             String broker_id = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_BROKER, "");
             JSONObject jsonObject = new JSONObject();
@@ -811,6 +828,7 @@ public class QuoteFragment extends LazyLoadFragment {
                 int firstPosition1 = (lastPosition1 - position) != visibleItemCount1 ? (lastPosition1 - visibleItemCount1) : position;
                 List<String> insList = mInsList.subList(firstPosition1, lastPosition1);
                 sendSubscribeQuotes(insList);
+                LogUtils.e("1111", true);
             } catch (IndexOutOfBoundsException e) {
                 e.printStackTrace();
             }
@@ -860,7 +878,60 @@ public class QuoteFragment extends LazyLoadFragment {
             dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 @Override
                 public void onDismiss(DialogInterface dialog) {
-                    QuoteFragment.this.refreshOptional();
+                    final Dialog dialog1 = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
+                    View viewDialog = View.inflate(getActivity(), R.layout.view_dialog_recommend_quote, null);
+                    Window dialogWindow = dialog1.getWindow();
+                    if (dialogWindow != null) {
+                        dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+                        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+                        dialogWindow.setGravity(Gravity.CENTER);
+                        lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+                        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                        dialogWindow.setAttributes(lp);
+                    }
+                    dialog1.setContentView(viewDialog);
+                    final List<String> insList = new ArrayList<>();
+                    for (String ins : RECOMMEND_INS.split(",")) {
+                        insList.add(ins);
+                    }
+                    final QuoteAdapterRecommend quoteAdapterRecommend = new QuoteAdapterRecommend(BaseApplication.getContext(), insList);
+                    RecyclerView recyclerView = viewDialog.findViewById(R.id.dialog_rv);
+                    viewDialog.findViewById(R.id.iv_close).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog1.dismiss();
+                        }
+                    });
+                    viewDialog.findViewById(R.id.enter).setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog1.dismiss();
+                        }
+                    });
+                    recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+                    recyclerView.setAdapter(quoteAdapterRecommend);
+                    dialog1.show();
+                    dialog1.setCancelable(false);
+                    dialog1.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            List<String> list = quoteAdapterRecommend.getmDataPre();
+                            List<String> insList = new ArrayList<>();
+                            if (list != null && !list.isEmpty()) {
+                                List<String> values = new ArrayList<>(LatestFileManager.getMainInsListNameNav().values());
+                                List<String> keys = new ArrayList<>(LatestFileManager.getMainInsListNameNav().keySet());
+                                for (String name : list) {
+                                    int index = values.indexOf(name);
+                                    if (index != -1 && index < keys.size()) {
+                                        String ins = keys.get(index);
+                                        if (ins != null && !ins.isEmpty()) insList.add(ins);
+                                    }
+                                }
+                                LatestFileManager.saveInsListToFile(insList);
+                            }
+                            QuoteFragment.this.refreshOptional();
+                        }
+                    });
                 }
             });
 

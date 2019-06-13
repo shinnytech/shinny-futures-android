@@ -26,16 +26,6 @@
                 android:background="@color/toolbar"
                 app:popupTheme="@style/AppTheme.PopupOverlay">
 
-                <TextView
-                    android:id="@+id/title_toolbar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:layout_gravity="center"
-                    android:textColor="@android:color/white"
-                    android:textSize="@dimen/font_size_normal_high"
-                    android:visibility="gone" />
-
                 <android.support.v7.widget.SearchView
                     android:id="@+id/search_edit_frame"
                     android:layout_width="match_parent"

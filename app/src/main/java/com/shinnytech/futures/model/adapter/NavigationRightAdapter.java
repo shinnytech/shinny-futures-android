@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * date: 7/9/17
  * author: chenli
- * description: 行情页适配器
+ * description: 右导航适配器
  * version:
  * state: done
  */

@@ -1,10 +1,8 @@
 package com.shinnytech.futures.controller.activity;
 
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -15,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.MainActivityPresenter;
 import com.shinnytech.futures.controller.fragment.AccountFragment;
@@ -22,7 +21,6 @@ import com.shinnytech.futures.controller.fragment.LazyLoadFragment;
 import com.shinnytech.futures.controller.fragment.QuoteFragment;
 import com.shinnytech.futures.controller.fragment.QuotePagerFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
-import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.NetworkUtils;
@@ -46,7 +44,6 @@ import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_
 import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_TRANSFER_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
-import static com.shinnytech.futures.receiver.NetworkReceiver.NETWORK_STATE;
 
 /**
  * date: 6/14/17
@@ -107,42 +104,11 @@ public class MainActivity extends BaseActivity {
             mToolbarTitle.setText(title);
             mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
         } else {
-            mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.off_line));
+            mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.login_simulation_hint));
             mToolbarTitle.setTextColor(Color.BLACK);
             mToolbarTitle.setText(OFFLINE);
             mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
         }
-    }
-
-    @Override
-    protected void registerBroaderCast() {
-        mReceiverNetwork = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int networkStatus = intent.getIntExtra("networkStatus", 0);
-                switch (networkStatus) {
-                    case 0:
-                        if (OFFLINE.equals(mToolbarTitle.getText().toString()))
-                            mTitle = mToolbarTitle.getText().toString();
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.off_line));
-                        mToolbarTitle.setTextColor(Color.BLACK);
-                        mToolbarTitle.setText(OFFLINE);
-                        mToolbarTitle.setTextSize(20);
-                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-                        break;
-                    case 1:
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.toolbar));
-                        mToolbarTitle.setTextColor(Color.WHITE);
-                        mToolbarTitle.setText(mTitle);
-                        mToolbarTitle.setTextSize(25);
-                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-        registerReceiver(mReceiverNetwork, new IntentFilter(NETWORK_STATE));
     }
 
     @Override

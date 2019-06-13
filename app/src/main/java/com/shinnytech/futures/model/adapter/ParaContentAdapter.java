@@ -14,7 +14,7 @@ import com.shinnytech.futures.databinding.ItemActivityParaContentBinding;
 /**
  * date: 7/9/17
  * author: chenli
- * description: 搜索页列表适配器
+ * description: 设置页行情参数列表适配器
  * version:
  * state: done
  */

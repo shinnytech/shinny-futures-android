@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * date: 7/9/17
  * author: chenli
- * description: futureInfoActivity页上toolbar的标题点击弹出框适配器，用于显示自选合约列表
+ * description: 添加常用适配器
  * version:
  * state: done
  */

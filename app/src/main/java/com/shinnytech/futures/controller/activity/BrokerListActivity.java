@@ -7,9 +7,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.databinding.ActivityBrokerListBinding;
 import com.shinnytech.futures.model.adapter.BrokerAdapter;
-import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
@@ -64,14 +64,14 @@ public class BrokerListActivity extends BaseActivity {
                     @Override
                     public void onItemClick(View view, int position) {
                         String broker = mBrokerAdapter.getData().get(position);
-                        if (broker == null)return;
+                        if (broker == null) return;
 
                         JSONObject jsonObject = new JSONObject();
                         try {
                             jsonObject.put(AMP_EVENT_SELECT_BROKER_ID, broker);
                             if (broker.contains(" ")) {
                                 jsonObject.put(AMP_EVENT_SELECT_IS_ADDED, false);
-                            }else {
+                            } else {
                                 jsonObject.put(AMP_EVENT_SELECT_IS_ADDED, true);
                             }
                         } catch (JSONException e) {

@@ -38,8 +38,7 @@ import static com.shinnytech.futures.utils.ScreenUtils.getStatusBarHeight;
 
 public class SplashActivity extends AppCompatActivity {
     private final int TO_LOGIN = 0;
-    private final int TO_MAIN = 1;
-    private final int TO_SCREEN = 2;
+    private final int TO_SCREEN = 1;
     private BroadcastReceiver mReceiverLogin;
     private Handler mHandler;
     private Timer mTimer;
@@ -80,7 +79,7 @@ public class SplashActivity extends AppCompatActivity {
                 }
             });
             dialog.show();
-        }else {
+        } else {
             mTimer.schedule(mTimerTask, 10000);
 
             //没有登录过
@@ -90,11 +89,6 @@ public class SplashActivity extends AppCompatActivity {
                 //关闭软件前退出登录
                 String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
                 if (date.isEmpty()) mHandler.sendEmptyMessageDelayed(TO_LOGIN, 2000);
-                else {
-                    String broker = (String) SPUtils.get(context, CommonConstants.CONFIG_BROKER, "");
-                    String user = (String) SPUtils.get(context, CommonConstants.CONFIG_ACCOUNT, "");
-                    if (!broker.isEmpty() && !user.isEmpty())mHandler.sendEmptyMessageDelayed(TO_MAIN, 2000);
-                }
             }
         }
         registerBroaderCast();
@@ -128,15 +122,17 @@ public class SplashActivity extends AppCompatActivity {
 
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
-            if (isFirm) window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
-            else  window.setStatusBarColor(ContextCompat.getColor(this, R.color.login_simulation_hint));
+            if (isFirm)
+                window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+            else
+                window.setStatusBarColor(ContextCompat.getColor(this, R.color.login_simulation_hint));
         }
     }
 
     /**
      * date: 2019/4/24
      * author: chenli
-     * description: 监听结算单弹出、登录成功事件
+     * description: 监听登录成功、失败事件
      */
     private void registerBroaderCast() {
 
@@ -210,9 +206,6 @@ public class SplashActivity extends AppCompatActivity {
                         activity.toLogin();
                         break;
                     case 1:
-                        activity.toMain();
-                        break;
-                    case 2:
                         activity.toScreen();
                         break;
                     default:

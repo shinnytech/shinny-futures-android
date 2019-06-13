@@ -16,11 +16,11 @@ import android.view.View;
 import android.widget.RadioGroup;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.FutureInfoActivityPresenter;
 import com.shinnytech.futures.controller.fragment.LazyLoadFragment;
 import com.shinnytech.futures.databinding.ActivityFutureInfoBinding;
-import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.model.bean.eventbusbean.AverageEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
@@ -59,7 +59,6 @@ import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_L
 import static com.shinnytech.futures.constants.CommonConstants.FUTURE_INFO_ACTIVITY_TO_CHART_SETTING_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
-import static com.shinnytech.futures.receiver.NetworkReceiver.NETWORK_STATE;
 import static com.shinnytech.futures.service.WebSocketService.MD_BROADCAST_ACTION;
 
 /**
@@ -134,7 +133,7 @@ public class FutureInfoActivity extends BaseActivity {
             mFutureInfoActivityPresenter.setToolbarTitle();
             mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
         } else {
-            mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.off_line));
+            mToolbar.setBackgroundColor(ContextCompat.getColor(sContext, R.color.login_simulation_hint));
             mToolbarTitle.setTextColor(Color.BLACK);
             mToolbarTitle.setText(OFFLINE);
             mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
@@ -143,30 +142,6 @@ public class FutureInfoActivity extends BaseActivity {
 
     @Override
     protected void registerBroaderCast() {
-        mReceiverNetwork = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int networkStatus = intent.getIntExtra("networkStatus", 0);
-                switch (networkStatus) {
-                    case 0:
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.off_line));
-                        mToolbarTitle.setTextColor(Color.BLACK);
-                        mToolbarTitle.setText(OFFLINE);
-                        mToolbarTitle.setTextSize(20);
-                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-                        break;
-                    case 1:
-                        mToolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.toolbar));
-                        mToolbarTitle.setTextColor(Color.WHITE);
-                        mFutureInfoActivityPresenter.setToolbarTitle();
-                        mToolbarTitle.setTextSize(25);
-                        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
-                        break;
-                }
-            }
-        };
-        registerReceiver(mReceiverNetwork, new IntentFilter(NETWORK_STATE));
-
         mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {

@@ -1,7 +1,6 @@
 package com.shinnytech.futures.controller.activity;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -34,17 +33,16 @@ import android.widget.FrameLayout;
 
 import com.sfit.ctp.info.DeviceInfoManager;
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.databinding.ActivityLoginBinding;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.amplitude.api.Identify;
+import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.databinding.ActivityLoginBinding;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.Base64;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
-import com.shinnytech.futures.utils.ScreenUtils;
 import com.shinnytech.futures.utils.TimeUtils;
 import com.shinnytech.futures.utils.ToastUtils;
 
@@ -127,6 +125,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_login);
         initData();
+        initBrokerAccount();
         initEvent();
         checkResponsibility();
         checkPermissions();
@@ -136,16 +135,21 @@ public class LoginActivity extends AppCompatActivity {
         sContext = BaseApplication.getContext();
         sDataManager = DataManager.getInstance();
         mHandler = new MyHandler(this);
-
         //控制是否显示登录成功弹出框
         sDataManager.IS_SHOW_LOGIN_SUCCESS = false;
         //登录入口
         sDataManager.LOGIN_TYPE = AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
+    }
 
+    /**
+     * date: 2019/5/30
+     * author: chenli
+     * description: 初始化期货公司、账户
+     */
+    private void initBrokerAccount() {
         mIsFirm = (boolean) SPUtils.get(sContext, CONFIG_IS_FIRM, true);
-        changeStatusBarColor(mIsFirm);
-
-        initBrokerName();
+        if (mIsFirm) switchFirm();
+        else switchSimulator();
     }
 
     private void initEvent() {
@@ -181,8 +185,8 @@ public class LoginActivity extends AppCompatActivity {
                 sDataManager.LOGIN_TYPE = AMP_EVENT_LOGIN_TYPE_VALUE_VISIT;
                 sDataManager.LOGIN_BROKER_ID = mBrokerName;
                 sDataManager.LOGIN_USER_ID = mPhoneNumber;
-                SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, false);
                 changeStatusBarColor(false);
+                mIsFirm = false;
                 JSONObject jsonObject = new JSONObject();
                 try {
                     jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, mBrokerName);
@@ -456,7 +460,9 @@ public class LoginActivity extends AppCompatActivity {
                         mHandler.sendEmptyMessageDelayed(LOGIN_TO_CHANGE_PASSWORD, 2000);
                         break;
                     case TD_MESSAGE_BROKER_INFO:
-                        initBrokerName();
+                        if (mBinding.broker.getText().toString().isEmpty()
+                                && mBinding.account.getText().toString().isEmpty())
+                            initBrokerAccount();
                         break;
                     case TD_MESSAGE_LOGIN_FAIL:
                         //登录失败
@@ -606,34 +612,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * date: 2019/5/30
-     * author: chenli
-     * description: 初始化期货公司、账户
-     */
-    private void initBrokerName() {
-        List<String> brokers = LatestFileManager.getBrokerIdFromBuildConfig(sDataManager.getBroker().getBrokers());
-        if (brokers.isEmpty()) return;
-        //获取用户登录成功后保存在sharedPreference里的期货公司
-        if (SPUtils.contains(sContext, CONFIG_BROKER)) {
-            String brokerName = (String) SPUtils.get(sContext, CONFIG_BROKER, "");
-            String account = (String) SPUtils.get(sContext, CONFIG_ACCOUNT, "");
-            if (BROKER_ID_SIMULATION.equals(brokerName)) {
-                mBinding.broker.setText(brokers.get(0));
-                switchSimulator();
-            }
-            else{
-                mBinding.broker.setText(brokerName);
-                switchFirm();
-            }
-            if (account.contains(BROKER_ID_VISITOR))return;
-            mBinding.account.setText(account);
-            mBinding.account.setSelection(account.length());
-            if (!account.isEmpty()) mBinding.deleteAccount.setVisibility(View.VISIBLE);
-        } else mBinding.broker.setText(brokers.get(0));
-    }
-
-
-    /**
      * date: 2019/6/4
      * author: chenli
      * description: 切换模拟
@@ -649,9 +627,20 @@ public class LoginActivity extends AppCompatActivity {
         mBinding.tvAccount.setText("手机号码");
         mBinding.simulationHint.setVisibility(View.VISIBLE);
 
-        SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, false);
         changeStatusBarColor(false);
         mIsFirm = false;
+
+        boolean isFirm = (boolean) SPUtils.get(sContext, CONFIG_IS_FIRM, true);
+        //获取用户登录成功后保存在sharedPreference里的期货公司
+        if (SPUtils.contains(sContext, CONFIG_ACCOUNT) && !isFirm) {
+            String account = (String) SPUtils.get(sContext, CONFIG_ACCOUNT, "");
+            if (account.contains(BROKER_ID_VISITOR)) return;
+            mBinding.account.setText(account);
+            mBinding.account.setSelection(account.length());
+            if (!account.isEmpty()) mBinding.deleteAccount.setVisibility(View.VISIBLE);
+        } else {
+            mBinding.account.getEditableText().clear();
+        }
     }
 
     /**
@@ -670,9 +659,23 @@ public class LoginActivity extends AppCompatActivity {
         mBinding.tvAccount.setText("资金账号");
         mBinding.simulationHint.setVisibility(View.GONE);
 
-        SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, true);
         changeStatusBarColor(true);
         mIsFirm = true;
+
+        boolean isFirm = (boolean) SPUtils.get(sContext, CONFIG_IS_FIRM, true);
+        List<String> brokers = LatestFileManager.getBrokerIdFromBuildConfig(sDataManager.getBroker().getBrokers());
+        //获取用户登录成功后保存在sharedPreference里的期货公司
+        if (SPUtils.contains(sContext, CONFIG_BROKER) && isFirm) {
+            String brokerName = (String) SPUtils.get(sContext, CONFIG_BROKER, "");
+            String account = (String) SPUtils.get(sContext, CONFIG_ACCOUNT, "");
+            if (brokers.contains(brokerName)) mBinding.broker.setText(brokerName);
+            mBinding.account.setText(account);
+            mBinding.account.setSelection(account.length());
+            if (!account.isEmpty()) mBinding.deleteAccount.setVisibility(View.VISIBLE);
+        } else if (!brokers.isEmpty()) {
+            mBinding.broker.setText(brokers.get(0));
+            mBinding.account.getEditableText().clear();
+        }
     }
 
     private void changeStatusBarColor(boolean isFirm) {
@@ -695,8 +698,10 @@ public class LoginActivity extends AppCompatActivity {
 
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
-            if (isFirm) window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
-            else  window.setStatusBarColor(ContextCompat.getColor(this, R.color.login_simulation_hint));
+            if (isFirm)
+                window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+            else
+                window.setStatusBarColor(ContextCompat.getColor(this, R.color.login_simulation_hint));
         }
     }
 
@@ -724,6 +729,7 @@ public class LoginActivity extends AppCompatActivity {
                         SPUtils.putAndApply(activity.sContext, CONFIG_ACCOUNT, activity.mPhoneNumber);
                         SPUtils.putAndApply(activity.sContext, CONFIG_PASSWORD, activity.mPassword);
                         SPUtils.putAndApply(activity.sContext, CONFIG_BROKER, activity.mBrokerName);
+                        SPUtils.putAndApply(activity.sContext, CONFIG_IS_FIRM, activity.mIsFirm);
                         //关闭键盘
                         View view = activity.getWindow().getCurrentFocus();
                         if (view != null) {
@@ -771,7 +777,7 @@ public class LoginActivity extends AppCompatActivity {
                         startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         activity.startActivity(startMain);
                         break;
-                    case  MY_PERMISSIONS_REQUEST_DENIED:
+                    case MY_PERMISSIONS_REQUEST_DENIED:
                         activity.checkPermissions();
                         break;
                     default:

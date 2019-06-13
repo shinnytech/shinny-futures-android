@@ -17,7 +17,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/drag_optional"
+            android:text="@string/recommend_optional"
             android:textColor="@color/dialog_optional_out_text"
             android:textSize="@dimen/font_size_normal_high" />
 
@@ -39,8 +39,27 @@
         android:layout_marginBottom="@dimen/margin_10dp"
         android:layout_marginLeft="@dimen/margin_10dp"
         android:layout_marginRight="@dimen/margin_10dp"
-        android:background="@drawable/fragment_quote_dialog_rectangle"></android.support.v7.widget.RecyclerView>
+        android:background="@drawable/fragment_quote_dialog_rectangle"/>
 
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/padding_20dp"
+        android:paddingEnd="@dimen/padding_20dp"
+        android:layout_marginBottom="@dimen/margin_10dp">
+        <Button
+            android:id="@+id/enter"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/activity_main_enter_rectangle"
+            android:gravity="center"
+            android:text="@string/enter"
+            android:textColor="@color/white"
+            android:textSize="@dimen/font_size_normal_high" />
+    </LinearLayout>
 
 </LinearLayout>

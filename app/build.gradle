@@ -6,8 +6,8 @@ android {
         applicationId "com.shinnytech.futures"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 41
-        versionName "1.21.1"
+        versionCode 42
+        versionName "1.22.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         resValue("string", "app_name", "ShinnyFutures")
         flavorDimensions("shinny")
@@ -749,5 +749,4 @@ dependencies {
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     implementation(name: 'InfoCollection_single_release_v1.5-2019-05-27', ext: 'aar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'io.reactivex.rxjava2:rxjava:2.+'
 }
