@@ -785,7 +785,7 @@ public class LatestFileManager {
                         brokerList.add(brokerIdOrigin[i]);
                 }
             }
-        } else WebSocketService.reConnectTD();
+        }
 
         return brokerList;
     }

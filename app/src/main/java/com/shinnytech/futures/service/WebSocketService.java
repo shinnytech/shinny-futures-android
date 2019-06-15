@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -13,6 +14,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.google.gson.Gson;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
+import com.neovisionaries.ws.client.WebSocketException;
 import com.neovisionaries.ws.client.WebSocketExtension;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
@@ -42,6 +44,9 @@ import com.shinnytech.futures.utils.TimeUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -111,8 +116,6 @@ public class WebSocketService extends Service {
     private static WebSocket mWebSocketClientTD;
     private static DataManager sDataManager = DataManager.getInstance();
     private static LocalBroadcastManager mLocalBroadcastManager = LocalBroadcastManager.getInstance(BaseApplication.getContext());
-    private static boolean mMDPongSucceed = false;
-    private static boolean mTDPongSucceed = false;
     private final IBinder mBinder = new LocalBinder();
 
     public static void sendMessage(String message, String type) {
@@ -144,6 +147,29 @@ public class WebSocketService extends Service {
                     .setMissingCloseFrameAllowed(false)
                     .addListener(new WebSocketAdapter() {
 
+                        int mPongCount;
+                        Timer mTimer;
+                        TimerTask mTimerTask;
+
+                        @Override
+                        public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
+                            super.onConnected(websocket, headers);
+                            mPongCount = 0;
+                            mTimer = new Timer();
+                            mTimerTask = new TimerTask() {
+                                @Override
+                                public void run() {
+                                    if (mPongCount > 3){
+                                        mWebSocketClientMD.disconnect();
+                                        return;
+                                    }
+                                    mWebSocketClientMD.sendPing();
+                                    mPongCount++;
+                                }
+                            };
+                            mTimer.schedule(mTimerTask, 0, 10000);
+                        }
+
                         // A text message arrived from the server.
                         public void onTextMessage(WebSocket websocket, String message) {
                             LogUtils.e(message, false);
@@ -152,8 +178,6 @@ public class WebSocketService extends Service {
                                 String aid = jsonObject.getString("aid");
                                 switch (aid) {
                                     case "rsp_login":
-                                        if (mWebSocketClientMD != null)
-                                            mWebSocketClientMD.sendPing();
                                         sendSubscribeAfterConnect();
                                         break;
                                     case "rtn_data":
@@ -172,18 +196,41 @@ public class WebSocketService extends Service {
                         @Override
                         public void onPongFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
                             super.onPongFrame(websocket, frame);
-                            mMDPongSucceed = true;
+                            mPongCount--;
                             LogUtils.e("MDPong", true);
-                        }
-
-                        @Override
-                        public void onCloseFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
-                            super.onCloseFrame(websocket, frame);
                         }
 
                         @Override
                         public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
                             super.onDisconnected(websocket, serverCloseFrame, clientCloseFrame, closedByServer);
+                            if (mTimer != null){
+                                mTimer.cancel();
+                                mTimer = null;
+                            }
+
+                            if (mTimerTask != null){
+                                mTimerTask.cancel();
+                                mTimerTask = null;
+                            }
+
+//                            mWebSocketClientMD = mWebSocketClientMD.recreate();
+//                            mWebSocketClientMD.connectAsynchronously();
+//                            connectMD(BaseApplication.getsMDURLs().get(BaseApplication.getsIndex()));
+                            sendMessage(MD_OFFLINE, MD_BROADCAST);
+
+                        }
+
+                        @Override
+                        public void onConnectError(WebSocket websocket, WebSocketException exception) throws Exception {
+                            super.onConnectError(websocket, exception);
+                            Timer timer = new Timer();
+                            timer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    sendMessage(MD_OFFLINE, MD_BROADCAST);
+
+                                }
+                            }, 10000);
                         }
                     })
                     .addHeader("User-Agent", sDataManager.USER_AGENT + " " + sDataManager.APP_VERSION)
@@ -233,7 +280,7 @@ public class WebSocketService extends Service {
 
     public static void disConnectMD() {
         if (mWebSocketClientMD != null) {
-            mWebSocketClientMD.disconnect();
+            mWebSocketClientMD = null;
         }
     }
 
@@ -327,8 +374,31 @@ public class WebSocketService extends Service {
                     .createSocket(CommonConstants.TRANSACTION_URL)
                     .setMissingCloseFrameAllowed(false)
                     .addListener(new WebSocketAdapter() {
-                        @Override
 
+                        int mPongCount;
+                        Timer mTimer;
+                        TimerTask mTimerTask;
+
+                        @Override
+                        public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
+                            super.onConnected(websocket, headers);
+                            mPongCount = 0;
+                            mTimer = new Timer();
+                            mTimerTask = new TimerTask() {
+                                @Override
+                                public void run() {
+                                    if (mPongCount > 3){
+                                        mWebSocketClientTD.disconnect();
+                                        return;
+                                    }
+                                    mWebSocketClientTD.sendPing();
+                                    mPongCount++;
+                                }
+                            };
+                            mTimer.schedule(mTimerTask, 0, 10000);
+                        }
+
+                        @Override
                         // A text message arrived from the server.
                         public void onTextMessage(final WebSocket websocket, String message) {
                             LogUtils.e(message, false);
@@ -337,8 +407,6 @@ public class WebSocketService extends Service {
                                 String aid = jsonObject.getString("aid");
                                 switch (aid) {
                                     case "rtn_brokers":
-                                        if (mWebSocketClientTD != null)
-                                            mWebSocketClientTD.sendPing();
                                         loginConfig(message);
                                         break;
                                     case "rtn_data":
@@ -356,8 +424,38 @@ public class WebSocketService extends Service {
                         @Override
                         public void onPongFrame(WebSocket websocket, WebSocketFrame frame) throws Exception {
                             super.onPongFrame(websocket, frame);
-                            mTDPongSucceed = true;
+                            mPongCount--;
                             LogUtils.e("TDPong", true);
+                        }
+
+                        @Override
+                        public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
+                            super.onDisconnected(websocket, serverCloseFrame, clientCloseFrame, closedByServer);
+                            if (mTimer != null){
+                                mTimer.cancel();
+                                mTimer = null;
+                            }
+
+                            if (mTimerTask != null){
+                                mTimerTask.cancel();
+                                mTimerTask = null;
+                            }
+
+                            sendMessage(TD_OFFLINE, TD_BROADCAST);
+
+                        }
+
+                        @Override
+                        public void onConnectError(WebSocket websocket, WebSocketException exception) throws Exception {
+                            super.onConnectError(websocket, exception);
+                            Timer timer = new Timer();
+                            timer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    sendMessage(TD_OFFLINE, TD_BROADCAST);
+
+                                }
+                            }, 10000);
                         }
 
                     })
@@ -437,7 +535,7 @@ public class WebSocketService extends Service {
 
     public static void disConnectTD() {
         if (mWebSocketClientTD != null) {
-            mWebSocketClientTD.disconnect();
+            mWebSocketClientTD = null;
             DataManager.getInstance().clearAccount();
         }
     }
@@ -624,29 +722,6 @@ public class WebSocketService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        Timer timer = new Timer();
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                if (BaseApplication.issBackGround()) return;
-
-                if (mWebSocketClientMD == null || !mWebSocketClientMD.isOpen() || !mMDPongSucceed)
-                    sendMessage(MD_OFFLINE, MD_BROADCAST);
-                else {
-                    mWebSocketClientMD.sendPing();
-                    mMDPongSucceed = false;
-                }
-
-                if (mWebSocketClientTD == null || !mWebSocketClientTD.isOpen() || !mTDPongSucceed)
-                    sendMessage(TD_OFFLINE, TD_BROADCAST);
-                else {
-                    mWebSocketClientTD.sendPing();
-                    mTDPongSucceed = false;
-                }
-
-            }
-        };
-        timer.schedule(timerTask, 5000, 5000);
         return mBinder;
     }
 
@@ -655,4 +730,5 @@ public class WebSocketService extends Service {
             return WebSocketService.this;
         }
     }
+
 }

@@ -5,9 +5,9 @@ public final class CommonConstants {
     public static String TRANSACTION_URL = "wss://opentd.shinnytech.com/trade/user0";
     public static String JSON_FILE_URL = "https://openmd.shinnytech.com/t/md/symbols/latest.json";
     public static final String MARKET_URL_1 = "wss://openmd.shinnytech.com/t/md/front/mobile";
-    public static final String MARKET_URL_2 = "wss://139.198.126.116/t/md/front/mobile";
-    public static final String MARKET_URL_3 = "wss://139.198.122.80/t/md/front/mobile";
-    public static final String MARKET_URL_4 = "wss://139.198.123.206/t/md/front/mobile";
+    public static final String MARKET_URL_2 = "ws://139.198.126.116/t/md/front/mobile";
+    public static final String MARKET_URL_3 = "ws://139.198.122.80/t/md/front/mobile";
+    public static final String MARKET_URL_4 = "ws://139.198.123.206/t/md/front/mobile";
     public static final String FEED_BACK_URL = "https://ask.shinnytech.com/src/indexm.html";
     //广播信息类型
     public static final String MD_ONLINE = "MD_ONLINE";

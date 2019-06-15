@@ -578,11 +578,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                     case MD_OFFLINE:
                         //断线重连
                         LogUtils.e("行情服务器连接断开，正在重连...", true);
-
-                        if (NetworkUtils.isNetworkConnected(sContext))
-                            WebSocketService.reConnectMD(sMDURLs.get(sIndex));
-                        else
-                            ToastUtils.showToast(sContext, "无网络，请检查网络设置");
+                        WebSocketService.reConnectMD(sMDURLs.get(sIndex));
                         break;
                     default:
                         break;
@@ -600,11 +596,7 @@ public class BaseApplication extends Application implements ServiceConnection {
                     case TD_OFFLINE:
                         //断线重连
                         LogUtils.e("交易服务器连接断开，正在重连...", true);
-
-                        if (NetworkUtils.isNetworkConnected(sContext))
-                            WebSocketService.reConnectTD();
-                        else
-                            ToastUtils.showToast(sContext, "无网络，请检查网络设置");
+                        WebSocketService.reConnectTD();
                         break;
                     case TD_MESSAGE_SETTLEMENT:
                         if (mSettlementContext != null) {
@@ -633,7 +625,6 @@ public class BaseApplication extends Application implements ServiceConnection {
             }
         };
         LocalBroadcastManager.getInstance(sContext).registerReceiver(mReceiverTransaction, new IntentFilter(TD_BROADCAST_ACTION));
-
     }
 
     @Override
