@@ -35,6 +35,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import static com.shinnytech.futures.application.BaseApplication.MD_BROADCAST_ACTION;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BALANCE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BROKER_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_IS_INS_IN_OPTIONAL;
@@ -52,7 +53,6 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_SHOW_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
-import static com.shinnytech.futures.service.WebSocketService.MD_BROADCAST_ACTION;
 
 /**
  * date: 7/9/17
@@ -143,7 +143,7 @@ public class HandicapFragment extends LazyLoadFragment {
             String broker_id = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_BROKER, "");
             JSONObject jsonObject = new JSONObject();
             String ins = mInstrumentId;
-            boolean isInsInOptional = LatestFileManager.getOptionalInsList().keySet().contains(ins);
+            boolean isInsInOptional = LatestFileManager.getOptionalInsList().containsKey(ins);
             jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
             jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);
             jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_HANDICAP);
@@ -194,7 +194,7 @@ public class HandicapFragment extends LazyLoadFragment {
             String broker_id = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_BROKER, "");
             JSONObject jsonObject = new JSONObject();
             String ins = mInstrumentId;
-            boolean isInsInOptional = LatestFileManager.getOptionalInsList().keySet().contains(ins);
+            boolean isInsInOptional = LatestFileManager.getOptionalInsList().containsKey(ins);
             jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
             jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);
             jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_HANDICAP);

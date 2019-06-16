@@ -27,6 +27,7 @@ import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.amplitude.api.Amplitude;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.controller.activity.AboutActivity;
 import com.shinnytech.futures.controller.activity.AccountActivity;
@@ -50,7 +51,6 @@ import com.shinnytech.futures.model.bean.settingbean.NavigationRightEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
-import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ScreenUtils;
@@ -286,7 +286,7 @@ public class MainActivityPresenter {
                         Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                         mMainActivity.startActivity(new Intent(mMainActivity, LoginActivity.class));
                         mMainActivity.finish();
-                        WebSocketService.reConnectTD();
+                        BaseApplication.getmTDWebSocket().reconnect();
                         break;
                     case CommonConstants.SETTING:
                         try {

@@ -33,7 +33,7 @@ public class ForegroundService extends Service {
         intent1.setAction("notification_click");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent1, 0);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String channelName = "WebSocketService";
+            String channelName = "ForegroundService";
             NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
             chan.setLightColor(Color.BLUE);
             chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);

@@ -39,7 +39,6 @@ import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityLoginBinding;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.Base64;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
@@ -54,6 +53,7 @@ import java.util.List;
 import java.util.Random;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
+import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_BROKER_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TIME;
@@ -86,7 +86,6 @@ import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_FAIL;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_SUCCEED;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_WEAK_PASSWORD;
-import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 import static com.shinnytech.futures.utils.ScreenUtils.getStatusBarHeight;
 
 /**
@@ -197,7 +196,7 @@ public class LoginActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 Amplitude.getInstance().logEvent(AMP_LOGIN, jsonObject);
-                WebSocketService.sendReqLogin(mBrokerName, mPhoneNumber, mPassword);
+                BaseApplication.getmTDWebSocket().sendReqLogin(mBrokerName, mPhoneNumber, mPassword);
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
@@ -423,7 +422,7 @@ public class LoginActivity extends AppCompatActivity {
 
             // Show a progress spinner, and kick off a background task to
             // perform the user fragment_home attempt.
-            WebSocketService.sendReqLogin(mBrokerName, mPhoneNumber, mPassword);
+            BaseApplication.getmTDWebSocket().sendReqLogin(mBrokerName, mPhoneNumber, mPassword);
 
             //超时检测
             mHandler.sendEmptyMessageDelayed(LOGIN_TIME_OUT, 5000);
@@ -630,6 +629,9 @@ public class LoginActivity extends AppCompatActivity {
         changeStatusBarColor(false);
         mIsFirm = false;
 
+        mBinding.account.getEditableText().clear();
+        mBinding.account.requestFocus();
+        mBinding.password.getEditableText().clear();
         boolean isFirm = (boolean) SPUtils.get(sContext, CONFIG_IS_FIRM, true);
         //获取用户登录成功后保存在sharedPreference里的期货公司
         if (SPUtils.contains(sContext, CONFIG_ACCOUNT) && !isFirm) {
@@ -638,8 +640,6 @@ public class LoginActivity extends AppCompatActivity {
             mBinding.account.setText(account);
             mBinding.account.setSelection(account.length());
             if (!account.isEmpty()) mBinding.deleteAccount.setVisibility(View.VISIBLE);
-        } else {
-            mBinding.account.getEditableText().clear();
         }
     }
 
@@ -662,6 +662,9 @@ public class LoginActivity extends AppCompatActivity {
         changeStatusBarColor(true);
         mIsFirm = true;
 
+        mBinding.account.getEditableText().clear();
+        mBinding.account.requestFocus();
+        mBinding.password.getEditableText().clear();
         boolean isFirm = (boolean) SPUtils.get(sContext, CONFIG_IS_FIRM, true);
         List<String> brokers = LatestFileManager.getBrokerIdFromBuildConfig(sDataManager.getBroker().getBrokers());
         //获取用户登录成功后保存在sharedPreference里的期货公司
@@ -674,7 +677,6 @@ public class LoginActivity extends AppCompatActivity {
             if (!account.isEmpty()) mBinding.deleteAccount.setVisibility(View.VISIBLE);
         } else if (!brokers.isEmpty()) {
             mBinding.broker.setText(brokers.get(0));
-            mBinding.account.getEditableText().clear();
         }
     }
 

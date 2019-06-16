@@ -12,7 +12,6 @@ import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
-import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.SPUtils;
@@ -712,7 +711,7 @@ public class LatestFileManager {
     /**
      * 读取本地文件合约列表
      */
-    private static List<String> readInsListFromFile() {
+    public static List<String> readInsListFromFile() {
         List<String> insList = new ArrayList<>();
         //打开文件输入流
         //读取文件内容

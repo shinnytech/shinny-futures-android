@@ -31,7 +31,7 @@ public class OptionalActivity extends BaseActivity {
     @Override
     protected void initData() {
         mBinding = (ActivityOptionalBinding) mViewDataBinding;
-        List<String> list = new ArrayList<>(LatestFileManager.getOptionalInsList().keySet());
+        List<String> list = LatestFileManager.readInsListFromFile();
         mOptionalAdapter = new OptionalAdapter(this, list);
         mBinding.optionalRv.setLayoutManager(new LinearLayoutManager(this));
         mBinding.optionalRv.setAdapter(mOptionalAdapter);

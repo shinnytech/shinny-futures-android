@@ -20,7 +20,6 @@ import com.shinnytech.futures.model.bean.futureinfobean.DiffEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.FutureBean;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
-import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
@@ -38,6 +37,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import static com.shinnytech.futures.application.BaseApplication.MD_BROADCAST;
+import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST;
+import static com.shinnytech.futures.application.BaseApplication.sendMessage;
+import static com.shinnytech.futures.application.BaseApplication.showSettlement;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_BROKER_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TIME;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE;
@@ -68,8 +71,6 @@ import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_SUCCEED;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_WEAK_PASSWORD;
-import static com.shinnytech.futures.service.WebSocketService.MD_BROADCAST;
-import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST;
 
 /**
  * date: 7/9/17
@@ -236,7 +237,7 @@ public class DataManager {
                     }
                 }
             }
-            WebSocketService.sendMessage(MD_MESSAGE, MD_BROADCAST);
+            sendMessage(MD_MESSAGE, MD_BROADCAST);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -461,15 +462,15 @@ public class DataManager {
                                 Amplitude.getInstance().logEvent(AMP_NOTIFY, jsonObject1);
 
                                 if (content.equals(CHANGE_PASSWORD_SUCCEED)) {
-                                    WebSocketService.sendMessage(TD_MESSAGE_CHANGE_SUCCESS, TD_BROADCAST);
+                                    sendMessage(TD_MESSAGE_CHANGE_SUCCESS, TD_BROADCAST);
                                 }
                                 if ((code == 140) || (code == 131)) {
-                                    WebSocketService.sendMessage(TD_MESSAGE_WEAK_PASSWORD, TD_BROADCAST);
+                                    sendMessage(TD_MESSAGE_WEAK_PASSWORD, TD_BROADCAST);
                                 }
                                 if ("SETTLEMENT".equals(type)) {
                                     LogUtils.e(content, true);
                                     BROKER.setSettlement(content);
-                                    WebSocketService.sendMessage(TD_MESSAGE_SETTLEMENT, TD_BROADCAST);
+                                    showSettlement();
                                 } else {
                                     if (LOGIN_SUCCEED.equals(content)) {
                                         //游客模式不显示登录成功弹出框
@@ -487,7 +488,7 @@ public class DataManager {
                                             e.printStackTrace();
                                         }
                                         Amplitude.getInstance().logEvent(AMP_LOGIN_FAILED, jsonObject);
-                                        WebSocketService.sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
+                                        sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
                                     }
                                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                                         @Override
@@ -558,7 +559,7 @@ public class DataManager {
                                                     e.printStackTrace();
                                                 }
                                                 Amplitude.getInstance().logEvent(AMP_LOGIN_SUCCEEDED, jsonObject);
-                                                WebSocketService.sendMessage(TD_MESSAGE_LOGIN_SUCCEED, TD_BROADCAST);
+                                                sendMessage(TD_MESSAGE_LOGIN_SUCCEED, TD_BROADCAST);
                                             }
 
                                             break;
@@ -567,7 +568,7 @@ public class DataManager {
                                     }
                                 }
                                 userEntities.put(userKey, userEntity);
-                                WebSocketService.sendMessage(TD_MESSAGE, TD_BROADCAST);
+                                sendMessage(TD_MESSAGE, TD_BROADCAST);
                             }
                             break;
                         default:

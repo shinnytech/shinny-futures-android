@@ -15,13 +15,13 @@ import android.widget.ArrayAdapter;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.amplitude.api.Identify;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivityBankTransferBinding;
 import com.shinnytech.futures.model.adapter.BankTransferAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.BankEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.TransferEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.listener.TransferDiffCallback;
-import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.ToastUtils;
@@ -116,7 +116,7 @@ public class BankTransferActivity extends BaseActivity {
                 String currency = (String) mBinding.spinnerCurrency.getSelectedItem();
                 try {
                     float amountF = -abs(Float.parseFloat(amount));
-                    WebSocketService.sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
+                    BaseApplication.getmTDWebSocket().sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
                     Identify identify = new Identify()
                             .setOnce(AMP_USER_BANK_FIRST, bank)
                             .set(AMP_USER_BANK_LAST, bank);
@@ -146,7 +146,7 @@ public class BankTransferActivity extends BaseActivity {
                 String currency = (String) mBinding.spinnerCurrency.getSelectedItem();
                 try {
                     float amountF = abs(Float.parseFloat(amount));
-                    WebSocketService.sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
+                    BaseApplication.getmTDWebSocket().sendReqTransfer(futureAccount, accountPassword, bankId, bankPassword, currency, amountF);
                     Identify identify = new Identify()
                             .setOnce(AMP_USER_BANK_FIRST, bank)
                             .set(AMP_USER_BANK_LAST, bank);

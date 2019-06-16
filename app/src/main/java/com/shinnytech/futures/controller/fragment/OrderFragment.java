@@ -43,7 +43,6 @@ import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.OrderDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
-import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.LogUtils;
@@ -62,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BALANCE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BROKER_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
@@ -89,7 +89,6 @@ import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIV
 import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
-import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 5/10/17
@@ -305,7 +304,7 @@ public class OrderFragment extends LazyLoadFragment {
                 jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_ACCOUNT);
             } else {
                 String ins = mInstrumentId;
-                boolean isInsInOptional = LatestFileManager.getOptionalInsList().keySet().contains(ins);
+                boolean isInsInOptional = LatestFileManager.getOptionalInsList().containsKey(ins);
                 jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
                 jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);
             }
@@ -366,7 +365,7 @@ public class OrderFragment extends LazyLoadFragment {
                 jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_ACCOUNT);
             } else {
                 String ins = mInstrumentId;
-                boolean isInsInOptional = LatestFileManager.getOptionalInsList().keySet().contains(ins);
+                boolean isInsInOptional = LatestFileManager.getOptionalInsList().containsKey(ins);
                 jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
                 jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);
             }
@@ -487,7 +486,7 @@ public class OrderFragment extends LazyLoadFragment {
                     initDialog(order_id, ins_name, direction_title, volume, price);
                     popWindow.dismiss();
                 } else {
-                    WebSocketService.sendReqCancelOrder(order_id);
+                    BaseApplication.getmTDWebSocket().sendReqCancelOrder(order_id);
                     popWindow.dismiss();
                 }
             }
@@ -527,7 +526,7 @@ public class OrderFragment extends LazyLoadFragment {
             @Override
             public void onClick(View v) {
                 try {
-                    WebSocketService.sendReqCancelOrder(order_id);
+                    BaseApplication.getmTDWebSocket().sendReqCancelOrder(order_id);
                 } catch (NumberFormatException ex) {
                     ex.printStackTrace();
                 }

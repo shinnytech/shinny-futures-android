@@ -34,6 +34,7 @@ import com.shinnytech.futures.utils.SPUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_ABOUT;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_ACCOUNT;
@@ -49,7 +50,6 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_IS_FIRM;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
-import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 7/7/17

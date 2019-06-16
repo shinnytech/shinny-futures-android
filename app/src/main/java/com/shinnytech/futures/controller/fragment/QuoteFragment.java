@@ -50,7 +50,6 @@ import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.QuoteDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
-import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.LogUtils;
@@ -69,6 +68,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.shinnytech.futures.application.BaseApplication.MD_BROADCAST_ACTION;
+import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BALANCE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BROKER_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
@@ -109,8 +110,6 @@ import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOU;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
-import static com.shinnytech.futures.service.WebSocketService.MD_BROADCAST_ACTION;
-import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 7/9/17
@@ -238,8 +237,6 @@ public class QuoteFragment extends LazyLoadFragment {
             showEvent();
             refreshMD(mToolbarTitle.getText().toString());
             refreshTD();
-
-            if (OPTIONAL.equals(mTitle)) initConfigOptional();
 
             if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
                 mBinding.tvChangePercent.setText(R.string.quote_fragment_bid_price1);
@@ -376,10 +373,10 @@ public class QuoteFragment extends LazyLoadFragment {
     private void sendSubscribeQuotes(List<String> insList) {
 
         if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle) || OPTIONAL.equals(mTitle)) {
-            WebSocketService.
+            BaseApplication.getmMDWebSocket().
                     sendSubscribeQuote(TextUtils.join(",", LatestFileManager.getCombineInsList(insList)));
         } else {
-            WebSocketService.
+            BaseApplication.getmMDWebSocket().
                     sendSubscribeQuote(TextUtils.join(",", insList));
         }
     }
@@ -554,7 +551,7 @@ public class QuoteFragment extends LazyLoadFragment {
                             public void onClick(View v) {
                                 popWindow.dismiss();
                                 if (mDragDialogAdapter != null)
-                                    mDragDialogAdapter.updateList(new ArrayList<>(LatestFileManager.getOptionalInsList().keySet()));
+                                    mDragDialogAdapter.updateList(LatestFileManager.readInsListFromFile());
 
                                 if (mDialog == null) {
                                     //初始化自选合约弹出框
@@ -798,6 +795,8 @@ public class QuoteFragment extends LazyLoadFragment {
             }
         }
 
+        if (OPTIONAL.equals(mTitle)) initConfigOptional(list);
+
         mAdapter.updateHighlightList(list);
     }
 
@@ -857,7 +856,7 @@ public class QuoteFragment extends LazyLoadFragment {
      * author: chenli
      * description: 配置新用户自选合约
      */
-    public void initConfigOptional() {
+    public void initConfigOptional(final List<String> insList) {
         if (!SPUtils.contains(BaseApplication.getContext(), CONFIG_RECOMMEND_OPTIONAL)
                 && LatestFileManager.getOptionalInsList().isEmpty()) {
             final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
@@ -916,7 +915,7 @@ public class QuoteFragment extends LazyLoadFragment {
                         @Override
                         public void onDismiss(DialogInterface dialog) {
                             List<String> list = quoteAdapterRecommend.getmDataPre();
-                            List<String> insList = new ArrayList<>();
+                            List<String> insList = LatestFileManager.readInsListFromFile();
                             if (list != null && !list.isEmpty()) {
                                 List<String> values = new ArrayList<>(LatestFileManager.getMainInsListNameNav().values());
                                 List<String> keys = new ArrayList<>(LatestFileManager.getMainInsListNameNav().keySet());
@@ -939,26 +938,11 @@ public class QuoteFragment extends LazyLoadFragment {
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    UserEntity userEntity = mDataManager.getTradeBean().getUsers().get(mDataManager.LOGIN_USER_ID);
-                    if (userEntity != null) {
-                        Map<String, PositionEntity> positions = userEntity.getPositions();
-                        //持仓合约
-                        if (!positions.isEmpty()) {
-                            List<String> list = new ArrayList<>();
-                            for (PositionEntity positionEntity : positions.values()) {
-                                int volume_long = Integer.parseInt(positionEntity.getVolume_long());
-                                int volume_short = Integer.parseInt(positionEntity.getVolume_short());
-                                if (!(volume_long == 0 && volume_short == 0)) {
-                                    list.add(positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id());
-                                }
-                            }
-                            LatestFileManager.saveInsListToFile(list);
-                        }
-                    }
+                    LatestFileManager.saveInsListToFile(insList);
                     SPUtils.putAndApply(BaseApplication.getContext(), CONFIG_RECOMMEND_OPTIONAL, true);
                     dialog.dismiss();
                 }
-            }, 3000);
+            }, 1500);
         }
 
     }

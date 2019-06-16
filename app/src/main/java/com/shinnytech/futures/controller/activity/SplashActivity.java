@@ -29,11 +29,11 @@ import java.lang.ref.WeakReference;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_IS_FIRM;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_FAIL;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_SUCCEED;
 import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
-import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 import static com.shinnytech.futures.utils.ScreenUtils.getStatusBarHeight;
 
 public class SplashActivity extends AppCompatActivity {

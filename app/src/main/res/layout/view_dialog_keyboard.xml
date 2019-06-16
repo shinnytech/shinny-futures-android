@@ -3,13 +3,6 @@
     android:orientation="vertical"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
-    <ImageView
-        android:id="@+id/hide_keyboard"
-        android:scaleType="center"
-        android:layout_gravity="right"
-        android:src="@mipmap/ic_keyboard_hide_white_36dp"
-        android:layout_width="36dp"
-        android:layout_height="36dp" />
 
     <android.inputmethodservice.KeyboardView
         android:id="@+id/keyboard"

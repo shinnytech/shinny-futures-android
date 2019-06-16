@@ -54,7 +54,6 @@ import com.shinnytech.futures.model.bean.futureinfobean.ChartEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.SPUtils;
@@ -409,7 +408,7 @@ public class KlineFragment extends BaseChartFragment {
                             if (Math.abs(mMiddleChartViewBase.getLowestVisibleX() - startIndex) < 50) {
                                 if (xVals.size() >= mViewWidth) {
                                     mViewWidth = mViewWidth + 100;
-                                    WebSocketService.sendSetChartKline(instrument_id, mViewWidth, mKlineType);
+                                    BaseApplication.getmMDWebSocket().sendSetChartKline(instrument_id, mViewWidth, mKlineType);
                                 }
                             }
                         }
@@ -454,7 +453,7 @@ public class KlineFragment extends BaseChartFragment {
                             if (Math.abs(mMiddleChartViewBase.getLowestVisibleX() - startIndex) < 50) {
                                 if (xVals.size() >= mViewWidth) {
                                     mViewWidth = mViewWidth + 100;
-                                    WebSocketService.sendSetChartKline(instrument_id, mViewWidth, mKlineType);
+                                    BaseApplication.getmMDWebSocket().sendSetChartKline(instrument_id, mViewWidth, mKlineType);
                                 }
                             }
                         }
@@ -957,7 +956,7 @@ public class KlineFragment extends BaseChartFragment {
             drawKline();
             if (mIsPosition) addPositionLimitLines();
             if (mIsPending) addOrderLimitLines();
-            WebSocketService.sendSetChartKline(instrument_id, VIEW_WIDTH, mKlineType);
+            BaseApplication.getmMDWebSocket().sendSetChartKline(instrument_id, VIEW_WIDTH, mKlineType);
 
         }
     }
@@ -980,7 +979,7 @@ public class KlineFragment extends BaseChartFragment {
         drawKline();
         if (mIsPosition) addPositionLimitLines();
         if (mIsPending) addOrderLimitLines();
-        WebSocketService.sendSetChartKline(instrument_id, VIEW_WIDTH, mKlineType);
+        BaseApplication.getmMDWebSocket().sendSetChartKline(instrument_id, VIEW_WIDTH, mKlineType);
 
     }
 

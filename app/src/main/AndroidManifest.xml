@@ -48,11 +48,6 @@
         </provider>
 
         <service
-            android:exported="false"
-            android:name=".service.WebSocketService"
-            android:priority="1000" />
-
-        <service
             android:priority="1000"
             android:name=".service.ForegroundService"
             android:exported="false"/>

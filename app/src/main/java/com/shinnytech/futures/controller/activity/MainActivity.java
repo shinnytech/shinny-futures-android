@@ -22,7 +22,6 @@ import com.shinnytech.futures.controller.fragment.QuoteFragment;
 import com.shinnytech.futures.controller.fragment.QuotePagerFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
 import com.shinnytech.futures.model.engine.DataManager;
-import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastUtils;
@@ -253,7 +252,7 @@ public class MainActivity extends BaseActivity {
                 if (quoteFragment != null && OPTIONAL.equals(quoteFragment.getTitle())) {
                     quoteFragment.refreshOptional();
                 } else if (mIns != null && !mIns.equals(sDataManager.getRtnData().getIns_list())) {
-                    WebSocketService.sendSubscribeQuote(mIns);
+                    BaseApplication.getmMDWebSocket().sendSubscribeQuote(mIns);
                 }
             }
 

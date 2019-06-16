@@ -31,6 +31,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_ACCOUNT_TRANSFER_IN;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_ACCOUNT_TRANSFER_OUT;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
@@ -47,7 +48,6 @@ import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_DIRECTION;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_IN;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_OUT;
-import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
 public class AccountFragment extends LazyLoadFragment {
 

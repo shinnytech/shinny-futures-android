@@ -251,7 +251,7 @@ public class FutureInfoActivityPresenter {
                         dialogWindow.setAttributes(lp);
                     }
                     mDialogOptional.setContentView(viewDialog);
-                    List<String> list = new ArrayList<>(LatestFileManager.getOptionalInsList().keySet());
+                    List<String> list = LatestFileManager.readInsListFromFile();
                     DataManager dataManager = DataManager.getInstance();
                     UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.LOGIN_USER_ID);
                     if (userEntity != null) {
@@ -300,7 +300,7 @@ public class FutureInfoActivityPresenter {
                                     }));
 
                 } else {
-                    List<String> list = new ArrayList<>(LatestFileManager.getOptionalInsList().keySet());
+                    List<String> list = LatestFileManager.readInsListFromFile();
                     DataManager dataManager = DataManager.getInstance();
                     UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.LOGIN_USER_ID);
                     if (userEntity != null) {

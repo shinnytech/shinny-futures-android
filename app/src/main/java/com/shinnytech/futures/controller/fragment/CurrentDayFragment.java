@@ -33,13 +33,13 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.Transformer;
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyMarkerView;
@@ -685,7 +685,7 @@ public class CurrentDayFragment extends BaseChartFragment {
         if (mIsPosition) addPositionLimitLines();
         if (mIsPending) addOrderLimitLines();
 
-        WebSocketService.sendSetChart(instrument_id);
+        BaseApplication.getmMDWebSocket().sendSetChart(instrument_id);
     }
 
     /**

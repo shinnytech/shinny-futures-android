@@ -8,16 +8,12 @@ import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.lifecycle.ProcessLifecycleOwner;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.TextView;
@@ -34,6 +30,7 @@ import com.lzy.okgo.callback.FileCallback;
 import com.lzy.okgo.cookie.store.SPCookieStore;
 import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
 import com.lzy.okgo.model.HttpHeaders;
+import com.lzy.okgo.model.Response;
 import com.sfit.ctp.info.DeviceInfoManager;
 import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.R;
@@ -46,14 +43,14 @@ import com.shinnytech.futures.model.bean.eventbusbean.RedrawEvent;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.service.ForegroundService;
-import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.Base64;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
-import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
 import com.shinnytech.futures.utils.ToastUtils;
+import com.shinnytech.futures.websocket.MDWebSocket;
+import com.shinnytech.futures.websocket.TDWebSocket;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.tencent.bugly.crashreport.CrashReport;
@@ -111,13 +108,8 @@ import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_1;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_2;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_3;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_4;
-import static com.shinnytech.futures.constants.CommonConstants.MD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_INS_LIST;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
-import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_URL;
-import static com.shinnytech.futures.service.WebSocketService.MD_BROADCAST_ACTION;
-import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * Created on 12/21/17.
@@ -125,30 +117,41 @@ import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTIO
  * Description: Tinker框架下的application类的具体实现
  */
 
-public class BaseApplication extends Application implements ServiceConnection {
+public class BaseApplication extends Application {
 
+    /**
+     * date: 7/9/17
+     * description: 行情广播类型
+     */
+    public static final String MD_BROADCAST = "MD_BROADCAST";
+
+    /**
+     * date: 7/9/17
+     * description: 交易广播类型
+     */
+    public static final String TD_BROADCAST = "TD_BROADCAST";
+
+    /**
+     * date: 7/9/17
+     * description: 行情广播信息
+     */
+    public static final String MD_BROADCAST_ACTION = BaseApplication.class.getName() + "." + MD_BROADCAST;
+
+    /**
+     * date: 7/9/17
+     * description: 交易广播信息
+     */
+    public static final String TD_BROADCAST_ACTION = BaseApplication.class.getName() + "." + TD_BROADCAST;
+    private static LocalBroadcastManager mLocalBroadcastManager;
     private static Context sContext;
-    private static List<String> sMDURLs = new ArrayList<>();
-    private static int sIndex = 0;
+    private List<String> mMDURLs;
+    private List<String> mTDURLs;
     private static LOGClient sLOGClient;
-    private static boolean sBackGround = false;
-    private BroadcastReceiver mReceiverMarket;
-    private BroadcastReceiver mReceiverTransaction;
-    private AppLifecycleObserver mAppLifecycleObserver = new AppLifecycleObserver();
-    private Context mSettlementContext;
-    private int mBindingCount = 0;
-
-    public static int getsIndex() {
-        return sIndex;
-    }
-
-    public static void setsIndex(int sIndex) {
-        BaseApplication.sIndex = sIndex;
-    }
-
-    public static List<String> getsMDURLs() {
-        return sMDURLs;
-    }
+    private static boolean sBackGround;
+    private AppLifecycleObserver mAppLifecycleObserver;
+    private static Context mSettlementContext;
+    private static MDWebSocket mMDWebSocket;
+    private static TDWebSocket mTDWebSocket;
 
     public static Context getContext() {
         return sContext;
@@ -162,10 +165,38 @@ public class BaseApplication extends Application implements ServiceConnection {
         return sLOGClient;
     }
 
+    public static MDWebSocket getmMDWebSocket() {
+        return mMDWebSocket;
+    }
+
+    public static TDWebSocket getmTDWebSocket() {
+        return mTDWebSocket;
+    }
+
+    public static void sendMessage(String message, String type) {
+        switch (type) {
+            case MD_BROADCAST:
+                Intent intent = new Intent(MD_BROADCAST_ACTION);
+                intent.putExtra("msg", message);
+                mLocalBroadcastManager.sendBroadcast(intent);
+                break;
+            case TD_BROADCAST:
+                Intent intentTransaction = new Intent(TD_BROADCAST_ACTION);
+                intentTransaction.putExtra("msg", message);
+                mLocalBroadcastManager.sendBroadcast(intentTransaction);
+                break;
+        }
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
-        if (sContext == null) sContext = getApplicationContext();
+        sContext = getApplicationContext();
+        mMDURLs = new ArrayList<>();
+        mTDURLs = new ArrayList<>();
+        mAppLifecycleObserver = new AppLifecycleObserver();
+        sBackGround = false;
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(sContext);
 
         ProcessLifecycleOwner.get().getLifecycle().addObserver(mAppLifecycleObserver);
 
@@ -186,9 +217,6 @@ public class BaseApplication extends Application implements ServiceConnection {
 
         //注册活动生命周期回调
         registerActivityLifecycleCallback();
-
-        //广播注册
-        registerBroaderCast();
 
     }
 
@@ -365,7 +393,7 @@ public class BaseApplication extends Application implements ServiceConnection {
             MDUrlGroup.add(MARKET_URL_5);
             MDUrlGroup.add(MARKET_URL_6);
             MDUrlGroup.add(MARKET_URL_7);
-            sMDURLs.add(MARKET_URL_8);
+            mMDURLs.add(MARKET_URL_8);
             TRANSACTION_URL = TRANSACTION_URL_L;
             JSON_FILE_URL = JSON_FILE_URL_L;
             Amplitude.getInstance().initialize(this, AMP_KEY).enableForegroundTracking(this);
@@ -401,20 +429,59 @@ public class BaseApplication extends Application implements ServiceConnection {
             DataManager.getInstance().USER_AGENT = user_agent;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-            sMDURLs.add(MARKET_URL_1);
+            mMDURLs.add(MARKET_URL_1);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-            sMDURLs.add(MARKET_URL_1);
+            mMDURLs.add(MARKET_URL_1);
         } catch (InvocationTargetException e) {
             e.printStackTrace();
-            sMDURLs.add(MARKET_URL_1);
+            mMDURLs.add(MARKET_URL_1);
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
-            sMDURLs.add(MARKET_URL_1);
+            mMDURLs.add(MARKET_URL_1);
         }
         Collections.shuffle(MDUrlGroup);
-        sMDURLs.addAll(MDUrlGroup);
+        mMDURLs.addAll(MDUrlGroup);
+        mTDURLs.add(TRANSACTION_URL);
     }
+
+    /**
+     * date: 7/9/17
+     * author: chenli
+     * description: 下载合约列表文件
+     */
+    private void downloadLatestJsonFile() {
+        OkGo.<File>get(CommonConstants.JSON_FILE_URL)
+                .tag(this)
+                .execute(new FileCallback(sContext.getFilesDir().getAbsolutePath(), "latest.json") {
+                    @Override
+                    public void onSuccess(final com.lzy.okgo.model.Response<File> response) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                LatestFileManager.initInsList(response.body());
+                                mMDWebSocket = new MDWebSocket(mMDURLs, 0);
+                                mTDWebSocket = new TDWebSocket(mTDURLs, 0);
+                                mMDWebSocket.connect();
+                                mTDWebSocket.connect();
+                            }
+                        }).start();
+                    }
+
+                    @Override
+                    public void onError(Response<File> response) {
+                        super.onError(response);
+                        ToastUtils.showToast(sContext, "合约代码下载失败，请重试");
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                System.exit(0);
+                            }
+                        }, 2000);
+                    }
+                });
+    }
+
 
     /**
      * date: 7/21/17
@@ -472,6 +539,46 @@ public class BaseApplication extends Application implements ServiceConnection {
         });
     }
 
+    /**
+     * date: 2019/6/15
+     * author: chenli
+     * description: 显示结算单
+     */
+    public static void showSettlement(){
+        if (mSettlementContext != null) {
+            final Dialog dialog = new Dialog(mSettlementContext, R.style.responsibilityDialog);
+            View viewDialog = View.inflate(mSettlementContext, R.layout.view_dialog_confirm, null);
+            dialog.setContentView(viewDialog);
+            TextView settlement = viewDialog.findViewById(R.id.settlement_info);
+            settlement.setText(DataManager.getInstance().getBroker().getSettlement());
+            dialog.setCanceledOnTouchOutside(false);
+            viewDialog.findViewById(R.id.confirm).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mTDWebSocket.sendReqConfirmSettlement();
+                    dialog.dismiss();
+                }
+            });
+            if (!dialog.isShowing()) {
+                dialog.show();
+            }
+        }
+    }
+
+    class AppLifecycleObserver implements LifecycleObserver {
+        @OnLifecycleEvent(Lifecycle.Event.ON_START)
+        public void onEnterForeground() {
+            LogUtils.e("onEnterForeground", true);
+            notifyForeground();
+        }
+
+        @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+        public void onEnterBackground() {
+            LogUtils.e("onEnterBackground", true);
+            notifyBackground();
+        }
+    }
+
 
     /**
      * date: 7/21/17
@@ -488,13 +595,14 @@ public class BaseApplication extends Application implements ServiceConnection {
             }
         }).start();
 
+        if (sBackGround){
+            mMDWebSocket.sendPeekMessage();
+            mTDWebSocket.sendPeekMessageTransaction();
+        }
+
         EventBus.getDefault().post(new RedrawEvent());
         sBackGround = false;
-        WebSocketService.sendPeekMessage();
-        WebSocketService.sendPeekMessageTransaction();
-
         Amplitude.getInstance().logEvent(AMP_FOREGROUND);
-
         Intent intent = new Intent(sContext, ForegroundService.class);
         stopService(intent);
     }
@@ -537,154 +645,6 @@ public class BaseApplication extends Application implements ServiceConnection {
 
         Intent intent = new Intent(sContext, ForegroundService.class);
         startService(intent);
-
-    }
-
-    /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 下载合约列表文件
-     */
-    private void downloadLatestJsonFile() {
-        OkGo.<File>get(CommonConstants.JSON_FILE_URL)
-                .tag(this)
-                .execute(new FileCallback(sContext.getFilesDir().getAbsolutePath(), "latest.json") {
-                    @Override
-                    public void onSuccess(final com.lzy.okgo.model.Response<File> response) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                LatestFileManager.initInsList(response.body());
-                                Intent intent = new Intent(sContext, WebSocketService.class);
-                                sContext.bindService(intent, BaseApplication.this, Context.BIND_AUTO_CREATE);
-                            }
-                        }).start();
-
-                    }
-                });
-    }
-
-    /**
-     * date: 7/9/17
-     * description: 注册广播
-     */
-    private void registerBroaderCast() {
-        //行情服务器断线重连广播
-        mReceiverMarket = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String mDataString = intent.getStringExtra("msg");
-                switch (mDataString) {
-                    case MD_OFFLINE:
-                        //断线重连
-                        LogUtils.e("行情服务器连接断开，正在重连...", true);
-                        WebSocketService.reConnectMD(sMDURLs.get(sIndex));
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-        LocalBroadcastManager.getInstance(sContext).registerReceiver(mReceiverMarket, new IntentFilter(MD_BROADCAST_ACTION));
-
-        //交易服务器断线重连广播
-        mReceiverTransaction = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String mDataString = intent.getStringExtra("msg");
-                switch (mDataString) {
-                    case TD_OFFLINE:
-                        //断线重连
-                        LogUtils.e("交易服务器连接断开，正在重连...", true);
-                        WebSocketService.reConnectTD();
-                        break;
-                    case TD_MESSAGE_SETTLEMENT:
-                        if (mSettlementContext != null) {
-                            final Dialog dialog = new Dialog(mSettlementContext, R.style.responsibilityDialog);
-                            View viewDialog = View.inflate(mSettlementContext, R.layout.view_dialog_confirm, null);
-                            dialog.setContentView(viewDialog);
-                            TextView settlement = viewDialog.findViewById(R.id.settlement_info);
-                            settlement.setText(DataManager.getInstance().getBroker().getSettlement());
-                            dialog.setCanceledOnTouchOutside(false);
-                            viewDialog.findViewById(R.id.confirm).setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    WebSocketService.sendReqConfirmSettlement();
-                                    dialog.dismiss();
-                                }
-                            });
-                            if (!dialog.isShowing()) {
-                                dialog.show();
-                            }
-                        }
-                        break;
-                    default:
-                        break;
-
-                }
-            }
-        };
-        LocalBroadcastManager.getInstance(sContext).registerReceiver(mReceiverTransaction, new IntentFilter(TD_BROADCAST_ACTION));
-    }
-
-    @Override
-    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-        mBindingCount++;
-        //连接行情服务器
-        WebSocketService.connectMD(sMDURLs.get(sIndex));
-        //连接交易服务器
-        WebSocketService.connectTD();
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName componentName) {
-        if (mBindingCount < 5) {
-            Intent intent = new Intent(sContext, WebSocketService.class);
-            sContext.bindService(intent, BaseApplication.this, Context.BIND_AUTO_CREATE);
-        } else {
-            ToastUtils.showToast(sContext, "系统异常，即将退出，请重新打开");
-            new android.os.Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    System.exit(0);
-                }
-            }, 2000);
-        }
-    }
-
-    @Override
-    public void onBindingDied(ComponentName name) {
-        if (mBindingCount < 5) {
-            Intent intent = new Intent(sContext, WebSocketService.class);
-            sContext.bindService(intent, BaseApplication.this, Context.BIND_AUTO_CREATE);
-        } else {
-            ToastUtils.showToast(sContext, "系统异常，即将退出，请重新打开");
-            new android.os.Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    System.exit(0);
-                }
-            }, 2000);
-        }
-    }
-
-    @Override
-    public void onNullBinding(ComponentName name) {
-
-    }
-
-    class AppLifecycleObserver implements LifecycleObserver {
-        @OnLifecycleEvent(Lifecycle.Event.ON_START)
-        public void onEnterForeground() {
-            LogUtils.e("onEnterForeground", true);
-            notifyForeground();
-        }
-
-        @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-        public void onEnterBackground() {
-            LogUtils.e("onEnterBackground", true);
-            notifyBackground();
-        }
     }
 
 }

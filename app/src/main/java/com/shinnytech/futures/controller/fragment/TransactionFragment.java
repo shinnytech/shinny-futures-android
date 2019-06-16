@@ -13,6 +13,7 @@ import android.inputmethodservice.KeyboardView;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.PopupMenu;
 import android.text.Editable;
@@ -44,7 +45,6 @@ import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
-import com.shinnytech.futures.service.WebSocketService;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
@@ -61,6 +61,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.shinnytech.futures.application.BaseApplication.MD_BROADCAST_ACTION;
+import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
 import static com.shinnytech.futures.constants.CommonConstants.ACTION_ADD_BUY;
 import static com.shinnytech.futures.constants.CommonConstants.ACTION_ADD_SELL;
 import static com.shinnytech.futures.constants.CommonConstants.ACTION_CLOSE_BUY;
@@ -150,8 +152,6 @@ import static com.shinnytech.futures.constants.CommonConstants.STATUS_FIRST_OPEN
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_LOCK;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.USER_PRICE;
-import static com.shinnytech.futures.service.WebSocketService.MD_BROADCAST_ACTION;
-import static com.shinnytech.futures.service.WebSocketService.TD_BROADCAST_ACTION;
 
 /**
  * date: 6/8/17
@@ -185,6 +185,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     private FragmentTransactionBinding mBinding;
     private boolean mIsShowDialog;
     private long mShowTime;
+    private Dialog mPriceDialog;
+    private Dialog mVolumeDialog;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -202,8 +204,14 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_transaction, container, false);
+        initData();
         initEvent();
         return mBinding.getRoot();
+    }
+
+    private void initData(){
+        mPriceDialog = initKeyboardDialog(mBinding.price, R.xml.future_price);
+        mVolumeDialog = initKeyboardDialog(mBinding.volume, R.xml.future_volume);
     }
 
     private void initEvent() {
@@ -228,7 +236,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         }
                     }
                     mBinding.price.setSelection(0, mBinding.price.getText().length());
-                    popupKeyboardDialog(mBinding.price, R.xml.future_price);
+                    if (mVolumeDialog.isShowing())mVolumeDialog.dismiss();
+                    if (!mPriceDialog.isShowing())mPriceDialog.show();
                 }
                 return true;
             }
@@ -251,7 +260,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         }
                     }
                     mBinding.volume.setSelection(0, mBinding.volume.getText().length());
-                    popupKeyboardDialog(mBinding.volume, R.xml.future_volume);
+                    if (mPriceDialog.isShowing())mPriceDialog.dismiss();
+                    if (!mVolumeDialog.isShowing())mVolumeDialog.show();
                 }
                 return true;
             }
@@ -344,6 +354,13 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         mBinding.backAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (mPriceDialog.isShowing() ){
+                    mPriceDialog.dismiss();
+                    return;
+                }else if (mVolumeDialog.isShowing()){
+                    mVolumeDialog.dismiss();
+                    return;
+                }
                 Amplitude.getInstance().logEvent(AMP_ACCOUNT_LINK);
                 Intent intent = new Intent();
                 intent.putExtra(BACK_TO_ACCOUNT_DETAIL, true);
@@ -396,7 +413,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             String broker_id = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_BROKER, "");
             JSONObject jsonObject = new JSONObject();
             String ins = mInstrumentId;
-            boolean isInsInOptional = LatestFileManager.getOptionalInsList().keySet().contains(ins);
+            boolean isInsInOptional = LatestFileManager.getOptionalInsList().containsKey(ins);
             jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
             jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);
             jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_TRANSACTION);
@@ -448,7 +465,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             String broker_id = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_BROKER, "");
             JSONObject jsonObject = new JSONObject();
             String ins = mInstrumentId;
-            boolean isInsInOptional = LatestFileManager.getOptionalInsList().keySet().contains(ins);
+            boolean isInsInOptional = LatestFileManager.getOptionalInsList().containsKey(ins);
             jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
             jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);
             jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_TRANSACTION);
@@ -1184,8 +1201,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    WebSocketService.sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
-                    WebSocketService.sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, price);
+                    BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
+                    BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, price);
                     refreshPosition();
                     dialog.dismiss();
                     mIsRefreshPosition = true;
@@ -1201,8 +1218,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             });
             dialog.show();
         } else {
-            WebSocketService.sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
-            WebSocketService.sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, price);
+            BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
+            BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, price);
             refreshPosition();
             mIsRefreshPosition = true;
         }
@@ -1249,7 +1266,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    WebSocketService.sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
+                    BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
                     refreshPosition();
                     dialog.dismiss();
                     mIsRefreshPosition = true;
@@ -1265,7 +1282,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             });
             dialog.show();
         } else {
-            WebSocketService.sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
+            BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
             refreshPosition();
             mIsRefreshPosition = true;
         }
@@ -1312,7 +1329,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 @Override
                 public void onClick(View v) {
                     for (String order_id : orderIds) {
-                        WebSocketService.sendReqCancelOrder(order_id);
+                        BaseApplication.getmTDWebSocket().sendReqCancelOrder(order_id);
                     }
                     dialog.dismiss();
                     Amplitude.getInstance().logEvent(AMP_CANCEL_CLOSE_CONFIRMED);
@@ -1452,10 +1469,10 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     /**
      * date: 2019/4/15
      * author: chenli
-     * description: 软键盘弹出框
+     * description: 初始化软键盘
      */
-    private void popupKeyboardDialog(final EditText mEditText, final int idKeyboard) {
-        final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_No_Dim_Dialog);
+    private Dialog initKeyboardDialog(final EditText mEditText, final int idKeyboard) {
+        Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_No_Dim_Dialog);
         View viewDialog = View.inflate(getActivity(), R.layout.view_dialog_keyboard, null);
         Window dialogWindow = dialog.getWindow();
         if (dialogWindow != null) {
@@ -1463,10 +1480,13 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             dialogWindow.setGravity(Gravity.BOTTOM);
             WindowManager.LayoutParams lp = dialogWindow.getAttributes();
             lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
-            lp.height = ScreenUtils.dp2px(sContext, 236);
+            lp.height = ScreenUtils.dp2px(sContext, 200);
             lp.x = ScreenUtils.dp2px(sContext, 100);
             dialogWindow.setAttributes(lp);
+            dialogWindow.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL, WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+            dialogWindow.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         }
+
         Keyboard mKeyboard = new Keyboard(getActivity(), idKeyboard);
         KeyboardView keyboardView = viewDialog.findViewById(R.id.keyboard);
         keyboardView.setKeyboard(mKeyboard);
@@ -1509,27 +1529,27 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         jsonObject.put(AMP_EVENT_VOLUME_KEY, AMP_EVENT_VOLUME_KEY_VALUE_CLEAR);
                         editable.clear();
                     } else if (primaryCode == Keyboard.KEYCODE_DONE) {
-                        dialog.dismiss();
+                        mPriceDialog.dismiss();
                     } else if (primaryCode == mEditText.getContext().getResources().getInteger(R.integer.keycode_line_up_price)) {
                         jsonObject.put(AMP_EVENT_PRICE_KEY, AMP_EVENT_PRICE_KEY_VALUE_QUEUED);
                         editable.clear();
                         editable.insert(0, QUEUED_PRICE);
-                        dialog.dismiss();
+                        mPriceDialog.dismiss();
                     } else if (primaryCode == mEditText.getContext().getResources().getInteger(R.integer.keycode_opponent_price)) {
                         jsonObject.put(AMP_EVENT_PRICE_KEY, AMP_EVENT_PRICE_KEY_VALUE_OPPONENT);
                         editable.clear();
                         editable.insert(0, OPPONENT_PRICE);
-                        dialog.dismiss();
+                        mPriceDialog.dismiss();
                     } else if (primaryCode == mEditText.getContext().getResources().getInteger(R.integer.keycode_last_price)) {
                         jsonObject.put(AMP_EVENT_PRICE_KEY, AMP_EVENT_PRICE_KEY_VALUE_LAST);
                         editable.clear();
                         editable.insert(0, LATEST_PRICE);
-                        dialog.dismiss();
+                        mPriceDialog.dismiss();
                     } else if (primaryCode == mEditText.getContext().getResources().getInteger(R.integer.keycode_market_price)) {
                         jsonObject.put(AMP_EVENT_PRICE_KEY, AMP_EVENT_PRICE_KEY_VALUE_MARKET);
                         editable.clear();
                         editable.insert(0, MARKET_PRICE);
-                        dialog.dismiss();
+                        mPriceDialog.dismiss();
                     } else if (primaryCode == mEditText.getContext().getResources().getInteger(R.integer.keycode_add)) {
                         if (idKeyboard == R.xml.future_price) {
                             jsonObject.put(AMP_EVENT_PRICE_KEY, AMP_EVENT_PRICE_KEY_VALUE_PLUS);
@@ -1767,23 +1787,23 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             }
         });
         dialog.setContentView(viewDialog);
-        viewDialog.findViewById(R.id.hide_keyboard).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
-        if (!dialog.isShowing()) {
-            mBinding.backAccount.setVisibility(View.INVISIBLE);
-            dialog.show();
-        }
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialogInterface) {
-                mBinding.backAccount.setVisibility(View.VISIBLE);
+                mBinding.backAccount.setImageDrawable(
+                        ContextCompat.getDrawable(sContext, R.mipmap.ic_account_circle_white_36dp));
             }
         });
 
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                mBinding.backAccount.setImageDrawable(
+                        ContextCompat.getDrawable(sContext, R.mipmap.ic_keyboard_hide_white_36dp));
+            }
+        });
+
+        return dialog;
     }
 
 
