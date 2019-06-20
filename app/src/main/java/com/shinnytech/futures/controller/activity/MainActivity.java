@@ -245,14 +245,11 @@ public class MainActivity extends BaseActivity {
             if (requestCode == MAIN_ACTIVITY_TO_SEARCH_ACTIVITY
                     || requestCode == MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY
                     || requestCode == MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY) {
-                String mIns = mMainActivityPresenter.getPreSubscribedQuotes();
                 QuoteFragment quoteFragment = ((QuotePagerFragment) mMainActivityPresenter.
                         getmViewPagerFragmentAdapter().getItem(0)).getCurrentItem();
                 if (quoteFragment != null) quoteFragment.refreshTD();
                 if (quoteFragment != null && OPTIONAL.equals(quoteFragment.getTitle())) {
                     quoteFragment.refreshOptional();
-                } else if (mIns != null && !mIns.equals(sDataManager.getRtnData().getIns_list())) {
-                    BaseApplication.getmMDWebSocket().sendSubscribeQuote(mIns);
                 }
             }
 

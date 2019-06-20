@@ -23,7 +23,6 @@ public class ToastUtils {
 
     public static void showToast(Context context,
                                  String content) {
-        if (LOGIN_FAIL.equals(content)) return;
         if (toast != null) {
             toast.cancel();
         }

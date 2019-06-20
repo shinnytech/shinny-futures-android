@@ -29,9 +29,11 @@ public class ForegroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String NOTIFICATION_CHANNEL_ID = "com.shinnytech.futures";
+
         Intent intent1 = new Intent(this, NotificationClickReceiver.class);
         intent1.setAction("notification_click");
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent1, 0);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelName = "ForegroundService";
             NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);

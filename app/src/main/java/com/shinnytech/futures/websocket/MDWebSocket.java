@@ -2,7 +2,6 @@ package com.shinnytech.futures.websocket;
 
 import com.google.gson.Gson;
 import com.neovisionaries.ws.client.WebSocket;
-import com.neovisionaries.ws.client.WebSocketState;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.model.bean.reqbean.ReqPeekMessageEntity;
@@ -38,10 +37,10 @@ public class MDWebSocket extends WebSocketBase {
             String aid = jsonObject.getString("aid");
             switch (aid) {
                 case "rsp_login":
+                    mIndex = 0;
                     sendSubscribeAfterConnect();
                     break;
                 case "rtn_data":
-                    mIndex = 0;
                     sDataManager.refreshFutureBean(jsonObject);
                     break;
                 default:
@@ -75,7 +74,6 @@ public class MDWebSocket extends WebSocketBase {
      * description: 首次连接行情服务器与断开重连的行情订阅处理
      */
     private void sendSubscribeAfterConnect() {
-        if (mWebSocketClient == null) return;
         if (!sDataManager.QUOTES.isEmpty()) {
             mWebSocketClient.sendText(sDataManager.QUOTES);
         }
@@ -91,15 +89,13 @@ public class MDWebSocket extends WebSocketBase {
      * description: 行情订阅
      */
     public void sendSubscribeQuote(String insList) {
-        if (mWebSocketClient != null && mWebSocketClient.isOpen()) {
-            ReqSubscribeQuoteEntity reqSubscribeQuoteEntity = new ReqSubscribeQuoteEntity();
-            reqSubscribeQuoteEntity.setAid("subscribe_quote");
-            reqSubscribeQuoteEntity.setIns_list(insList);
-            String subScribeQuote = new Gson().toJson(reqSubscribeQuoteEntity);
-            mWebSocketClient.sendText(subScribeQuote);
-            sDataManager.QUOTES = subScribeQuote;
-            LogUtils.e(subScribeQuote, true);
-        }
+        ReqSubscribeQuoteEntity reqSubscribeQuoteEntity = new ReqSubscribeQuoteEntity();
+        reqSubscribeQuoteEntity.setAid("subscribe_quote");
+        reqSubscribeQuoteEntity.setIns_list(insList);
+        String subScribeQuote = new Gson().toJson(reqSubscribeQuoteEntity);
+        mWebSocketClient.sendText(subScribeQuote);
+        sDataManager.QUOTES = subScribeQuote;
+        LogUtils.e(subScribeQuote, true);
     }
 
     /**
@@ -108,13 +104,11 @@ public class MDWebSocket extends WebSocketBase {
      * description: 获取合约信息
      */
     public void sendPeekMessage() {
-        if (mWebSocketClient != null && mWebSocketClient.getState() == WebSocketState.OPEN) {
-            ReqPeekMessageEntity reqPeekMessageEntity = new ReqPeekMessageEntity();
-            reqPeekMessageEntity.setAid("peek_message");
-            String peekMessage = new Gson().toJson(reqPeekMessageEntity);
-            mWebSocketClient.sendText(peekMessage);
-            LogUtils.e(peekMessage, false);
-        }
+        ReqPeekMessageEntity reqPeekMessageEntity = new ReqPeekMessageEntity();
+        reqPeekMessageEntity.setAid("peek_message");
+        String peekMessage = new Gson().toJson(reqPeekMessageEntity);
+        mWebSocketClient.sendText(peekMessage);
+        LogUtils.e(peekMessage, false);
     }
 
     /**
@@ -123,19 +117,17 @@ public class MDWebSocket extends WebSocketBase {
      * description: 分时图
      */
     public void sendSetChart(String ins_list) {
-        if (mWebSocketClient != null && mWebSocketClient.isOpen()) {
-            ReqSetChartEntity reqSetChartEntity = new ReqSetChartEntity();
-            reqSetChartEntity.setAid("set_chart");
-            reqSetChartEntity.setChart_id(CHART_ID);
-            reqSetChartEntity.setIns_list(ins_list);
-            reqSetChartEntity.setDuration(60000000000l);
-            reqSetChartEntity.setTrading_day_start(0);
-            reqSetChartEntity.setTrading_day_count(86400000000000l);
-            String setChart = new Gson().toJson(reqSetChartEntity);
-            sDataManager.CHARTS = setChart;
-            mWebSocketClient.sendText(setChart);
-            LogUtils.e(setChart, true);
-        }
+        ReqSetChartEntity reqSetChartEntity = new ReqSetChartEntity();
+        reqSetChartEntity.setAid("set_chart");
+        reqSetChartEntity.setChart_id(CHART_ID);
+        reqSetChartEntity.setIns_list(ins_list);
+        reqSetChartEntity.setDuration(60000000000l);
+        reqSetChartEntity.setTrading_day_start(0);
+        reqSetChartEntity.setTrading_day_count(86400000000000l);
+        String setChart = new Gson().toJson(reqSetChartEntity);
+        sDataManager.CHARTS = setChart;
+        mWebSocketClient.sendText(setChart);
+        LogUtils.e(setChart, true);
     }
 
     /**
@@ -144,22 +136,20 @@ public class MDWebSocket extends WebSocketBase {
      * description: k线图
      */
     public void sendSetChartKline(String ins_list, int view_width, String duration) {
-        if (mWebSocketClient != null && mWebSocketClient.isOpen()) {
-            try {
-                long duration_l = Long.parseLong(duration);
-                ReqSetChartKlineEntity reqSetChartKlineEntity = new ReqSetChartKlineEntity();
-                reqSetChartKlineEntity.setAid("set_chart");
-                reqSetChartKlineEntity.setChart_id(CHART_ID);
-                reqSetChartKlineEntity.setIns_list(ins_list);
-                reqSetChartKlineEntity.setView_width(view_width);
-                reqSetChartKlineEntity.setDuration(duration_l);
-                String setChart = new Gson().toJson(reqSetChartKlineEntity);
-                sDataManager.CHARTS = setChart;
-                mWebSocketClient.sendText(setChart);
-                LogUtils.e(setChart, true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        try {
+            long duration_l = Long.parseLong(duration);
+            ReqSetChartKlineEntity reqSetChartKlineEntity = new ReqSetChartKlineEntity();
+            reqSetChartKlineEntity.setAid("set_chart");
+            reqSetChartKlineEntity.setChart_id(CHART_ID);
+            reqSetChartKlineEntity.setIns_list(ins_list);
+            reqSetChartKlineEntity.setView_width(view_width);
+            reqSetChartKlineEntity.setDuration(duration_l);
+            String setChart = new Gson().toJson(reqSetChartKlineEntity);
+            sDataManager.CHARTS = setChart;
+            mWebSocketClient.sendText(setChart);
+            LogUtils.e(setChart, true);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

@@ -7,7 +7,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 28
         versionCode 42
-        versionName "2.0.0"
+        versionName "1.22.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         resValue("string", "app_name", "ShinnyFutures")
         flavorDimensions("shinny")
@@ -218,13 +218,13 @@ android {
 //            dimension "shinny"
 //        }
 //
-//        htfutures_sim {
-//            buildConfigField "String", "BROKER_ID", "\"海通股指仿真\""
-//            resValue("string", "app_name", "海通股指仿真")
-//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
-//            applicationIdSuffix ".htfutures_sim"
-//            dimension "shinny"
-//        }
+        htfutures_sim {
+            buildConfigField "String", "BROKER_ID", "\"海通股指仿真\""
+            resValue("string", "app_name", "海通股指仿真")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+            applicationIdSuffix ".htfutures_sim"
+            dimension "shinny"
+        }
 //
 //        hzqh {
 //            buildConfigField "String", "BROKER_ID", "\"海证期货\""
@@ -362,21 +362,21 @@ android {
 //            dimension "shinny"
 //        }
 //
-//        qhqh {
-//            buildConfigField "String", "BROKER_ID", "\"前海期货\""
-//            resValue("string", "app_name", "前海快期小Q")
-//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher_qhqh"]
-//            applicationIdSuffix ".qhqh"
-//            dimension "shinny"
-//        }
-//
-//        rdqh {
-//            buildConfigField "String", "BROKER_ID", "\"瑞达期货\""
-//            resValue("string", "app_name", "瑞达期货")
-//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
-//            applicationIdSuffix ".rdqh"
-//            dimension "shinny"
-//        }
+        qhqh {
+            buildConfigField "String", "BROKER_ID", "\"前海期货\""
+            resValue("string", "app_name", "前海快期小Q")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher_qhqh"]
+            applicationIdSuffix ".qhqh"
+            dimension "shinny"
+        }
+
+        rdqh {
+            buildConfigField "String", "BROKER_ID", "\"瑞达期货\""
+            resValue("string", "app_name", "瑞达期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+            applicationIdSuffix ".rdqh"
+            dimension "shinny"
+        }
 //
 //        sywg {
 //            buildConfigField "String", "BROKER_ID", "\"申万期货\""

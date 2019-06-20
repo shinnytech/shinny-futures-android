@@ -69,7 +69,6 @@ import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_CHANGE_SUCCESS;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_FAIL;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_SUCCEED;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_SETTLEMENT;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_WEAK_PASSWORD;
 
 /**
@@ -468,9 +467,13 @@ public class DataManager {
                                     sendMessage(TD_MESSAGE_WEAK_PASSWORD, TD_BROADCAST);
                                 }
                                 if ("SETTLEMENT".equals(type)) {
-                                    LogUtils.e(content, true);
                                     BROKER.setSettlement(content);
-                                    showSettlement();
+                                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            showSettlement();
+                                        }
+                                    });
                                 } else {
                                     if (LOGIN_SUCCEED.equals(content)) {
                                         //游客模式不显示登录成功弹出框
@@ -489,7 +492,9 @@ public class DataManager {
                                         }
                                         Amplitude.getInstance().logEvent(AMP_LOGIN_FAILED, jsonObject);
                                         sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
+                                        if (!LOGIN_BROKER_ID.equals(BROKER_ID_SIMULATION))return;
                                     }
+
                                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                                         @Override
                                         public void run() {
@@ -535,7 +540,6 @@ public class DataManager {
                                             String userId = user.getJSONObject("session").optString("user_id");
                                             if (LOGIN_USER_ID.equals(userId)) {
                                                 userEntity.setUser_id(userId);
-                                                Amplitude.getInstance().setUserId(LOGIN_BROKER_ID + LOGIN_USER_ID);
                                                 Identify identify = new Identify()
                                                         .setOnce(AMP_USER_ACCOUNT_ID_FIRST, LOGIN_USER_ID)
                                                         .set(AMP_USER_ACCOUNT_ID_LAST, LOGIN_USER_ID)
@@ -716,10 +720,10 @@ public class DataManager {
                         String data = positionObject.optString(key1);
                         f.set(positionEntity, data);
                     } catch (NoSuchFieldException e) {
-                        e.printStackTrace();
+//                        e.printStackTrace();
                         continue;
                     } catch (IllegalAccessException e) {
-                        e.printStackTrace();
+//                        e.printStackTrace();
                         continue;
                     }
 

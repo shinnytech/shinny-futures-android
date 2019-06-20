@@ -66,7 +66,7 @@
     <string name="account_activity_withdraw">出金金额</string>
 
     <!--related to trade activity-->
-    <string name="trade_activity_instrument_id">合约名称</string>
+    <string name="trade_activity_instrument_id">合约</string>
     <string name="trade_activity_direction">开平</string>
     <string name="trade_activity_amount">成交价</string>
     <string name="trade_activity_volume">成交量</string>

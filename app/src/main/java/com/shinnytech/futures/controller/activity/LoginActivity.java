@@ -603,9 +603,13 @@ public class LoginActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                byte[] info = DeviceInfoManager.getCollectInfo(LoginActivity.this);
-                String encodeInfo = Base64.encode(info);
-                SPUtils.putAndApply(sContext, CONFIG_SYSTEM_INFO, encodeInfo);
+                try {
+                    byte[] info = DeviceInfoManager.getCollectInfo(LoginActivity.this);
+                    String encodeInfo = Base64.encode(info);
+                    SPUtils.putAndApply(sContext, CONFIG_SYSTEM_INFO, encodeInfo);
+                }catch (Exception e){
+                    SPUtils.putAndApply(sContext, CONFIG_SYSTEM_INFO, "");
+                }
             }
         }).start();
     }

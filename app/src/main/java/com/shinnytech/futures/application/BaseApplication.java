@@ -197,51 +197,73 @@ public class BaseApplication extends Application {
         mAppLifecycleObserver = new AppLifecycleObserver();
         sBackGround = false;
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(sContext);
-
         ProcessLifecycleOwner.get().getLifecycle().addObserver(mAppLifecycleObserver);
 
-        //获取版本号
         initAppVersion();
-
-        //初始化行情服务器地址
         initTMDUrl();
-
-        //初始化默认配置
         initDefaultConfig();
-
-        //OkHttp网络框架初始化
-        initOkGo();
-
-        //下载合约列表文件
+        initThirdParty();
         downloadLatestJsonFile();
-
-        //注册活动生命周期回调
         registerActivityLifecycleCallback();
 
     }
 
     /**
-     * date: 2019/3/24
+     * date: 2018/11/7
      * author: chenli
-     * description: 配置阿里日志服务
+     * description: 获取app版本号
      */
-    private void initAliLog(String ak, String sk) {
-        SLSDatabaseManager.getInstance().setupDB(sContext);
+    private void initAppVersion() {
+        try {
+            DataManager.getInstance().APP_CODE = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionCode;
+            DataManager.getInstance().APP_VERSION = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 
-        PlainTextAKSKCredentialProvider credentialProvider =
-                new PlainTextAKSKCredentialProvider(ak, sk);
-
-        ClientConfiguration conf = new ClientConfiguration();
-        conf.setCachable(false);
-        conf.setConnectType(ClientConfiguration.NetworkPolicy.WWAN_OR_WIFI);
-        conf.setConnectionTimeout(15 * 1000); // 连接超时，默认15秒
-        conf.setSocketTimeout(15 * 1000); // socket超时，默认15秒
-        conf.setMaxConcurrentRequest(5); // 最大并发请求书，默认5个
-        conf.setMaxErrorRetry(2); // 失败后最大重试次数，默认2次
-        SLSLog.enableLog(); // log打印在控制台
-
-        String endpoint = "https://cn-shanghai.log.aliyuncs.com";
-        sLOGClient = new LOGClient(sContext, endpoint, credentialProvider, conf);
+    /**
+     * date: 8/6/18
+     * author: chenli
+     * description: 初始化服务器地址
+     */
+    private void initTMDUrl() {
+        List<String> MDUrlGroup = new ArrayList<>();
+        MDUrlGroup.add(MARKET_URL_2);
+        MDUrlGroup.add(MARKET_URL_3);
+        MDUrlGroup.add(MARKET_URL_4);
+        try {
+            Class cl = Class.forName("com.shinnytech.futures.constants.LocalCommonConstants");
+            String MARKET_URL_5 = (String) cl.getMethod("getMarketUrl5").invoke(null);
+            String MARKET_URL_6 = (String) cl.getMethod("getMarketUrl6").invoke(null);
+            String MARKET_URL_7 = (String) cl.getMethod("getMarketUrl7").invoke(null);
+            String MARKET_URL_8 = (String) cl.getMethod("getMarketUrl8").invoke(null);
+            String TRANSACTION_URL_L = (String) cl.getMethod("getTransactionUrl").invoke(null);
+            String JSON_FILE_URL_L = (String) cl.getMethod("getJsonFileUrl").invoke(null);
+            MDUrlGroup.add(MARKET_URL_5);
+            MDUrlGroup.add(MARKET_URL_6);
+            MDUrlGroup.add(MARKET_URL_7);
+            mMDURLs.add(MARKET_URL_8);
+            TRANSACTION_URL = TRANSACTION_URL_L;
+            JSON_FILE_URL = JSON_FILE_URL_L;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            mMDURLs.add(MARKET_URL_1);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            mMDURLs.add(MARKET_URL_1);
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+            mMDURLs.add(MARKET_URL_1);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            mMDURLs.add(MARKET_URL_1);
+        }
+        Collections.shuffle(MDUrlGroup);
+        mMDURLs.addAll(MDUrlGroup);
+        mTDURLs.add(TRANSACTION_URL);
+        mMDWebSocket = new MDWebSocket(mMDURLs, 0);
+        mTDWebSocket = new TDWebSocket(mTDURLs, 0);
     }
 
     /**
@@ -317,19 +339,108 @@ public class BaseApplication extends Application {
     }
 
     /**
-     * date: 2018/11/7
+     * date: 2019/6/18
      * author: chenli
-     * description: 获取app版本号
+     * description: 初始化第三方框架
      */
-    private void initAppVersion() {
+    private void initThirdParty(){
         try {
-            DataManager.getInstance().APP_CODE = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionCode;
-            DataManager.getInstance().APP_VERSION = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
-        } catch (PackageManager.NameNotFoundException e) {
+            Class cl = Class.forName("com.shinnytech.futures.constants.LocalCommonConstants");
+            String BUGLY_KEY = (String) cl.getMethod("getBuglyKey").invoke(null);
+            String AMP_KEY = (String) cl.getMethod("getAmpKey").invoke(null);
+            String AK = (String) cl.getMethod("getAK").invoke(null);
+            String SK = (String) cl.getMethod("getSK").invoke(null);
+            final String user_agent = (String) cl.getMethod("getUserAgent").invoke(null);
+            DataManager.getInstance().USER_AGENT = user_agent;
+            initAMP(AMP_KEY);
+            initBugly(user_agent, BUGLY_KEY);
+            initAliLog(AK, SK);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
+        initOkGo();
     }
 
+    /**
+     * date: 2019/6/18
+     * author: chenli
+     * description: 配置AMP
+     */
+    private void initAMP(String AMP_KEY){
+        Amplitude.getInstance().initialize(this, AMP_KEY).enableForegroundTracking(this);
+        Identify identify = new Identify()
+                .setOnce(AMP_USER_PACKAGE_ID_FIRST, BuildConfig.FLAVOR)
+                .set(AMP_USER_PACKAGE_ID_LAST, BuildConfig.FLAVOR)
+                .setOnce(AMP_USER_INIT_TIME_FIRST, TimeUtils.getNowTimeSecond());
+        Amplitude.getInstance().identify(identify);
+        Amplitude.getInstance().logEvent(AMP_INIT);
+        LogUtils.e("AMP_INIT", true);
+    }
+
+    /**
+     * date: 2019/6/18
+     * author: chenli
+     * description: 配置bugly
+     */
+    private void initBugly(final String user_agent, String BUGLY_KEY){
+        CrashReport.UserStrategy strategy = new CrashReport.UserStrategy(sContext);
+        strategy.setCrashHandleCallback(new CrashReport.CrashHandleCallback() {
+            public Map<String, String> onCrashHandleStart(int crashType, String errorType,
+                                                          String errorMessage, String errorStack) {
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put(AMP_EVENT_CRASH_TYPE, crashType);
+                    jsonObject.put(AMP_EVENT_ERROR_TYPE, errorType);
+                    jsonObject.put(AMP_EVENT_ERROR_MESSAGE, errorMessage);
+                    jsonObject.put(AMP_EVENT_ERROR_STACK, errorStack);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Amplitude.getInstance().logEvent(AMP_CRASH, jsonObject);
+                LinkedHashMap<String, String> map = new LinkedHashMap<>();
+                map.put("user-agent", user_agent);
+                return map;
+            }
+        });
+        Beta.enableHotfix = false;
+        Bugly.init(sContext, BUGLY_KEY, false, strategy);
+    }
+
+    /**
+     * date: 2019/3/24
+     * author: chenli
+     * description: 配置阿里日志服务
+     */
+    private void initAliLog(String ak, String sk) {
+        SLSDatabaseManager.getInstance().setupDB(sContext);
+
+        PlainTextAKSKCredentialProvider credentialProvider =
+                new PlainTextAKSKCredentialProvider(ak, sk);
+
+        ClientConfiguration conf = new ClientConfiguration();
+        conf.setCachable(false);
+        conf.setConnectType(ClientConfiguration.NetworkPolicy.WWAN_OR_WIFI);
+        conf.setConnectionTimeout(15 * 1000); // 连接超时，默认15秒
+        conf.setSocketTimeout(15 * 1000); // socket超时，默认15秒
+        conf.setMaxConcurrentRequest(5); // 最大并发请求书，默认5个
+        conf.setMaxErrorRetry(2); // 失败后最大重试次数，默认2次
+        SLSLog.enableLog(); // log打印在控制台
+
+        String endpoint = "https://cn-shanghai.log.aliyuncs.com";
+        sLOGClient = new LOGClient(sContext, endpoint, credentialProvider, conf);
+    }
+
+    /**
+     * date: 2019/6/18
+     * author: chenli
+     * description: 配置http服务
+     */
     private void initOkGo() {
         //构建OkHttpClient.Builder
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
@@ -368,84 +479,6 @@ public class BaseApplication extends Application {
     }
 
     /**
-     * date: 8/6/18
-     * author: chenli
-     * description: 初始化服务器地址
-     */
-    private void initTMDUrl() {
-        List<String> MDUrlGroup = new ArrayList<>();
-        MDUrlGroup.add(MARKET_URL_2);
-        MDUrlGroup.add(MARKET_URL_3);
-        MDUrlGroup.add(MARKET_URL_4);
-        try {
-            Class cl = Class.forName("com.shinnytech.futures.constants.LocalCommonConstants");
-            String MARKET_URL_5 = (String) cl.getMethod("getMarketUrl5").invoke(null);
-            String MARKET_URL_6 = (String) cl.getMethod("getMarketUrl6").invoke(null);
-            String MARKET_URL_7 = (String) cl.getMethod("getMarketUrl7").invoke(null);
-            String MARKET_URL_8 = (String) cl.getMethod("getMarketUrl8").invoke(null);
-            String TRANSACTION_URL_L = (String) cl.getMethod("getTransactionUrl").invoke(null);
-            String JSON_FILE_URL_L = (String) cl.getMethod("getJsonFileUrl").invoke(null);
-            String BUGLY_KEY = (String) cl.getMethod("getBuglyKey").invoke(null);
-            String AMP_KEY = (String) cl.getMethod("getAmpKey").invoke(null);
-            String AK = (String) cl.getMethod("getAK").invoke(null);
-            String SK = (String) cl.getMethod("getSK").invoke(null);
-            final String user_agent = (String) cl.getMethod("getUserAgent").invoke(null);
-            MDUrlGroup.add(MARKET_URL_5);
-            MDUrlGroup.add(MARKET_URL_6);
-            MDUrlGroup.add(MARKET_URL_7);
-            mMDURLs.add(MARKET_URL_8);
-            TRANSACTION_URL = TRANSACTION_URL_L;
-            JSON_FILE_URL = JSON_FILE_URL_L;
-            Amplitude.getInstance().initialize(this, AMP_KEY).enableForegroundTracking(this);
-            Identify identify = new Identify()
-                    .setOnce(AMP_USER_PACKAGE_ID_FIRST, BuildConfig.FLAVOR)
-                    .set(AMP_USER_PACKAGE_ID_LAST, BuildConfig.FLAVOR)
-                    .setOnce(AMP_USER_INIT_TIME_FIRST, TimeUtils.getNowTimeSecond());
-            Amplitude.getInstance().identify(identify);
-            Amplitude.getInstance().logEvent(AMP_INIT);
-            LogUtils.e("AMP_INIT", true);
-            CrashReport.UserStrategy strategy = new CrashReport.UserStrategy(sContext);
-            strategy.setCrashHandleCallback(new CrashReport.CrashHandleCallback() {
-                public Map<String, String> onCrashHandleStart(int crashType, String errorType,
-                                                              String errorMessage, String errorStack) {
-                    JSONObject jsonObject = new JSONObject();
-                    try {
-                        jsonObject.put(AMP_EVENT_CRASH_TYPE, crashType);
-                        jsonObject.put(AMP_EVENT_ERROR_TYPE, errorType);
-                        jsonObject.put(AMP_EVENT_ERROR_MESSAGE, errorMessage);
-                        jsonObject.put(AMP_EVENT_ERROR_STACK, errorStack);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    Amplitude.getInstance().logEvent(AMP_CRASH, jsonObject);
-                    LinkedHashMap<String, String> map = new LinkedHashMap<>();
-                    map.put("user-agent", user_agent);
-                    return map;
-                }
-            });
-            Beta.enableHotfix = false;
-            Bugly.init(sContext, BUGLY_KEY, false, strategy);
-            initAliLog(AK, SK);
-            DataManager.getInstance().USER_AGENT = user_agent;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            mMDURLs.add(MARKET_URL_1);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            mMDURLs.add(MARKET_URL_1);
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-            mMDURLs.add(MARKET_URL_1);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            mMDURLs.add(MARKET_URL_1);
-        }
-        Collections.shuffle(MDUrlGroup);
-        mMDURLs.addAll(MDUrlGroup);
-        mTDURLs.add(TRANSACTION_URL);
-    }
-
-    /**
      * date: 7/9/17
      * author: chenli
      * description: 下载合约列表文件
@@ -460,10 +493,8 @@ public class BaseApplication extends Application {
                             @Override
                             public void run() {
                                 LatestFileManager.initInsList(response.body());
-                                mMDWebSocket = new MDWebSocket(mMDURLs, 0);
-                                mTDWebSocket = new TDWebSocket(mTDURLs, 0);
-                                mMDWebSocket.connect();
-                                mTDWebSocket.connect();
+                                mMDWebSocket.reconnect();
+                                mTDWebSocket.reconnect();
                             }
                         }).start();
                     }
@@ -586,23 +617,31 @@ public class BaseApplication extends Application {
      * description: 前台任务--连接服务器
      */
     private void notifyForeground() {
+        Amplitude.getInstance().logEvent(AMP_FOREGROUND);
+
         new Thread(new Runnable() {
             @Override
             public void run() {
-                byte[] info = DeviceInfoManager.getCollectInfo(sContext);
-                String encodeInfo = Base64.encode(info);
-                SPUtils.putAndApply(sContext, CONFIG_SYSTEM_INFO, encodeInfo);
+                try {
+                    byte[] info = DeviceInfoManager.getCollectInfo(sContext);
+                    String encodeInfo = Base64.encode(info);
+                    SPUtils.putAndApply(sContext, CONFIG_SYSTEM_INFO, encodeInfo);
+                }catch (Exception e){
+                    SPUtils.putAndApply(sContext, CONFIG_SYSTEM_INFO, "");
+                }
+
             }
         }).start();
 
         if (sBackGround){
+            sBackGround = false;
+            mMDWebSocket.resetConnectTime();
+            mTDWebSocket.resetConnectTime();
             mMDWebSocket.sendPeekMessage();
             mTDWebSocket.sendPeekMessageTransaction();
         }
 
         EventBus.getDefault().post(new RedrawEvent());
-        sBackGround = false;
-        Amplitude.getInstance().logEvent(AMP_FOREGROUND);
         Intent intent = new Intent(sContext, ForegroundService.class);
         stopService(intent);
     }

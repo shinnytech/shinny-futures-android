@@ -7,6 +7,7 @@ import com.neovisionaries.ws.client.WebSocketExtension;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
 import com.shinnytech.futures.amplitude.api.Amplitude;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.model.engine.DataManager;
 
 import java.io.IOException;
@@ -15,8 +16,9 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_URL;
+
 public class WebSocketBase extends WebSocketAdapter {
-    private static final int TIMEOUT = 5000;
     protected DataManager sDataManager = DataManager.getInstance();
     protected WebSocket mWebSocketClient;
     protected List<String> mUrls;
@@ -24,23 +26,25 @@ public class WebSocketBase extends WebSocketAdapter {
     private int mPongCount;
     private Timer mTimer;
     private TimerTask mTimerTask;
+    private long mConnectTime;
 
     public WebSocketBase(List<String> urls, int index){
         mIndex = index;
         mUrls = urls;
-        create();
     }
 
     @Override
     public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
         super.onConnected(websocket, headers);
+        mConnectTime = System.currentTimeMillis() / 1000;
         mPongCount = 0;
         mTimer = new Timer();
         mTimerTask = new TimerTask() {
             @Override
             public void run() {
+                if (BaseApplication.issBackGround())return;
                 if (mPongCount > 3){
-                    mWebSocketClient.disconnect();
+                    reconnect();
                     return;
                 }
                 mWebSocketClient.sendPing();
@@ -53,17 +57,18 @@ public class WebSocketBase extends WebSocketAdapter {
     @Override
     public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
         super.onDisconnected(websocket, serverCloseFrame, clientCloseFrame, closedByServer);
-        if (mTimer != null){
-            mTimer.cancel();
-            mTimer = null;
+        long currentTime = System.currentTimeMillis() / 1000;
+        if (currentTime - mConnectTime >= 10) reconnect();
+        else {
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    reconnect();
+                }
+            }, 10000);
         }
 
-        if (mTimerTask != null){
-            mTimerTask.cancel();
-            mTimerTask = null;
-        }
-
-        reconnect();
     }
 
     @Override
@@ -84,10 +89,21 @@ public class WebSocketBase extends WebSocketAdapter {
         mPongCount--;
     }
 
-    private void create(){
+    public void reconnect(){
+        if (mTimer != null){
+            mTimer.cancel();
+            mTimer = null;
+        }
+
+        if (mTimerTask != null){
+            mTimerTask.cancel();
+            mTimerTask = null;
+        }
         try {
+            if (mWebSocketClient != null) mWebSocketClient.clearListeners();
             mWebSocketClient = new WebSocketFactory()
-                    .setConnectionTimeout(TIMEOUT)
+                    .setVerifyHostname(TRANSACTION_URL.equals(mUrls.get(0)))
+                    .setConnectionTimeout(5000)
                     .createSocket(mUrls.get(mIndex))
                     .setMissingCloseFrameAllowed(false)
                     .addListener(this)
@@ -98,16 +114,13 @@ public class WebSocketBase extends WebSocketAdapter {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public void reconnect(){
-        create();
-        connect();
-    }
-
-    public void connect(){
         mIndex += 1;
         if (mIndex == mUrls.size()) mIndex = 0;
         mWebSocketClient.connectAsynchronously();
     }
+
+    public void resetConnectTime(){
+        mConnectTime = System.currentTimeMillis() / 1000;
+    }
+
 }

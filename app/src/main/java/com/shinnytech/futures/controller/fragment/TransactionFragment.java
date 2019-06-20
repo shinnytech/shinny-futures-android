@@ -187,6 +187,11 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     private long mShowTime;
     private Dialog mPriceDialog;
     private Dialog mVolumeDialog;
+    /**
+     * date: 2019/6/17
+     * description: 软键盘是否刚隐藏
+     */
+    private boolean mIsKeyBoardJustHide = false;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -236,7 +241,6 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         }
                     }
                     mBinding.price.setSelection(0, mBinding.price.getText().length());
-                    if (mVolumeDialog.isShowing())mVolumeDialog.dismiss();
                     if (!mPriceDialog.isShowing())mPriceDialog.show();
                 }
                 return true;
@@ -260,7 +264,6 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         }
                     }
                     mBinding.volume.setSelection(0, mBinding.volume.getText().length());
-                    if (mPriceDialog.isShowing())mPriceDialog.dismiss();
                     if (!mVolumeDialog.isShowing())mVolumeDialog.show();
                 }
                 return true;
@@ -354,11 +357,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         mBinding.backAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mPriceDialog.isShowing() ){
-                    mPriceDialog.dismiss();
-                    return;
-                }else if (mVolumeDialog.isShowing()){
-                    mVolumeDialog.dismiss();
+                if (mIsKeyBoardJustHide){
+                    mIsKeyBoardJustHide = false;
                     return;
                 }
                 Amplitude.getInstance().logEvent(AMP_ACCOUNT_LINK);
@@ -979,6 +979,9 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         quoteEntity.getInstrument_id());
                 mBinding.closePrice.setText(last_price);
                 break;
+            case USER_PRICE:
+                mBinding.closePrice.setText(mBinding.price.getText().toString());
+                break;
             default:
                 break;
         }
@@ -1010,6 +1013,9 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         quoteEntity.getInstrument_id());
                 mBinding.closePrice.setText(last_price);
                 break;
+            case USER_PRICE:
+                mBinding.closePrice.setText(mBinding.price.getText().toString());
+                break;
             default:
                 break;
         }
@@ -1024,6 +1030,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     private void defaultClosePosition(View v) {
         if (mBinding.closePrice.getText() != null && mBinding.volume.getText() != null && !"".equals(mDirection)) {
             final String price = mBinding.closePrice.getText().toString();
+            LogUtils.e(price, true);
             String volume = mBinding.volume.getText().toString();
             final String direction = DIRECTION_BUY_ZN.equals(mDirection) ? DIRECTION_SELL : DIRECTION_BUY;
             String directionTitle = DIRECTION_BUY_ZN.equals(mDirection) ? ACTION_CLOSE_BUY : ACTION_CLOSE_SELL;
@@ -1055,16 +1062,11 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 if (userEntity == null) return;
                 PositionEntity positionEntity = userEntity.getPositions().get(mInstrumentIdTransaction);
                 if (positionEntity == null) return;
-                int available_long = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_long(), positionEntity.getVolume_long_frozen()));
-                int available_short = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_short(), positionEntity.getVolume_short_frozen()));
-                if (DIRECTION_SELL.equals(direction)) {
-                    if (volumeN > available_long) {
-                        initDialog(userEntity, mExchangeId, instrumentId);
-                        return;
-                    }
-                } else if (DIRECTION_BUY.equals(direction)) {
-                    if (volumeN > available_short) {
-                        initDialog(userEntity, mExchangeId, instrumentId);
+
+                if (!detectCloseVolumeEnough()){
+                    List<String> orders = getInsOrders(userEntity, mExchangeId, instrumentId);
+                    if (!orders.isEmpty()){
+                        initDialog(orders);
                         return;
                     }
                 }
@@ -1125,6 +1127,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                     initDialog(mExchangeId, instrumentId, directionTitle, direction,
                             OFFSET_CLOSE, volumeN, PRICE_TYPE_LIMIT, priceN, price);
             } catch (NumberFormatException ex) {
+                ex.printStackTrace();
+                LogUtils.e("价格或手数输入不合法", true);
                 ToastUtils.showToast(BaseApplication.getContext(), "价格或手数输入不合法");
             }
         }
@@ -1201,8 +1205,10 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
-                    BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, price);
+                    BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id,
+                            direction, offset, volume, price_type, price);
+                    BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id,
+                            direction, offset1, volume1, price_type, price);
                     refreshPosition();
                     dialog.dismiss();
                     mIsRefreshPosition = true;
@@ -1218,8 +1224,10 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             });
             dialog.show();
         } else {
-            BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
-            BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id, direction, offset1, volume1, price_type, price);
+            BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id,
+                    direction, offset, volume, price_type, price);
+            BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id,
+                    direction, offset1, volume1, price_type, price);
             refreshPosition();
             mIsRefreshPosition = true;
         }
@@ -1266,7 +1274,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
+                    BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id,
+                            direction, offset, volume, price_type, price);
                     refreshPosition();
                     dialog.dismiss();
                     mIsRefreshPosition = true;
@@ -1282,7 +1291,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             });
             dialog.show();
         } else {
-            BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id, direction, offset, volume, price_type, price);
+            BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id, direction,
+                    offset, volume, price_type, price);
             refreshPosition();
             mIsRefreshPosition = true;
         }
@@ -1294,22 +1304,11 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      * author: chenli
      * description: 仓位手数不足：撤单下单
      */
-    private void initDialog(UserEntity userEntity, final String exchange_id, final String instrument_id) {
+    private void initDialog(final List<String> orderIds) {
         try {
-            mIsReClose = true;
-            final List<String> orderIds = new ArrayList<>();
-            for (OrderEntity orderEntity :
-                    userEntity.getOrders().values()) {
-                String order_id = orderEntity.getOrder_id();
-                String exId = orderEntity.getExchange_id();
-                String insId = orderEntity.getInstrument_id();
-                String offset = orderEntity.getOffset();
-                String status = orderEntity.getStatus();
-                if (STATUS_ALIVE.equals(status) && exchange_id.equals(exId) && instrument_id.equals(insId)
-                        && (OFFSET_CLOSE.equals(offset) || OFFSET_CLOSE_HISTORY.equals(offset) || OFFSET_CLOSE_TODAY.equals(offset))) {
-                    orderIds.add(order_id);
-                }
-            }
+
+            //无挂单则没有弹框，直接下一手错单
+            if (orderIds.isEmpty())return;
             final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
             View view = View.inflate(getActivity(), R.layout.view_dialog_cancel_insert_order, null);
             Window dialogWindow = dialog.getWindow();
@@ -1328,6 +1327,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    mIsReClose = true;
+
                     for (String order_id : orderIds) {
                         BaseApplication.getmTDWebSocket().sendReqCancelOrder(order_id);
                     }
@@ -1349,6 +1350,29 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     }
 
     /**
+     * date: 2019/6/17
+     * author: chenli
+     * description: 获取合约对应挂单
+     */
+    private List<String> getInsOrders(UserEntity userEntity, final String exchange_id, final String instrument_id){
+        final List<String> orderIds = new ArrayList<>();
+        for (OrderEntity orderEntity :
+                userEntity.getOrders().values()) {
+            String order_id = orderEntity.getOrder_id();
+            String exId = orderEntity.getExchange_id();
+            String insId = orderEntity.getInstrument_id();
+            String offset = orderEntity.getOffset();
+            String status = orderEntity.getStatus();
+            if (STATUS_ALIVE.equals(status) && exchange_id.equals(exId) && instrument_id.equals(insId)
+                    && (OFFSET_CLOSE.equals(offset) || OFFSET_CLOSE_HISTORY.equals(offset) ||
+                    OFFSET_CLOSE_TODAY.equals(offset))) {
+                orderIds.add(order_id);
+            }
+        }
+        return orderIds;
+    }
+
+    /**
      * date: 2019/4/18
      * author: chenli
      * description: 检测平仓手数是否满足
@@ -1363,8 +1387,10 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         if (positionEntity == null) return false;
 
         try {
-            int available_long = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_long(), positionEntity.getVolume_long_frozen()));
-            int available_short = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_short(), positionEntity.getVolume_short_frozen()));
+            int available_long = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_long(),
+                    positionEntity.getVolume_long_frozen()));
+            int available_short = Integer.parseInt(MathUtils.subtract(positionEntity.getVolume_short(),
+                    positionEntity.getVolume_short_frozen()));
 
             if (DIRECTION_SELL.equals(direction)) {
                 if (volumeN <= available_long) {
@@ -1472,7 +1498,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      * description: 初始化软键盘
      */
     private Dialog initKeyboardDialog(final EditText mEditText, final int idKeyboard) {
-        Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_No_Dim_Dialog);
+        final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_No_Dim_Dialog);
         View viewDialog = View.inflate(getActivity(), R.layout.view_dialog_keyboard, null);
         Window dialogWindow = dialog.getWindow();
         if (dialogWindow != null) {
@@ -1482,9 +1508,17 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
             lp.height = ScreenUtils.dp2px(sContext, 200);
             lp.x = ScreenUtils.dp2px(sContext, 100);
+            lp.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
             dialogWindow.setAttributes(lp);
-            dialogWindow.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL, WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
-            dialogWindow.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            dialogWindow.getDecorView().setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    if (motionEvent.getAction() == MotionEvent.ACTION_OUTSIDE){
+                        dialog.dismiss();
+                    }
+                    return false;
+                }
+            });
         }
 
         Keyboard mKeyboard = new Keyboard(getActivity(), idKeyboard);
@@ -1519,7 +1553,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                             jsonObject.put(AMP_EVENT_VOLUME_KEY, AMP_EVENT_VOLUME_KEY_VALUE_DEL);
                         }
                         if (editable.length() > 0) {
-                            if (!QUEUED_PRICE.equals(text) && !OPPONENT_PRICE.equals(text) && !MARKET_PRICE.equals(text) && !LATEST_PRICE.equals(text)) {
+                            if (!QUEUED_PRICE.equals(text) && !OPPONENT_PRICE.equals(text)
+                                    && !MARKET_PRICE.equals(text) && !LATEST_PRICE.equals(text)) {
                                 editable.delete(start - 1, start);
                             } else {
                                 editable.clear();
@@ -1556,34 +1591,43 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         } else {
                             jsonObject.put(AMP_EVENT_VOLUME_KEY, AMP_EVENT_VOLUME_KEY_VALUE_PLUS);
                         }
-                        QuoteEntity quoteEntity = DataManager.getInstance().getRtnData().getQuotes().get(mInstrumentId);
+                        QuoteEntity quoteEntity = DataManager.getInstance().getRtnData().getQuotes()
+                                .get(mInstrumentId);
                         switch (text) {
                             case QUEUED_PRICE:
                                 if (quoteEntity != null) {
-                                    String ask_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(), mInstrumentId);
-                                    String bid_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(), mInstrumentId);
+                                    String ask_price1 = LatestFileManager.
+                                            saveScaleByPtick(quoteEntity.getAsk_price1(), mInstrumentId);
+                                    String bid_price1 = LatestFileManager.
+                                            saveScaleByPtick(quoteEntity.getBid_price1(), mInstrumentId);
                                     editable.clear();
-                                    editable.insert(0, MathUtils.subtract(bid_price1, ask_price1).contains("-") ? bid_price1 : ask_price1);
+                                    editable.insert(0, MathUtils.subtract(bid_price1, ask_price1).
+                                            contains("-") ? bid_price1 : ask_price1);
                                 }
                                 break;
                             case OPPONENT_PRICE:
                                 if (quoteEntity != null) {
-                                    String ask_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(), mInstrumentId);
-                                    String bid_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(), mInstrumentId);
+                                    String ask_price1 = LatestFileManager.
+                                            saveScaleByPtick(quoteEntity.getAsk_price1(), mInstrumentId);
+                                    String bid_price1 = LatestFileManager.
+                                            saveScaleByPtick(quoteEntity.getBid_price1(), mInstrumentId);
                                     editable.clear();
-                                    editable.insert(0, MathUtils.subtract(bid_price1, ask_price1).contains("-") ? ask_price1 : bid_price1);
+                                    editable.insert(0, MathUtils.
+                                            subtract(bid_price1, ask_price1).contains("-") ? ask_price1 : bid_price1);
                                 }
                                 break;
                             case LATEST_PRICE:
                                 if (quoteEntity != null) {
-                                    String last_price = LatestFileManager.saveScaleByPtick(quoteEntity.getLast_price(), mInstrumentId);
+                                    String last_price = LatestFileManager.
+                                            saveScaleByPtick(quoteEntity.getLast_price(), mInstrumentId);
                                     editable.clear();
                                     editable.insert(0, last_price);
                                 }
                                 break;
                             case MARKET_PRICE:
                                 if (quoteEntity != null) {
-                                    String last_price = LatestFileManager.saveScaleByPtick(quoteEntity.getLast_price(), mInstrumentId);
+                                    String last_price = LatestFileManager.
+                                            saveScaleByPtick(quoteEntity.getLast_price(), mInstrumentId);
                                     editable.clear();
                                     editable.insert(0, last_price);
                                 }
@@ -1607,34 +1651,43 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         } else {
                             jsonObject.put(AMP_EVENT_VOLUME_KEY, AMP_EVENT_VOLUME_KEY_VALUE_MINUS);
                         }
-                        QuoteEntity quoteEntity = DataManager.getInstance().getRtnData().getQuotes().get(mInstrumentId);
+                        QuoteEntity quoteEntity = DataManager.getInstance().getRtnData().getQuotes().
+                                get(mInstrumentId);
                         switch (text) {
                             case QUEUED_PRICE:
                                 if (quoteEntity != null) {
-                                    String ask_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(), mInstrumentId);
-                                    String bid_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(), mInstrumentId);
+                                    String ask_price1 = LatestFileManager.
+                                            saveScaleByPtick(quoteEntity.getAsk_price1(), mInstrumentId);
+                                    String bid_price1 = LatestFileManager.
+                                            saveScaleByPtick(quoteEntity.getBid_price1(), mInstrumentId);
                                     editable.clear();
-                                    editable.insert(0, MathUtils.subtract(bid_price1, ask_price1).contains("-") ? bid_price1 : ask_price1);
+                                    editable.insert(0, MathUtils.
+                                            subtract(bid_price1, ask_price1).contains("-") ? bid_price1 : ask_price1);
                                 }
                                 break;
                             case OPPONENT_PRICE:
                                 if (quoteEntity != null) {
-                                    String ask_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(), mInstrumentId);
-                                    String bid_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(), mInstrumentId);
+                                    String ask_price1 = LatestFileManager.
+                                            saveScaleByPtick(quoteEntity.getAsk_price1(), mInstrumentId);
+                                    String bid_price1 = LatestFileManager.
+                                            saveScaleByPtick(quoteEntity.getBid_price1(), mInstrumentId);
                                     editable.clear();
-                                    editable.insert(0, MathUtils.subtract(bid_price1, ask_price1).contains("-") ? ask_price1 : bid_price1);
+                                    editable.insert(0, MathUtils.
+                                            subtract(bid_price1, ask_price1).contains("-") ? ask_price1 : bid_price1);
                                 }
                                 break;
                             case LATEST_PRICE:
                                 if (quoteEntity != null) {
-                                    String last_price = LatestFileManager.saveScaleByPtick(quoteEntity.getLast_price(), mInstrumentId);
+                                    String last_price = LatestFileManager.
+                                            saveScaleByPtick(quoteEntity.getLast_price(), mInstrumentId);
                                     editable.clear();
                                     editable.insert(0, last_price);
                                 }
                                 break;
                             case MARKET_PRICE:
                                 if (quoteEntity != null) {
-                                    String last_price = LatestFileManager.saveScaleByPtick(quoteEntity.getLast_price(), mInstrumentId);
+                                    String last_price = LatestFileManager.
+                                            saveScaleByPtick(quoteEntity.getLast_price(), mInstrumentId);
                                     editable.clear();
                                     editable.insert(0, last_price);
                                 }
@@ -1647,7 +1700,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                                         editable.insert(0, "-");
                                         break;
                                     } else {
-                                        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
+                                        SearchEntity searchEntity = LatestFileManager.getSearchEntities().
+                                                get(mInstrumentId);
                                         String price_tick = searchEntity == null ? "0" : searchEntity.getpTick();
                                         data = MathUtils.subtract(editable.toString(), price_tick);
                                     }
@@ -1738,7 +1792,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                                 break;
                         }
                         String str = editable.toString();
-                        if (QUEUED_PRICE.equals(text) || OPPONENT_PRICE.equals(text) || MARKET_PRICE.equals(text) || LATEST_PRICE.equals(text) || mIsInit) {
+                        if (QUEUED_PRICE.equals(text) || OPPONENT_PRICE.equals(text) ||
+                                MARKET_PRICE.equals(text) || LATEST_PRICE.equals(text) || mIsInit) {
                             //添加负号功能
                             if ("-".equals(str)) {
                                 if ((!".".equals(insertStr)) || (".".equals(insertStr) && !text.contains(".")))
@@ -1748,8 +1803,12 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                                 editable.insert(0, insertStr);
                             }
                             mIsInit = false;
-                        } else if ((!".".equals(insertStr)) || (".".equals(insertStr) && !text.contains(".")))
-                            editable.insert(start, insertStr);
+                        } else if ((!".".equals(insertStr)) || (".".equals(insertStr) && !text.contains("."))){
+                            if ((mEditText.getSelectionEnd() - mEditText.getSelectionStart() == editable.length())){
+                                editable.clear();
+                                editable.insert(0, insertStr);
+                            }else editable.insert(start, insertStr);
+                        }
                     }
                     if (idKeyboard == R.xml.future_price) {
                         Amplitude.getInstance().logEvent(AMP_PRICE_KEY, jsonObject);
@@ -1792,6 +1851,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             public void onDismiss(DialogInterface dialogInterface) {
                 mBinding.backAccount.setImageDrawable(
                         ContextCompat.getDrawable(sContext, R.mipmap.ic_account_circle_white_36dp));
+                mIsKeyBoardJustHide = true;
             }
         });
 

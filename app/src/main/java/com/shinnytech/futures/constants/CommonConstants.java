@@ -5,19 +5,14 @@ public final class CommonConstants {
     public static String TRANSACTION_URL = "wss://opentd.shinnytech.com/trade/user0";
     public static String JSON_FILE_URL = "https://openmd.shinnytech.com/t/md/symbols/latest.json";
     public static final String MARKET_URL_1 = "wss://openmd.shinnytech.com/t/md/front/mobile";
-    public static final String MARKET_URL_2 = "ws://139.198.126.116/t/md/front/mobile";
-    public static final String MARKET_URL_3 = "ws://139.198.122.80/t/md/front/mobile";
-    public static final String MARKET_URL_4 = "ws://139.198.123.206/t/md/front/mobile";
+    public static final String MARKET_URL_2 = "wss://139.198.126.116/t/md/front/mobile";
+    public static final String MARKET_URL_3 = "wss://139.198.122.80/t/md/front/mobile";
+    public static final String MARKET_URL_4 = "wss://139.198.123.206/t/md/front/mobile";
     public static final String FEED_BACK_URL = "https://ask.shinnytech.com/src/indexm.html";
     //广播信息类型
-    public static final String MD_ONLINE = "MD_ONLINE";
-    public static final String MD_OFFLINE = "MD_OFFLINE";
     public static final String MD_MESSAGE = "MD_MESSAGE";
-    public static final String MD_TIMEOUT = "MD_TIMEOUT";
-    public static final String TD_ONLINE = "TD_ONLINE";
     public static final String TD_OFFLINE = "TD_OFFLINE";
     public static final String TD_MESSAGE = "TD_MESSAGE";
-    public static final String TD_TIMEOUT = "TD_TIMEOUT";
     public static final String TD_MESSAGE_LOGIN_SUCCEED = "TD_MESSAGE_LOGIN_SUCCEED";
     public static final String TD_MESSAGE_LOGIN_FAIL = "TD_MESSAGE_LOGIN_FAIL";
     public static final String TD_MESSAGE_WEAK_PASSWORD = "TD_MESSAGE_WEAK_PASSWORD";

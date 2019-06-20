@@ -144,6 +144,7 @@ public class QuoteFragment extends LazyLoadFragment {
     private RecyclerView mRecyclerView;
     private DragDialogAdapter mDragDialogAdapter;
     private long mShowTime;
+    private boolean mIsInitRecommend;
 
     /**
      * date: 7/9/17
@@ -175,6 +176,7 @@ public class QuoteFragment extends LazyLoadFragment {
     }
 
     private void initData() {
+        mIsInitRecommend = true;
         mToolbarTitle = getActivity().findViewById(R.id.title_toolbar);
         mBinding.rvQuote.setLayoutManager(new LinearLayoutManager(getActivity()));
         mBinding.rvQuote.addItemDecoration(
@@ -238,6 +240,8 @@ public class QuoteFragment extends LazyLoadFragment {
             refreshMD(mToolbarTitle.getText().toString());
             refreshTD();
 
+            if (OPTIONAL.equals(mTitle))initConfigOptional();
+
             if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
                 mBinding.tvChangePercent.setText(R.string.quote_fragment_bid_price1);
                 mBinding.tvOpenInterest.setText(R.string.quote_fragment_ask_price1);
@@ -246,7 +250,16 @@ public class QuoteFragment extends LazyLoadFragment {
                 mBinding.tvOpenInterest.setText(R.string.quote_fragment_open_interest);
             }
 
-            mBinding.rvQuote.scrollToPosition(0);
+            if (getActivity() instanceof MainActivity) {
+                String insList = ((MainActivity) getActivity()).getmMainActivityPresenter()
+                        .getPreSubscribedQuotes();
+                if (insList != null && !insList.equals(DataManager.getInstance().getRtnData().getIns_list())) {
+                    BaseApplication.getmMDWebSocket().sendSubscribeQuote(insList);
+                    ((MainActivity) getActivity()).getmMainActivityPresenter().setPreSubscribedQuotes(null);
+                    return;
+                }
+            }
+
             if (OPTIONAL.equals(mTitle)) {
                 List<String> ins;
                 if (mInsList.size() <= LOAD_QUOTE_NUM) {
@@ -779,6 +792,7 @@ public class QuoteFragment extends LazyLoadFragment {
         DataManager dataManager = DataManager.getInstance();
         UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.LOGIN_USER_ID);
         if (userEntity == null) return;
+
         List<String> list = new ArrayList<>();
 
         for (PositionEntity positionEntity : userEntity.getPositions().values()) {
@@ -794,8 +808,6 @@ public class QuoteFragment extends LazyLoadFragment {
                 if (!list.contains(ins)) list.add(ins);
             }
         }
-
-        if (OPTIONAL.equals(mTitle)) initConfigOptional(list);
 
         mAdapter.updateHighlightList(list);
     }
@@ -856,7 +868,7 @@ public class QuoteFragment extends LazyLoadFragment {
      * author: chenli
      * description: 配置新用户自选合约
      */
-    public void initConfigOptional(final List<String> insList) {
+    public void initConfigOptional() {
         if (!SPUtils.contains(BaseApplication.getContext(), CONFIG_RECOMMEND_OPTIONAL)
                 && LatestFileManager.getOptionalInsList().isEmpty()) {
             final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
@@ -938,11 +950,26 @@ public class QuoteFragment extends LazyLoadFragment {
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    LatestFileManager.saveInsListToFile(insList);
+                    UserEntity userEntity = mDataManager.getTradeBean().getUsers().get(mDataManager.LOGIN_USER_ID);
+                    if (userEntity != null) {
+                        Map<String, PositionEntity> positions = userEntity.getPositions();
+                        //持仓合约
+                        if (!positions.isEmpty()) {
+                            List<String> list = new ArrayList<>();
+                            for (PositionEntity positionEntity : positions.values()) {
+                                int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+                                int volume_short = Integer.parseInt(positionEntity.getVolume_short());
+                                if (!(volume_long == 0 && volume_short == 0)) {
+                                    list.add(positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id());
+                                }
+                            }
+                            LatestFileManager.saveInsListToFile(list);
+                        }
+                    }
                     SPUtils.putAndApply(BaseApplication.getContext(), CONFIG_RECOMMEND_OPTIONAL, true);
                     dialog.dismiss();
                 }
-            }, 1500);
+            }, 2000);
         }
 
     }
