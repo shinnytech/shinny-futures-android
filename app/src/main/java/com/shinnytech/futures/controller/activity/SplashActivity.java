@@ -1,9 +1,7 @@
 package com.shinnytech.futures.controller.activity;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
@@ -22,7 +20,7 @@ import android.widget.FrameLayout;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
-import com.shinnytech.futures.utils.NetworkUtils;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
 import java.lang.ref.WeakReference;
@@ -38,7 +36,6 @@ import static com.shinnytech.futures.utils.ScreenUtils.getStatusBarHeight;
 
 public class SplashActivity extends AppCompatActivity {
     private final int TO_LOGIN = 0;
-    private final int TO_SCREEN = 1;
     private BroadcastReceiver mReceiverLogin;
     private Handler mHandler;
     private Timer mTimer;
@@ -51,6 +48,9 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
         boolean isFirm = (boolean) SPUtils.get(BaseApplication.getContext(), CONFIG_IS_FIRM, true);
         changeStatusBarColor(isFirm);
+
+        if(!isTaskRoot()) finish();
+
         mHandler = new MyHandler(this);
         mTimer = new Timer();
         mTimerTask = new TimerTask() {
@@ -66,31 +66,13 @@ public class SplashActivity extends AppCompatActivity {
         super.onResume();
 
         final Context context = BaseApplication.getContext();
-        if (!NetworkUtils.isNetworkConnected(context)) {
-            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-            dialog.setTitle("登录结果");
-            dialog.setMessage("网络故障，无法连接到服务器");
-            dialog.setCancelable(false);
-            dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    mHandler.sendEmptyMessageDelayed(TO_SCREEN, 500);
-                    dialog.dismiss();
-                }
-            });
-            dialog.show();
-        } else {
-            mTimer.schedule(mTimerTask, 10000);
+        mTimer.schedule(mTimerTask, 10000);
 
-            //没有登录过
-            if (!SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
-                mHandler.sendEmptyMessageDelayed(TO_LOGIN, 2000);
-            } else {
-                //关闭软件前退出登录
-                String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
-                if (date.isEmpty()) mHandler.sendEmptyMessageDelayed(TO_LOGIN, 2000);
-            }
-        }
+        //没有登录过
+        if (!SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE) ||
+                ((String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "")).isEmpty())
+            mHandler.sendEmptyMessageDelayed(TO_LOGIN, 2000);
+
         registerBroaderCast();
     }
 
@@ -164,6 +146,7 @@ public class SplashActivity extends AppCompatActivity {
 
     private void toLogin() {
         mTimer.cancel();
+        mTimerTask.cancel();
         Intent loginIntent = new Intent(SplashActivity.this, LoginActivity.class);
         SplashActivity.this.startActivity(loginIntent);
         SplashActivity.this.finish();
@@ -171,16 +154,10 @@ public class SplashActivity extends AppCompatActivity {
 
     private void toMain() {
         mTimer.cancel();
+        mTimerTask.cancel();
         Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
         SplashActivity.this.startActivity(mainIntent);
         SplashActivity.this.finish();
-    }
-
-    private void toScreen() {
-        Intent startMain = new Intent(Intent.ACTION_MAIN);
-        startMain.addCategory(Intent.CATEGORY_HOME);
-        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(startMain);
     }
 
     /**
@@ -204,9 +181,6 @@ public class SplashActivity extends AppCompatActivity {
                 switch (msg.what) {
                     case 0:
                         activity.toLogin();
-                        break;
-                    case 1:
-                        activity.toScreen();
                         break;
                     default:
                         break;

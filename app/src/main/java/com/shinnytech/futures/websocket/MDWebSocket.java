@@ -46,15 +46,16 @@ public class MDWebSocket extends WebSocketBase {
                 default:
                     return;
             }
-            if (!BaseApplication.issBackGround()) sendPeekMessage();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        if (!BaseApplication.issBackGround())sendPeekMessage();
     }
 
     @Override
-    public void reconnect() {
-        super.reconnect();
+    public void reConnect() {
+        super.reConnect();
 
         LogUtils.e("reConnectMD", true);
         JSONObject jsonObject = new JSONObject();
@@ -65,7 +66,6 @@ public class MDWebSocket extends WebSocketBase {
             e.printStackTrace();
         }
         Amplitude.getInstance().logEvent(AMP_RECONNECT, jsonObject);
-
     }
 
     /**
@@ -96,19 +96,6 @@ public class MDWebSocket extends WebSocketBase {
         mWebSocketClient.sendText(subScribeQuote);
         sDataManager.QUOTES = subScribeQuote;
         LogUtils.e(subScribeQuote, true);
-    }
-
-    /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 获取合约信息
-     */
-    public void sendPeekMessage() {
-        ReqPeekMessageEntity reqPeekMessageEntity = new ReqPeekMessageEntity();
-        reqPeekMessageEntity.setAid("peek_message");
-        String peekMessage = new Gson().toJson(reqPeekMessageEntity);
-        mWebSocketClient.sendText(peekMessage);
-        LogUtils.e(peekMessage, false);
     }
 
     /**

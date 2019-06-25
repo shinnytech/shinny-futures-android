@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.TextView;
@@ -351,7 +350,9 @@ public class BaseApplication extends Application {
             String AK = (String) cl.getMethod("getAK").invoke(null);
             String SK = (String) cl.getMethod("getSK").invoke(null);
             final String user_agent = (String) cl.getMethod("getUserAgent").invoke(null);
+            final String client_app_id = (String) cl.getMethod("getClientAppId").invoke(null);
             DataManager.getInstance().USER_AGENT = user_agent;
+            DataManager.getInstance().CLIENT_APP_ID = client_app_id;
             initAMP(AMP_KEY);
             initBugly(user_agent, BUGLY_KEY);
             initAliLog(AK, SK);
@@ -493,8 +494,8 @@ public class BaseApplication extends Application {
                             @Override
                             public void run() {
                                 LatestFileManager.initInsList(response.body());
-                                mMDWebSocket.reconnect();
-                                mTDWebSocket.reconnect();
+                                mMDWebSocket.reConnect();
+                                mTDWebSocket.reConnect();
                             }
                         }).start();
                     }
@@ -502,17 +503,18 @@ public class BaseApplication extends Application {
                     @Override
                     public void onError(Response<File> response) {
                         super.onError(response);
-                        ToastUtils.showToast(sContext, "合约代码下载失败，请重试");
-                        new Handler().postDelayed(new Runnable() {
+                        ToastUtils.showToast(sContext, "合约代码下载失败，请检查网络");
+                        new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                System.exit(0);
+                                LatestFileManager.initInsList(new File("latest.json"));
+                                mMDWebSocket.reConnect();
+                                mTDWebSocket.reConnect();
                             }
-                        }, 2000);
+                        }).start();
                     }
                 });
     }
-
 
     /**
      * date: 7/21/17
@@ -635,10 +637,8 @@ public class BaseApplication extends Application {
 
         if (sBackGround){
             sBackGround = false;
-            mMDWebSocket.resetConnectTime();
-            mTDWebSocket.resetConnectTime();
-            mMDWebSocket.sendPeekMessage();
-            mTDWebSocket.sendPeekMessageTransaction();
+            mMDWebSocket.backToForegroundCheck();
+            mTDWebSocket.backToForegroundCheck();
         }
 
         EventBus.getDefault().post(new RedrawEvent());

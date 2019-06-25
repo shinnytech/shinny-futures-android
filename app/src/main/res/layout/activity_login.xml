@@ -224,7 +224,7 @@
             <Button
                 android:background="@null"
                 android:id="@+id/visitor"
-                android:gravity="top|center"
+                android:gravity="center"
                 android:layout_gravity="center"
                 android:textColor="@color/login_gray"
                 android:text="随便看看"

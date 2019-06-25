@@ -10,14 +10,18 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentQuotePagerBinding;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.model.engine.DataManager;
+import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.SPUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.shinnytech.futures.constants.CommonConstants.CONFIG_RECOMMEND_OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
@@ -80,7 +84,6 @@ public class QuotePagerFragment extends LazyLoadFragment {
 
     private void initData() {
         mMainActivity = (MainActivity) getActivity();
-        mTitle = OPTIONAL;
         mTitleList = new ArrayList<>();
         mTitleList.add(OPTIONAL);
         mTitleList.add(DOMINANT);
@@ -104,9 +107,20 @@ public class QuotePagerFragment extends LazyLoadFragment {
         fragmentList.add(QuoteFragment.newInstance(DALIANZUHE));
         fragmentList.add(QuoteFragment.newInstance(ZHENGZHOUZUHE));
         //初始化适配器类
-        mViewPagerFragmentAdapter = new ViewPagerFragmentAdapter(getActivity().getSupportFragmentManager(), fragmentList);
+        mViewPagerFragmentAdapter = new ViewPagerFragmentAdapter(
+                getActivity().getSupportFragmentManager(), fragmentList);
         mBinding.quotePager.setAdapter(mViewPagerFragmentAdapter);
-        mBinding.quotePager.setCurrentItem(0);
+        if (!SPUtils.contains(BaseApplication.getContext(), CONFIG_RECOMMEND_OPTIONAL)){
+            mTitle = OPTIONAL;
+            mBinding.quotePager.setCurrentItem(0);
+        } else if (LatestFileManager.getOptionalInsList().isEmpty()){
+            mTitle = DOMINANT;
+            mBinding.quotePager.setCurrentItem(1);
+        }else {
+            mTitle = OPTIONAL;
+            mBinding.quotePager.setCurrentItem(0);
+        }
+
         mBinding.quotePager.setOffscreenPageLimit(8);
     }
 

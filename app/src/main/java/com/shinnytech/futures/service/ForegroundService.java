@@ -15,6 +15,7 @@ import android.support.v4.app.NotificationCompat;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.receiver.NotificationClickReceiver;
+import com.shinnytech.futures.utils.LogUtils;
 
 public class ForegroundService extends Service {
     public ForegroundService() {
@@ -52,6 +53,12 @@ public class ForegroundService extends Service {
                 .setContentIntent(pendingIntent)
                 .build();
         startForeground(1, notification);
-        return super.onStartCommand(intent, flags, startId);
+        return START_NOT_STICKY;
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        System.exit(0);
     }
 }

@@ -79,15 +79,16 @@ public class TDWebSocket extends WebSocketBase {
                 default:
                     return;
             }
-            if (!BaseApplication.issBackGround()) sendPeekMessageTransaction();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        if (!BaseApplication.issBackGround())sendPeekMessage();
     }
 
     @Override
-    public void reconnect() {
-        super.reconnect();
+    public void reConnect() {
+        super.reConnect();
 
         LogUtils.e("reConnectTD", true);
         JSONObject jsonObject = new JSONObject();
@@ -99,7 +100,6 @@ public class TDWebSocket extends WebSocketBase {
         }
         Amplitude.getInstance().logEvent(AMP_RECONNECT, jsonObject);
     }
-
 
     /**
      * date: 2019/3/17
@@ -127,8 +127,7 @@ public class TDWebSocket extends WebSocketBase {
                     || ContextCompat.checkSelfPermission(BaseApplication.getContext(),
                     Manifest.permission.ACCESS_COARSE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED;
-            if ((name != null && name.contains(BROKER_ID_VISITOR)
-                    && !TimeUtils.getNowTime().equals(date)) || isPermissionDenied) {
+            if ((name.contains(BROKER_ID_VISITOR) && !TimeUtils.getNowTime().equals(date)) || isPermissionDenied) {
                 sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
                 return;
             }
@@ -155,19 +154,6 @@ public class TDWebSocket extends WebSocketBase {
     /**
      * date: 7/9/17
      * author: chenli
-     * description: 获取合约信息
-     */
-    public void sendPeekMessageTransaction() {
-        ReqPeekMessageEntity reqPeekMessageEntity = new ReqPeekMessageEntity();
-        reqPeekMessageEntity.setAid("peek_message");
-        String peekMessage = new Gson().toJson(reqPeekMessageEntity);
-        mWebSocketClient.sendText(peekMessage);
-        LogUtils.e(peekMessage, false);
-    }
-
-    /**
-     * date: 7/9/17
-     * author: chenli
      * description: 用户登录
      */
     public void sendReqLogin(String bid, String user_name, String password) {
@@ -178,7 +164,7 @@ public class TDWebSocket extends WebSocketBase {
         reqLoginEntity.setUser_name(user_name);
         reqLoginEntity.setPassword(password);
         reqLoginEntity.setClient_system_info(systemInfo);
-        reqLoginEntity.setClient_app_id("SHINNY_XQ_1.0");
+        reqLoginEntity.setClient_app_id(sDataManager.CLIENT_APP_ID);
         String reqLogin = new Gson().toJson(reqLoginEntity);
         mWebSocketClient.sendText(reqLogin);
         LogUtils.e(reqLogin, true);

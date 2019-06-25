@@ -267,6 +267,7 @@ public class MainActivityPresenter {
                 switch (title) {
                     case CommonConstants.LOGOUT:
                         SPUtils.putAndApply(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
+                        SPUtils.putAndApply(sContext, CommonConstants.CONFIG_PASSWORD, "");
                         JSONObject jsonObject1 = new JSONObject();
                         try {
                             jsonObject1.put(AMP_EVENT_LOGIN_BROKER_ID, DataManager.getInstance().LOGIN_BROKER_ID);
@@ -286,7 +287,7 @@ public class MainActivityPresenter {
                         Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                         mMainActivity.startActivity(new Intent(mMainActivity, LoginActivity.class));
                         mMainActivity.finish();
-                        BaseApplication.getmTDWebSocket().reconnect();
+                        BaseApplication.getmTDWebSocket().reConnect();
                         break;
                     case CommonConstants.SETTING:
                         try {

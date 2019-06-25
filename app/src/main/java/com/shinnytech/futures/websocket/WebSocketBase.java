@@ -1,5 +1,6 @@
 package com.shinnytech.futures.websocket;
 
+import com.google.gson.Gson;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
@@ -8,7 +9,9 @@ import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.model.bean.reqbean.ReqPeekMessageEntity;
 import com.shinnytech.futures.model.engine.DataManager;
+import com.shinnytech.futures.utils.LogUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,9 +29,9 @@ public class WebSocketBase extends WebSocketAdapter {
     private int mPongCount;
     private Timer mTimer;
     private TimerTask mTimerTask;
-    private long mConnectTime;
+    private long mConnectTime = 0;
 
-    public WebSocketBase(List<String> urls, int index){
+    public WebSocketBase(List<String> urls, int index) {
         mIndex = index;
         mUrls = urls;
     }
@@ -36,15 +39,16 @@ public class WebSocketBase extends WebSocketAdapter {
     @Override
     public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
         super.onConnected(websocket, headers);
-        mConnectTime = System.currentTimeMillis() / 1000;
         mPongCount = 0;
         mTimer = new Timer();
         mTimerTask = new TimerTask() {
             @Override
             public void run() {
-                if (BaseApplication.issBackGround())return;
-                if (mPongCount > 3){
-                    reconnect();
+                if (BaseApplication.issBackGround()) return;
+
+                if (mPongCount > 3) {
+                    LogUtils.e("onConnected", true);
+                    reConnect();
                     return;
                 }
                 mWebSocketClient.sendPing();
@@ -57,30 +61,15 @@ public class WebSocketBase extends WebSocketAdapter {
     @Override
     public void onDisconnected(WebSocket websocket, WebSocketFrame serverCloseFrame, WebSocketFrame clientCloseFrame, boolean closedByServer) throws Exception {
         super.onDisconnected(websocket, serverCloseFrame, clientCloseFrame, closedByServer);
-        long currentTime = System.currentTimeMillis() / 1000;
-        if (currentTime - mConnectTime >= 10) reconnect();
-        else {
-            Timer timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    reconnect();
-                }
-            }, 10000);
-        }
-
+        LogUtils.e("onDisconnected", true);
+        reConnect();
     }
 
     @Override
     public void onConnectError(WebSocket websocket, WebSocketException exception) throws Exception {
         super.onConnectError(websocket, exception);
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                reconnect();
-            }
-        }, 10000);
+        LogUtils.e("onConnectError", true);
+        reConnect();
     }
 
     @Override
@@ -89,13 +78,31 @@ public class WebSocketBase extends WebSocketAdapter {
         mPongCount--;
     }
 
-    public void reconnect(){
-        if (mTimer != null){
+    public void reConnect() {
+        if (BaseApplication.issBackGround()) return;
+
+        final long currentTime = System.currentTimeMillis() / 1000;
+        if (currentTime - mConnectTime <= 10)
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    connect(currentTime);
+                }
+            }, 10000);
+        else{
+            connect(currentTime);
+        }
+    }
+
+    private void connect(long currentTime) {
+        mConnectTime = currentTime;
+
+        if (mTimer != null) {
             mTimer.cancel();
             mTimer = null;
         }
 
-        if (mTimerTask != null){
+        if (mTimerTask != null) {
             mTimerTask.cancel();
             mTimerTask = null;
         }
@@ -119,8 +126,18 @@ public class WebSocketBase extends WebSocketAdapter {
         mWebSocketClient.connectAsynchronously();
     }
 
-    public void resetConnectTime(){
-        mConnectTime = System.currentTimeMillis() / 1000;
+    public void backToForegroundCheck() {
+        mConnectTime = 0;
+        if (!mWebSocketClient.isOpen()) reConnect();
+        else sendPeekMessage();
+    }
+
+    public void sendPeekMessage(){
+        ReqPeekMessageEntity reqPeekMessageEntity = new ReqPeekMessageEntity();
+        reqPeekMessageEntity.setAid("peek_message");
+        String peekMessage = new Gson().toJson(reqPeekMessageEntity);
+        mWebSocketClient.sendText(peekMessage);
+        LogUtils.e(peekMessage, false);
     }
 
 }

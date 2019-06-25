@@ -40,6 +40,7 @@ import com.shinnytech.futures.databinding.ActivityLoginBinding;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.Base64;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
@@ -239,6 +240,11 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mBinding.account.getEditableText().clear();
+                String account = (String) SPUtils.get(sContext, CONFIG_ACCOUNT, "");
+                if (!account.isEmpty()){
+                    SPUtils.putAndApply(sContext, CONFIG_ACCOUNT, "");
+                    ToastUtils.showToast(sContext, "删除账号信息");
+                }
             }
         });
 
@@ -676,6 +682,7 @@ public class LoginActivity extends AppCompatActivity {
             String brokerName = (String) SPUtils.get(sContext, CONFIG_BROKER, "");
             String account = (String) SPUtils.get(sContext, CONFIG_ACCOUNT, "");
             if (brokers.contains(brokerName)) mBinding.broker.setText(brokerName);
+            else if (!brokers.isEmpty()) mBinding.broker.setText(brokers.get(0));
             mBinding.account.setText(account);
             mBinding.account.setSelection(account.length());
             if (!account.isEmpty()) mBinding.deleteAccount.setVisibility(View.VISIBLE);
@@ -778,10 +785,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
                         break;
                     case EXIT_APP:
-                        Intent startMain = new Intent(Intent.ACTION_MAIN);
-                        startMain.addCategory(Intent.CATEGORY_HOME);
-                        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        activity.startActivity(startMain);
+                        System.exit(0);
                         break;
                     case MY_PERMISSIONS_REQUEST_DENIED:
                         activity.checkPermissions();
