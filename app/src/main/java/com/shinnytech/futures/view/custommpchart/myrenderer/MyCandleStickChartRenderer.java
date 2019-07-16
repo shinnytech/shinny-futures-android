@@ -21,6 +21,7 @@ import com.github.mikephil.charting.utils.Utils;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.view.custommpchart.mychart.CombinedChartKline;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyTransformer;
 

@@ -13,7 +13,6 @@ import com.shinnytech.futures.databinding.ActivityOptionalBinding;
 import com.shinnytech.futures.model.adapter.OptionalAdapter;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class OptionalActivity extends BaseActivity {
@@ -86,8 +85,4 @@ public class OptionalActivity extends BaseActivity {
     protected void initEvent() {
     }
 
-    @Override
-    protected void refreshUI() {
-
-    }
 }

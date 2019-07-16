@@ -7,13 +7,22 @@ package com.shinnytech.futures.model.bean.eventbusbean;
  */
 
 public class OrderSettingEvent {
-    private boolean isPopup;
+    private boolean isCancelPopup;
+    private boolean isInsertPopup;
 
-    public boolean isPopup() {
-        return isPopup;
+    public boolean isCancelPopup() {
+        return isCancelPopup;
     }
 
-    public void setPopup(boolean popup) {
-        isPopup = popup;
+    public void setCancelPopup(boolean cancelPopup) {
+        isCancelPopup = cancelPopup;
+    }
+
+    public boolean isInsertPopup() {
+        return isInsertPopup;
+    }
+
+    public void setInsertPopup(boolean insertPopup) {
+        isInsertPopup = insertPopup;
     }
 }

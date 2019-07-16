@@ -1,8 +1,12 @@
 package com.shinnytech.futures.controller.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,23 +30,16 @@ import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.ToastUtils;
 
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_AMOUNT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BANK;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENCY;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_BROKER_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_USER_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_TRANSFER_IN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_TRANSFER_OUT;
+import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BANK_FIRST;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BANK_LAST;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_DIRECTION;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_IN;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_OUT;
@@ -107,7 +104,7 @@ public class BankTransferActivity extends BaseActivity {
         mBinding.futureBank.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String futureAccount = sDataManager.LOGIN_USER_ID;
+                String futureAccount = sDataManager.USER_ID;
                 String bank = (String) mBinding.spinnerBank.getSelectedItem();
                 String bankId = mBankId.get(bank);
                 String accountPassword = mBinding.etAccountPassword.getText().toString();
@@ -121,13 +118,6 @@ public class BankTransferActivity extends BaseActivity {
                             .setOnce(AMP_USER_BANK_FIRST, bank)
                             .set(AMP_USER_BANK_LAST, bank);
                     Amplitude.getInstance().identify(identify);
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, sDataManager.LOGIN_BROKER_ID);
-                    jsonObject.put(AMP_EVENT_LOGIN_USER_ID, sDataManager.LOGIN_USER_ID);
-                    jsonObject.put(AMP_EVENT_BANK, bank);
-                    jsonObject.put(AMP_EVENT_AMOUNT, amountF);
-                    jsonObject.put(AMP_EVENT_CURRENCY, currency);
-                    Amplitude.getInstance().logEvent(AMP_TRANSFER_OUT, jsonObject);
                 } catch (Exception e) {
                     ToastUtils.showToast(sContext, "输入金额错误！");
                 }
@@ -137,7 +127,7 @@ public class BankTransferActivity extends BaseActivity {
         mBinding.bankFuture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String futureAccount = sDataManager.LOGIN_USER_ID;
+                String futureAccount = sDataManager.USER_ID;
                 String bank = (String) mBinding.spinnerBank.getSelectedItem();
                 String bankId = mBankId.get(bank);
                 String accountPassword = mBinding.etAccountPassword.getText().toString();
@@ -151,13 +141,6 @@ public class BankTransferActivity extends BaseActivity {
                             .setOnce(AMP_USER_BANK_FIRST, bank)
                             .set(AMP_USER_BANK_LAST, bank);
                     Amplitude.getInstance().identify(identify);
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, sDataManager.LOGIN_BROKER_ID);
-                    jsonObject.put(AMP_EVENT_LOGIN_USER_ID, sDataManager.LOGIN_USER_ID);
-                    jsonObject.put(AMP_EVENT_BANK, bank);
-                    jsonObject.put(AMP_EVENT_AMOUNT, amountF);
-                    jsonObject.put(AMP_EVENT_CURRENCY, currency);
-                    Amplitude.getInstance().logEvent(AMP_TRANSFER_IN, jsonObject);
                 } catch (Exception e) {
                     ToastUtils.showToast(sContext, "输入金额错误！");
                 }
@@ -209,8 +192,7 @@ public class BankTransferActivity extends BaseActivity {
 
     }
 
-    @Override
-    protected void refreshUI() {
+    private void refreshUI() {
         if (mBankSpinnerAdapter.isEmpty()) refreshBank();
         if (mCurrencySpinnerAdapter.isEmpty()) refreshCurrency();
         if (mIsUpdate) refreshTransfer();
@@ -219,10 +201,35 @@ public class BankTransferActivity extends BaseActivity {
     @Override
     public void onResume() {
         super.onResume();
+        refreshUI();
+        registerBroaderCast();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mReceiverLocal != null)
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLocal);
+    }
+
+    /**
+     * date: 7/7/17
+     * author: chenli
+     * description: 注册账户广播，监听账户实时信息
+     */
+    protected void registerBroaderCast() {
+        mReceiverLocal = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String msg = intent.getStringExtra("msg");
+                if (TD_MESSAGE.equals(msg)) refreshUI();
+            }
+        };
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverLocal, new IntentFilter(TD_BROADCAST_ACTION));
     }
 
     private void refreshBank() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
         if (userEntity == null) return;
         mBankId.clear();
         mBankSpinnerAdapter.clear();
@@ -238,7 +245,7 @@ public class BankTransferActivity extends BaseActivity {
     }
 
     private void refreshCurrency() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
         if (userEntity == null) return;
         mCurrencySpinnerAdapter.clear();
         List<String> currencyList = new ArrayList<>();
@@ -252,7 +259,7 @@ public class BankTransferActivity extends BaseActivity {
 
     private void refreshTransfer() {
         try {
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
             mNewData.clear();
             for (TransferEntity transferEntity :

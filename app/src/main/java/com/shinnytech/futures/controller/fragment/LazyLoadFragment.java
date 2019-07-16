@@ -4,6 +4,10 @@ package com.shinnytech.futures.controller.fragment;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
+import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
+import com.shinnytech.futures.model.engine.LatestFileManager;
+
 /**
  * date: 6/1/18
  * author: chenli
@@ -71,6 +75,26 @@ public abstract class LazyLoadFragment extends Fragment {
         if (!mIsVisibleToUser && mIsViewInitiated && mIsDataInitiated) {
             leave();
         }
-
     }
+
+    /**
+     * date: 2019/1/10
+     * author: chenli
+     * description: 订阅合约行情
+     */
+    protected void sendSubscribeQuote(String ins) {
+        if (ins.contains("&") && ins.contains(" ")) {
+            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(ins);
+            if (searchEntity != null) {
+                String leg1_symbol = searchEntity.getLeg1_symbol();
+                String leg2_symbol = searchEntity.getLeg2_symbol();
+                ins = ins + "," + leg1_symbol + "," + leg2_symbol;
+            }
+        }
+        BaseApplication.getmMDWebSocket().sendSubscribeQuote(ins);
+    }
+
+    public abstract void refreshMD();
+    public abstract void refreshTD();
+
 }

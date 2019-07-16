@@ -1,4 +1,4 @@
-package com.shinnytech.futures.controller;
+package com.shinnytech.futures.controller.activity;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -29,24 +29,19 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
-import com.shinnytech.futures.controller.activity.AboutActivity;
-import com.shinnytech.futures.controller.activity.AccountActivity;
-import com.shinnytech.futures.controller.activity.BankTransferActivity;
-import com.shinnytech.futures.controller.activity.ChangePasswordActivity;
-import com.shinnytech.futures.controller.activity.FeedBackActivity;
-import com.shinnytech.futures.controller.activity.LoginActivity;
-import com.shinnytech.futures.controller.activity.MainActivity;
-import com.shinnytech.futures.controller.activity.OptionalActivity;
-import com.shinnytech.futures.controller.activity.SettingActivity;
 import com.shinnytech.futures.controller.fragment.AccountFragment;
+import com.shinnytech.futures.controller.fragment.FutureInfoFragment;
 import com.shinnytech.futures.controller.fragment.QuotePagerFragment;
 import com.shinnytech.futures.databinding.ActivityMainDrawerBinding;
 import com.shinnytech.futures.model.adapter.DialogAdapter;
 import com.shinnytech.futures.model.adapter.NavigationRightAdapter;
 import com.shinnytech.futures.model.adapter.QuoteNavAdapter;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
+import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
+import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
-import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
+import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.bean.settingbean.NavigationRightEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
@@ -54,7 +49,6 @@ import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ScreenUtils;
-import com.shinnytech.futures.utils.TimeUtils;
 import com.shinnytech.futures.utils.ToastUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -66,36 +60,36 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static com.shinnytech.futures.constants.CommonConstants.ABOUT;
+import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT_DETAIL;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_ACCOUNT_TAB;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_CONDITIONAL_ORDER;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_BROKER_ID;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_USER_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGOUT_TIME;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_ABOUT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_ACCOUNT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_CHANGE_PASSWORD;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_FEED_BACK;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_LOGIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_MAIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_OPEN_ACCOUNT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_OPTIONAL_SETTING;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_SETTING;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_TRANSFER;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_MENU;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID_VALUE_MAIN;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SWITCH_FROM;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SWITCH_TO;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TAB_ACCOUNT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TAB_MARKET;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGOUT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_MENU_TRANSFER_IN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_MENU_TRANSFER_OUT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_QUOTE_TAB;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_MENU;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_TAB;
+import static com.shinnytech.futures.constants.CommonConstants.CONDITIONAL_ORDER;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
+import static com.shinnytech.futures.constants.CommonConstants.FEEDBACK;
+import static com.shinnytech.futures.constants.CommonConstants.LOGOUT;
 import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_SETTING_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.MENU_TITLE_COLLECT;
+import static com.shinnytech.futures.constants.CommonConstants.MENU_TITLE_NAVIGATION;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
+import static com.shinnytech.futures.constants.CommonConstants.OPEN_ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
+import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_SETTING;
+import static com.shinnytech.futures.constants.CommonConstants.PASSWORD;
+import static com.shinnytech.futures.constants.CommonConstants.SETTING;
 import static com.shinnytech.futures.constants.CommonConstants.SHANGHAI;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_DIRECTION;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_IN;
@@ -124,13 +118,18 @@ public class MainActivityPresenter {
     private DialogAdapter mTitleDialogAdapter;
     private RecyclerView mTitleRecyclerView;
     private List<String> mTitleList;
+    private String mInstrumentId;
+    private DataManager sDataManager;
+    private boolean mIsUpdate;
 
     public MainActivityPresenter(final MainActivity mainActivity, Context context,
-                                 ActivityMainDrawerBinding binding, String title, TextView toolbarTitle) {
+                                 ActivityMainDrawerBinding binding, TextView toolbarTitle) {
         this.mBinding = binding;
         this.mMainActivity = mainActivity;
         this.mToolbarTitle = toolbarTitle;
         this.sContext = context;
+        this.sDataManager = DataManager.getInstance();
+        this.mIsUpdate = true;
 
         mTitleList = new ArrayList<>();
         mTitleList.add(OPTIONAL);
@@ -155,15 +154,14 @@ public class MainActivityPresenter {
         //添加合约页，设置首页是自选合约列表页
         List<Fragment> fragmentList = new ArrayList<>();
         fragmentList.add(new QuotePagerFragment());
-        fragmentList.add(AccountFragment.newInstance());
+        fragmentList.add(new AccountFragment());
+        fragmentList.add(new FutureInfoFragment());
         //初始化适配器类
         mViewPagerFragmentAdapter = new ViewPagerFragmentAdapter(mMainActivity.getSupportFragmentManager(), fragmentList);
         mBinding.vpContent.setAdapter(mViewPagerFragmentAdapter);
-        mBinding.vpContent.setCurrentItem(0);
         mBinding.vpContent.setPagingEnabled(false);
         //保证lazyLoad的效用,每次加载一个fragment
-        mBinding.vpContent.setOffscreenPageLimit(7);
-        switchQuotesNavigation(title);
+        mBinding.vpContent.setOffscreenPageLimit(3);
 
         //设置右导航宽度
         ViewGroup.LayoutParams paramsR = mBinding.nvMenuRight.getLayoutParams();
@@ -175,19 +173,19 @@ public class MainActivityPresenter {
         mBinding.navigationRightRv.setItemAnimator(new DefaultItemAnimator());
         NavigationRightEntity menu0 = new NavigationRightEntity();
         menu0.setIcon(R.mipmap.ic_perm_identity_white_18dp);
-        menu0.setContent(CommonConstants.LOGOUT);
+        menu0.setContent(LOGOUT);
         NavigationRightEntity menu1 = new NavigationRightEntity();
         menu1.setIcon(R.mipmap.ic_settings_white_18dp);
         menu1.setContent(CommonConstants.SETTING);
         NavigationRightEntity menu9 = new NavigationRightEntity();
         menu9.setIcon(R.mipmap.ic_build_white_18dp);
-        menu9.setContent(CommonConstants.OPTIONAL_SETTING);
+        menu9.setContent(OPTIONAL_SETTING);
         NavigationRightEntity menu2 = new NavigationRightEntity();
         menu2.setIcon(R.mipmap.ic_account_balance_white_18dp);
-        menu2.setContent(CommonConstants.ACCOUNT);
+        menu2.setContent(ACCOUNT);
         NavigationRightEntity menu3 = new NavigationRightEntity();
         menu3.setIcon(R.mipmap.ic_fingerprint_white_18dp);
-        menu3.setContent(CommonConstants.PASSWORD);
+        menu3.setContent(PASSWORD);
         NavigationRightEntity menu4 = new NavigationRightEntity();
         menu4.setIcon(R.mipmap.ic_flight_land_white_18dp);
         menu4.setContent(CommonConstants.TRANSFER_IN);
@@ -196,16 +194,16 @@ public class MainActivityPresenter {
         menu5.setContent(CommonConstants.TRANSFER_OUT);
         NavigationRightEntity menu10 = new NavigationRightEntity();
         menu10.setIcon(R.mipmap.ic_settings_remote_white_18dp);
-        menu10.setContent(CommonConstants.CONDITIONAL_ORDER);
+        menu10.setContent(CONDITIONAL_ORDER);
         NavigationRightEntity menu6 = new NavigationRightEntity();
         menu6.setIcon(R.mipmap.ic_supervisor_account_white_18dp);
-        menu6.setContent(CommonConstants.OPEN_ACCOUNT);
+        menu6.setContent(OPEN_ACCOUNT);
         NavigationRightEntity menu7 = new NavigationRightEntity();
         menu7.setIcon(R.mipmap.ic_visibility_white_18dp);
-        menu7.setContent(CommonConstants.FEEDBACK);
+        menu7.setContent(FEEDBACK);
         NavigationRightEntity menu8 = new NavigationRightEntity();
         menu8.setIcon(R.mipmap.ic_info_white_18dp);
-        menu8.setContent(CommonConstants.ABOUT);
+        menu8.setContent(ABOUT);
         List<NavigationRightEntity> list = new ArrayList<>();
         list.add(menu0);
         list.add(menu1);
@@ -265,118 +263,90 @@ public class MainActivityPresenter {
                 String title = (String) view.getTag();
                 JSONObject jsonObject = new JSONObject();
                 switch (title) {
-                    case CommonConstants.LOGOUT:
-                        SPUtils.putAndApply(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
+                    case LOGOUT:
                         SPUtils.putAndApply(sContext, CommonConstants.CONFIG_PASSWORD, "");
-                        JSONObject jsonObject1 = new JSONObject();
                         try {
-                            jsonObject1.put(AMP_EVENT_LOGIN_BROKER_ID, DataManager.getInstance().LOGIN_BROKER_ID);
-                            jsonObject1.put(AMP_EVENT_LOGIN_USER_ID, DataManager.getInstance().LOGIN_USER_ID);
-                            jsonObject1.put(AMP_EVENT_LOGIN_TYPE, DataManager.getInstance().LOGIN_TYPE);
-                            jsonObject1.put(AMP_EVENT_LOGOUT_TIME, TimeUtils.getAmpTime());
+                            jsonObject.put(AMP_EVENT_LOGIN_TYPE, sDataManager.LOGIN_TYPE);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        Amplitude.getInstance().logEvent(AMP_LOGOUT, jsonObject1);
-                        try {
-                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_LOGIN);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+                        Amplitude.getInstance().logEventWrap(AMP_LOGOUT, jsonObject);
                         mMainActivity.startActivity(new Intent(mMainActivity, LoginActivity.class));
                         mMainActivity.finish();
                         BaseApplication.getmTDWebSocket().reConnect();
                         break;
-                    case CommonConstants.SETTING:
+                    case SETTING:
                         try {
-                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_SETTING);
+                            jsonObject.put(AMP_EVENT_MENU, SETTING);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+                        Amplitude.getInstance().logEventWrap(AMP_MENU, jsonObject);
                         Intent intentSetting = new Intent(mMainActivity, SettingActivity.class);
-                        mMainActivity.startActivity(intentSetting);
+                        mMainActivity.startActivityForResult(intentSetting, MAIN_ACTIVITY_TO_SETTING_ACTIVITY);
                         break;
-                    case CommonConstants.OPTIONAL_SETTING:
+                    case OPTIONAL_SETTING:
                         try {
-                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_OPTIONAL_SETTING);
+                            jsonObject.put(AMP_EVENT_MENU, OPTIONAL_SETTING);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+                        Amplitude.getInstance().logEventWrap(AMP_MENU, jsonObject);
                         Intent intentSettingOptional = new Intent(mMainActivity, OptionalActivity.class);
                         mMainActivity.startActivityForResult(intentSettingOptional, MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY);
                         break;
-                    case CommonConstants.ACCOUNT:
+                    case ACCOUNT:
                         try {
-                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_ACCOUNT);
+                            jsonObject.put(AMP_EVENT_MENU, ACCOUNT);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+                        Amplitude.getInstance().logEventWrap(AMP_MENU, jsonObject);
                         Intent intentAcc = new Intent(mMainActivity, AccountActivity.class);
                         mMainActivity.startActivity(intentAcc);
                         break;
-                    case CommonConstants.PASSWORD:
+                    case PASSWORD:
                         try {
-                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_CHANGE_PASSWORD);
+                            jsonObject.put(AMP_EVENT_MENU, PASSWORD);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+                        Amplitude.getInstance().logEventWrap(AMP_MENU, jsonObject);
                         Intent intentChange = new Intent(mMainActivity, ChangePasswordActivity.class);
                         mMainActivity.startActivity(intentChange);
                         break;
-                    case CommonConstants.TRANSFER_IN:
-                        JSONObject jsonObject2 = new JSONObject();
+                    case TRANSFER_IN:
                         try {
-                            jsonObject2.put(AMP_EVENT_LOGIN_BROKER_ID, DataManager.getInstance().LOGIN_BROKER_ID);
-                            jsonObject2.put(AMP_EVENT_LOGIN_USER_ID, DataManager.getInstance().LOGIN_USER_ID);
-                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_TRANSFER);
+                            jsonObject.put(AMP_EVENT_MENU, TRANSFER_IN);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
-                        Amplitude.getInstance().logEvent(AMP_MENU_TRANSFER_IN, jsonObject2);
+                        Amplitude.getInstance().logEventWrap(AMP_MENU, jsonObject);
                         Intent intentBank = new Intent(mMainActivity, BankTransferActivity.class);
                         intentBank.putExtra(TRANSFER_DIRECTION, TRANSFER_IN);
                         mMainActivity.startActivity(intentBank);
                         break;
-                    case CommonConstants.TRANSFER_OUT:
-                        JSONObject jsonObject3 = new JSONObject();
+                    case TRANSFER_OUT:
                         try {
-                            jsonObject3.put(AMP_EVENT_LOGIN_BROKER_ID, DataManager.getInstance().LOGIN_BROKER_ID);
-                            jsonObject3.put(AMP_EVENT_LOGIN_USER_ID, DataManager.getInstance().LOGIN_USER_ID);
-                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_TRANSFER);
+                            jsonObject.put(AMP_EVENT_MENU, TRANSFER_OUT);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
-                        Amplitude.getInstance().logEvent(AMP_MENU_TRANSFER_OUT, jsonObject3);
+                        Amplitude.getInstance().logEventWrap(AMP_MENU, jsonObject);
                         Intent intentBankOut = new Intent(mMainActivity, BankTransferActivity.class);
                         intentBankOut.putExtra(TRANSFER_DIRECTION, TRANSFER_OUT);
                         mMainActivity.startActivity(intentBankOut);
                         break;
-                    case CommonConstants.CONDITIONAL_ORDER:
-                        Amplitude.getInstance().logEvent(AMP_CONDITIONAL_ORDER);
+                    case CONDITIONAL_ORDER:
                         ToastUtils.showToast(sContext, "敬请期待！");
                         break;
-                    case CommonConstants.OPEN_ACCOUNT:
+                    case OPEN_ACCOUNT:
                         try {
-                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_OPEN_ACCOUNT);
+                            jsonObject.put(AMP_EVENT_MENU, OPEN_ACCOUNT);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+                        Amplitude.getInstance().logEventWrap(AMP_MENU, jsonObject);
                         Intent intentOpenAccount = mMainActivity.getPackageManager().getLaunchIntentForPackage("com.cfmmc.app.sjkh");
                         if (intentOpenAccount != null)
                             mMainActivity.startActivity(intentOpenAccount);
@@ -385,25 +355,23 @@ public class MainActivityPresenter {
                             mMainActivity.startActivity(browserIntent);
                         }
                         break;
-                    case CommonConstants.FEEDBACK:
+                    case FEEDBACK:
                         try {
-                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_FEED_BACK);
+                            jsonObject.put(AMP_EVENT_MENU, FEEDBACK);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+                        Amplitude.getInstance().logEventWrap(AMP_MENU, jsonObject);
                         Intent intentFeed = new Intent(mMainActivity, FeedBackActivity.class);
                         mMainActivity.startActivity(intentFeed);
                         break;
-                    case CommonConstants.ABOUT:
+                    case ABOUT:
                         try {
-                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_ABOUT);
+                            jsonObject.put(AMP_EVENT_MENU, ABOUT);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+                        Amplitude.getInstance().logEventWrap(AMP_MENU, jsonObject);
                         Intent intentAbout = new Intent(mMainActivity, AboutActivity.class);
                         mMainActivity.startActivity(intentAbout);
                         break;
@@ -438,7 +406,7 @@ public class MainActivityPresenter {
                         dialogWindow.setAttributes(lp);
                     }
                     mTitleDialog.setContentView(viewDialog);
-                    mTitleDialogAdapter = new DialogAdapter(mMainActivity, mTitleList, mToolbarTitle.getText().toString());
+                    mTitleDialogAdapter = new DialogAdapter(mMainActivity, new ArrayList<String>(), "");
                     mTitleRecyclerView = viewDialog.findViewById(R.id.dialog_rv);
                     mTitleRecyclerView.setLayoutManager(
                             new GridLayoutManager(mMainActivity, 3));
@@ -451,9 +419,18 @@ public class MainActivityPresenter {
                                     new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
                                         @Override
                                         public void onItemClick(View view, int position) {
-                                            DataManager.getInstance().IS_POSITIVE = true;
-                                            ((QuotePagerFragment) mViewPagerFragmentAdapter.
-                                                    getItem(0)).setCurrentItem(position);
+                                            if (mBinding.vpContent.getCurrentItem() == 0) {
+                                                ((QuotePagerFragment) mViewPagerFragmentAdapter.
+                                                        getItem(0)).setCurrentItem(position);
+                                            } else if (mBinding.vpContent.getCurrentItem() == 2) {
+                                                String instrumentId = (String) view.getTag();
+                                                if (instrumentId != null && !instrumentId.equals(mInstrumentId)) {
+                                                    changeToolbar(instrumentId);
+                                                    IdEvent idEvent = new IdEvent();
+                                                    idEvent.setInstrument_id(instrumentId);
+                                                    EventBus.getDefault().post(idEvent);
+                                                }
+                                            }
                                             mTitleDialog.dismiss();
                                         }
 
@@ -463,10 +440,29 @@ public class MainActivityPresenter {
                                         }
                                     }));
 
-                } else
+                }
+                if (mBinding.vpContent.getCurrentItem() == 0) {
                     mTitleDialogAdapter.updateList(mTitleList, mToolbarTitle.getText().toString());
-                if (!mTitleDialog.isShowing() && !ACCOUNT_DETAIL.equals(mToolbarTitle.getText().toString()))
-                    mTitleDialog.show();
+                    if (!mTitleDialog.isShowing()) mTitleDialog.show();
+                } else if (mBinding.vpContent.getCurrentItem() == 2) {
+                    List<String> list = LatestFileManager.readInsListFromFile();
+                    UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+                    if (userEntity != null) {
+                        for (PositionEntity positionEntity : userEntity.getPositions().values()) {
+                            try {
+                                int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+                                int volume_short = Integer.parseInt(positionEntity.getVolume_short());
+                                String ins = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
+                                if ((volume_long != 0 || volume_short != 0) && !list.contains(ins))
+                                    list.add(ins);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    mTitleDialogAdapter.updateList(list, mInstrumentId);
+                    if (!mTitleDialog.isShowing()) mTitleDialog.show();
+                }
             }
         });
 
@@ -475,37 +471,26 @@ public class MainActivityPresenter {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.market:
+                        switchToMarket();
+                        JSONObject jsonObject = new JSONObject();
                         try {
-                            DataManager.getInstance().IS_POSITIVE = true;
-                            Amplitude.getInstance().logEvent(AMP_QUOTE_TAB);
-                            QuotePagerFragment quotePagerFragment = ((QuotePagerFragment) mViewPagerFragmentAdapter.getItem(0));
-                            String title = quotePagerFragment.getmTitle();
-                            if (OPTIONAL.equals(title))
-                                mBinding.llNavigation.setVisibility(View.GONE);
-                            else mBinding.llNavigation.setVisibility(View.VISIBLE);
-                            mBinding.vpContent.setCurrentItem(0, false);
-                            mToolbarTitle.setText(title);
-                            mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
-                        } catch (Exception e) {
+                            jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_MAIN);
+                            jsonObject.put(AMP_EVENT_SWITCH_FROM, AMP_EVENT_TAB_ACCOUNT);
+                            jsonObject.put(AMP_EVENT_SWITCH_TO, AMP_EVENT_TAB_MARKET);
+                            Amplitude.getInstance().logEventWrap(AMP_SWITCH_TAB, jsonObject);
+                        } catch (JSONException e) {
                             e.printStackTrace();
                         }
                         break;
                     case R.id.trade:
+                        switchToAccount();
+                        JSONObject jsonObject1 = new JSONObject();
                         try {
-                            DataManager.getInstance().IS_POSITIVE = true;
-                            Amplitude.getInstance().logEvent(AMP_ACCOUNT_TAB);
-                            mBinding.llNavigation.setVisibility(View.GONE);
-                            AccountFragment accountFragment = ((AccountFragment) mViewPagerFragmentAdapter.getItem(1));
-                            //首次加载不能存在，防止显示事件上报
-                            if (accountFragment != null && accountFragment.getmBinding().vp != null &&
-                                    accountFragment.getmBinding().vp.getVisibility() == View.GONE) {
-                                accountFragment.getmBinding().vp.setVisibility(View.VISIBLE);
-                                accountFragment.setmIsInit(true);
-                            }
-                            mBinding.vpContent.setCurrentItem(1, false);
-                            mToolbarTitle.setText(ACCOUNT_DETAIL);
-                            mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-                        } catch (Exception e) {
+                            jsonObject1.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_MAIN);
+                            jsonObject1.put(AMP_EVENT_SWITCH_FROM, AMP_EVENT_TAB_MARKET);
+                            jsonObject1.put(AMP_EVENT_SWITCH_TO, AMP_EVENT_TAB_ACCOUNT);
+                            Amplitude.getInstance().logEventWrap(AMP_SWITCH_TAB, jsonObject1);
+                        } catch (JSONException e) {
                             e.printStackTrace();
                         }
                         break;
@@ -520,7 +505,10 @@ public class MainActivityPresenter {
         mBinding.bottomNavigation.setOnNavigationItemReselectedListener(new BottomNavigationView.OnNavigationItemReselectedListener() {
             @Override
             public void onNavigationItemReselected(@NonNull MenuItem item) {
-
+                //从交易页链接而来
+                if (mBinding.vpContent.getCurrentItem() == 2) {
+                    mBinding.vpContent.setCurrentItem(1, false);
+                }
             }
         });
 
@@ -533,21 +521,16 @@ public class MainActivityPresenter {
 
             @Override
             public void onDrawerOpened(View drawerView) {
-
             }
 
             @Override
             public void onDrawerClosed(View drawerView) {
-                UpdateEvent updateEvent = new UpdateEvent();
-                updateEvent.setState(1);
-                EventBus.getDefault().post(updateEvent);
+                mIsUpdate = true;
             }
 
             @Override
             public void onDrawerStateChanged(int newState) {
-                UpdateEvent updateEvent = new UpdateEvent();
-                updateEvent.setState(newState);
-                EventBus.getDefault().post(updateEvent);
+                if (newState == 2) mIsUpdate = false;
             }
         });
     }
@@ -612,7 +595,7 @@ public class MainActivityPresenter {
      */
     public void switchQuotesNavigation(String mTitle) {
         //保存最后一次切换的交易所，用户二级详情页上下滑动切换合约
-        DataManager.getInstance().EXCHANGE_ID = mTitle;
+        sDataManager.EXCHANGE_ID = mTitle;
         mToolbarTitle.setText(mTitle);
         Rect bounds = new Rect();
         Paint textPaint = new Paint();
@@ -659,6 +642,117 @@ public class MainActivityPresenter {
     }
 
     /**
+     * date: 2019/7/2
+     * author: chenli
+     * description: 点击某个具体合约时改变标题
+     */
+    public void changeToolbar(String instrumentId) {
+        mInstrumentId = instrumentId;
+        MenuItem menuItem = mMainActivity.menu.getItem(1);
+        menuItem.setTitle(MENU_TITLE_COLLECT);
+        if (LatestFileManager.getOptionalInsList().containsKey(mInstrumentId)) {
+            menuItem.setIcon(R.mipmap.ic_favorite_white_24dp);
+        } else {
+            menuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
+        }
+        mMainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        mMainActivity.getSupportActionBar().setHomeButtonEnabled(true);
+        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
+        if (searchEntity != null) mToolbarTitle.setText(searchEntity.getInstrumentName());
+        else mToolbarTitle.setText(mInstrumentId);
+        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
+    }
+
+    /**
+     * date: 2019/7/3
+     * author: chenli
+     * description: 切换到行情页
+     */
+    public void switchToMarket() {
+        QuotePagerFragment quotePagerFragment = ((QuotePagerFragment) mViewPagerFragmentAdapter.getItem(0));
+        String title = quotePagerFragment.getmTitle();
+        mMainActivity.setTitle(title);
+        if (OPTIONAL.equals(title))
+            mBinding.llNavigation.setVisibility(View.GONE);
+        else mBinding.llNavigation.setVisibility(View.VISIBLE);
+        mBinding.bottomNavigation.setVisibility(View.VISIBLE);
+        mBinding.vpContent.setCurrentItem(0, false);
+        mToolbarTitle.setText(title);
+        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
+    }
+
+    /**
+     * date: 2019/7/3
+     * author: chenli
+     * description: 切换到账户页
+     */
+    public void switchToAccount() {
+        mMainActivity.setTitle(ACCOUNT_DETAIL);
+        mBinding.llNavigation.setVisibility(View.GONE);
+        mBinding.bottomNavigation.setVisibility(View.VISIBLE);
+        mBinding.vpContent.setCurrentItem(1, false);
+        mToolbarTitle.setText(ACCOUNT_DETAIL);
+        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+    }
+
+    /**
+     * date: 2019/7/3
+     * author: chenli
+     * description: 从交易页链接而来
+     */
+    public void linkToAccount() {
+        mBinding.bottomNavigation.setVisibility(View.VISIBLE);
+        MenuItem menuItem = mMainActivity.menu.getItem(1);
+        menuItem.setIcon(R.mipmap.ic_menu);
+        menuItem.setTitle(MENU_TITLE_NAVIGATION);
+        mMainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        mMainActivity.getSupportActionBar().setHomeButtonEnabled(false);
+        AccountFragment accountFragment = (AccountFragment) mViewPagerFragmentAdapter.getItem(1);
+        accountFragment.getmBinding().accountFab.show();
+        mBinding.bottomNavigation.setSelectedItemId(R.id.trade);
+        mToolbarTitle.setText(ACCOUNT_DETAIL);
+        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+    }
+
+    /**
+     * date: 2019/7/3
+     * author: chenli
+     * description: 切换到合约详情页
+     */
+    public void switchToFutureInfo(String instrument_id) {
+        setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
+        changeToolbar(instrument_id);
+        mBinding.llNavigation.setVisibility(View.GONE);
+        mBinding.bottomNavigation.setVisibility(View.GONE);
+        mBinding.vpContent.setCurrentItem(2, false);
+    }
+
+    /**
+     * date: 2019/7/3
+     * author: chenli
+     * description: 账户页链接到合约详情页
+     */
+    public void linkToFutureInfo() {
+        MenuItem menuItem = mMainActivity.menu.getItem(1);
+        menuItem.setTitle(MENU_TITLE_COLLECT);
+        if (LatestFileManager.getOptionalInsList().containsKey(mInstrumentId)) {
+            menuItem.setIcon(R.mipmap.ic_favorite_white_24dp);
+        } else {
+            menuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
+        }
+        mMainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        mMainActivity.getSupportActionBar().setHomeButtonEnabled(true);
+        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
+        if (searchEntity != null) mToolbarTitle.setText(searchEntity.getInstrumentName());
+        else mToolbarTitle.setText(mInstrumentId);
+        mToolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.ic_exchange_down, 0);
+
+        mBinding.llNavigation.setVisibility(View.GONE);
+        mBinding.bottomNavigation.setVisibility(View.GONE);
+        mBinding.vpContent.setCurrentItem(2, false);
+    }
+
+    /**
      * date: 2019/4/17
      * author: chenli
      * description: 获取toolbar高度px
@@ -685,6 +779,18 @@ public class MainActivityPresenter {
 
     public TextView getmToolbarTitle() {
         return mToolbarTitle;
+    }
+
+    public String getmInstrumentId() {
+        return mInstrumentId;
+    }
+
+    public ActivityMainDrawerBinding getmBinding() {
+        return mBinding;
+    }
+
+    public boolean ismIsUpdate() {
+        return mIsUpdate;
     }
 
     /**

@@ -8,7 +8,18 @@ import android.location.Location;
 import android.os.Build;
 import android.util.Pair;
 
+import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.amplitude.security.MD5;
+import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
+import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
+import com.shinnytech.futures.model.engine.DataManager;
+import com.shinnytech.futures.model.engine.LatestFileManager;
+import com.shinnytech.futures.utils.MathUtils;
+import com.shinnytech.futures.utils.TimeUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,6 +39,13 @@ import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_COMMON_BALANCE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_COMMON_FAVORITE_COUNT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_COMMON_FLOAT_PROFIT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_COMMON_ORDER_COUNT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_COMMON_POSITION_COUNT;
+import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
 
 /**
  * <h1>AmplitudeClient</h1>
@@ -862,6 +880,73 @@ public class AmplitudeClient {
      */
     public void logEvent(String eventType) {
         logEvent(eventType, null);
+    }
+
+    public void logEventWrap(String event, JSONObject jsonObject){
+        try {
+            DataManager dataManager = DataManager.getInstance();
+            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_HOUR, TimeUtils.getAmpTimeHour());
+            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_MINUTE, TimeUtils.getAmpTimeMinute());
+            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_SECOND, TimeUtils.getAmpTimeSecond());
+            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_WEEKDAY, TimeUtils.getAmpTimeWeekDay());
+            long currentTime = System.currentTimeMillis();
+            long offset = currentTime - dataManager.INIT_TIME;
+            long offseth = currentTime - dataManager.FOREGROUND_TIME;
+            long span = currentTime - dataManager.LAST_TIME;
+            dataManager.LAST_TIME = currentTime;
+            Long count = dataManager.COUNT.get(event);
+            if (count == null)count = 1l;
+            else count++;
+            dataManager.COUNT.put(event, count);
+            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_OFFSET, offset);
+            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_OFFSETH, offseth);
+            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_SPAN, span);
+            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_COUNT, count);
+            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_CHANNEL_ID, BuildConfig.CHANNEL_ID);
+
+            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_MD_STATUS, BaseApplication.getmMDWebSocket().getWebSocketStatus());
+            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_TD_STATUS, BaseApplication.getmTDWebSocket().getWebSocketStatus());
+            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_MD_SESSION, dataManager.MD_SESSION);
+            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_TD_SESSION, dataManager.TD_SESSION);
+            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_MD_PACK_COUNT, dataManager.MD_PACK_COUNT);
+            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_TD_PACK_COUNT, dataManager.TD_PACK_COUNT);
+
+            if (!dataManager.USER_ID.isEmpty())
+                jsonObject.put(CommonConstants.AMP_EVENT_COMMON_USER_ID, dataManager.USER_ID);
+            if (!dataManager.BROKER_ID.isEmpty())
+                jsonObject.put(CommonConstants.AMP_EVENT_COMMON_BROKER_ID, dataManager.BROKER_ID);
+            UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.USER_ID);
+            if (userEntity != null) {
+                AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
+                if (accountEntity != null) {
+                    String static_balance = MathUtils.round(accountEntity.getStatic_balance(), 2);
+                    String float_profit = MathUtils.round(accountEntity.getFloat_profit(), 2);
+                    jsonObject.put(AMP_EVENT_COMMON_BALANCE, static_balance);
+                    jsonObject.put(AMP_EVENT_COMMON_FLOAT_PROFIT, float_profit);
+                }
+
+                int positionCount = 0;
+                int orderCount = 0;
+                for (PositionEntity positionEntity :
+                        userEntity.getPositions().values()) {
+                    int volume_long = Integer.parseInt(positionEntity.getVolume_long());
+                    int volume_short = Integer.parseInt(positionEntity.getVolume_short());
+                    if (volume_long != 0 || volume_short != 0) positionCount += 1;
+                }
+
+                for (OrderEntity orderEntity :
+                        userEntity.getOrders().values()) {
+                    if (STATUS_ALIVE.equals(orderEntity.getStatus())) orderCount += 1;
+                }
+                jsonObject.put(AMP_EVENT_COMMON_POSITION_COUNT, positionCount);
+                jsonObject.put(AMP_EVENT_COMMON_ORDER_COUNT, orderCount);
+            }
+
+            jsonObject.put(AMP_EVENT_COMMON_FAVORITE_COUNT, LatestFileManager.readInsListFromFile().size());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        logEvent(event, jsonObject);
     }
 
     /**

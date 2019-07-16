@@ -1,9 +1,6 @@
 package com.shinnytech.futures.websocket;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.support.v4.content.ContextCompat;
 
 import com.google.gson.Gson;
 import com.neovisionaries.ws.client.WebSocket;
@@ -18,7 +15,6 @@ import com.shinnytech.futures.model.bean.reqbean.ReqConfirmSettlementEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqInsertOrderEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqLoginEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqPasswordEntity;
-import com.shinnytech.futures.model.bean.reqbean.ReqPeekMessageEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqTransferEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
@@ -36,16 +32,14 @@ import static com.shinnytech.futures.application.BaseApplication.sendMessage;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_CANCEL_ORDER;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_DIRECTION;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_INSTRUMENT_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_BROKER_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TIME;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_USER_ID;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OFFSET;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_RECONNECT_SERVER_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_TD;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_RECONNECT_TIME;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_VOLUME;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_INSERT_ORDER;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN;
@@ -53,7 +47,6 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_RECONNECT;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_SYSTEM_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_FAIL;
 
 public class TDWebSocket extends WebSocketBase {
 
@@ -65,6 +58,7 @@ public class TDWebSocket extends WebSocketBase {
     public void onTextMessage(WebSocket websocket, String text) throws Exception {
         super.onTextMessage(websocket, text);
         LogUtils.e(text, false);
+        sDataManager.TD_PACK_COUNT++;
         try {
             JSONObject jsonObject = new JSONObject(text);
             String aid = jsonObject.getString("aid");
@@ -88,17 +82,20 @@ public class TDWebSocket extends WebSocketBase {
 
     @Override
     public void reConnect() {
+        if (BaseApplication.issBackGround()) return;
+
         super.reConnect();
+        sDataManager.TD_SESSION++;
+        sDataManager.TD_PACK_COUNT = 0;
 
         LogUtils.e("reConnectTD", true);
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put(AMP_EVENT_RECONNECT_SERVER_TYPE, AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_TD);
-            jsonObject.put(AMP_EVENT_RECONNECT_TIME, TimeUtils.getAmpTime());
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Amplitude.getInstance().logEvent(AMP_RECONNECT, jsonObject);
+        Amplitude.getInstance().logEventWrap(AMP_RECONNECT, jsonObject);
     }
 
     /**
@@ -114,39 +111,27 @@ public class TDWebSocket extends WebSocketBase {
         Context context = BaseApplication.getContext();
         if (SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
             String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
-            if (date.isEmpty()) return;
             String name = (String) SPUtils.get(context, CommonConstants.CONFIG_ACCOUNT, "");
             String password = (String) SPUtils.get(context, CommonConstants.CONFIG_PASSWORD, "");
             String broker = (String) SPUtils.get(context, CommonConstants.CONFIG_BROKER, "");
-            boolean isPermissionDenied = ContextCompat.checkSelfPermission(BaseApplication.getContext(),
-                    Manifest.permission.READ_PHONE_STATE)
-                    != PackageManager.PERMISSION_GRANTED
-                    || ContextCompat.checkSelfPermission(BaseApplication.getContext(),
-                    Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED
-                    || ContextCompat.checkSelfPermission(BaseApplication.getContext(),
-                    Manifest.permission.ACCESS_COARSE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED;
-            if ((name.contains(BROKER_ID_VISITOR) && !TimeUtils.getNowTime().equals(date)) || isPermissionDenied) {
-                sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
-                return;
+            boolean notLogin = password.isEmpty() ||
+                    (name.contains(BROKER_ID_VISITOR) && !date.isEmpty() && !TimeUtils.getNowTime().equals(date));
+            if (!notLogin){
+                sDataManager.BROKER_ID = broker;
+                sDataManager.USER_ID = name;
+                //处理切换账号断线重连的情况
+                if (date.isEmpty()) sDataManager.LOGIN_TYPE = AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN;
+                else sDataManager.LOGIN_TYPE = AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put(AMP_EVENT_LOGIN_TYPE, AMP_EVENT_LOGIN_TYPE_VALUE_AUTO);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Amplitude.getInstance().logEventWrap(AMP_LOGIN, jsonObject);
+                sendReqLogin(broker, name, password);
+                LogUtils.e("AMP_LOGIN", true);
             }
-
-            sDataManager.LOGIN_BROKER_ID = broker;
-            sDataManager.LOGIN_USER_ID = name;
-            sDataManager.LOGIN_TYPE = AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, broker);
-                jsonObject.put(AMP_EVENT_LOGIN_USER_ID, name);
-                jsonObject.put(AMP_EVENT_LOGIN_TIME, TimeUtils.getAmpTime());
-                jsonObject.put(AMP_EVENT_LOGIN_TYPE, AMP_EVENT_LOGIN_TYPE_VALUE_AUTO);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            Amplitude.getInstance().logEvent(AMP_LOGIN, jsonObject);
-            LogUtils.e("AMP_LOGIN", true);
-            sendReqLogin(broker, name, password);
         }
 
     }
@@ -191,10 +176,11 @@ public class TDWebSocket extends WebSocketBase {
      * description: 下单
      */
     public void sendReqInsertOrder(String exchange_id, String instrument_id, String direction,
-                                   String offset, int volume, String price_type, double price) {
+                                   String offset, int volume, String price_type, double price, String amp_price_type) {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put(AMP_EVENT_PRICE, price);
+            jsonObject.put(AMP_EVENT_PRICE_TYPE, amp_price_type);
             jsonObject.put(AMP_EVENT_INSTRUMENT_ID, exchange_id + "." + instrument_id);
             jsonObject.put(AMP_EVENT_VOLUME, volume);
             jsonObject.put(AMP_EVENT_DIRECTION, direction);
@@ -202,8 +188,9 @@ public class TDWebSocket extends WebSocketBase {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Amplitude.getInstance().logEvent(AMP_INSERT_ORDER, jsonObject);
-        String user_id = DataManager.getInstance().LOGIN_USER_ID;
+        LogUtils.e(amp_price_type, true);
+        Amplitude.getInstance().logEventWrap(AMP_INSERT_ORDER, jsonObject);
+        String user_id = DataManager.getInstance().USER_ID;
         ReqInsertOrderEntity reqInsertOrderEntity = new ReqInsertOrderEntity();
         reqInsertOrderEntity.setAid("insert_order");
         reqInsertOrderEntity.setUser_id(user_id);
@@ -229,7 +216,7 @@ public class TDWebSocket extends WebSocketBase {
      * description: 撤单
      */
     public void sendReqCancelOrder(String order_id) {
-        String user_id = DataManager.getInstance().LOGIN_USER_ID;
+        String user_id = DataManager.getInstance().USER_ID;
         UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(user_id);
         if (userEntity != null) {
             OrderEntity orderEntity = userEntity.getOrders().get(order_id);
@@ -244,7 +231,7 @@ public class TDWebSocket extends WebSocketBase {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                Amplitude.getInstance().logEvent(AMP_CANCEL_ORDER, jsonObject);
+                Amplitude.getInstance().logEventWrap(AMP_CANCEL_ORDER, jsonObject);
             }
         }
         ReqCancelOrderEntity reqCancelOrderEntity = new ReqCancelOrderEntity();
@@ -292,5 +279,15 @@ public class TDWebSocket extends WebSocketBase {
         mWebSocketClient.sendText(reqPassword);
         LogUtils.e(reqPassword, true);
         LatestFileManager.insertLogToDB(reqPassword);
+    }
+
+    /**
+     * date: 2019/7/14
+     * author: chenli
+     * description: 在splash页判断是否链接成功
+     */
+    public boolean isOpen(){
+        if (mWebSocketClient == null)return false;
+        else return mWebSocketClient.isOpen();
     }
 }

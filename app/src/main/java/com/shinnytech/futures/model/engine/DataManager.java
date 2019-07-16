@@ -20,7 +20,6 @@ import com.shinnytech.futures.model.bean.futureinfobean.DiffEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.FutureBean;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
 import com.shinnytech.futures.utils.ToastUtils;
@@ -41,15 +40,11 @@ import static com.shinnytech.futures.application.BaseApplication.MD_BROADCAST;
 import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST;
 import static com.shinnytech.futures.application.BaseApplication.sendMessage;
 import static com.shinnytech.futures.application.BaseApplication.showSettlement;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_BROKER_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TIME;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_FAIL_REASON;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_USER_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_NOTIFY_CODE;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_NOTIFY_CONTENT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_NOTIFY_LEVEL;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_NOTIFY_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_FAILED;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_SUCCEEDED;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_NOTIFY;
@@ -60,6 +55,7 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_I
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_LOGIN_SUCCESS_TIME_FIRST;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMNOW;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMULATION;
+import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
 import static com.shinnytech.futures.constants.CommonConstants.CHANGE_PASSWORD_SUCCEED;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_INIT_TIME;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN_FAIL;
@@ -100,7 +96,7 @@ public class DataManager {
      * date: 2019/6/24
      * description: client_app_id
      */
-    public String CLIENT_APP_ID = "";
+    public String CLIENT_APP_ID = "github";
     /**
      * date: 2018/11/7
      * description: 用户下单价格类型
@@ -117,27 +113,22 @@ public class DataManager {
      */
     public boolean IS_SHOW_VP_CONTENT = false;
     /**
-     * date: 2019/5/11
-     * description: 判断是否显示登录成功弹框
-     */
-    public boolean IS_SHOW_LOGIN_SUCCESS = false;
-    /**
      * date: 2019/6/1
      * description: 登录入口
      */
     public String LOGIN_TYPE = AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
     /**
      * date: 2019/6/1
-     * description: 主动登录事件期货公司及账号
+     * description: 期货公司及账号
      */
-    public String LOGIN_BROKER_ID = "";
-    public String LOGIN_USER_ID = "";
+    public String BROKER_ID = "";
+    public String USER_ID = "";
 
     /**
-     * date: 2019/5/24
-     * description: 判断用户是否主动切换页面
+     * date: 2019/7/4
+     * description: 页面来源
      */
-    public boolean IS_POSITIVE = false;
+    public String SOURCE = "";
     /**
      * date: 2019/3/18
      * description: 用户最后一次发送的订阅请求
@@ -149,6 +140,54 @@ public class DataManager {
      * description: 用户最后一次切换的交易所
      */
     public String EXCHANGE_ID = "";
+
+    /**
+     * date: 2019/7/4
+     * description: 进程开启时间
+     */
+    public long INIT_TIME = 0;
+
+    /**
+     * date: 2019/7/4
+     * description: 上一个事件时间
+     */
+    public long LAST_TIME = 0;
+
+    /**
+     * date: 2019/7/4
+     * description: 切前台时间
+     */
+    public long FOREGROUND_TIME = 0;
+
+    /**
+     * date: 2019/7/4
+     * description: 本事件次序
+     */
+    public Map<String, Long> COUNT = new HashMap<>();
+
+    /**
+     * date: 2019/7/4
+     * description: 行情重连次数
+     */
+    public int MD_SESSION = 0;
+
+    /**
+     * date: 2019/7/4
+     * description: 交易重连次数
+     */
+    public int TD_SESSION = 0;
+
+    /**
+     * date: 2019/7/4
+     * description: 行情收包数
+     */
+    public int MD_PACK_COUNT = 0;
+
+    /**
+     * date: 2019/7/4
+     * description: 交易收包数
+     */
+    public int TD_PACK_COUNT = 0;
 
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
     /**
@@ -194,11 +233,6 @@ public class DataManager {
 
     public SimpleDateFormat getSimpleDateFormat() {
         return simpleDateFormat;
-    }
-
-    public void clearAccount() {
-        LOGIN_USER_ID = "";
-        TRADE_DATA = new TradeBean();
     }
 
     /**
@@ -445,140 +479,10 @@ public class DataManager {
                     JSONObject data = dataObject.getJSONObject(key);
                     switch (key) {
                         case "notify":
-                            Iterator<String> notifyIterator = data.keys();
-                            while (notifyIterator.hasNext()) {
-                                String notifyKey = notifyIterator.next();
-                                if (data.isNull(notifyKey)) continue;
-                                JSONObject notify = data.getJSONObject(notifyKey);
-                                final String content = notify.optString("content");
-                                String type = notify.optString("type");
-                                String level = notify.optString("level");
-                                int code = notify.optInt("code");
-                                JSONObject jsonObject1 = new JSONObject();
-                                try {
-                                    jsonObject1.put(AMP_EVENT_NOTIFY_CODE, code);
-                                    jsonObject1.put(AMP_EVENT_NOTIFY_CONTENT, content);
-                                    jsonObject1.put(AMP_EVENT_NOTIFY_LEVEL, level);
-                                    jsonObject1.put(AMP_EVENT_NOTIFY_TYPE, type);
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                                Amplitude.getInstance().logEvent(AMP_NOTIFY, jsonObject1);
-
-                                if (content.equals(CHANGE_PASSWORD_SUCCEED)) {
-                                    sendMessage(TD_MESSAGE_CHANGE_SUCCESS, TD_BROADCAST);
-                                }
-                                if ((code == 140) || (code == 131)) {
-                                    sendMessage(TD_MESSAGE_WEAK_PASSWORD, TD_BROADCAST);
-                                }
-                                if ("SETTLEMENT".equals(type)) {
-                                    BROKER.setSettlement(content);
-                                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            showSettlement();
-                                        }
-                                    });
-                                } else {
-                                    if (LOGIN_SUCCEED.equals(content)) {
-                                        //游客模式不显示登录成功弹出框
-                                        if (IS_SHOW_LOGIN_SUCCESS) IS_SHOW_LOGIN_SUCCESS = false;
-                                        else continue;
-                                    }
-                                    if (LOGIN_FAIL.equals(content)) {
-                                        JSONObject jsonObject = new JSONObject();
-                                        try {
-                                            jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, LOGIN_BROKER_ID);
-                                            jsonObject.put(AMP_EVENT_LOGIN_USER_ID, LOGIN_USER_ID);
-                                            jsonObject.put(AMP_EVENT_LOGIN_TIME, TimeUtils.getAmpTime());
-                                            jsonObject.put(AMP_EVENT_LOGIN_TYPE, LOGIN_TYPE);
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                        Amplitude.getInstance().logEvent(AMP_LOGIN_FAILED, jsonObject);
-                                        sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
-                                        if (!LOGIN_BROKER_ID.equals(BROKER_ID_SIMULATION))return;
-                                    }
-
-                                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            ToastUtils.showToast(BaseApplication.getContext(), content);
-                                        }
-                                    });
-                                }
-                            }
+                            parseNotify(data);
                             break;
                         case "trade":
-                            Map<String, UserEntity> userEntities = TRADE_DATA.getUsers();
-                            Iterator<String> tradeIterator = data.keys();
-                            while (tradeIterator.hasNext()) {
-                                String userKey = tradeIterator.next();
-                                if (data.isNull(userKey)) continue;
-                                JSONObject user = data.getJSONObject(userKey);
-                                UserEntity userEntity = userEntities.get(userKey);
-                                if (userEntity == null) userEntity = new UserEntity();
-                                Iterator<String> tradeDataIterator = user.keys();
-                                while (tradeDataIterator.hasNext()) {
-                                    String tradeDataKey = tradeDataIterator.next();
-                                    if (user.isNull(tradeDataKey)) continue;
-                                    switch (tradeDataKey) {
-                                        case "accounts":
-                                            parseAccounts(user, userEntity);
-                                            break;
-                                        case "orders":
-                                            parseOrders(user, userEntity);
-                                            break;
-                                        case "positions":
-                                            parsePositions(user, userEntity);
-                                            break;
-                                        case "trades":
-                                            parseTrades(user, userEntity);
-                                            break;
-                                        case "banks":
-                                            parseBanks(user, userEntity);
-                                            break;
-                                        case "transfers":
-                                            parseTransfers(user, userEntity);
-                                            break;
-                                        case "session":
-                                            String userId = user.getJSONObject("session").optString("user_id");
-                                            if (LOGIN_USER_ID.equals(userId)) {
-                                                userEntity.setUser_id(userId);
-                                                Identify identify = new Identify()
-                                                        .setOnce(AMP_USER_ACCOUNT_ID_FIRST, LOGIN_USER_ID)
-                                                        .set(AMP_USER_ACCOUNT_ID_LAST, LOGIN_USER_ID)
-                                                        .setOnce(AMP_USER_BROKER_ID_FIRST, LOGIN_BROKER_ID)
-                                                        .set(AMP_USER_BROKER_ID_LAST, LOGIN_BROKER_ID);
-                                                if (!(BROKER_ID_SIMULATION.equals(LOGIN_BROKER_ID) || BROKER_ID_SIMNOW.equals(LOGIN_BROKER_ID))) {
-                                                    long currentTime = System.currentTimeMillis();
-                                                    long initTime = (long) SPUtils.get(BaseApplication.getContext(), CONFIG_INIT_TIME, currentTime);
-                                                    long loginTime = currentTime - initTime;
-                                                    identify.setOnce(AMP_USER_LOGIN_SUCCESS_TIME_FIRST, loginTime);
-                                                }
-                                                Amplitude.getInstance().identify(identify);
-
-                                                JSONObject jsonObject = new JSONObject();
-                                                try {
-                                                    jsonObject.put(AMP_EVENT_LOGIN_BROKER_ID, LOGIN_BROKER_ID);
-                                                    jsonObject.put(AMP_EVENT_LOGIN_USER_ID, LOGIN_USER_ID);
-                                                    jsonObject.put(AMP_EVENT_LOGIN_TIME, TimeUtils.getAmpTime());
-                                                    jsonObject.put(AMP_EVENT_LOGIN_TYPE, LOGIN_TYPE);
-                                                } catch (JSONException e) {
-                                                    e.printStackTrace();
-                                                }
-                                                Amplitude.getInstance().logEvent(AMP_LOGIN_SUCCEEDED, jsonObject);
-                                                sendMessage(TD_MESSAGE_LOGIN_SUCCEED, TD_BROADCAST);
-                                            }
-
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                }
-                                userEntities.put(userKey, userEntity);
-                                sendMessage(TD_MESSAGE, TD_BROADCAST);
-                            }
+                            parseTrade(data);
                             break;
                         default:
                             break;
@@ -588,6 +492,158 @@ public class DataManager {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    private void parseNotify(JSONObject data){
+        try {
+            Iterator<String> notifyIterator = data.keys();
+            while (notifyIterator.hasNext()) {
+                String notifyKey = notifyIterator.next();
+                if (data.isNull(notifyKey)) continue;
+                JSONObject notify = data.getJSONObject(notifyKey);
+                final String content = notify.optString("content");
+                String type = notify.optString("type");
+                String level = notify.optString("level");
+                int code = notify.optInt("code");
+
+                //warning通知上报
+                if ("WARNING".equals(level)){
+                    JSONObject jsonObject1 = new JSONObject();
+                    try {
+                        jsonObject1.put(AMP_EVENT_NOTIFY_CONTENT, content);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Amplitude.getInstance().logEventWrap(AMP_NOTIFY, jsonObject1);
+                }
+
+                //修改密码成功通知
+                if (content.equals(CHANGE_PASSWORD_SUCCEED)) {
+                    sendMessage(TD_MESSAGE_CHANGE_SUCCESS, TD_BROADCAST);
+                }
+                //弱密码通知
+                if ((code == 140) || (code == 131)) {
+                    sendMessage(TD_MESSAGE_WEAK_PASSWORD, TD_BROADCAST);
+                }
+
+                //结算单
+                if ("SETTLEMENT".equals(type)) {
+                    BROKER.setSettlement(content);
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            showSettlement();
+                        }
+                    });
+                } else {
+                    //登录成功提示
+                    if (LOGIN_SUCCEED.equals(content)) {
+                        //游客模式和自动登录不弹出提示
+                        if (!LOGIN_TYPE.equals(AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN))continue;
+                    }
+
+                    //登录失败提示
+                    if (LOGIN_FAIL.equals(content)) {
+                        JSONObject jsonObject = new JSONObject();
+                        try {
+                            jsonObject.put(AMP_EVENT_LOGIN_TYPE, LOGIN_TYPE);
+                            jsonObject.put(AMP_EVENT_LOGIN_FAIL_REASON, content);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Amplitude.getInstance().logEventWrap(AMP_LOGIN_FAILED, jsonObject);
+                        sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
+                        //实盘不提示"登录失败"，显示ctp给的提示
+                        if (!BROKER_ID.equals(BROKER_ID_SIMULATION) && !TimeUtils.isBetw1620())continue;
+                    }
+
+                    //CTP查询未就绪不显示
+                    if (code == 90)continue;
+
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            ToastUtils.showToast(BaseApplication.getContext(), content);
+                        }
+                    });
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void parseTrade(JSONObject data){
+        try {
+            Map<String, UserEntity> userEntities = TRADE_DATA.getUsers();
+            Iterator<String> tradeIterator = data.keys();
+            while (tradeIterator.hasNext()) {
+                String userKey = tradeIterator.next();
+                if (data.isNull(userKey)) continue;
+                JSONObject user = data.getJSONObject(userKey);
+                UserEntity userEntity = userEntities.get(userKey);
+                if (userEntity == null) userEntity = new UserEntity();
+                Iterator<String> tradeDataIterator = user.keys();
+                while (tradeDataIterator.hasNext()) {
+                    String tradeDataKey = tradeDataIterator.next();
+                    if (user.isNull(tradeDataKey)) continue;
+                    switch (tradeDataKey) {
+                        case "accounts":
+                            parseAccounts(user, userEntity);
+                            break;
+                        case "orders":
+                            parseOrders(user, userEntity);
+                            break;
+                        case "positions":
+                            parsePositions(user, userEntity);
+                            break;
+                        case "trades":
+                            parseTrades(user, userEntity);
+                            break;
+                        case "banks":
+                            parseBanks(user, userEntity);
+                            break;
+                        case "transfers":
+                            parseTransfers(user, userEntity);
+                            break;
+                        case "session":
+                            String userId = user.getJSONObject("session").optString("user_id");
+                            if (USER_ID.equals(userId)) {
+                                userEntity.setUser_id(userId);
+                                Identify identify = new Identify()
+                                        .setOnce(AMP_USER_ACCOUNT_ID_FIRST, USER_ID)
+                                        .set(AMP_USER_ACCOUNT_ID_LAST, USER_ID)
+                                        .setOnce(AMP_USER_BROKER_ID_FIRST, BROKER_ID)
+                                        .set(AMP_USER_BROKER_ID_LAST, BROKER_ID);
+                                if (!(BROKER_ID_SIMULATION.equals(BROKER_ID) || BROKER_ID_SIMNOW.equals(BROKER_ID))) {
+                                    long currentTime = System.currentTimeMillis();
+                                    long initTime = (long) SPUtils.get(BaseApplication.getContext(), CONFIG_INIT_TIME, currentTime);
+                                    long loginTime = currentTime - initTime;
+                                    identify.setOnce(AMP_USER_LOGIN_SUCCESS_TIME_FIRST, loginTime);
+                                }
+                                Amplitude.getInstance().identify(identify);
+
+                                JSONObject jsonObject = new JSONObject();
+                                try {
+                                    jsonObject.put(AMP_EVENT_LOGIN_TYPE, LOGIN_TYPE);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                Amplitude.getInstance().logEventWrap(AMP_LOGIN_SUCCEEDED, jsonObject);
+                                sendMessage(TD_MESSAGE_LOGIN_SUCCEED, TD_BROADCAST);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                userEntities.put(userKey, userEntity);
+                sendMessage(TD_MESSAGE, TD_BROADCAST);
+            }
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+
     }
 
     private void parseTransfers(JSONObject user, UserEntity userEntity) {

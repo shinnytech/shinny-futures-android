@@ -1,15 +1,11 @@
 package com.shinnytech.futures.controller.fragment;
 
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,16 +21,13 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
-import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
+import com.shinnytech.futures.controller.activity.MainActivityPresenter;
 import com.shinnytech.futures.databinding.FragmentOrderBinding;
 import com.shinnytech.futures.model.adapter.OrderAdapter;
-import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
-import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.OrderSettingEvent;
@@ -45,8 +38,6 @@ import com.shinnytech.futures.model.listener.OrderDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
-import com.shinnytech.futures.utils.LogUtils;
-import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ScreenUtils;
 import com.shinnytech.futures.utils.TimeUtils;
@@ -54,41 +45,13 @@ import com.shinnytech.futures.utils.ToastUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BALANCE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BROKER_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_IS_INS_IN_OPTIONAL;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_IS_INS_IN_POSITION;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_IS_POSITIVE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_ORDER_COUNT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID_VALUE_ACCOUNT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_FUTURE_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_MAIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VISIBLE_TIME;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_POSITION_COUNT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SUB_PAGE_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SUB_PAGE_ID_VALUE_ALIVE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SUB_PAGE_ID_VALUE_ORDER;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_LEAVE_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_SHOW_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
-import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 
 /**
  * date: 5/10/17
@@ -101,7 +64,8 @@ public class OrderFragment extends LazyLoadFragment {
 
     private static final String KEY_FRAGMENT_TYPE = "mIsOrdersAlive";
 
-    protected BroadcastReceiver mReceiver;
+    private static final String KEY_FRAGMENT_TYPE_1 = "isInAccountFragment";
+
     protected DataManager sDataManager = DataManager.getInstance();
 
     private OrderAdapter mAdapter;
@@ -111,13 +75,14 @@ public class OrderFragment extends LazyLoadFragment {
     private boolean mIsUpdate;
     private boolean mIsShowCancelPop;
     private boolean mIsOrdersAlive;
-    private long mShowTime;
     private String mInstrumentId;
+    private boolean mIsInAccountFragment;
 
-    public static OrderFragment newInstance(boolean mIsOrdersAlive) {
+    public static OrderFragment newInstance(boolean mIsOrdersAlive, boolean isInAccountFragment) {
         OrderFragment fragment = new OrderFragment();
         Bundle bundle = new Bundle();
         bundle.putBoolean(KEY_FRAGMENT_TYPE, mIsOrdersAlive);
+        bundle.putBoolean(KEY_FRAGMENT_TYPE_1, isInAccountFragment);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -126,7 +91,7 @@ public class OrderFragment extends LazyLoadFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mIsOrdersAlive = getArguments().getBoolean(KEY_FRAGMENT_TYPE);
-        setHasOptionsMenu(true);
+        mIsInAccountFragment = getArguments().getBoolean(KEY_FRAGMENT_TYPE_1);
     }
 
 
@@ -147,18 +112,13 @@ public class OrderFragment extends LazyLoadFragment {
         mBinding.rv.addItemDecoration(
                 new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
         mAdapter = new OrderAdapter(getActivity(), mOldData);
+        mAdapter.setHighlightIns(mInstrumentId);
         mBinding.rv.setAdapter(mAdapter);
         mIsShowCancelPop = (boolean) SPUtils.get(BaseApplication.getContext(), CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM, true);
-        mInstrumentId = "";
-        if (getActivity() instanceof FutureInfoActivity) {
-            mInstrumentId = ((FutureInfoActivity) getActivity()).getInstrument_id();
-            mAdapter.setHighlightIns(mInstrumentId);
-        }
         EventBus.getDefault().register(this);
     }
 
     protected void initEvent() {
-
         mBinding.rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -187,22 +147,11 @@ public class OrderFragment extends LazyLoadFragment {
                     if (mIsOrdersAlive) {
                         checkPassword(view, orderEntity);
                     } else {
-                        ((MainActivity) getActivity()).getmMainActivityPresenter()
-                                .setPreSubscribedQuotes(sDataManager.getRtnData().getIns_list());
-
+                        String instrument_id = orderEntity.getExchange_id() + "." + orderEntity.getInstrument_id();
                         sDataManager.IS_SHOW_VP_CONTENT = true;
-                        Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
-                        intent.putExtra(INS_BETWEEN_ACTIVITY, orderEntity.getExchange_id()
-                                + "." + orderEntity.getInstrument_id());
-                        getActivity().startActivityForResult(intent, MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY);
-                        JSONObject jsonObject = new JSONObject();
-                        try {
-                            jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                            jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_FUTURE_INFO);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+                        MainActivity mainActivity = (MainActivity) getActivity();
+                        MainActivityPresenter mainActivityPresenter = mainActivity.getmMainActivityPresenter();
+                        mainActivityPresenter.switchToFutureInfo(instrument_id);
                     }
                 }
             }
@@ -215,49 +164,30 @@ public class OrderFragment extends LazyLoadFragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        registerBroaderCast();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
-    }
-
-    @Override
     public void onDestroyView() {
         super.onDestroyView();
         EventBus.getDefault().unregister(this);
     }
 
-    protected void registerBroaderCast() {
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String mDataString = intent.getStringExtra("msg");
-                switch (mDataString) {
-                    case TD_MESSAGE:
-                        refreshOrder();
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, new IntentFilter(TD_BROADCAST_ACTION));
+    @Override
+    public void show() {
+        refreshTD();
     }
 
-    /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 根据用户选择显示全部挂单或未成交单
-     */
-    protected void refreshOrder() {
+    @Override
+    public void leave() {
+    }
+
+    @Override
+    public void refreshMD() {
+
+    }
+
+    @Override
+    public void refreshTD() {
         try {
             if (!mIsUpdate) return;
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
             mNewData.clear();
 
@@ -280,133 +210,6 @@ public class OrderFragment extends LazyLoadFragment {
             mOldData.clear();
             mOldData.addAll(mNewData);
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void show() {
-        try {
-            refreshOrder();
-            showEvent();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void showEvent() {
-        try {
-            LogUtils.e("showOrder", true);
-            mShowTime = System.currentTimeMillis();
-            String broker_id = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_BROKER, "");
-            JSONObject jsonObject = new JSONObject();
-            if (getActivity() instanceof MainActivity) {
-                jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_ACCOUNT);
-            } else {
-                String ins = mInstrumentId;
-                boolean isInsInOptional = LatestFileManager.getOptionalInsList().containsKey(ins);
-                jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
-                jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);
-            }
-            if (mIsOrdersAlive)
-                jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_ALIVE);
-            else jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_ORDER);
-            jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
-            jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
-            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().LOGIN_USER_ID);
-            if (userEntity != null) {
-                AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
-                if (accountEntity != null) {
-                    String static_balance = MathUtils.round(accountEntity.getStatic_balance(), 2);
-                    jsonObject.put(AMP_EVENT_BALANCE, static_balance);
-                    int positionCount = 0;
-                    int orderCount = 0;
-                    for (PositionEntity positionEntity :
-                            userEntity.getPositions().values()) {
-                        int volume_long = Integer.parseInt(positionEntity.getVolume_long());
-                        int volume_short = Integer.parseInt(positionEntity.getVolume_short());
-                        if (volume_long != 0 || volume_short != 0) positionCount += 1;
-                    }
-
-                    for (OrderEntity orderEntity :
-                            userEntity.getOrders().values()) {
-                        if (STATUS_ALIVE.equals(orderEntity.getStatus())) orderCount += 1;
-                    }
-                    jsonObject.put(AMP_EVENT_POSITION_COUNT, positionCount);
-                    jsonObject.put(AMP_EVENT_ORDER_COUNT, orderCount);
-
-                    if (getActivity() instanceof FutureInfoActivity) {
-                        String ins = ((FutureInfoActivity) getActivity()).getInstrument_id();
-                        boolean isInsInPosition = userEntity.getPositions().keySet().contains(ins);
-                        jsonObject.put(AMP_EVENT_IS_INS_IN_POSITION, isInsInPosition);
-                    }
-                }
-            }
-            Amplitude.getInstance().logEvent(AMP_SHOW_PAGE, jsonObject);
-            DataManager.getInstance().IS_POSITIVE = false;
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    @Override
-    public void leave() {
-        leaveEvent();
-    }
-
-    public void leaveEvent() {
-        try {
-            LogUtils.e("leaveOrder", true);
-            long pageVisibleTime = System.currentTimeMillis() - mShowTime;
-            String broker_id = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_BROKER, "");
-            JSONObject jsonObject = new JSONObject();
-            if (getActivity() instanceof MainActivity) {
-                jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_ACCOUNT);
-            } else {
-                String ins = mInstrumentId;
-                boolean isInsInOptional = LatestFileManager.getOptionalInsList().containsKey(ins);
-                jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
-                jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);
-            }
-            if (mIsOrdersAlive)
-                jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_ALIVE);
-            else jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_ORDER);
-            jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
-            jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
-            jsonObject.put(AMP_EVENT_PAGE_VISIBLE_TIME, pageVisibleTime);
-            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().LOGIN_USER_ID);
-            if (userEntity != null) {
-                AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
-                if (accountEntity != null) {
-                    String static_balance = MathUtils.round(accountEntity.getStatic_balance(), 2);
-                    jsonObject.put(AMP_EVENT_BALANCE, static_balance);
-                    int positionCount = 0;
-                    int orderCount = 0;
-                    for (PositionEntity positionEntity :
-                            userEntity.getPositions().values()) {
-                        int volume_long = Integer.parseInt(positionEntity.getVolume_long());
-                        int volume_short = Integer.parseInt(positionEntity.getVolume_short());
-                        if (volume_long != 0 || volume_short != 0) positionCount += 1;
-                    }
-
-                    for (OrderEntity orderEntity :
-                            userEntity.getOrders().values()) {
-                        if (STATUS_ALIVE.equals(orderEntity.getStatus())) orderCount += 1;
-                    }
-                    jsonObject.put(AMP_EVENT_POSITION_COUNT, positionCount);
-                    jsonObject.put(AMP_EVENT_ORDER_COUNT, orderCount);
-
-                    if (getActivity() instanceof FutureInfoActivity) {
-                        String ins = ((FutureInfoActivity) getActivity()).getInstrument_id();
-                        boolean isInsInPosition = userEntity.getPositions().keySet().contains(ins);
-                        jsonObject.put(AMP_EVENT_IS_INS_IN_POSITION, isInsInPosition);
-                    }
-
-                }
-            }
-            Amplitude.getInstance().logEvent(AMP_LEAVE_PAGE, jsonObject);
-        } catch (JSONException e) {
             e.printStackTrace();
         }
     }
@@ -543,14 +346,25 @@ public class OrderFragment extends LazyLoadFragment {
     }
 
     /**
+     * date: 2019/7/3
+     * author: chenli
+     * description: 设置合约id
+     */
+    public void setInstrument_id(String ins) {
+        mInstrumentId = ins;
+    }
+
+    /**
      * date: 7/9/17
      * author: chenli
      * description: 接收持仓点击、自选点击、搜索页点击发来的合约，用于更新高亮合约
      */
     @Subscribe
     public void onEvent(IdEvent data) {
-        if (getActivity() instanceof FutureInfoActivity)
-            mAdapter.updateHighlightIns(data.getInstrument_id());
+        if (!mIsInAccountFragment) {
+            mInstrumentId = data.getInstrument_id();
+            mAdapter.updateHighlightIns(mInstrumentId);
+        }
     }
 
     /**
@@ -560,7 +374,7 @@ public class OrderFragment extends LazyLoadFragment {
      */
     @Subscribe
     public void onEventSetting(OrderSettingEvent data) {
-        mIsShowCancelPop = data.isPopup();
+        mIsShowCancelPop = data.isCancelPopup();
     }
 
 

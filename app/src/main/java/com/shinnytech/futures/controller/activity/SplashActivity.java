@@ -20,26 +20,30 @@ import android.widget.FrameLayout;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.SystemUtils;
+import com.shinnytech.futures.utils.TimeUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
+import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_IS_FIRM;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_FAIL;
 import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_SUCCEED;
-import static com.shinnytech.futures.constants.CommonConstants.TD_OFFLINE;
 import static com.shinnytech.futures.utils.ScreenUtils.getStatusBarHeight;
 
 public class SplashActivity extends AppCompatActivity {
-    private final int TO_LOGIN = 0;
+    private static final int TO_LOGIN = 0;
+    private static final int TIME_OUT = 1;
+    private static final int EXIT_APP = 2;
     private BroadcastReceiver mReceiverLogin;
     private Handler mHandler;
     private Timer mTimer;
-    private TimerTask mTimerTask;
+    private Context sContext;
 
 
     @Override
@@ -49,29 +53,31 @@ public class SplashActivity extends AppCompatActivity {
         boolean isFirm = (boolean) SPUtils.get(BaseApplication.getContext(), CONFIG_IS_FIRM, true);
         changeStatusBarColor(isFirm);
 
-        if(!isTaskRoot()) finish();
-
-        mHandler = new MyHandler(this);
-        mTimer = new Timer();
-        mTimerTask = new TimerTask() {
-            @Override
-            public void run() {
-                mHandler.sendEmptyMessage(TO_LOGIN);
-            }
-        };
+        if (isTaskRoot()) {
+            mHandler = new MyHandler(this);
+            mTimer = new Timer();
+            sContext = BaseApplication.getContext();
+            mTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    mHandler.sendEmptyMessage(TIME_OUT);
+                }
+            }, 10000);
+        } else finish();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        final Context context = BaseApplication.getContext();
-        mTimer.schedule(mTimerTask, 10000);
-
-        //没有登录过
-        if (!SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE) ||
-                ((String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "")).isEmpty())
-            mHandler.sendEmptyMessageDelayed(TO_LOGIN, 2000);
+        if (SPUtils.contains(sContext, CommonConstants.CONFIG_LOGIN_DATE)) {
+            String date = (String) SPUtils.get(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
+            String name = (String) SPUtils.get(sContext, CommonConstants.CONFIG_ACCOUNT, "");
+            String password = (String) SPUtils.get(sContext, CommonConstants.CONFIG_PASSWORD, "");
+            boolean notLogin = password.isEmpty() ||
+                    (name.contains(BROKER_ID_VISITOR) && !TimeUtils.getNowTime().equals(date));
+            if (notLogin) mHandler.sendEmptyMessageDelayed(TO_LOGIN, 1000);
+        }else mHandler.sendEmptyMessageDelayed(TO_LOGIN, 1000);
 
         registerBroaderCast();
     }
@@ -131,10 +137,6 @@ public class SplashActivity extends AppCompatActivity {
                         //登录失败
                         toLogin();
                         break;
-                    case TD_OFFLINE:
-                        //超时检测，连接失败
-                        toLogin();
-                        break;
                     default:
                         break;
                 }
@@ -145,18 +147,24 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void toLogin() {
-        mTimer.cancel();
-        mTimerTask.cancel();
+        if (mTimer != null) {
+            mTimer.cancel();
+            mTimer = null;
+        }
         Intent loginIntent = new Intent(SplashActivity.this, LoginActivity.class);
         SplashActivity.this.startActivity(loginIntent);
         SplashActivity.this.finish();
     }
 
     private void toMain() {
-        mTimer.cancel();
-        mTimerTask.cancel();
+        if (mTimer != null) {
+            mTimer.cancel();
+            mTimer = null;
+        }
+
         Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
         SplashActivity.this.startActivity(mainIntent);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         SplashActivity.this.finish();
     }
 
@@ -181,6 +189,16 @@ public class SplashActivity extends AppCompatActivity {
                 switch (msg.what) {
                     case 0:
                         activity.toLogin();
+                        break;
+                    case 1:
+                        if (BaseApplication.getmTDWebSocket().isOpen())activity.toLogin();
+                        else {
+                            ToastUtils.showToast(activity.sContext, "无法连接到服务器，请尝试重新打开");
+                            activity.mHandler.sendEmptyMessageDelayed(EXIT_APP, 2000);
+                        }
+                        break;
+                    case 2:
+                        SystemUtils.exitApp(activity.sContext);
                         break;
                     default:
                         break;

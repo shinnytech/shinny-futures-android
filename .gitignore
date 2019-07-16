@@ -11,6 +11,9 @@
 # Java files
 app/src/main/java/com/shinnytech/futures/constants/LocalCommonConstants.java
 
+# travis files 
+.travis.yml
+
 # MacOS files
 .DS_Store
 

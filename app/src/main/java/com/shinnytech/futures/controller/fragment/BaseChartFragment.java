@@ -1,15 +1,9 @@
 package com.shinnytech.futures.controller.fragment;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +13,8 @@ import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.components.LimitLine;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.controller.activity.FutureInfoActivity;
+import com.shinnytech.futures.controller.activity.MainActivity;
+import com.shinnytech.futures.controller.activity.MainActivityPresenter;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
@@ -41,23 +36,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.shinnytech.futures.application.BaseApplication.MD_BROADCAST_ACTION;
-import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
-import static com.shinnytech.futures.constants.CommonConstants.CURRENT_DAY_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
-import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.SHANGHAI;
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_FINISHED;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
-import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOU;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
@@ -147,38 +136,14 @@ public class BaseChartFragment extends LazyLoadFragment {
      */
     protected List<String> mInsList;
     protected DataManager sDataManager;
-    protected BroadcastReceiver mReceiver;
-    protected BroadcastReceiver mReceiver1;
     protected String instrument_id;
     protected String instrument_id_transaction;
     protected Calendar mCalendar;
     protected SimpleDateFormat mSimpleDateFormat;
     protected SparseArray<String> xVals;
     protected int mLayoutId;
+    protected FutureInfoFragment mFutureInfoFragment;
     private ViewDataBinding mViewDataBinding;
-
-    /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 刷新K线图
-     */
-    private void refreshChart(String mDataString) {
-        try {
-            switch (mDataString) {
-                case MD_MESSAGE:
-                    drawKline();
-                    break;
-                case TD_MESSAGE:
-                    refreshTrade();
-                    break;
-                default:
-                    break;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -186,32 +151,9 @@ public class BaseChartFragment extends LazyLoadFragment {
         mTopChartViewBase = mViewDataBinding.getRoot().findViewById(R.id.chart);
         mMiddleChartViewBase = mViewDataBinding.getRoot().findViewById(R.id.middleChart);
         mBottomChartViewBase = mViewDataBinding.getRoot().findViewById(R.id.bottomChart);
-        //注册EventBus
-        EventBus.getDefault().register(this);
         initData();
         initChart();
-        initInsList();
         return mViewDataBinding.getRoot();
-    }
-
-    /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 获取传进futureInfoActivity页的合约代码，以及初始化持仓线、挂单线、均线
-     */
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        instrument_id = ((FutureInfoActivity) getActivity()).getInstrument_id();
-        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
-        if (instrument_id.contains("KQ") && searchEntity != null)
-            instrument_id_transaction = searchEntity.getUnderlying_symbol();
-        else instrument_id_transaction = instrument_id;
-
-        mIsPosition = (boolean) SPUtils.get(BaseApplication.getContext(), CONFIG_POSITION_LINE, true);
-        mIsPending = (boolean) SPUtils.get(BaseApplication.getContext(), CONFIG_ORDER_LINE, true);
-
     }
 
     /**
@@ -256,7 +198,7 @@ public class BaseChartFragment extends LazyLoadFragment {
         mInsList = new ArrayList<>(map.keySet());
         if (OPTIONAL.equals(title)) {
             DataManager dataManager = DataManager.getInstance();
-            UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.LOGIN_USER_ID);
+            UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.USER_ID);
             if (userEntity != null) {
                 for (PositionEntity positionEntity : userEntity.getPositions().values()) {
                     try {
@@ -275,6 +217,11 @@ public class BaseChartFragment extends LazyLoadFragment {
     }
 
     protected void initData() {
+        EventBus.getDefault().register(this);
+        MainActivity mainActivity = (MainActivity) getActivity();
+        MainActivityPresenter mainActivityPresenter = mainActivity.getmMainActivityPresenter();
+        mFutureInfoFragment = (FutureInfoFragment) mainActivityPresenter.getmViewPagerFragmentAdapter().getItem(2);
+
         mColorHomeBg = ContextCompat.getColor(getActivity(), R.color.kline_background);
         mColorAxis = ContextCompat.getColor(getActivity(), R.color.kline_axis);
         mColorGrid = ContextCompat.getColor(getActivity(), R.color.kline_grid);
@@ -289,6 +236,9 @@ public class BaseChartFragment extends LazyLoadFragment {
         mCalendar = Calendar.getInstance();
         sDataManager = DataManager.getInstance();
         xVals = new SparseArray<>();
+
+        mIsPosition = (boolean) SPUtils.get(BaseApplication.getContext(), CONFIG_POSITION_LINE, true);
+        mIsPending = (boolean) SPUtils.get(BaseApplication.getContext(), CONFIG_ORDER_LINE, true);
     }
 
     protected void initChart() {
@@ -335,7 +285,24 @@ public class BaseChartFragment extends LazyLoadFragment {
         mBottomChartViewBase.setHighlightPerTapEnabled(false);
         mBottomChartViewBase.setHighlightPerDragEnabled(false);
 
-        //切换周期时控制图表显示
+    }
+
+    /**
+     * date: 2019/7/3
+     * author: chenli
+     * description: 设置合约id
+     */
+    public void setInstrument_id(String ins) {
+        instrument_id = ins;
+        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
+        if (instrument_id.contains("KQ") && searchEntity != null)
+            instrument_id_transaction = searchEntity.getUnderlying_symbol();
+        else instrument_id_transaction = instrument_id;
+    }
+
+    @Override
+    public void show() {
+        //控制图表显示
         if (sDataManager.IS_SHOW_VP_CONTENT) {
             mMiddleChartViewBase.setVisibility(View.GONE);
 //            mBottomChartViewBase.setVisibility(View.GONE);
@@ -343,11 +310,7 @@ public class BaseChartFragment extends LazyLoadFragment {
             mMiddleChartViewBase.setVisibility(View.VISIBLE);
 //            mBottomChartViewBase.setVisibility(View.VISIBLE);
         }
-
-    }
-
-    @Override
-    public void show() {
+        initInsList();
     }
 
 
@@ -355,29 +318,15 @@ public class BaseChartFragment extends LazyLoadFragment {
     public void leave() {
     }
 
-    /**
-     * date: 6/28/18
-     * author: chenli
-     * description: 刷新行情信息
-     */
-    protected void drawKline() {
+    @Override
+    public void refreshMD() {
+        drawKline();
     }
 
-    /**
-     * date: 2019/5/12
-     * author: chenli
-     * description: 清空行情图
-     */
-    protected void clearKline() {
-    }
 
-    /**
-     * date: 6/28/18
-     * author: chenli
-     * description: 刷新账户信息
-     */
-    private void refreshTrade() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
+    @Override
+    public void refreshTD() {
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
         if (userEntity == null) return;
         if (mIsPending) {
             for (OrderEntity orderEntity :
@@ -421,6 +370,22 @@ public class BaseChartFragment extends LazyLoadFragment {
     }
 
     /**
+     * date: 6/28/18
+     * author: chenli
+     * description: 刷新行情信息
+     */
+    protected void drawKline() {
+    }
+
+    /**
+     * date: 2019/5/12
+     * author: chenli
+     * description: 清空行情图
+     */
+    protected void clearKline() {
+    }
+
+    /**
      * date: 6/1/18
      * author: chenli
      * description: 增加持仓线
@@ -438,7 +403,7 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void addLongPositionLimitLine() {
         try {
             String key = instrument_id_transaction;
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
             PositionEntity positionEntity = userEntity.getPositions().get(key);
 
@@ -462,7 +427,7 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void addShortPositionLimitLine() {
         try {
             String key = instrument_id_transaction;
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
             PositionEntity positionEntity = userEntity.getPositions().get(key);
             if (positionEntity == null) return;
@@ -505,7 +470,7 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void refreshLongPositionLimitLine() {
         try {
             String key = instrument_id_transaction;
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
             PositionEntity positionEntity = userEntity.getPositions().get(key);
             String limitKey = key + "0";
@@ -544,7 +509,7 @@ public class BaseChartFragment extends LazyLoadFragment {
     private void refreshShortPositionLimitLine() {
         try {
             String key = instrument_id_transaction;
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
             PositionEntity positionEntity = userEntity.getPositions().get(key);
             String limitKey = key + "1";
@@ -641,7 +606,7 @@ public class BaseChartFragment extends LazyLoadFragment {
      * description: 增加挂单线
      */
     protected void addOrderLimitLines() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
         if (userEntity == null) return;
         for (OrderEntity orderEntity :
                 userEntity.getOrders().values()) {
@@ -669,51 +634,6 @@ public class BaseChartFragment extends LazyLoadFragment {
     }
 
     /**
-     * date: 6/1/18
-     * author: chenli
-     * description: 注册行情交易广播
-     */
-    private void registerBroaderCast() {
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String mDataString = intent.getStringExtra("msg");
-                refreshChart(mDataString);
-            }
-        };
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, new IntentFilter(MD_BROADCAST_ACTION));
-
-        mReceiver1 = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String mDataString = intent.getStringExtra("msg");
-                refreshChart(mDataString);
-            }
-        };
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver1, new IntentFilter(TD_BROADCAST_ACTION));
-    }
-
-    /**
-     * date: 6/1/18
-     * author: chenli
-     * description: k线数据订阅
-     */
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (mIsPosition) addPositionLimitLines();
-        if (mIsPending) addOrderLimitLines();
-        drawKline();
-
-        registerBroaderCast();
-        if (CURRENT_DAY_FRAGMENT.equals(mFragmentType)) {
-            BaseApplication.getmMDWebSocket().sendSetChart(instrument_id);
-        } else {
-            BaseApplication.getmMDWebSocket().sendSetChartKline(instrument_id, VIEW_WIDTH, mKlineType);
-        }
-    }
-
-    /**
      * date: 2019/1/10
      * author: chenli
      * description: 获取组合两腿
@@ -730,13 +650,6 @@ public class BaseChartFragment extends LazyLoadFragment {
         return ins;
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver1);
-    }
-
     /**
      * date: 6/1/18
      * author: chenli
@@ -747,12 +660,6 @@ public class BaseChartFragment extends LazyLoadFragment {
         super.onDestroyView();
         EventBus.getDefault().unregister(this);
     }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
 
     /**
      * date: 2019/2/20

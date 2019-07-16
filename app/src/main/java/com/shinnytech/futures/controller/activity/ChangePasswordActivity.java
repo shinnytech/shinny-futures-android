@@ -37,13 +37,6 @@ public class ChangePasswordActivity extends BaseActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        if (mReceiverChange != null)
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverChange);
-    }
-
-    @Override
     protected void initData() {
         mBinding = (ActivityChangePasswordBinding) mViewDataBinding;
         mHandler = new MyHandler(this);
@@ -51,6 +44,7 @@ public class ChangePasswordActivity extends BaseActivity {
 
     @Override
     protected void initEvent() {
+        mBinding.etOldPassword.requestFocus();
 
         mBinding.deleteOldPassword.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -205,8 +199,16 @@ public class ChangePasswordActivity extends BaseActivity {
     }
 
     @Override
-    protected void refreshUI() {
+    protected void onResume() {
+        super.onResume();
+        registerBroaderCast();
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mReceiverChange != null)
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverChange);
     }
 
     /**
@@ -215,9 +217,6 @@ public class ChangePasswordActivity extends BaseActivity {
      * description: 修改密码成功检测
      */
     protected void registerBroaderCast() {
-
-        super.registerBroaderCast();
-
         mReceiverChange = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {

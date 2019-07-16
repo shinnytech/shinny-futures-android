@@ -69,10 +69,4 @@ public class CommonSwitchActivity extends BaseActivity {
             }
         });
     }
-
-    @Override
-    protected void refreshUI() {
-
-    }
-
 }

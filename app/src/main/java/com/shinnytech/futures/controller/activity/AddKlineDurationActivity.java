@@ -57,11 +57,6 @@ public class AddKlineDurationActivity extends BaseActivity {
     }
 
     @Override
-    protected void refreshUI() {
-
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent = new Intent();
         setResult(RESULT_OK, intent);

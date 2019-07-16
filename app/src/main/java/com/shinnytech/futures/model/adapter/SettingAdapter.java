@@ -156,12 +156,15 @@ public class SettingAdapter extends RecyclerView.Adapter<SettingAdapter.ItemView
             switch (mBinding.content.getText().toString()) {
                 case CommonConstants.INSERT_ORDER_CONFIRM:
                     SPUtils.putAndApply(sContext, CommonConstants.CONFIG_INSERT_ORDER_CONFIRM, mBinding.settingToggle.isChecked());
+                    OrderSettingEvent insertEvent = new OrderSettingEvent();
+                    insertEvent.setInsertPopup(mBinding.settingToggle.isChecked());
+                    EventBus.getDefault().post(insertEvent);
                     break;
                 case CommonConstants.CANCEL_ORDER_CONFIRM:
                     SPUtils.putAndApply(sContext, CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM, mBinding.settingToggle.isChecked());
-                    OrderSettingEvent orderSettingEvent = new OrderSettingEvent();
-                    orderSettingEvent.setPopup(mBinding.settingToggle.isChecked());
-                    EventBus.getDefault().post(orderSettingEvent);
+                    OrderSettingEvent cancelEvent = new OrderSettingEvent();
+                    cancelEvent.setCancelPopup(mBinding.settingToggle.isChecked());
+                    EventBus.getDefault().post(cancelEvent);
                     break;
                 default:
                     break;

@@ -14,8 +14,9 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.receiver.NotificationClickReceiver;
-import com.shinnytech.futures.utils.LogUtils;
+import com.shinnytech.futures.utils.SystemUtils;
 
 public class ForegroundService extends Service {
     public ForegroundService() {
@@ -59,6 +60,6 @@ public class ForegroundService extends Service {
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
-        System.exit(0);
+        SystemUtils.exitApp(BaseApplication.getContext());
     }
 }

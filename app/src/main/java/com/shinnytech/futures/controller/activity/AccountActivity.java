@@ -1,14 +1,20 @@
 package com.shinnytech.futures.controller.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ActivityAccountBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 
+import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
 import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT;
+import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 
 /**
  * date: 7/7/17
@@ -37,8 +43,8 @@ public class AccountActivity extends BaseActivity {
     protected void initEvent() {
     }
 
-    protected void refreshUI() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
+    private void refreshUI() {
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
         if (userEntity == null) return;
         AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
         ((ActivityAccountBinding) mViewDataBinding).setAccount(accountEntity);
@@ -47,6 +53,31 @@ public class AccountActivity extends BaseActivity {
     @Override
     public void onResume() {
         super.onResume();
+        refreshUI();
+        registerBroaderCast();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mReceiverLocal != null)
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLocal);
+    }
+
+    /**
+     * date: 7/7/17
+     * author: chenli
+     * description: 注册账户广播，监听账户实时信息
+     */
+    protected void registerBroaderCast() {
+        mReceiverLocal = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String msg = intent.getStringExtra("msg");
+                if (TD_MESSAGE.equals(msg)) refreshUI();
+            }
+        };
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverLocal, new IntentFilter(TD_BROADCAST_ACTION));
     }
 
     /**

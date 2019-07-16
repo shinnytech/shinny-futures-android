@@ -14,8 +14,6 @@ import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
-import com.shinnytech.futures.utils.SPUtils;
-import com.shinnytech.futures.utils.TimeUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -773,14 +771,14 @@ public class LatestFileManager {
     public static List<String> getBrokerIdFromBuildConfig(String[] brokerIdOrigin) {
         List<String> brokerList = new ArrayList<>();
         if (brokerIdOrigin != null) {
-            if (CommonConstants.KUAI_QI_XIAO_Q.equals(BuildConfig.BROKER_ID)) {
+            if (CommonConstants.KUAI_QI_XIAO_Q.equals(BuildConfig.CHANNEL_ID)) {
                 for (int i = 0; i < brokerIdOrigin.length; i++) {
                     if (!BROKER_ID_SIMULATION.equals(brokerIdOrigin[i]))
                         brokerList.add(brokerIdOrigin[i]);
                 }
             } else {
                 for (int i = 0; i < brokerIdOrigin.length; i++) {
-                    if (brokerIdOrigin[i] != null && brokerIdOrigin[i].contains(BuildConfig.BROKER_ID))
+                    if (brokerIdOrigin[i] != null && brokerIdOrigin[i].contains(BuildConfig.CHANNEL_ID))
                         brokerList.add(brokerIdOrigin[i]);
                 }
             }
@@ -795,19 +793,6 @@ public class LatestFileManager {
         Date date = new Date();
         entity.setTimestamp(new Long(date.getTime()));
         SLSDatabaseManager.getInstance().insertRecordIntoDB(entity);
-    }
-
-    public static void deleteLogDB() {
-        Context context = BaseApplication.getContext();
-        if (SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
-            String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
-            if (!TimeUtils.getNowTime().equals(date)) {
-                List<LogEntity> list = SLSDatabaseManager.getInstance().queryRecordFromDB();
-                for (LogEntity logEntity : list) {
-                    SLSDatabaseManager.getInstance().deleteRecordFromDB(logEntity);
-                }
-            }
-        }
     }
 
 }

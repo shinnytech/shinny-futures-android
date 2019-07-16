@@ -1,12 +1,8 @@
 package com.shinnytech.futures.controller.fragment;
 
-import android.app.Activity;
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
@@ -14,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.PopupMenu;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -34,13 +29,14 @@ import com.shinnytech.futures.R;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
-import com.shinnytech.futures.controller.activity.FutureInfoActivity;
+import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.databinding.FragmentTransactionBinding;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.OrderSettingEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
@@ -55,14 +51,11 @@ import com.shinnytech.futures.utils.ToastUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.shinnytech.futures.application.BaseApplication.MD_BROADCAST_ACTION;
-import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
 import static com.shinnytech.futures.constants.CommonConstants.ACTION_ADD_BUY;
 import static com.shinnytech.futures.constants.CommonConstants.ACTION_ADD_SELL;
 import static com.shinnytech.futures.constants.CommonConstants.ACTION_CLOSE_BUY;
@@ -70,19 +63,8 @@ import static com.shinnytech.futures.constants.CommonConstants.ACTION_CLOSE_SELL
 import static com.shinnytech.futures.constants.CommonConstants.ACTION_LOCK;
 import static com.shinnytech.futures.constants.CommonConstants.ACTION_OPEN_BUY;
 import static com.shinnytech.futures.constants.CommonConstants.ACTION_OPEN_SELL;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_ACCOUNT_LINK;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_CANCEL_CLOSE_CANCELED;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_CANCEL_CLOSE_CONFIRMED;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BALANCE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BROKER_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_IS_INS_IN_OPTIONAL;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_IS_INS_IN_POSITION;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_IS_POSITIVE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_ORDER_COUNT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VISIBLE_TIME;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_POSITION_COUNT;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE_KEY;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE_KEY_VALUE_0;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE_KEY_VALUE_1;
@@ -102,8 +84,11 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE_K
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE_KEY_VALUE_PLUS;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE_KEY_VALUE_POINT;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE_KEY_VALUE_QUEUED;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SUB_PAGE_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SUB_PAGE_ID_VALUE_TRANSACTION;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE_TYPE_VALUE_LAST;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE_TYPE_VALUE_MARKET;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE_TYPE_VALUE_NUMBER;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE_TYPE_VALUE_OPPONENT;
+import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE_TYPE_VALUE_QUEUED;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_VOLUME_KEY;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_VOLUME_KEY_VALUE_0;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_VOLUME_KEY_VALUE_1;
@@ -119,12 +104,8 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_VOLUME_
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_VOLUME_KEY_VALUE_DEL;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_VOLUME_KEY_VALUE_MINUS;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_VOLUME_KEY_VALUE_PLUS;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_LEAVE_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_PRICE_KEY;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_SHOW_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_VOLUME_KEY;
-import static com.shinnytech.futures.constants.CommonConstants.BACK_TO_ACCOUNT_DETAIL;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
 import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BOTH_ZN;
 import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY;
@@ -132,10 +113,8 @@ import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY_ZN;
 import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_SELL;
 import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_SELL_ZN;
 import static com.shinnytech.futures.constants.CommonConstants.INE_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.LATEST_PRICE;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_PRICE;
-import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE;
 import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_HISTORY;
 import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_HISTORY_ZN;
@@ -150,7 +129,6 @@ import static com.shinnytech.futures.constants.CommonConstants.SHFE_ZN;
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_FIRST_OPEN_FIRST_CLOSE;
 import static com.shinnytech.futures.constants.CommonConstants.STATUS_LOCK;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.USER_PRICE;
 
 /**
@@ -169,8 +147,6 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
 
     private DataManager sDataManager = DataManager.getInstance();
     private Context sContext = BaseApplication.getContext();
-    private BroadcastReceiver mReceiverAccount;
-    private BroadcastReceiver mReceiverPrice;
     /**
      * date: 7/9/17
      * description: 平仓状态是否为实时数字标志
@@ -184,7 +160,6 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     private boolean mIsReClose = false;
     private FragmentTransactionBinding mBinding;
     private boolean mIsShowDialog;
-    private long mShowTime;
     private Dialog mPriceDialog;
     private Dialog mVolumeDialog;
     /**
@@ -192,18 +167,6 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      * description: 软键盘是否刚隐藏
      */
     private boolean mIsKeyBoardJustHide = false;
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mInstrumentId = ((FutureInfoActivity) getActivity()).getInstrument_id();
-        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
-        if (mInstrumentId.contains("KQ") && searchEntity != null)
-            mInstrumentIdTransaction = searchEntity.getUnderlying_symbol();
-        else mInstrumentIdTransaction = mInstrumentId;
-        mExchangeId = mInstrumentIdTransaction.split("\\.")[0];
-        mIsShowDialog = (boolean) SPUtils.get(sContext, CommonConstants.CONFIG_INSERT_ORDER_CONFIRM, true);
-    }
 
     @Nullable
     @Override
@@ -214,7 +177,8 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         return mBinding.getRoot();
     }
 
-    private void initData(){
+    private void initData() {
+        mIsShowDialog = (boolean) SPUtils.get(sContext, CommonConstants.CONFIG_INSERT_ORDER_CONFIRM, true);
         mPriceDialog = initKeyboardDialog(mBinding.price, R.xml.future_price);
         mVolumeDialog = initKeyboardDialog(mBinding.volume, R.xml.future_volume);
     }
@@ -241,7 +205,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         }
                     }
                     mBinding.price.setSelection(0, mBinding.price.getText().length());
-                    if (!mPriceDialog.isShowing())mPriceDialog.show();
+                    if (!mPriceDialog.isShowing()) mPriceDialog.show();
                 }
                 return true;
             }
@@ -264,7 +228,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         }
                     }
                     mBinding.volume.setSelection(0, mBinding.volume.getText().length());
-                    if (!mVolumeDialog.isShowing())mVolumeDialog.show();
+                    if (!mVolumeDialog.isShowing()) mVolumeDialog.show();
                 }
                 return true;
             }
@@ -286,7 +250,6 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             public void afterTextChanged(Editable s) {
                 QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
                 if (quoteEntity != null) {
-
                     switch (mBinding.price.getText().toString()) {
                         case QUEUED_PRICE:
                             String ask_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(),
@@ -357,16 +320,12 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         mBinding.backAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mIsKeyBoardJustHide){
+                if (mIsKeyBoardJustHide) {
                     mIsKeyBoardJustHide = false;
                     return;
                 }
-                Amplitude.getInstance().logEvent(AMP_ACCOUNT_LINK);
-                Intent intent = new Intent();
-                intent.putExtra(BACK_TO_ACCOUNT_DETAIL, true);
-                intent.putExtra(INS_BETWEEN_ACTIVITY, mInstrumentId);
-                getActivity().setResult(Activity.RESULT_OK, intent);
-                getActivity().finish();
+                MainActivity mainActivity = (MainActivity) getActivity();
+                mainActivity.getmMainActivityPresenter().linkToAccount();
             }
         });
     }
@@ -374,18 +333,10 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     @Override
     public void onResume() {
         super.onResume();
-        registerBroaderCast();
         //不用show()防止重复上报
-        refreshPrice();
-        refreshAccount();
+        refreshMD();
+        refreshTD();
         initPosition();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiverAccount);
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiverPrice);
     }
 
     @Override
@@ -396,111 +347,103 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
 
     @Override
     public void show() {
-        try {
-            refreshPrice();
-            refreshAccount();
-            initPosition();
-            showEvent();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        refreshMD();
+        refreshTD();
+        initPosition();
     }
-
-    public void showEvent() {
-        try {
-            LogUtils.e("showTransaction", true);
-            mShowTime = System.currentTimeMillis();
-            String broker_id = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_BROKER, "");
-            JSONObject jsonObject = new JSONObject();
-            String ins = mInstrumentId;
-            boolean isInsInOptional = LatestFileManager.getOptionalInsList().containsKey(ins);
-            jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
-            jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);
-            jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_TRANSACTION);
-            jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
-            jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
-            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().LOGIN_USER_ID);
-            if (userEntity != null) {
-                AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
-                if (accountEntity != null) {
-                    String static_balance = MathUtils.round(accountEntity.getStatic_balance(), 2);
-                    jsonObject.put(AMP_EVENT_BALANCE, static_balance);
-                    int positionCount = 0;
-                    int orderCount = 0;
-                    for (PositionEntity positionEntity :
-                            userEntity.getPositions().values()) {
-                        int volume_long = Integer.parseInt(positionEntity.getVolume_long());
-                        int volume_short = Integer.parseInt(positionEntity.getVolume_short());
-                        if (volume_long != 0 || volume_short != 0) positionCount += 1;
-                    }
-
-                    for (OrderEntity orderEntity :
-                            userEntity.getOrders().values()) {
-                        if (STATUS_ALIVE.equals(orderEntity.getStatus())) orderCount += 1;
-                    }
-                    jsonObject.put(AMP_EVENT_POSITION_COUNT, positionCount);
-                    jsonObject.put(AMP_EVENT_ORDER_COUNT, orderCount);
-
-                    boolean isInsInPosition = userEntity.getPositions().keySet().contains(ins);
-                    jsonObject.put(AMP_EVENT_IS_INS_IN_POSITION, isInsInPosition);
-                }
-            }
-            Amplitude.getInstance().logEvent(AMP_SHOW_PAGE, jsonObject);
-            DataManager.getInstance().IS_POSITIVE = false;
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     @Override
     public void leave() {
-        leaveEvent();
     }
 
-    public void leaveEvent() {
-        try {
-            LogUtils.e("leaveTransaction", true);
-            long pageVisibleTime = System.currentTimeMillis() - mShowTime;
-            String broker_id = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_BROKER, "");
-            JSONObject jsonObject = new JSONObject();
-            String ins = mInstrumentId;
-            boolean isInsInOptional = LatestFileManager.getOptionalInsList().containsKey(ins);
-            jsonObject.put(AMP_EVENT_IS_INS_IN_OPTIONAL, isInsInOptional);
-            jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO);
-            jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_TRANSACTION);
-            jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
-            jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
-            jsonObject.put(AMP_EVENT_PAGE_VISIBLE_TIME, pageVisibleTime);
-            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().LOGIN_USER_ID);
-            if (userEntity != null) {
-                AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
-                if (accountEntity != null) {
-                    String static_balance = MathUtils.round(accountEntity.getStatic_balance(), 2);
-                    jsonObject.put(AMP_EVENT_BALANCE, static_balance);
-                    int positionCount = 0;
-                    int orderCount = 0;
-                    for (PositionEntity positionEntity :
-                            userEntity.getPositions().values()) {
-                        int volume_long = Integer.parseInt(positionEntity.getVolume_long());
-                        int volume_short = Integer.parseInt(positionEntity.getVolume_short());
-                        if (volume_long != 0 || volume_short != 0) positionCount += 1;
-                    }
-
-                    for (OrderEntity orderEntity :
-                            userEntity.getOrders().values()) {
-                        if (STATUS_ALIVE.equals(orderEntity.getStatus())) orderCount += 1;
-                    }
-                    jsonObject.put(AMP_EVENT_POSITION_COUNT, positionCount);
-                    jsonObject.put(AMP_EVENT_ORDER_COUNT, orderCount);
-
-                    boolean isInsInPosition = userEntity.getPositions().keySet().contains(ins);
-                    jsonObject.put(AMP_EVENT_IS_INS_IN_POSITION, isInsInPosition);
+    @Override
+    public void refreshMD() {
+        QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
+        if (quoteEntity == null) return;
+        if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")) {
+            quoteEntity = CloneUtils.clone(quoteEntity);
+            quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
+        }
+        mBinding.setQuote(quoteEntity);
+        //控制下单板的显示模式
+        switch (sDataManager.PRICE_TYPE) {
+            case QUEUED_PRICE:
+                String ask_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(),
+                        quoteEntity.getInstrument_id());
+                String bid_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(),
+                        quoteEntity.getInstrument_id());
+                mBinding.bidPrice11.setText(bid_price1);
+                mBinding.askPrice11.setText(ask_price1);
+                if (mIsClosePriceShow) {
+                    if (DIRECTION_BUY_ZN.equals(mDirection))
+                        mBinding.closePrice.setText(ask_price1);
+                    else if (DIRECTION_SELL_ZN.equals(mDirection))
+                        mBinding.closePrice.setText(bid_price1);
                 }
+                break;
+            case OPPONENT_PRICE:
+                String ask_price1_1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(),
+                        quoteEntity.getInstrument_id());
+                String bid_price1_1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(),
+                        quoteEntity.getInstrument_id());
+                mBinding.bidPrice11.setText(ask_price1_1);
+                mBinding.askPrice11.setText(bid_price1_1);
+                if (mIsClosePriceShow) {
+                    if (DIRECTION_BUY_ZN.equals(mDirection))
+                        mBinding.closePrice.setText(bid_price1_1);
+                    else if (DIRECTION_SELL_ZN.equals(mDirection))
+                        mBinding.closePrice.setText(ask_price1_1);
+                }
+                break;
+            case MARKET_PRICE:
+                String lower_limit = LatestFileManager.saveScaleByPtick(quoteEntity.getLower_limit(),
+                        quoteEntity.getInstrument_id());
+                String upper_limit = LatestFileManager.saveScaleByPtick(quoteEntity.getUpper_limit(),
+                        quoteEntity.getInstrument_id());
+                mBinding.bidPrice11.setText(upper_limit);
+                mBinding.askPrice11.setText(lower_limit);
+                if (mIsClosePriceShow) {
+                    if (DIRECTION_BUY_ZN.equals(mDirection))
+                        mBinding.closePrice.setText(lower_limit);
+                    else if (DIRECTION_SELL_ZN.equals(mDirection))
+                        mBinding.closePrice.setText(upper_limit);
+                }
+                break;
+            case LATEST_PRICE:
+                String last_price = LatestFileManager.saveScaleByPtick(quoteEntity.getLast_price(),
+                        quoteEntity.getInstrument_id());
+                mBinding.bidPrice11.setText(last_price);
+                mBinding.askPrice11.setText(last_price);
+                if (mIsClosePriceShow) mBinding.closePrice.setText(last_price);
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void refreshTD() {
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
+        if (userEntity == null) return;
+        AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
+        if (accountEntity == null) return;
+        mBinding.setAccount(accountEntity);
+        QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
+        if (quoteEntity != null) {
+            if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")) {
+                quoteEntity = CloneUtils.clone(quoteEntity);
+                quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
             }
-            Amplitude.getInstance().logEvent(AMP_LEAVE_PAGE, jsonObject);
-        } catch (JSONException e) {
-            e.printStackTrace();
+            mBinding.setQuote(quoteEntity);
+        }
+        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
+        if (searchEntity != null) mBinding.tvIdTransactionPTick.setText(searchEntity.getpTick());
+
+        if (mIsRefreshPosition) refreshPosition();
+        //撤单平仓
+        if (mIsReClose && detectCloseVolumeEnough()) {
+            mIsReClose = false;
+            defaultClosePosition(mBinding.closePosition);
         }
     }
 
@@ -515,7 +458,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 mBinding.price.setText(OPPONENT_PRICE);
             else mBinding.price.setText(sDataManager.PRICE_TYPE);
             String key = mInstrumentIdTransaction;
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
             PositionEntity positionEntity = userEntity.getPositions().get(key);
             if (positionEntity == null) {
@@ -603,7 +546,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     private void refreshPosition() {
         try {
             String key = mInstrumentIdTransaction;
-            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
+            UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
             PositionEntity positionEntity = userEntity.getPositions().get(key);
             if (positionEntity == null) {
@@ -649,135 +592,6 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 刷新价格信息
-     */
-    private void refreshPrice() {
-        QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
-        if (quoteEntity == null) return;
-        if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")) {
-            quoteEntity = CloneUtils.clone(quoteEntity);
-            quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
-        }
-        mBinding.setQuote(quoteEntity);
-        //控制下单板的显示模式
-        switch (sDataManager.PRICE_TYPE) {
-            case QUEUED_PRICE:
-                String ask_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(),
-                        quoteEntity.getInstrument_id());
-                String bid_price1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(),
-                        quoteEntity.getInstrument_id());
-                mBinding.bidPrice11.setText(bid_price1);
-                mBinding.askPrice11.setText(ask_price1);
-                if (mIsClosePriceShow) {
-                    if (DIRECTION_BUY_ZN.equals(mDirection))
-                        mBinding.closePrice.setText(ask_price1);
-                    else if (DIRECTION_SELL_ZN.equals(mDirection))
-                        mBinding.closePrice.setText(bid_price1);
-                }
-                break;
-            case OPPONENT_PRICE:
-                String ask_price1_1 = LatestFileManager.saveScaleByPtick(quoteEntity.getAsk_price1(),
-                        quoteEntity.getInstrument_id());
-                String bid_price1_1 = LatestFileManager.saveScaleByPtick(quoteEntity.getBid_price1(),
-                        quoteEntity.getInstrument_id());
-                mBinding.bidPrice11.setText(ask_price1_1);
-                mBinding.askPrice11.setText(bid_price1_1);
-                if (mIsClosePriceShow) {
-                    if (DIRECTION_BUY_ZN.equals(mDirection))
-                        mBinding.closePrice.setText(bid_price1_1);
-                    else if (DIRECTION_SELL_ZN.equals(mDirection))
-                        mBinding.closePrice.setText(ask_price1_1);
-                }
-                break;
-            case MARKET_PRICE:
-                String lower_limit = LatestFileManager.saveScaleByPtick(quoteEntity.getLower_limit(),
-                        quoteEntity.getInstrument_id());
-                String upper_limit = LatestFileManager.saveScaleByPtick(quoteEntity.getUpper_limit(),
-                        quoteEntity.getInstrument_id());
-                mBinding.bidPrice11.setText(upper_limit);
-                mBinding.askPrice11.setText(lower_limit);
-                if (mIsClosePriceShow) {
-                    if (DIRECTION_BUY_ZN.equals(mDirection))
-                        mBinding.closePrice.setText(lower_limit);
-                    else if (DIRECTION_SELL_ZN.equals(mDirection))
-                        mBinding.closePrice.setText(upper_limit);
-                }
-                break;
-            case LATEST_PRICE:
-                String last_price = LatestFileManager.saveScaleByPtick(quoteEntity.getLast_price(),
-                        quoteEntity.getInstrument_id());
-                mBinding.bidPrice11.setText(last_price);
-                mBinding.askPrice11.setText(last_price);
-                if (mIsClosePriceShow) mBinding.closePrice.setText(last_price);
-                break;
-            default:
-                break;
-        }
-    }
-
-    /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 刷新账户信息
-     */
-    private void refreshAccount() {
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
-        if (userEntity == null) return;
-        AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
-        if (accountEntity == null) return;
-        mBinding.setAccount(accountEntity);
-        QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
-        if (quoteEntity != null) {
-            if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")) {
-                quoteEntity = CloneUtils.clone(quoteEntity);
-                quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
-            }
-            mBinding.setQuote(quoteEntity);
-        }
-        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
-        if (searchEntity != null) mBinding.tvIdTransactionPTick.setText(searchEntity.getpTick());
-    }
-
-    private void registerBroaderCast() {
-        mReceiverAccount = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String mDataString = intent.getStringExtra("msg");
-                switch (mDataString) {
-                    case TD_MESSAGE:
-                        refreshAccount();
-                        if (mIsRefreshPosition) refreshPosition();
-                        //撤单平仓
-                        if (mIsReClose && detectCloseVolumeEnough()) {
-                            mIsReClose = false;
-                            defaultClosePosition(mBinding.closePosition);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-
-        mReceiverPrice = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String mDataString = intent.getStringExtra("msg");
-                switch (mDataString) {
-                    case MD_MESSAGE:
-                        refreshPrice();
-                    default:
-                        break;
-                }
-            }
-        };
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiverAccount, new IntentFilter(TD_BROADCAST_ACTION));
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiverPrice, new IntentFilter(MD_BROADCAST_ACTION));
     }
 
     /**
@@ -1058,14 +872,14 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 final int volumeN = Integer.parseInt(volume);
                 final double priceN = Double.parseDouble(price);
                 final String instrumentId = mInstrumentIdTransaction.split("\\.")[1];
-                UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
+                UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
                 if (userEntity == null) return;
                 PositionEntity positionEntity = userEntity.getPositions().get(mInstrumentIdTransaction);
                 if (positionEntity == null) return;
 
-                if (!detectCloseVolumeEnough()){
+                if (!detectCloseVolumeEnough()) {
                     List<String> orders = getInsOrders(userEntity, mExchangeId, instrumentId);
-                    if (!orders.isEmpty()){
+                    if (!orders.isEmpty()) {
                         initDialog(orders);
                         return;
                     }
@@ -1135,24 +949,6 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
     }
 
     /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 更新合约代码以及持仓信息--来自自选择约选择以及持仓列表点击切换
-     */
-    @Subscribe
-    public void onEvent(IdEvent data) {
-        if (mInstrumentId.equals(data.getInstrument_id())) return;
-        mInstrumentId = data.getInstrument_id();
-        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
-        if (mInstrumentId.contains("KQ") && searchEntity != null)
-            mInstrumentIdTransaction = searchEntity.getUnderlying_symbol();
-        else mInstrumentIdTransaction = mInstrumentId;
-        mExchangeId = mInstrumentIdTransaction.split("\\.")[0];
-        //若如果不是从持仓点击而来，则刷新页面
-        if (sDataManager.POSITION_DIRECTION.isEmpty()) show();
-    }
-
-    /**
      * date: 7/14/17
      * author: chenli
      * description: 下单弹出框，根据固定宽高值自定义dialog，注意宽高值从dimens.xml文件中得到；用于同时平今昨仓
@@ -1206,9 +1002,9 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 @Override
                 public void onClick(View v) {
                     BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id,
-                            direction, offset, volume, price_type, price);
+                            direction, offset, volume, price_type, price, getAmpPriceType());
                     BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id,
-                            direction, offset1, volume1, price_type, price);
+                            direction, offset1, volume1, price_type, price, getAmpPriceType());
                     refreshPosition();
                     dialog.dismiss();
                     mIsRefreshPosition = true;
@@ -1225,9 +1021,9 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             dialog.show();
         } else {
             BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id,
-                    direction, offset, volume, price_type, price);
+                    direction, offset, volume, price_type, price, getAmpPriceType());
             BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id,
-                    direction, offset1, volume1, price_type, price);
+                    direction, offset1, volume1, price_type, price, getAmpPriceType());
             refreshPosition();
             mIsRefreshPosition = true;
         }
@@ -1275,7 +1071,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                 @Override
                 public void onClick(View v) {
                     BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id,
-                            direction, offset, volume, price_type, price);
+                            direction, offset, volume, price_type, price, getAmpPriceType());
                     refreshPosition();
                     dialog.dismiss();
                     mIsRefreshPosition = true;
@@ -1292,7 +1088,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             dialog.show();
         } else {
             BaseApplication.getmTDWebSocket().sendReqInsertOrder(exchange_id, instrument_id, direction,
-                    offset, volume, price_type, price);
+                    offset, volume, price_type, price, getAmpPriceType());
             refreshPosition();
             mIsRefreshPosition = true;
         }
@@ -1308,7 +1104,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         try {
 
             //无挂单则没有弹框，直接下一手错单
-            if (orderIds.isEmpty())return;
+            if (orderIds.isEmpty()) return;
             final Dialog dialog = new Dialog(getActivity(), R.style.Theme_Light_Dialog);
             View view = View.inflate(getActivity(), R.layout.view_dialog_cancel_insert_order, null);
             Window dialogWindow = dialog.getWindow();
@@ -1333,14 +1129,14 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                         BaseApplication.getmTDWebSocket().sendReqCancelOrder(order_id);
                     }
                     dialog.dismiss();
-                    Amplitude.getInstance().logEvent(AMP_CANCEL_CLOSE_CONFIRMED);
+                    Amplitude.getInstance().logEventWrap(AMP_CANCEL_CLOSE_CONFIRMED, new JSONObject());
                 }
             });
             cancel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     dialog.dismiss();
-                    Amplitude.getInstance().logEvent(AMP_CANCEL_CLOSE_CANCELED);
+                    Amplitude.getInstance().logEventWrap(AMP_CANCEL_CLOSE_CANCELED, new JSONObject());
                 }
             });
             if (!dialog.isShowing()) dialog.show();
@@ -1354,7 +1150,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
      * author: chenli
      * description: 获取合约对应挂单
      */
-    private List<String> getInsOrders(UserEntity userEntity, final String exchange_id, final String instrument_id){
+    private List<String> getInsOrders(UserEntity userEntity, final String exchange_id, final String instrument_id) {
         final List<String> orderIds = new ArrayList<>();
         for (OrderEntity orderEntity :
                 userEntity.getOrders().values()) {
@@ -1381,7 +1177,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         String volume = mBinding.volume.getText().toString();
         final String direction = DIRECTION_BUY_ZN.equals(mDirection) ? DIRECTION_SELL : DIRECTION_BUY;
         final int volumeN = Integer.parseInt(volume);
-        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.LOGIN_USER_ID);
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
         if (userEntity == null) return false;
         PositionEntity positionEntity = userEntity.getPositions().get(mInstrumentIdTransaction);
         if (positionEntity == null) return false;
@@ -1513,7 +1309,7 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
             dialogWindow.getDecorView().setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
-                    if (motionEvent.getAction() == MotionEvent.ACTION_OUTSIDE){
+                    if (motionEvent.getAction() == MotionEvent.ACTION_OUTSIDE) {
                         dialog.dismiss();
                     }
                     return false;
@@ -1803,17 +1599,17 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
                                 editable.insert(0, insertStr);
                             }
                             mIsInit = false;
-                        } else if ((!".".equals(insertStr)) || (".".equals(insertStr) && !text.contains("."))){
-                            if ((mEditText.getSelectionEnd() - mEditText.getSelectionStart() == editable.length())){
+                        } else if ((!".".equals(insertStr)) || (".".equals(insertStr) && !text.contains("."))) {
+                            if ((mEditText.getSelectionEnd() - mEditText.getSelectionStart() == editable.length())) {
                                 editable.clear();
                                 editable.insert(0, insertStr);
-                            }else editable.insert(start, insertStr);
+                            } else editable.insert(start, insertStr);
                         }
                     }
                     if (idKeyboard == R.xml.future_price) {
-                        Amplitude.getInstance().logEvent(AMP_PRICE_KEY, jsonObject);
+                        Amplitude.getInstance().logEventWrap(AMP_PRICE_KEY, jsonObject);
                     } else {
-                        Amplitude.getInstance().logEvent(AMP_VOLUME_KEY, jsonObject);
+                        Amplitude.getInstance().logEventWrap(AMP_VOLUME_KEY, jsonObject);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -1866,5 +1662,69 @@ public class TransactionFragment extends LazyLoadFragment implements View.OnClic
         return dialog;
     }
 
+    /**
+     * date: 2019/7/3
+     * author: chenli
+     * description: 设置合约id
+     */
+    public void setInstrument_id(String ins) {
+        mInstrumentId = ins;
+        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
+        if (mInstrumentId.contains("KQ") && searchEntity != null)
+            mInstrumentIdTransaction = searchEntity.getUnderlying_symbol();
+        else mInstrumentIdTransaction = mInstrumentId;
+        mExchangeId = mInstrumentIdTransaction.split("\\.")[0];
+    }
+
+    /**
+     * date: 2019/7/5
+     * author: chenli
+     * description: 获取上报价格类型
+     */
+    private String getAmpPriceType(){
+        String ampPriceType;
+        switch (mBinding.price.getText().toString()) {
+            case QUEUED_PRICE:
+                ampPriceType = AMP_EVENT_PRICE_TYPE_VALUE_QUEUED;
+                break;
+            case OPPONENT_PRICE:
+                ampPriceType = AMP_EVENT_PRICE_TYPE_VALUE_OPPONENT;
+                break;
+            case MARKET_PRICE:
+                ampPriceType = AMP_EVENT_PRICE_TYPE_VALUE_MARKET;
+                break;
+            case LATEST_PRICE:
+                ampPriceType = AMP_EVENT_PRICE_TYPE_VALUE_LAST;
+                break;
+            default:
+                ampPriceType = AMP_EVENT_PRICE_TYPE_VALUE_NUMBER;
+                break;
+        }
+        return ampPriceType;
+    }
+
+
+    /**
+     * date: 2019/5/28
+     * author: chenli
+     * description: 下单开关切换
+     */
+    @Subscribe
+    public void onEventSetting(OrderSettingEvent data) {
+        mIsShowDialog = data.isInsertPopup();
+    }
+
+    /**
+     * date: 7/9/17
+     * author: chenli
+     * description: 更新合约代码以及持仓信息--来自自选择约选择以及持仓列表点击切换
+     */
+    @Subscribe
+    public void onEvent(IdEvent data) {
+        if (data.getInstrument_id().equals(mInstrumentId)) return;
+        setInstrument_id(data.getInstrument_id());
+        //若如果不是从持仓点击而来，则刷新页面
+        if (sDataManager.POSITION_DIRECTION.isEmpty()) show();
+    }
 
 }

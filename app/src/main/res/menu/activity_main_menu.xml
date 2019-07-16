@@ -7,7 +7,7 @@
         android:id="@+id/right_navigation"
         android:icon="@mipmap/ic_menu"
         android:orderInCategory="101"
-        android:title="right_navigation"
+        android:title="navigation"
         app:showAsAction="always" />
 
 </menu>

@@ -102,11 +102,6 @@ public class KlineDurationActivity extends BaseActivity {
     }
 
     @Override
-    protected void refreshUI() {
-
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CommonConstants.KLINE_DURATION_ACTIVITY_TO_ADD_DURATION_ACTIVITY
                 && resultCode == RESULT_OK) {

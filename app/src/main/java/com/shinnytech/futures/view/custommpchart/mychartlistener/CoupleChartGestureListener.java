@@ -5,11 +5,18 @@ import android.view.MotionEvent;
 
 import com.github.mikephil.charting.charts.BarLineChartBase;
 import com.github.mikephil.charting.charts.Chart;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
+import com.github.mikephil.charting.utils.Transformer;
+import com.shinnytech.futures.amplitude.api.Amplitude;
+import com.shinnytech.futures.amplitude.api.Identify;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.ScreenUtils;
+
+import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_KLINE_WIDTH;
 
 /**
  * 图表联动交互监听
@@ -61,11 +68,23 @@ public class CoupleChartGestureListener implements OnChartGestureListener {
 
     @Override
     public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
-        float mScalex = (float) SPUtils.get(BaseApplication.getContext(), CommonConstants.SCALE_X, 1.0f);
-        if ((scaleX > 1 && scaleX > mScalex) || (scaleX < 1 && scaleX < mScalex)) {
-            mScalex = scaleX;
-        }
-        SPUtils.putAndApply(BaseApplication.getContext(), CommonConstants.SCALE_X, mScalex);
+        float[] mBodyBuffers = new float[4];
+        mBodyBuffers[0] = 0f;
+        mBodyBuffers[1] = 0f;
+        mBodyBuffers[2] = 0.8f;
+        mBodyBuffers[3] = 0f;
+        Transformer transformer = srcChart.getTransformer(YAxis.AxisDependency.LEFT);
+        transformer.pointValuesToPixel(mBodyBuffers);
+        float px = mBodyBuffers[2] - mBodyBuffers[0];
+        int width = ScreenUtils.px2dp(BaseApplication.getContext(), px);
+        Identify identify = new Identify();
+        identify.set(AMP_USER_KLINE_WIDTH, width);
+        Amplitude.getInstance().identify(identify);
+
+        float[] srcVals = new float[9];
+        Matrix srcMatrix = srcChart.getViewPortHandler().getMatrixTouch();
+        srcMatrix.getValues(srcVals);
+        SPUtils.putAndApply(BaseApplication.getContext(), CommonConstants.SCALE_X, srcVals[0]);
         syncCharts();
     }
 

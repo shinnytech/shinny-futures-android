@@ -16,6 +16,7 @@ import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ItemKlineDurationBinding;
 import com.shinnytech.futures.model.listener.ItemTouchHelperListener;
 import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,7 +137,8 @@ public class KlineDurationAdapter extends RecyclerView.Adapter<KlineDurationAdap
                 public void onClick(View v) {
                     try {
                         int index = getLayoutPosition();
-                        if (index >= 0 && index < getItemCount()) {
+                        if (index == 0)ToastUtils.showToast(sContext, "至少保留一个周期");
+                        if (index > 0 && index < getItemCount()) {
                             mData.remove(index);
                             notifyItemRemoved(index);
                             saveDurationList();

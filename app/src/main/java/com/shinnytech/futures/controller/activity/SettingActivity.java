@@ -92,10 +92,4 @@ public class SettingActivity extends BaseActivity {
             }
         });
     }
-
-    @Override
-    protected void refreshUI() {
-
-    }
-
 }

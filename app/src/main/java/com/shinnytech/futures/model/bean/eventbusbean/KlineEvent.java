@@ -11,6 +11,16 @@ public class KlineEvent {
 
     private String fragmentType;
 
+    private String xValuesType;
+
+    public String getxValuesType() {
+        return xValuesType;
+    }
+
+    public void setxValuesType(String xValuesType) {
+        this.xValuesType = xValuesType;
+    }
+
     public String getKlineType() {
         return klineType;
     }

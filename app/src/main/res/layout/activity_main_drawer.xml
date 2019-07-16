@@ -19,9 +19,9 @@
             <include layout="@layout/view_toolbar"/>
 
             <LinearLayout
+                android:id="@+id/main"
                 android:orientation="vertical"
                 android:layout_marginTop="?attr/actionBarSize"
-                android:layout_marginBottom="@dimen/margin_50dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -60,21 +60,16 @@
                         android:src="@mipmap/ic_chevron_right_white_24dp" />
                 </LinearLayout>
 
-                <View
-                    android:background="@color/quote_divider"
+                <android.support.design.widget.BottomNavigationView
+                    android:background="@color/toolbar"
+                    app:itemIconTint="@drawable/activity_main_bottom_navigation_selector"
+                    app:itemTextColor="@drawable/activity_main_bottom_navigation_selector"
+                    app:menu="@menu/activity_main_tab"
+                    android:id="@+id/bottom_navigation"
                     android:layout_width="match_parent"
-                    android:layout_height="0.5dp"/>
-            </LinearLayout>
+                    android:layout_height="50dp"/>
 
-            <android.support.design.widget.BottomNavigationView
-                android:background="@color/toolbar"
-                app:itemIconTint="@drawable/activity_main_bottom_navigation_selector"
-                app:itemTextColor="@drawable/activity_main_bottom_navigation_selector"
-                app:menu="@menu/activity_main_tab"
-                android:id="@+id/bottom_navigation"
-                android:layout_gravity="bottom"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"/>
+            </LinearLayout>
 
         </android.support.design.widget.CoordinatorLayout>
 

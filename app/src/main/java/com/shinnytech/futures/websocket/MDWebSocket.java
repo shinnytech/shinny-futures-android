@@ -4,12 +4,10 @@ import com.google.gson.Gson;
 import com.neovisionaries.ws.client.WebSocket;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.model.bean.reqbean.ReqPeekMessageEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqSetChartEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqSetChartKlineEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqSubscribeQuoteEntity;
 import com.shinnytech.futures.utils.LogUtils;
-import com.shinnytech.futures.utils.TimeUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,7 +16,6 @@ import java.util.List;
 
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_RECONNECT_SERVER_TYPE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_MD;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_RECONNECT_TIME;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_RECONNECT;
 import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
 
@@ -32,6 +29,7 @@ public class MDWebSocket extends WebSocketBase {
     public void onTextMessage(WebSocket websocket, String text) throws Exception {
         super.onTextMessage(websocket, text);
         LogUtils.e(text, false);
+        sDataManager.MD_PACK_COUNT++;
         try {
             JSONObject jsonObject = new JSONObject(text);
             String aid = jsonObject.getString("aid");
@@ -55,17 +53,20 @@ public class MDWebSocket extends WebSocketBase {
 
     @Override
     public void reConnect() {
+        if (BaseApplication.issBackGround()) return;
+
         super.reConnect();
+        sDataManager.MD_SESSION++;
+        sDataManager.MD_PACK_COUNT = 0;
 
         LogUtils.e("reConnectMD", true);
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put(AMP_EVENT_RECONNECT_SERVER_TYPE, AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_MD);
-            jsonObject.put(AMP_EVENT_RECONNECT_TIME, TimeUtils.getAmpTime());
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Amplitude.getInstance().logEvent(AMP_RECONNECT, jsonObject);
+        Amplitude.getInstance().logEventWrap(AMP_RECONNECT, jsonObject);
     }
 
     /**

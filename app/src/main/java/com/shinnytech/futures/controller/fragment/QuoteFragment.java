@@ -33,19 +33,18 @@ import android.widget.TextView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.controller.activity.FutureInfoActivity;
 import com.shinnytech.futures.controller.activity.MainActivity;
+import com.shinnytech.futures.controller.activity.MainActivityPresenter;
 import com.shinnytech.futures.databinding.FragmentQuoteBinding;
 import com.shinnytech.futures.model.adapter.DragDialogAdapter;
 import com.shinnytech.futures.model.adapter.QuoteAdapter;
 import com.shinnytech.futures.model.adapter.QuoteAdapterRecommend;
-import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
-import com.shinnytech.futures.model.bean.eventbusbean.UpdateEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
+import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.model.listener.QuoteDiffCallback;
@@ -53,7 +52,6 @@ import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.LogUtils;
-import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ScreenUtils;
 import com.shinnytech.futures.utils.ToastUtils;
@@ -70,36 +68,16 @@ import java.util.Map;
 
 import static com.shinnytech.futures.application.BaseApplication.MD_BROADCAST_ACTION;
 import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BALANCE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_BROKER_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_IS_POSITIVE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_INSTRUMENT_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_ORDER_COUNT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID_VALUE_MAIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_FUTURE_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_MAIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VISIBLE_TIME;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_POSITION_COUNT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SUB_PAGE_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SUB_PAGE_ID_VALUE_QUOTE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_LEAVE_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_OPTIONAL_QUOTE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_SHOW_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_RECOMMEND_OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
-import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
-import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
@@ -131,9 +109,7 @@ public class QuoteFragment extends LazyLoadFragment {
      */
     private boolean mIsUpdate = true;
     private QuoteAdapter mAdapter;
-    private DataManager mDataManager = DataManager.getInstance();
-    private BroadcastReceiver mReceiver;
-    private BroadcastReceiver mReceiverTrade;
+    private DataManager sDataManager = DataManager.getInstance();
     private String mTitle = DOMINANT;
     private TextView mToolbarTitle;
     private List<String> mInsList = new ArrayList<>();
@@ -143,8 +119,6 @@ public class QuoteFragment extends LazyLoadFragment {
     private Dialog mDialog;
     private RecyclerView mRecyclerView;
     private DragDialogAdapter mDragDialogAdapter;
-    private long mShowTime;
-    private boolean mIsInitRecommend;
 
     /**
      * date: 7/9/17
@@ -163,7 +137,6 @@ public class QuoteFragment extends LazyLoadFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mTitle = getArguments().getString(KEY_FRAGMENT_TITLE);
-        setHasOptionsMenu(true);
     }
 
     @Nullable
@@ -176,7 +149,6 @@ public class QuoteFragment extends LazyLoadFragment {
     }
 
     private void initData() {
-        mIsInitRecommend = true;
         mToolbarTitle = getActivity().findViewById(R.id.title_toolbar);
         mBinding.rvQuote.setLayoutManager(new LinearLayoutManager(getActivity()));
         mBinding.rvQuote.addItemDecoration(
@@ -192,12 +164,12 @@ public class QuoteFragment extends LazyLoadFragment {
      * description: 初始化合约列表
      */
     private void initInsList() {
-        try {
+        if (OPTIONAL.equals(mTitle)) {
+            mNewData = LatestFileManager.getOptionalInsList();
+            mInsList = new ArrayList<>(mNewData.keySet());
+        } else {
             if (!mNewData.isEmpty()) return;
             switch (mTitle) {
-                case OPTIONAL:
-                    mNewData = LatestFileManager.getOptionalInsList();
-                    break;
                 case DOMINANT:
                     mNewData.putAll(LatestFileManager.getMainInsList());
                     break;
@@ -227,20 +199,18 @@ public class QuoteFragment extends LazyLoadFragment {
                     break;
             }
             mInsList = new ArrayList<>(mNewData.keySet());
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
     @Override
     public void show() {
         try {
+            LogUtils.e(mTitle+"show", true);
             initInsList();
-            showEvent();
-            refreshMD(mToolbarTitle.getText().toString());
+            refreshMD();
             refreshTD();
 
-            if (OPTIONAL.equals(mTitle))initConfigOptional();
+            if (OPTIONAL.equals(mTitle)) initConfigOptional();
 
             if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
                 mBinding.tvChangePercent.setText(R.string.quote_fragment_bid_price1);
@@ -250,31 +220,21 @@ public class QuoteFragment extends LazyLoadFragment {
                 mBinding.tvOpenInterest.setText(R.string.quote_fragment_open_interest);
             }
 
-            if (getActivity() instanceof MainActivity) {
-                String insList = ((MainActivity) getActivity()).getmMainActivityPresenter()
-                        .getPreSubscribedQuotes();
-                if (insList != null && !insList.equals(DataManager.getInstance().getRtnData().getIns_list())) {
-                    BaseApplication.getmMDWebSocket().sendSubscribeQuote(insList);
-                    ((MainActivity) getActivity()).getmMainActivityPresenter().setPreSubscribedQuotes(null);
-                    return;
+            //返回订阅之前的合约
+            MainActivityPresenter mainActivityPresenter = ((MainActivity) getActivity()).getmMainActivityPresenter();
+            String ins_list = mainActivityPresenter.getPreSubscribedQuotes();
+            if (ins_list != null && !ins_list.equals(DataManager.getInstance().getRtnData().getIns_list())) {
+                //自选发生变化后，首次显示全订阅
+                if (OPTIONAL.equals(mTitle) && mOldData.size() != mNewData.size()) {
+                    ins_list = TextUtils.join(",", mInsList);
                 }
-            }
-
-            if (OPTIONAL.equals(mTitle)) {
-                List<String> ins;
-                if (mInsList.size() <= LOAD_QUOTE_NUM) {
-                    ins = mInsList;
-                } else {
-                    ins = mInsList.subList(0, LOAD_QUOTE_NUM);
-                }
-                sendSubscribeQuotes(ins);
+                BaseApplication.getmMDWebSocket().sendSubscribeQuote(ins_list);
+                mainActivityPresenter.setPreSubscribedQuotes(null);
+            } else if (mInsList.size() <= LOAD_QUOTE_NUM) {
+                sendSubscribeQuotes(mInsList);
             } else {
-                if (mInsList.size() <= LOAD_QUOTE_NUM) {
-                    sendSubscribeQuotes(mInsList);
-                } else {
-                    List<String> insList = mInsList.subList(0, LOAD_QUOTE_NUM);
-                    sendSubscribeQuotes(insList);
-                }
+                List<String> insList = mInsList.subList(0, LOAD_QUOTE_NUM);
+                sendSubscribeQuotes(insList);
             }
 
         } catch (IndexOutOfBoundsException e) {
@@ -282,100 +242,8 @@ public class QuoteFragment extends LazyLoadFragment {
         }
     }
 
-    /**
-     * date: 2019/5/25
-     * author: chenli
-     * description: 进入页面上报
-     */
-    public void showEvent() {
-        try {
-            LogUtils.e("quoteShow" + mTitle, true);
-            mShowTime = System.currentTimeMillis();
-            String broker_id = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_BROKER, "");
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_MAIN);
-            jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_QUOTE + "_" + mTitle);
-            jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
-            jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
-            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().LOGIN_USER_ID);
-            if (userEntity != null) {
-                AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
-                if (accountEntity != null) {
-                    String static_balance = MathUtils.round(accountEntity.getStatic_balance(), 2);
-                    jsonObject.put(AMP_EVENT_BALANCE, static_balance);
-                    int positionCount = 0;
-                    int orderCount = 0;
-                    for (PositionEntity positionEntity :
-                            userEntity.getPositions().values()) {
-                        int volume_long = Integer.parseInt(positionEntity.getVolume_long());
-                        int volume_short = Integer.parseInt(positionEntity.getVolume_short());
-                        if (volume_long != 0 || volume_short != 0) positionCount += 1;
-                    }
-
-                    for (OrderEntity orderEntity :
-                            userEntity.getOrders().values()) {
-                        if (STATUS_ALIVE.equals(orderEntity.getStatus())) orderCount += 1;
-                    }
-                    jsonObject.put(AMP_EVENT_POSITION_COUNT, positionCount);
-                    jsonObject.put(AMP_EVENT_ORDER_COUNT, orderCount);
-                }
-            }
-            Amplitude.getInstance().logEvent(AMP_SHOW_PAGE, jsonObject);
-            DataManager.getInstance().IS_POSITIVE = false;
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-
     @Override
     public void leave() {
-        leaveEvent();
-    }
-
-    /**
-     * date: 2019/5/25
-     * author: chenli
-     * description: 离开页面上报
-     */
-    public void leaveEvent() {
-        try {
-            LogUtils.e("quoteLeave", true);
-            long pageVisibleTime = System.currentTimeMillis() - mShowTime;
-            String broker_id = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_BROKER, "");
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put(AMP_EVENT_PAGE_ID, AMP_EVENT_PAGE_ID_VALUE_MAIN);
-            jsonObject.put(AMP_EVENT_SUB_PAGE_ID, AMP_EVENT_SUB_PAGE_ID_VALUE_QUOTE + "_" + mTitle);
-            jsonObject.put(AMP_EVENT_BROKER_ID, broker_id);
-            jsonObject.put(AMP_EVENT_IS_POSITIVE, DataManager.getInstance().IS_POSITIVE);
-            jsonObject.put(AMP_EVENT_PAGE_VISIBLE_TIME, pageVisibleTime);
-            UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().LOGIN_USER_ID);
-            if (userEntity != null) {
-                AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
-                if (accountEntity != null) {
-                    String static_balance = MathUtils.round(accountEntity.getStatic_balance(), 2);
-                    jsonObject.put(AMP_EVENT_BALANCE, static_balance);
-                    int positionCount = 0;
-                    int orderCount = 0;
-                    for (PositionEntity positionEntity :
-                            userEntity.getPositions().values()) {
-                        int volume_long = Integer.parseInt(positionEntity.getVolume_long());
-                        int volume_short = Integer.parseInt(positionEntity.getVolume_short());
-                        if (volume_long != 0 || volume_short != 0) positionCount += 1;
-                    }
-
-                    for (OrderEntity orderEntity :
-                            userEntity.getOrders().values()) {
-                        if (STATUS_ALIVE.equals(orderEntity.getStatus())) orderCount += 1;
-                    }
-                    jsonObject.put(AMP_EVENT_POSITION_COUNT, positionCount);
-                    jsonObject.put(AMP_EVENT_ORDER_COUNT, orderCount);
-                }
-            }
-            Amplitude.getInstance().logEvent(AMP_LEAVE_PAGE, jsonObject);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -393,7 +261,6 @@ public class QuoteFragment extends LazyLoadFragment {
                     sendSubscribeQuote(TextUtils.join(",", insList));
         }
     }
-
 
     /**
      * date: 2019/4/14
@@ -501,21 +368,9 @@ public class QuoteFragment extends LazyLoadFragment {
                             String instrument_id = quoteEntity.getInstrument_id();
                             //添加判断，防止自选合约列表为空时产生无效的点击事件
                             if (instrument_id != null && !instrument_id.isEmpty()) {
-                                if (getActivity() instanceof MainActivity) {
-                                    ((MainActivity) getActivity()).getmMainActivityPresenter()
-                                            .setPreSubscribedQuotes(mDataManager.getRtnData().getIns_list());
-                                }
-                                Intent intent = new Intent(getActivity(), FutureInfoActivity.class);
-                                intent.putExtra(INS_BETWEEN_ACTIVITY, instrument_id);
-                                getActivity().startActivityForResult(intent, MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY);
-                                JSONObject jsonObject = new JSONObject();
-                                try {
-                                    jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_MAIN);
-                                    jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_FUTURE_INFO);
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                                Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
+                                MainActivity mainActivity = (MainActivity) getActivity();
+                                MainActivityPresenter mainActivityPresenter = mainActivity.getmMainActivityPresenter();
+                                mainActivityPresenter.switchToFutureInfo(instrument_id);
                             }
                         }
                     }
@@ -583,7 +438,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                     mDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                                         @Override
                                         public void onDismiss(DialogInterface dialog) {
-                                            refreshOptional();
+                                            if (OPTIONAL.equals(mTitle)) show();
                                         }
                                     });
                                     mDragDialogAdapter = new DragDialogAdapter(getActivity(), new ArrayList<>(insList.keySet()));
@@ -664,25 +519,33 @@ public class QuoteFragment extends LazyLoadFragment {
                                             @Override
                                             public void run() {
                                                 popWindow.dismiss();
+                                                String name = instrument_id;
+                                                SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
+                                                if (searchEntity != null)
+                                                    name = searchEntity.getInstrumentName();
                                                 ToastUtils.showToast(BaseApplication.getContext(),
-                                                        "该合约已添加到自选列表");
+                                                        name + "合约已添加");
                                             }
                                         });
                                     } else {
                                         jsonObject.put(AMP_EVENT_OPTIONAL_DIRECTION, AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE);
                                         insList.remove(instrument_id);
                                         LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
-                                        refreshOptional();
+                                        if (OPTIONAL.equals(mTitle)) show();
                                         getActivity().runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
                                                 popWindow.dismiss();
+                                                String name = instrument_id;
+                                                SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
+                                                if (searchEntity != null)
+                                                    name = searchEntity.getInstrumentName();
                                                 ToastUtils.showToast(BaseApplication.getContext(),
-                                                        "该合约已被移除自选列表");
+                                                        name + "合约已移除");
                                             }
                                         });
                                     }
-                                    Amplitude.getInstance().logEvent(AMP_OPTIONAL_QUOTE, jsonObject);
+                                    Amplitude.getInstance().logEventWrap(AMP_OPTIONAL_QUOTE, jsonObject);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -692,14 +555,10 @@ public class QuoteFragment extends LazyLoadFragment {
                         trade.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                if (getActivity() instanceof MainActivity) {
-                                    ((MainActivity) getActivity()).getmMainActivityPresenter()
-                                            .setPreSubscribedQuotes(mDataManager.getRtnData().getIns_list());
-                                }
                                 DataManager.getInstance().IS_SHOW_VP_CONTENT = true;
-                                Intent intentPos = new Intent(getActivity(), FutureInfoActivity.class);
-                                intentPos.putExtra(INS_BETWEEN_ACTIVITY, instrument_id);
-                                getActivity().startActivityForResult(intentPos, MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY);
+                                MainActivity mainActivity = (MainActivity) getActivity();
+                                MainActivityPresenter mainActivityPresenter = mainActivity.getmMainActivityPresenter();
+                                mainActivityPresenter.switchToFutureInfo(instrument_id);
                                 popWindow.dismiss();
                             }
                         });
@@ -709,58 +568,21 @@ public class QuoteFragment extends LazyLoadFragment {
     }
 
     /**
-     * date: 2019/4/14
-     * author: chenli
-     * description: 注册广播
-     */
-    private void registerBroaderCast() {
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String mDataString = intent.getStringExtra("msg");
-                switch (mDataString) {
-                    case MD_MESSAGE:
-                        if (mIsUpdate) refreshMD(mToolbarTitle.getText().toString());
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, new IntentFilter(MD_BROADCAST_ACTION));
-
-        mReceiverTrade = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String mDataString = intent.getStringExtra("msg");
-                switch (mDataString) {
-                    case TD_MESSAGE:
-                        refreshTD();
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiverTrade, new IntentFilter(TD_BROADCAST_ACTION));
-
-    }
-
-    /**
      * date: 7/9/17
      * author: chenli
      * description: 根据主页标题和mTitle判断刷新不同行情页, 不显示的页面不刷
      */
-    public void refreshMD(String title) {
+    @Override
+    public void refreshMD() {
         //防止相邻合约列表页面刷新
-        if (!title.equals(mTitle)) return;
+        if (!mToolbarTitle.getText().toString().equals(mTitle) || !mIsUpdate) return;
         try {
-            String[] insList = mDataManager.getRtnData().getIns_list().split(",");
+            String[] insList = sDataManager.getRtnData().getIns_list().split(",");
             for (String ins : insList) {
                 try {
                     //防止合约页切换时,前一页的数据加载
                     if (mNewData.containsKey(ins)) {
-                        QuoteEntity quoteEntity = CloneUtils.clone(mDataManager.getRtnData().getQuotes().get(ins));
+                        QuoteEntity quoteEntity = CloneUtils.clone(sDataManager.getRtnData().getQuotes().get(ins));
                         if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle) || OPTIONAL.equals(mTitle)) {
                             if (ins.contains("&") && ins.contains(" "))
                                 quoteEntity = LatestFileManager.calculateCombineQuotePart(quoteEntity);
@@ -788,9 +610,12 @@ public class QuoteFragment extends LazyLoadFragment {
      * author: chenli
      * description: 刷新持仓挂单信息
      */
+    @Override
     public void refreshTD() {
+        if (!mIsUpdate)return;
+
         DataManager dataManager = DataManager.getInstance();
-        UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.LOGIN_USER_ID);
+        UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.USER_ID);
         if (userEntity == null) return;
 
         List<String> list = new ArrayList<>();
@@ -816,15 +641,12 @@ public class QuoteFragment extends LazyLoadFragment {
     public void onResume() {
         super.onResume();
         EventBus.getDefault().register(this);
-        registerBroaderCast();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         EventBus.getDefault().unregister(this);
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiverTrade);
     }
 
     //根据合约导航滑动行情列表
@@ -839,26 +661,8 @@ public class QuoteFragment extends LazyLoadFragment {
                 int firstPosition1 = (lastPosition1 - position) != visibleItemCount1 ? (lastPosition1 - visibleItemCount1) : position;
                 List<String> insList = mInsList.subList(firstPosition1, lastPosition1);
                 sendSubscribeQuotes(insList);
-                LogUtils.e("1111", true);
             } catch (IndexOutOfBoundsException e) {
                 e.printStackTrace();
-            }
-        }
-    }
-
-    //控制行情是否刷新
-    @Subscribe
-    public void onEvent(UpdateEvent updateEvent) {
-        if (mTitle.equals(mToolbarTitle.getText().toString())) {
-            switch (updateEvent.getState()) {
-                case 1:
-                    mIsUpdate = true;
-                    break;
-                case 2:
-                    mIsUpdate = false;
-                    break;
-                default:
-                    break;
             }
         }
     }
@@ -940,7 +744,7 @@ public class QuoteFragment extends LazyLoadFragment {
                                 }
                                 LatestFileManager.saveInsListToFile(insList);
                             }
-                            QuoteFragment.this.refreshOptional();
+                            if (OPTIONAL.equals(mTitle)) show();
                         }
                     });
                 }
@@ -950,7 +754,7 @@ public class QuoteFragment extends LazyLoadFragment {
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    UserEntity userEntity = mDataManager.getTradeBean().getUsers().get(mDataManager.LOGIN_USER_ID);
+                    UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
                     if (userEntity != null) {
                         Map<String, PositionEntity> positions = userEntity.getPositions();
                         //持仓合约
@@ -976,37 +780,6 @@ public class QuoteFragment extends LazyLoadFragment {
 
     public String getTitle() {
         return mTitle;
-    }
-
-    /**
-     * date: 2019/3/29
-     * author: chenli
-     * description: 自选合约管理菜单返回，刷新自选合约
-     */
-    public void refreshOptional() {
-        if (!OPTIONAL.equals(mTitle)) return;
-        //先刷新列表再更新行情
-        mNewData = LatestFileManager.getOptionalInsList();
-        mInsList = new ArrayList<>(mNewData.keySet());
-        List<QuoteEntity> newData = new ArrayList<>(mNewData.values());
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new QuoteDiffCallback(mOldData, newData), false);
-        mAdapter.setData(newData);
-        diffResult.dispatchUpdatesTo(mAdapter);
-        mOldData.clear();
-        mOldData.addAll(newData);
-        try {
-            List<String> insList;
-            if (mInsList.size() < LOAD_QUOTE_NUM) insList = mInsList;
-            else {
-                LinearLayoutManager lm = (LinearLayoutManager) mBinding.rvQuote.getLayoutManager();
-                int firstVisibleItemPosition = lm.findFirstVisibleItemPosition();
-                int lastVisibleItemPosition = lm.findLastVisibleItemPosition();
-                insList = mInsList.subList(firstVisibleItemPosition, lastVisibleItemPosition + 1);
-            }
-            sendSubscribeQuotes(insList);
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
-        }
     }
 
 }

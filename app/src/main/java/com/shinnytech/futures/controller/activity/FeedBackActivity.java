@@ -162,11 +162,6 @@ public class FeedBackActivity extends BaseActivity {
         });
     }
 
-    @Override
-    protected void refreshUI() {
-
-    }
-
     /**
      * date: 7/12/17
      * author: chenli

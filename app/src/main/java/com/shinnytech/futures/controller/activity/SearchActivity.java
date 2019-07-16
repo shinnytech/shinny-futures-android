@@ -43,16 +43,11 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CURRENT_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_INSTRUMENT_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_FUTURE_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_VALUE_SEARCH;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TARGET_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_OPTIONAL_SEARCH;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_PAGE;
 import static com.shinnytech.futures.constants.CommonConstants.CONFIG_IS_FIRM;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
 import static com.shinnytech.futures.utils.ScreenUtils.getStatusBarHeight;
@@ -60,7 +55,7 @@ import static com.shinnytech.futures.utils.ScreenUtils.getStatusBarHeight;
 /**
  * date: 6/21/17
  * author: chenli
- * description: 搜索合约页。问题：在finish本活动时略显混乱的感觉，能不能像文华一样加个向左的转场动画
+ * description: 搜索合约页
  * version:
  * state: basically done
  */
@@ -114,18 +109,11 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
                         idEvent.setInstrument_id(instrument_id);
                         EventBus.getDefault().post(idEvent);
                     } else {
-                        Intent intent = new Intent(SearchActivity.this, FutureInfoActivity.class);
+                        Intent intent = new Intent(SearchActivity.this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra(INS_BETWEEN_ACTIVITY, instrument_id);
                         startActivity(intent);
                     }
-                    JSONObject jsonObject = new JSONObject();
-                    try {
-                        jsonObject.put(AMP_EVENT_CURRENT_PAGE, AMP_EVENT_PAGE_VALUE_SEARCH);
-                        jsonObject.put(AMP_EVENT_TARGET_PAGE, AMP_EVENT_PAGE_VALUE_FUTURE_INFO);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    Amplitude.getInstance().logEvent(AMP_SWITCH_PAGE, jsonObject);
                     //关闭键盘后销毁
                     View view = getCurrentFocus();
                     if (view != null) {
@@ -144,12 +132,15 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
                 Map<String, QuoteEntity> insList = LatestFileManager.getOptionalInsList();
                 JSONObject jsonObject = new JSONObject();
                 try {
+                    String name = instrument_id;
+                    SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id);
+                    if (searchEntity != null) name = searchEntity.getInstrumentName();
                     jsonObject.put(AMP_EVENT_OPTIONAL_INSTRUMENT_ID, instrument_id);
                     if (insList.containsKey(instrument_id)) {
                         jsonObject.put(AMP_EVENT_OPTIONAL_DIRECTION, AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE);
                         insList.remove(instrument_id);
                         LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
-                        ToastUtils.showToast(BaseApplication.getContext(), "该合约已被移除自选列表");
+                        ToastUtils.showToast(BaseApplication.getContext(), name + "合约已移除");
                         ((ImageView) view).setImageResource(R.mipmap.ic_favorite_border_white_24dp);
                     } else {
                         jsonObject.put(AMP_EVENT_OPTIONAL_DIRECTION, AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD);
@@ -157,10 +148,10 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
                         quoteEntity.setInstrument_id(instrument_id);
                         insList.put(instrument_id, quoteEntity);
                         LatestFileManager.saveInsListToFile(new ArrayList<>(insList.keySet()));
-                        ToastUtils.showToast(BaseApplication.getContext(), "该合约已添加到自选列表");
+                        ToastUtils.showToast(BaseApplication.getContext(), name + "合约已添加");
                         ((ImageView) view).setImageResource(R.mipmap.ic_favorite_white_24dp);
                     }
-                    Amplitude.getInstance().logEvent(AMP_OPTIONAL_SEARCH, jsonObject);
+                    Amplitude.getInstance().logEventWrap(AMP_OPTIONAL_SEARCH, jsonObject);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

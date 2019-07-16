@@ -6,8 +6,8 @@ android {
         applicationId "com.shinnytech.futures"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 43
-        versionName "1.23.3"
+        versionCode 45
+        versionName "1.25.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         resValue("string", "app_name", "ShinnyFutures")
         flavorDimensions("shinny")
@@ -41,6 +41,16 @@ android {
             signingConfig signingConfigs.config
         }
     }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                outputFileName = "${variant.flavorName}_${variant.buildType.name}_${variant.versionName}(${variant.versionCode}).apk"
+            }
+        }
+    }
+
     productFlavors {
 //        bhfcc {
 //            buildConfigField "String", "BROKER_ID", "\"渤海期货\""
@@ -218,13 +228,13 @@ android {
 //            dimension "shinny"
 //        }
 //
-        htfutures_sim {
-            buildConfigField "String", "BROKER_ID", "\"海通股指仿真\""
-            resValue("string", "app_name", "海通股指仿真")
-            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
-            applicationIdSuffix ".htfutures_sim"
-            dimension "shinny"
-        }
+//        htfutures_sim {
+//            buildConfigField "String", "BROKER_ID", "\"海通股指仿真\""
+//            resValue("string", "app_name", "海通股指仿真")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+//            applicationIdSuffix ".htfutures_sim"
+//            dimension "shinny"
+//        }
 //
 //        hzqh {
 //            buildConfigField "String", "BROKER_ID", "\"海证期货\""
@@ -362,21 +372,21 @@ android {
 //            dimension "shinny"
 //        }
 //
-        qhqh {
-            buildConfigField "String", "BROKER_ID", "\"前海期货\""
-            resValue("string", "app_name", "前海快期小Q")
-            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher_qhqh"]
-            applicationIdSuffix ".qhqh"
-            dimension "shinny"
-        }
-
-        rdqh {
-            buildConfigField "String", "BROKER_ID", "\"瑞达期货\""
-            resValue("string", "app_name", "瑞达期货")
-            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
-            applicationIdSuffix ".rdqh"
-            dimension "shinny"
-        }
+//        qhqh {
+//            buildConfigField "String", "BROKER_ID", "\"前海期货\""
+//            resValue("string", "app_name", "前海快期小Q")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher_qhqh"]
+//            applicationIdSuffix ".qhqh"
+//            dimension "shinny"
+//        }
+//
+//        rdqh {
+//            buildConfigField "String", "BROKER_ID", "\"瑞达期货\""
+//            resValue("string", "app_name", "瑞达期货")
+//            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+//            applicationIdSuffix ".rdqh"
+//            dimension "shinny"
+//        }
 //
 //        sywg {
 //            buildConfigField "String", "BROKER_ID", "\"申万期货\""
@@ -586,8 +596,32 @@ android {
 //            dimension "shinny"
 //        }
 
+        htfutures_sim {
+            buildConfigField "String", "CHANNEL_ID", "\"海通股指仿真\""
+            resValue("string", "app_name", "海通股指仿真")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+            applicationIdSuffix ".htfutures_sim"
+            dimension "shinny"
+        }
+
+        qhqh {
+            buildConfigField "String", "CHANNEL_ID", "\"前海期货\""
+            resValue("string", "app_name", "前海快期小Q")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher_qhqh"]
+            applicationIdSuffix ".qhqh"
+            dimension "shinny"
+        }
+
+        rdqh {
+            buildConfigField "String", "CHANNEL_ID", "\"瑞达期货\""
+            resValue("string", "app_name", "瑞达期货")
+            manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
+            applicationIdSuffix ".rdqh"
+            dimension "shinny"
+        }
+
         kuaiqixiaoq {
-            buildConfigField "String", "BROKER_ID", "\"快期小Q\""
+            buildConfigField "String", "CHANNEL_ID", "\"快期小Q\""
             resValue("string", "app_name", "快期小Q")
             manifestPlaceholders = [app_icon: "@mipmap/ic_launcher"]
             applicationIdSuffix ".kuaiqixiaoq"

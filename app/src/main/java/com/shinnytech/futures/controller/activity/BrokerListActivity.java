@@ -7,7 +7,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.databinding.ActivityBrokerListBinding;
 import com.shinnytech.futures.model.adapter.BrokerAdapter;
 import com.shinnytech.futures.model.engine.LatestFileManager;
@@ -15,14 +14,8 @@ import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
 import com.shinnytech.futures.utils.ToastUtils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.List;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SELECT_BROKER_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SELECT_IS_ADDED;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_SELECT_BROKER;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_LIST;
 
 public class BrokerListActivity extends BaseActivity {
@@ -66,19 +59,6 @@ public class BrokerListActivity extends BaseActivity {
                         String broker = mBrokerAdapter.getData().get(position);
                         if (broker == null) return;
 
-                        JSONObject jsonObject = new JSONObject();
-                        try {
-                            jsonObject.put(AMP_EVENT_SELECT_BROKER_ID, broker);
-                            if (broker.contains(" ")) {
-                                jsonObject.put(AMP_EVENT_SELECT_IS_ADDED, false);
-                            } else {
-                                jsonObject.put(AMP_EVENT_SELECT_IS_ADDED, true);
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        Amplitude.getInstance().logEvent(AMP_SELECT_BROKER, jsonObject);
-
                         if (broker.contains(" ")) {
                             ToastUtils.showToast(sContext, "请联系期货公司申请！");
                             return;
@@ -93,7 +73,7 @@ public class BrokerListActivity extends BaseActivity {
                             public void run() {
                                 finish();
                             }
-                        }, 500);
+                        }, 300);
                     }
 
                     @Override
@@ -102,8 +82,4 @@ public class BrokerListActivity extends BaseActivity {
                 }));
     }
 
-    @Override
-    protected void refreshUI() {
-
-    }
 }

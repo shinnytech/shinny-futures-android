@@ -51,6 +51,9 @@ public class KlineDurationTitleAdapter extends RecyclerView.Adapter<KlineDuratio
         }
     }
 
+    public boolean isCurrentIndex(int position){
+        return position == index;
+    }
 
     public void update(int position) {
         if (position >= 0 && position < getItemCount()) {

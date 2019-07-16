@@ -74,4 +74,20 @@ public class SystemUtils {
         }
         return false;
     }
+
+    /**
+     * date: 2019/6/28
+     * author: chenli
+     * description: 退出应用
+     */
+    public static void exitApp(Context context){
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            List<ActivityManager.AppTask> taskInfoList = activityManager.getAppTasks();
+            for (ActivityManager.AppTask task : taskInfoList) {
+                task.finishAndRemoveTask();
+            }
+        }
+        System.exit(0);
+    }
 }

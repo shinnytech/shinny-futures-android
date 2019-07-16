@@ -33,12 +33,14 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.Transformer;
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.controller.activity.MainActivity;
+import com.shinnytech.futures.controller.activity.MainActivityPresenter;
 import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
-import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
@@ -526,7 +528,10 @@ public class CurrentDayFragment extends BaseChartFragment {
                 ((MyXAxis) mMiddleChartViewBase.getXAxis()).setXLabels(mStringSparseArray);
                 mMiddleChartViewBase.invalidate();
 
+                if (mIsPosition) addPositionLimitLines();
+                if (mIsPending) addOrderLimitLines();
             }
+
         } catch (Exception ex) {
             ByteArrayOutputStream error = new ByteArrayOutputStream();
             ex.printStackTrace(new PrintStream(error));
@@ -566,6 +571,7 @@ public class CurrentDayFragment extends BaseChartFragment {
             mStringSparseArray.put(index, timeLast);
         } else {
             String timePreS = xVals.get(index - 1);
+            if (timePreS == null) return;
             long timeCur = mSimpleDateFormat.parse(time).getTime();
             long timePre = mSimpleDateFormat.parse(timePreS).getTime();
             if ((timeCur - timePre) != 60000L) mStringSparseArray.put(index, time);
@@ -665,27 +671,22 @@ public class CurrentDayFragment extends BaseChartFragment {
     /**
      * date: 7/9/17
      * author: chenli
-     * description: 接收自选合约列表弹出框以及持仓页传过来的合约代码，以便更新K线图
+     * description: 接收自选合约列表弹出框、持仓页、上下滑动传过来的合约代码，以便更新K线图
      */
     @Subscribe
     public void onEvent(IdEvent data) {
         String instrument_id_new = data.getInstrument_id();
-        SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(instrument_id_new);
-        if (instrument_id.equals(instrument_id_new)) return;
-        instrument_id = instrument_id_new;
-
+        if (instrument_id_new.equals(instrument_id)) return;
+        setInstrument_id(instrument_id_new);
         clearKline();
-
-        if (instrument_id.contains("KQ") && searchEntity != null)
-            instrument_id_transaction = searchEntity.getUnderlying_symbol();
-        else instrument_id_transaction = instrument_id;
-
-        drawKline();
-
-        if (mIsPosition) addPositionLimitLines();
-        if (mIsPending) addOrderLimitLines();
-
-        BaseApplication.getmMDWebSocket().sendSetChart(instrument_id);
+        MainActivity mainActivity = (MainActivity) getActivity();
+        MainActivityPresenter mainActivityPresenter = mainActivity.getmMainActivityPresenter();
+        FutureInfoFragment futureInfoFragment = (FutureInfoFragment) mainActivityPresenter.getmViewPagerFragmentAdapter().getItem(2);
+        int currentIndex = futureInfoFragment.getmBinding().vpKlineContent.getCurrentItem();
+        if (currentIndex == 0) {
+            sendSubscribeQuote(instrument_id);
+            BaseApplication.getmMDWebSocket().sendSetChart(instrument_id);
+        }
     }
 
     /**
@@ -695,6 +696,8 @@ public class CurrentDayFragment extends BaseChartFragment {
      */
     @Subscribe
     public void onEventMainThread(SetUpEvent data) {
+        //k线还没初始化
+        if (mTopChartViewBase.getCombinedData() == null) return;
         if (mIsPending != data.isPending()) {
             mIsPending = data.isPending();
             if (mIsPending) addOrderLimitLines();
@@ -707,6 +710,7 @@ public class CurrentDayFragment extends BaseChartFragment {
             else removePositionLimitLines();
         }
 
+        mTopChartViewBase.getCombinedData().notifyDataChanged();
         mTopChartViewBase.invalidate();
     }
 

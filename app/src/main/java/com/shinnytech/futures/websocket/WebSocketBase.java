@@ -39,6 +39,7 @@ public class WebSocketBase extends WebSocketAdapter {
     @Override
     public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
         super.onConnected(websocket, headers);
+        LogUtils.e("onConnected", true);
         mPongCount = 0;
         mTimer = new Timer();
         mTimerTask = new TimerTask() {
@@ -47,7 +48,6 @@ public class WebSocketBase extends WebSocketAdapter {
                 if (BaseApplication.issBackGround()) return;
 
                 if (mPongCount > 3) {
-                    LogUtils.e("onConnected", true);
                     reConnect();
                     return;
                 }
@@ -79,8 +79,6 @@ public class WebSocketBase extends WebSocketAdapter {
     }
 
     public void reConnect() {
-        if (BaseApplication.issBackGround()) return;
-
         final long currentTime = System.currentTimeMillis() / 1000;
         if (currentTime - mConnectTime <= 10)
             new Timer().schedule(new TimerTask() {
@@ -128,7 +126,7 @@ public class WebSocketBase extends WebSocketAdapter {
 
     public void backToForegroundCheck() {
         mConnectTime = 0;
-        if (!mWebSocketClient.isOpen()) reConnect();
+        if (mWebSocketClient == null || !mWebSocketClient.isOpen()) reConnect();
         else sendPeekMessage();
     }
 
@@ -138,6 +136,11 @@ public class WebSocketBase extends WebSocketAdapter {
         String peekMessage = new Gson().toJson(reqPeekMessageEntity);
         mWebSocketClient.sendText(peekMessage);
         LogUtils.e(peekMessage, false);
+    }
+
+    public String getWebSocketStatus(){
+        if (mWebSocketClient == null)return "NULL";
+        else return mWebSocketClient.getState().name();
     }
 
 }

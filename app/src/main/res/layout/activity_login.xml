@@ -114,7 +114,6 @@
                     android:layout_marginStart="@dimen/margin_10dp"
                     android:layout_marginEnd="@dimen/margin_10dp"
                     android:src="@mipmap/ic_chevron_right_white_18dp" />
-
             </LinearLayout>
 
             <TextView
@@ -137,6 +136,7 @@
                 android:orientation="horizontal">
 
                 <EditText
+                    android:inputType="text"
                     android:id="@+id/account"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -227,7 +227,7 @@
                 android:gravity="center"
                 android:layout_gravity="center"
                 android:textColor="@color/login_gray"
-                android:text="随便看看"
+                android:text="进入行情"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp" />
 

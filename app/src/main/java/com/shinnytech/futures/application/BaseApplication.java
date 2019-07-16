@@ -77,7 +77,6 @@ import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CRASH_T
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_ERROR_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_ERROR_STACK;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_ERROR_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_FOREGROUND;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_INIT;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BALANCE_FIRST;
 import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BALANCE_LAST;
@@ -143,6 +142,7 @@ public class BaseApplication extends Application {
     public static final String TD_BROADCAST_ACTION = BaseApplication.class.getName() + "." + TD_BROADCAST;
     private static LocalBroadcastManager mLocalBroadcastManager;
     private static Context sContext;
+    private static DataManager sDataManager;
     private List<String> mMDURLs;
     private List<String> mTDURLs;
     private static LOGClient sLOGClient;
@@ -191,6 +191,7 @@ public class BaseApplication extends Application {
     public void onCreate() {
         super.onCreate();
         sContext = getApplicationContext();
+        sDataManager = DataManager.getInstance();
         mMDURLs = new ArrayList<>();
         mTDURLs = new ArrayList<>();
         mAppLifecycleObserver = new AppLifecycleObserver();
@@ -214,8 +215,8 @@ public class BaseApplication extends Application {
      */
     private void initAppVersion() {
         try {
-            DataManager.getInstance().APP_CODE = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionCode;
-            DataManager.getInstance().APP_VERSION = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
+            sDataManager.APP_CODE = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionCode;
+            sDataManager.APP_VERSION = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionName;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
@@ -343,19 +344,20 @@ public class BaseApplication extends Application {
      * description: 初始化第三方框架
      */
     private void initThirdParty(){
+        String BUGLY_KEY = "github";
+        String AMP_KEY = "github";
+        String AK = "github";
+        String SK = "github";
         try {
             Class cl = Class.forName("com.shinnytech.futures.constants.LocalCommonConstants");
-            String BUGLY_KEY = (String) cl.getMethod("getBuglyKey").invoke(null);
-            String AMP_KEY = (String) cl.getMethod("getAmpKey").invoke(null);
-            String AK = (String) cl.getMethod("getAK").invoke(null);
-            String SK = (String) cl.getMethod("getSK").invoke(null);
-            final String user_agent = (String) cl.getMethod("getUserAgent").invoke(null);
-            final String client_app_id = (String) cl.getMethod("getClientAppId").invoke(null);
-            DataManager.getInstance().USER_AGENT = user_agent;
-            DataManager.getInstance().CLIENT_APP_ID = client_app_id;
-            initAMP(AMP_KEY);
-            initBugly(user_agent, BUGLY_KEY);
-            initAliLog(AK, SK);
+            BUGLY_KEY = (String) cl.getMethod("getBuglyKey").invoke(null);
+            AMP_KEY = (String) cl.getMethod("getAmpKey").invoke(null);
+            AK = (String) cl.getMethod("getAK").invoke(null);
+            SK = (String) cl.getMethod("getSK").invoke(null);
+            String user_agent = (String) cl.getMethod("getUserAgent").invoke(null);
+            String client_app_id = (String) cl.getMethod("getClientAppId").invoke(null);
+            sDataManager.USER_AGENT = user_agent;
+            sDataManager.CLIENT_APP_ID = client_app_id;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -365,6 +367,9 @@ public class BaseApplication extends Application {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
+        initAMP(AMP_KEY);
+        initBugly(BUGLY_KEY);
+        initAliLog(AK, SK);
         initOkGo();
     }
 
@@ -380,8 +385,11 @@ public class BaseApplication extends Application {
                 .set(AMP_USER_PACKAGE_ID_LAST, BuildConfig.FLAVOR)
                 .setOnce(AMP_USER_INIT_TIME_FIRST, TimeUtils.getNowTimeSecond());
         Amplitude.getInstance().identify(identify);
-        Amplitude.getInstance().logEvent(AMP_INIT);
+        sDataManager.INIT_TIME = System.currentTimeMillis();
+        sDataManager.LAST_TIME =  sDataManager.INIT_TIME;
+        sDataManager.SOURCE = "none";
         LogUtils.e("AMP_INIT", true);
+        Amplitude.getInstance().logEventWrap(AMP_INIT, new JSONObject());
     }
 
     /**
@@ -389,7 +397,7 @@ public class BaseApplication extends Application {
      * author: chenli
      * description: 配置bugly
      */
-    private void initBugly(final String user_agent, String BUGLY_KEY){
+    private void initBugly(String BUGLY_KEY){
         CrashReport.UserStrategy strategy = new CrashReport.UserStrategy(sContext);
         strategy.setCrashHandleCallback(new CrashReport.CrashHandleCallback() {
             public Map<String, String> onCrashHandleStart(int crashType, String errorType,
@@ -403,9 +411,9 @@ public class BaseApplication extends Application {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                Amplitude.getInstance().logEvent(AMP_CRASH, jsonObject);
+                Amplitude.getInstance().logEventWrap(AMP_CRASH, jsonObject);
                 LinkedHashMap<String, String> map = new LinkedHashMap<>();
-                map.put("user-agent", user_agent);
+                map.put("user-agent", sDataManager.USER_AGENT);
                 return map;
             }
         });
@@ -493,6 +501,7 @@ public class BaseApplication extends Application {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
+                                LogUtils.e("onSuccess", true);
                                 LatestFileManager.initInsList(response.body());
                                 mMDWebSocket.reConnect();
                                 mTDWebSocket.reConnect();
@@ -507,6 +516,7 @@ public class BaseApplication extends Application {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
+                                LogUtils.e("onError", true);
                                 LatestFileManager.initInsList(new File("latest.json"));
                                 mMDWebSocket.reConnect();
                                 mTDWebSocket.reConnect();
@@ -583,8 +593,9 @@ public class BaseApplication extends Application {
             View viewDialog = View.inflate(mSettlementContext, R.layout.view_dialog_confirm, null);
             dialog.setContentView(viewDialog);
             TextView settlement = viewDialog.findViewById(R.id.settlement_info);
-            settlement.setText(DataManager.getInstance().getBroker().getSettlement());
+            settlement.setText(sDataManager.getBroker().getSettlement());
             dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
             viewDialog.findViewById(R.id.confirm).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -619,7 +630,7 @@ public class BaseApplication extends Application {
      * description: 前台任务--连接服务器
      */
     private void notifyForeground() {
-        Amplitude.getInstance().logEvent(AMP_FOREGROUND);
+        sDataManager.FOREGROUND_TIME = System.currentTimeMillis();
 
         new Thread(new Runnable() {
             @Override
@@ -654,12 +665,13 @@ public class BaseApplication extends Application {
     private void notifyBackground() {
         //后台
         sBackGround = true;
+        sDataManager.SOURCE = "none";
         long currentTime = System.currentTimeMillis();
         long initTime = (long) SPUtils.get(sContext, CONFIG_INIT_TIME, currentTime);
         long survivalTime = currentTime - initTime;
         Identify identify = new Identify();
         identify.set(AMP_USER_SURVIVAL_TIME_TOTAL, survivalTime);
-        UserEntity userEntity = DataManager.getInstance().getTradeBean().getUsers().get(DataManager.getInstance().LOGIN_USER_ID);
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
         if (userEntity != null) {
             AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
             if (accountEntity != null) {
@@ -669,7 +681,7 @@ public class BaseApplication extends Application {
                     identify.setOnce(AMP_USER_BALANCE_FIRST, static_balance)
                             .set(AMP_USER_BALANCE_LAST, static_balance);
                 }
-                String settlement = DataManager.getInstance().getBroker().getSettlement();
+                String settlement = sDataManager.getBroker().getSettlement();
                 if (!"-".equals(pre_balance)) {
                     if (MathUtils.isZero(pre_balance) && settlement == null) {
                         identify.setOnce(AMP_USER_TYPE_FIRST, AMP_USER_TYPE_FIRST_PURE_NEWBIE_VALUE);
@@ -680,7 +692,7 @@ public class BaseApplication extends Application {
             }
         }
         Amplitude.getInstance().identify(identify);
-        Amplitude.getInstance().logEvent(AMP_BACKGROUND);
+        Amplitude.getInstance().logEventWrap(AMP_BACKGROUND, new JSONObject());
 
         Intent intent = new Intent(sContext, ForegroundService.class);
         startService(intent);

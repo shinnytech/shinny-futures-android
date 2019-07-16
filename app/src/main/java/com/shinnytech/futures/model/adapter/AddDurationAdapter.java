@@ -14,6 +14,7 @@ import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
 import com.shinnytech.futures.databinding.ItemAddDurationBinding;
 import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,6 +95,10 @@ public class AddDurationAdapter extends RecyclerView.Adapter<AddDurationAdapter.
                         mBinding.tvDuration.setTag("1");
                         mDataPre.add(mBinding.tvDuration.getText().toString());
                     } else if ("1".equals(tag)) {
+                        if (mDataPre.size() == 1){
+                            ToastUtils.showToast(sContext, "至少保留一个周期");
+                            return;
+                        }
                         mBinding.tvDuration.setBackgroundColor(ContextCompat.getColor(sContext, R.color.black_light));
                         mBinding.tvDuration.setTag("0");
                         mDataPre.remove(mBinding.tvDuration.getText().toString());

@@ -120,8 +120,4 @@ public class ParaChangeActivity extends BaseActivity {
         });
     }
 
-    @Override
-    protected void refreshUI() {
-
-    }
 }

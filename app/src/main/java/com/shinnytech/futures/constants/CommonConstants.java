@@ -11,12 +11,10 @@ public final class CommonConstants {
     public static final String FEED_BACK_URL = "https://ask.shinnytech.com/src/indexm.html";
     //广播信息类型
     public static final String MD_MESSAGE = "MD_MESSAGE";
-    public static final String TD_OFFLINE = "TD_OFFLINE";
     public static final String TD_MESSAGE = "TD_MESSAGE";
     public static final String TD_MESSAGE_LOGIN_SUCCEED = "TD_MESSAGE_LOGIN_SUCCEED";
     public static final String TD_MESSAGE_LOGIN_FAIL = "TD_MESSAGE_LOGIN_FAIL";
     public static final String TD_MESSAGE_WEAK_PASSWORD = "TD_MESSAGE_WEAK_PASSWORD";
-    public static final String TD_MESSAGE_SETTLEMENT = "TD_MESSAGE_SETTLEMENT";
     public static final String TD_MESSAGE_BROKER_INFO = "TD_MESSAGE_BROKER_INFO";
     public static final String TD_MESSAGE_CHANGE_SUCCESS = "TD_MESSAGE_CHANGE_SUCCESS";
     //导航栏
@@ -77,21 +75,23 @@ public final class CommonConstants {
     public static final int VIEW_WIDTH = 200;
     //订阅合约数
     public static final int LOAD_QUOTE_NUM = 24;
+    //导航图标title
+    public static final String MENU_TITLE_NAVIGATION = "navigation";
+    public static final String MENU_TITLE_COLLECT = "collect";
 
     //页面跳转标志
     public static final int MAIN_ACTIVITY_TO_SEARCH_ACTIVITY = 1;
-    public static final int MAIN_ACTIVITY_TO_FUTURE_INFO_ACTIVITY = 2;
+    public static final int MAIN_ACTIVITY_TO_SETTING_ACTIVITY = 2;
     public static final int MAIN_ACTIVITY_TO_OPTIONAL_SETTING_ACTIVITY = 3;
     public static final int MAIN_ACTIVITY_TO_TRANSFER_ACTIVITY = 4;
     public static final int LOGIN_ACTIVITY_TO_CHANGE_PASSWORD_ACTIVITY = 5;
     public static final int LOGIN_ACTIVITY_TO_BROKER_LIST_ACTIVITY = 6;
     public static final int KLINE_DURATION_ACTIVITY_TO_ADD_DURATION_ACTIVITY = 7;
-    public static final int FUTURE_INFO_ACTIVITY_TO_CHART_SETTING_ACTIVITY = 8;
-    public static final String BACK_TO_ACCOUNT_DETAIL = "checkAccount";
+    public static final int FUTURE_INFO_FRAGMENT_TO_CHART_SETTING_ACTIVITY = 8;
     public static final String INS_BETWEEN_ACTIVITY = "instrument_id";
     //推荐标的
-    public static final String RECOMMEND_INS = "螺纹,豆粕,菜粕,甲醇,铁矿,沪深,玉米," +
-            "红枣,PTA,白糖,燃油,橡胶";
+    public static final String RECOMMEND_INS = "螺纹,豆粕,菜粕,甲醇,铁矿,沥青,焦炭," +
+            "PP,PTA,白糖,燃油,橡胶";
     //app名称
     public static final String KUAI_QI_XIAO_Q = "快期小Q";
     //本地自选合约文件名
@@ -140,7 +140,7 @@ public final class CommonConstants {
     public static final String UPLOAD_LOG = "上传运行日志";
     public static final String COMMON_SWITCH = "常用开关";
     public static final String PARA_MA = "5,10,20,40,60,0";
-    public static final String KLINE_DURATION_DEFAULT = "1分,5分,15分,30分,1日,1周";
+    public static final String KLINE_DURATION_DEFAULT = "1日,1分,3分,5分,15分,30分,1时";
     public static final String KLINE_DURATION_ALL = "3秒,5秒,10秒,15秒,20秒,30秒,1分,2分," +
             "3分,5分,10分,15分,30分,1时,2时,4时,1日,1周,4周";
     public static final String KLINE_DURATION_DAY = "分时";
@@ -204,54 +204,41 @@ public final class CommonConstants {
 
     //amp event type
     public static final String AMP_INIT = "amp_init";
-    public static final String AMP_SELECT_BROKER = "amp_select_broker";
     public static final String AMP_LOGIN = "amp_login";
     public static final String AMP_LOGIN_SUCCEEDED = "amp_login_succeeded";
     public static final String AMP_LOGIN_FAILED = "amp_login_failed";
-    public static final String AMP_LOGIN_TIME_OUT = "amp_login_time_out";
-    public static final String AMP_FOREGROUND = "amp_foreground";
     public static final String AMP_BACKGROUND = "amp_background";
     public static final String AMP_LOGOUT = "amp_logout";
-    public static final String AMP_QUOTE_TAB = "amp_quote_tab";
-    public static final String AMP_ACCOUNT_TAB = "amp_account_tab";
-    public static final String AMP_ACCOUNT_LINK = "amp_account_link";
     public static final String AMP_CANCEL_CLOSE_CONFIRMED = "amp_cancel_close_confirmed";
     public static final String AMP_CANCEL_CLOSE_CANCELED = "amp_cancel_close_canceled";
     public static final String AMP_CANCEL_ORDER = "amp_cancel_order";
     public static final String AMP_INSERT_ORDER = "amp_insert_order";
     public static final String AMP_OPTIONAL_SEARCH = "amp_optional_search";
-    public static final String AMP_OPTIONAL_RECOMMEND = "amp_optional_recommend";
     public static final String AMP_OPTIONAL_QUOTE = "amp_optional_quote";
     public static final String AMP_OPTIONAL_FUTURE_INFO = "amp_optional_future_info";
-    public static final String AMP_MENU_TRANSFER_IN = "amp_menu_transfer_in";
-    public static final String AMP_MENU_TRANSFER_OUT = "amp_menu_transfer_out";
-    public static final String AMP_ACCOUNT_TRANSFER_IN = "amp_account_transfer_in";
-    public static final String AMP_ACCOUNT_TRANSFER_OUT = "amp_account_transfer_out";
-    public static final String AMP_TRANSFER_IN = "amp_transfer_in";
-    public static final String AMP_TRANSFER_OUT = "amp_transfer_out";
-    public static final String AMP_CONDITIONAL_ORDER = "amp_conditional_order";
     public static final String AMP_CRASH = "amp_crash";
-    public static final String AMP_SWITCH_PAGE = "amp_switch_page";
     public static final String AMP_PRICE_KEY = "amp_price_key";
     public static final String AMP_VOLUME_KEY = "amp_volume_key";
     public static final String AMP_SHOW_PAGE = "amp_show_page";
-    public static final String AMP_LEAVE_PAGE = "amp_leave_page";
+    public static final String AMP_SWITCH_TAB = "amp_switch_tab";
+    public static final String AMP_MENU = "amp_menu";
     public static final String AMP_NOTIFY = "amp_notify";
     public static final String AMP_RECONNECT = "amp_reconnect";
 
     //amp event property
-    public static final String AMP_EVENT_SELECT_BROKER_ID = "broker_id";
-    public static final String AMP_EVENT_SELECT_IS_ADDED = "is_added";
-    public static final String AMP_EVENT_LOGIN_BROKER_ID = "broker_id";
-    public static final String AMP_EVENT_LOGIN_USER_ID = "user_id";
-    public static final String AMP_EVENT_LOGIN_TIME = "login_time";
     public static final String AMP_EVENT_LOGIN_TYPE = "login_type";
+    public static final String AMP_EVENT_LOGIN_FAIL_REASON = "reason";
     public static final String AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN = "login";
     public static final String AMP_EVENT_LOGIN_TYPE_VALUE_VISIT = "visit";
     public static final String AMP_EVENT_LOGIN_TYPE_VALUE_AUTO = "auto";
-    public static final String AMP_EVENT_LOGOUT_TIME = "logout_time";
 
     public static final String AMP_EVENT_PRICE = "price";
+    public static final String AMP_EVENT_PRICE_TYPE = "price_type";
+    public static final String AMP_EVENT_PRICE_TYPE_VALUE_OPPONENT = "对手价";
+    public static final String AMP_EVENT_PRICE_TYPE_VALUE_QUEUED = "排队价";
+    public static final String AMP_EVENT_PRICE_TYPE_VALUE_MARKET = "市价";
+    public static final String AMP_EVENT_PRICE_TYPE_VALUE_LAST = "最新价";
+    public static final String AMP_EVENT_PRICE_TYPE_VALUE_NUMBER = "数字";
     public static final String AMP_EVENT_INSTRUMENT_ID = "instrument_id";
     public static final String AMP_EVENT_VOLUME = "volume";
     public static final String AMP_EVENT_DIRECTION = "direction";
@@ -261,26 +248,6 @@ public final class CommonConstants {
     public static final String AMP_EVENT_OPTIONAL_DIRECTION = "optional_direction";
     public static final String AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD = "添加";
     public static final String AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE = "删除";
-
-    public static final String AMP_EVENT_BANK = "bank";
-    public static final String AMP_EVENT_AMOUNT = "amount";
-    public static final String AMP_EVENT_CURRENCY = "currency";
-
-    public static final String AMP_EVENT_CURRENT_PAGE = "current_page";
-    public static final String AMP_EVENT_TARGET_PAGE = "target_page";
-    public static final String AMP_EVENT_PAGE_VALUE_MAIN = "main_page";
-    public static final String AMP_EVENT_PAGE_VALUE_LOGIN = "login_page";
-    public static final String AMP_EVENT_PAGE_VALUE_SETTING = "setting_page";
-    public static final String AMP_EVENT_PAGE_VALUE_OPTIONAL_SETTING = "optional_setting_page";
-    public static final String AMP_EVENT_PAGE_VALUE_CHART_SETTING = "chart_setting_page";
-    public static final String AMP_EVENT_PAGE_VALUE_ACCOUNT = "account_page";
-    public static final String AMP_EVENT_PAGE_VALUE_CHANGE_PASSWORD = "change_password_page";
-    public static final String AMP_EVENT_PAGE_VALUE_TRANSFER = "transfer_page";
-    public static final String AMP_EVENT_PAGE_VALUE_OPEN_ACCOUNT = "open_account_page";
-    public static final String AMP_EVENT_PAGE_VALUE_FEED_BACK = "feed_back_page";
-    public static final String AMP_EVENT_PAGE_VALUE_ABOUT = "about_page";
-    public static final String AMP_EVENT_PAGE_VALUE_SEARCH = "search_page";
-    public static final String AMP_EVENT_PAGE_VALUE_FUTURE_INFO = "future_info_page";
 
     public static final String AMP_EVENT_PRICE_KEY = "price_key";
     public static final String AMP_EVENT_PRICE_KEY_VALUE_0 = "price_key_0";
@@ -319,40 +286,61 @@ public final class CommonConstants {
     public static final String AMP_EVENT_VOLUME_KEY_VALUE_CLEAR = "volume_key_clear";
 
     public static final String AMP_EVENT_PAGE_ID = "page_id";
+    public static final String AMP_EVENT_PAGE_ID_VALUE_LOGIN = "login";
     public static final String AMP_EVENT_PAGE_ID_VALUE_MAIN = "main";
     public static final String AMP_EVENT_PAGE_ID_VALUE_ACCOUNT = "account";
     public static final String AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO = "future_info";
-    public static final String AMP_EVENT_SUB_PAGE_ID = "sub_page_id";
-    public static final String AMP_EVENT_SUB_PAGE_ID_VALUE_QUOTE = "quote";
-    public static final String AMP_EVENT_SUB_PAGE_ID_VALUE_HANDICAP = "handicap";
-    public static final String AMP_EVENT_SUB_PAGE_ID_VALUE_POSITION = "position";
-    public static final String AMP_EVENT_SUB_PAGE_ID_VALUE_ALIVE = "alive";
-    public static final String AMP_EVENT_SUB_PAGE_ID_VALUE_ORDER = "order";
-    public static final String AMP_EVENT_SUB_PAGE_ID_VALUE_TRADE = "trade";
-    public static final String AMP_EVENT_SUB_PAGE_ID_VALUE_TRANSACTION = "transaction";
-    public static final String AMP_EVENT_IS_POSITIVE = "is_positive";
     public static final String AMP_EVENT_IS_INS_IN_POSITION = "is_ins_in_position";
     public static final String AMP_EVENT_IS_INS_IN_OPTIONAL = "is_ins_in_optional";
-    public static final String AMP_EVENT_BROKER_ID = "broker_id";
-    public static final String AMP_EVENT_BALANCE = "balance";
-    public static final String AMP_EVENT_POSITION_COUNT = "position_count";
-    public static final String AMP_EVENT_ORDER_COUNT = "order_count";
-    public static final String AMP_EVENT_PAGE_VISIBLE_TIME = "page_visible_time";
+    public static final String AMP_EVENT_SYMBOL = "symbol";
+    public static final String AMP_EVENT_SOURCE = "source";
+    public static final String AMP_EVENT_SWITCH_FROM = "from";
+    public static final String AMP_EVENT_SWITCH_TO = "to";
+    public static final String AMP_EVENT_TAB_MARKET = "tab_market";
+    public static final String AMP_EVENT_TAB_ACCOUNT = "tab_account";
+    public static final String AMP_EVENT_TAB_POSITION = "tab_position";
+    public static final String AMP_EVENT_TAB_ORDER_ALIVE = "tab_order_alive";
+    public static final String AMP_EVENT_TAB_ORDER = "tab_order";
+    public static final String AMP_EVENT_TAB_TRADE = "tab_trade";
+    public static final String AMP_EVENT_TAB_HANDICAP = "tab_handicap";
+    public static final String AMP_EVENT_TAB_TRANSACTION = "tab_transaction";
+    public static final String AMP_EVENT_MENU = "menu";
+
 
     public static final String AMP_EVENT_CRASH_TYPE = "crash_type";
     public static final String AMP_EVENT_ERROR_TYPE = "error_type";
     public static final String AMP_EVENT_ERROR_MESSAGE = "error_message";
     public static final String AMP_EVENT_ERROR_STACK = "error_stack";
 
-    public static final String AMP_EVENT_NOTIFY_TYPE = "notify_type";
-    public static final String AMP_EVENT_NOTIFY_LEVEL = "notify_level";
     public static final String AMP_EVENT_NOTIFY_CONTENT = "notify_content";
-    public static final String AMP_EVENT_NOTIFY_CODE = "notify_code";
 
     public static final String AMP_EVENT_RECONNECT_SERVER_TYPE = "server_type";
     public static final String AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_MD = "MD";
     public static final String AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_TD = "TD";
-    public static final String AMP_EVENT_RECONNECT_TIME = "reconnect_time";
+
+    //common event property
+    public static final String AMP_EVENT_COMMON_HOUR = "hour";
+    public static final String AMP_EVENT_COMMON_MINUTE = "minute";
+    public static final String AMP_EVENT_COMMON_SECOND = "second";
+    public static final String AMP_EVENT_COMMON_WEEKDAY = "weekday";
+    public static final String AMP_EVENT_COMMON_OFFSET = "offset";
+    public static final String AMP_EVENT_COMMON_OFFSETH = "offseth";
+    public static final String AMP_EVENT_COMMON_SPAN = "span";
+    public static final String AMP_EVENT_COMMON_COUNT = "count";
+    public static final String AMP_EVENT_COMMON_CHANNEL_ID = "channel_id";
+    public static final String AMP_EVENT_COMMON_BROKER_ID = "broker_id";
+    public static final String AMP_EVENT_COMMON_USER_ID = "user_id";
+    public static final String AMP_EVENT_COMMON_BALANCE = "balance";
+    public static final String AMP_EVENT_COMMON_FLOAT_PROFIT = "float_profit";
+    public static final String AMP_EVENT_COMMON_POSITION_COUNT = "position_count";
+    public static final String AMP_EVENT_COMMON_ORDER_COUNT = "order_count";
+    public static final String AMP_EVENT_COMMON_FAVORITE_COUNT = "favorite_count";
+    public static final String AMP_EVENT_COMMON_MD_STATUS = "md_status";
+    public static final String AMP_EVENT_COMMON_TD_STATUS = "td_status";
+    public static final String AMP_EVENT_COMMON_MD_SESSION = "md_session";
+    public static final String AMP_EVENT_COMMON_TD_SESSION = "td_session";
+    public static final String AMP_EVENT_COMMON_MD_PACK_COUNT = "md_pack_count";
+    public static final String AMP_EVENT_COMMON_TD_PACK_COUNT = "td_pack_count";
 
     //amp user property
     public static final String AMP_USER_PACKAGE_ID_FIRST = "package_id_first";
@@ -372,5 +360,5 @@ public final class CommonConstants {
     public static final String AMP_USER_TYPE_FIRST = "user_type_first";
     public static final String AMP_USER_TYPE_FIRST_PURE_NEWBIE_VALUE = "pure_newbie";
     public static final String AMP_USER_TYPE_FIRST_TRADER_VALUE = "trader";
-
+    public static final String AMP_USER_KLINE_WIDTH = "kline_width";
 }
