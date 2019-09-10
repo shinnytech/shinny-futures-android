@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="trigger_way">
+        <item>@string/trigger_way_price</item>
+        <item>@string/trigger_way_time</item>
+        <item>@string/trigger_way_open</item>
+        <item>@string/trigger_way_range</item>
+    </array>
+    <array name="trigger_price_range">
+        <item>@string/trigger_larger_equal</item>
+        <item>@string/trigger_lower_equal</item>
+        <item>@string/trigger_larger</item>
+        <item>@string/trigger_lower</item>
+    </array>
+    <array name="trigger_order_price">
+        <item>@string/trigger_order_price_market</item>
+        <item>@string/trigger_order_price_consideration</item>
+        <item>@string/trigger_order_price_over</item>
+        <item>@string/trigger_order_price_limit</item>
+        <item>@string/trigger_order_price_contingent</item>
+    </array>
+    <array name="trigger_order_price_without_contingent">
+        <item>@string/trigger_order_price_market</item>
+        <item>@string/trigger_order_price_consideration</item>
+        <item>@string/trigger_order_price_over</item>
+        <item>@string/trigger_order_price_limit</item>
+    </array>
+    <array name="trigger_order_price_only_market">
+        <item>@string/trigger_order_price_market</item>
+    </array>
+    <array name="trigger_order_volume">
+        <item>@string/trigger_order_volume_custom</item>
+        <item>@string/trigger_order_volume_all</item>
+    </array>
+    <array name="trigger_order_volume_only_custom">
+        <item>@string/trigger_order_volume_custom</item>
+    </array>
+    <array name="trigger_order_volume_only_all">
+        <item>@string/trigger_order_volume_all</item>
+    </array>
+    <array name="trigger_order_volume_sltp">
+        <item>@string/trigger_order_volume_custom</item>
+        <item>@string/trigger_order_volume_all</item>
+        <item>@string/trigger_order_offset_close_reverse</item>
+    </array>
+    <array name="trigger_order_offset">
+        <item>@string/trigger_order_offset_open</item>
+        <item>@string/trigger_order_offset_close</item>
+        <item>@string/trigger_order_offset_close_reverse</item>
+    </array>
+    <array name="trigger_order_direction">
+        <item>@string/trigger_order_direction_buy</item>
+        <item>@string/trigger_order_direction_sell</item>
+    </array>
+    <array name="trigger_expiry">
+        <item>@string/trigger_expiry_one_day</item>
+        <item>@string/trigger_expiry_always</item>
+    </array>
+</resources>

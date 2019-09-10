@@ -20,7 +20,8 @@
         android:padding="@dimen/padding_5dp" />
 
     <TextView
-        android:background="@color/launch"
+        android:clickable="true"
+        android:background="@drawable/popup_order_selector"
         android:id="@+id/cancel_order"
         android:layout_width="0dp"
         android:layout_height="match_parent"

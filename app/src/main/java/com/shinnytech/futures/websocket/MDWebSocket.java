@@ -1,6 +1,6 @@
 package com.shinnytech.futures.websocket;
 
-import com.google.gson.Gson;
+import com.alibaba.fastjson.JSON;
 import com.neovisionaries.ws.client.WebSocket;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
@@ -14,10 +14,15 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_RECONNECT_SERVER_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_MD;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_RECONNECT;
-import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_RECONNECT_SERVER_TYPE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_MD;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_RECONNECT;
+import static com.shinnytech.futures.constants.MarketConstants.CHART_ID;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_MARKET_KEY_AID;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_MARKET_KEY_RSP_LOGIN;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_MARKET_KEY_RTN_DATA;
+import static com.shinnytech.futures.constants.ServerConstants.REQ_SET_CHART;
+import static com.shinnytech.futures.constants.ServerConstants.REQ_SUBSCRIBE_QUOTE;
 
 public class MDWebSocket extends WebSocketBase {
 
@@ -32,13 +37,13 @@ public class MDWebSocket extends WebSocketBase {
         sDataManager.MD_PACK_COUNT++;
         try {
             JSONObject jsonObject = new JSONObject(text);
-            String aid = jsonObject.getString("aid");
+            String aid = jsonObject.getString(PARSE_MARKET_KEY_AID);
             switch (aid) {
-                case "rsp_login":
+                case PARSE_MARKET_KEY_RSP_LOGIN:
                     mIndex = 0;
                     sendSubscribeAfterConnect();
                     break;
-                case "rtn_data":
+                case PARSE_MARKET_KEY_RTN_DATA:
                     sDataManager.refreshFutureBean(jsonObject);
                     break;
                 default:
@@ -90,11 +95,13 @@ public class MDWebSocket extends WebSocketBase {
      * description: 行情订阅
      */
     public void sendSubscribeQuote(String insList) {
+        if (insList == null)return;
         ReqSubscribeQuoteEntity reqSubscribeQuoteEntity = new ReqSubscribeQuoteEntity();
-        reqSubscribeQuoteEntity.setAid("subscribe_quote");
+        reqSubscribeQuoteEntity.setAid(REQ_SUBSCRIBE_QUOTE);
         reqSubscribeQuoteEntity.setIns_list(insList);
-        String subScribeQuote = new Gson().toJson(reqSubscribeQuoteEntity);
-        mWebSocketClient.sendText(subScribeQuote);
+        String subScribeQuote = JSON.toJSONString(reqSubscribeQuoteEntity);
+        //首次打开，交易服务器已经登录完成，行情服务器还没有链接成功
+        if (mWebSocketClient != null)mWebSocketClient.sendText(subScribeQuote);
         sDataManager.QUOTES = subScribeQuote;
         LogUtils.e(subScribeQuote, true);
     }
@@ -106,13 +113,13 @@ public class MDWebSocket extends WebSocketBase {
      */
     public void sendSetChart(String ins_list) {
         ReqSetChartEntity reqSetChartEntity = new ReqSetChartEntity();
-        reqSetChartEntity.setAid("set_chart");
+        reqSetChartEntity.setAid(REQ_SET_CHART);
         reqSetChartEntity.setChart_id(CHART_ID);
         reqSetChartEntity.setIns_list(ins_list);
         reqSetChartEntity.setDuration(60000000000l);
         reqSetChartEntity.setTrading_day_start(0);
         reqSetChartEntity.setTrading_day_count(86400000000000l);
-        String setChart = new Gson().toJson(reqSetChartEntity);
+        String setChart = JSON.toJSONString(reqSetChartEntity);
         sDataManager.CHARTS = setChart;
         mWebSocketClient.sendText(setChart);
         LogUtils.e(setChart, true);
@@ -127,12 +134,12 @@ public class MDWebSocket extends WebSocketBase {
         try {
             long duration_l = Long.parseLong(duration);
             ReqSetChartKlineEntity reqSetChartKlineEntity = new ReqSetChartKlineEntity();
-            reqSetChartKlineEntity.setAid("set_chart");
+            reqSetChartKlineEntity.setAid(REQ_SET_CHART);
             reqSetChartKlineEntity.setChart_id(CHART_ID);
             reqSetChartKlineEntity.setIns_list(ins_list);
             reqSetChartKlineEntity.setView_width(view_width);
             reqSetChartKlineEntity.setDuration(duration_l);
-            String setChart = new Gson().toJson(reqSetChartKlineEntity);
+            String setChart = JSON.toJSONString(reqSetChartKlineEntity);
             sDataManager.CHARTS = setChart;
             mWebSocketClient.sendText(setChart);
             LogUtils.e(setChart, true);

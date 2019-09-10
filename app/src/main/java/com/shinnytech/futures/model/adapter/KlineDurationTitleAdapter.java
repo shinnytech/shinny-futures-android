@@ -1,9 +1,9 @@
 package com.shinnytech.futures.model.adapter;
 
 import android.content.Context;
-import android.databinding.DataBindingUtil;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.RecyclerView;
+import androidx.databinding.DataBindingUtil;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.SettingConstants;
 import com.shinnytech.futures.databinding.ItemDurationTitleBinding;
 import com.shinnytech.futures.utils.SPUtils;
 
@@ -39,11 +39,11 @@ public class KlineDurationTitleAdapter extends RecyclerView.Adapter<KlineDuratio
     public void update() {
         String durationPre = TextUtils.join(",", mData);
         String duration = (String) SPUtils.get(BaseApplication.getContext(),
-                CommonConstants.CONFIG_KLINE_DURATION_DEFAULT, "");
+                SettingConstants.CONFIG_KLINE_DURATION_DEFAULT, "");
         if (!duration.equals(durationPre)) {
             mData.clear();
             String[] durations = duration.split(",");
-            mData.add(CommonConstants.KLINE_DURATION_DAY);
+            mData.add(SettingConstants.KLINE_DURATION_DAY);
             for (String data : durations) {
                 mData.add(data);
             }

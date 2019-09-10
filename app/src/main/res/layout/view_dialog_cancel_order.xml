@@ -44,9 +44,6 @@
             android:id="@+id/order_price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxEms="4"
-            android:maxLines="1"
             android:text="1111"
             android:textColor="@color/black"
             android:textStyle="bold"
@@ -109,7 +106,7 @@
         android:orientation="horizontal">
 
         <Button
-            android:background="@null"
+            android:background="@drawable/dialog_cancel_selector"
             android:id="@+id/order_cancel"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -126,7 +123,7 @@
             android:background="@color/dialog_order_divider"></View>
 
         <Button
-            android:background="@null"
+            android:background="@drawable/dialog_ok_selector"
             android:id="@+id/order_ok"
             android:layout_width="0dp"
             android:layout_height="match_parent"

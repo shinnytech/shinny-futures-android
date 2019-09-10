@@ -4,8 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import android.text.format.DateFormat;
 
 import com.aliyun.sls.android.sdk.LOGClient;
@@ -19,7 +19,7 @@ import com.aliyun.sls.android.sdk.request.PostLogRequest;
 import com.aliyun.sls.android.sdk.result.PostLogResult;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.SettingConstants;
 import com.shinnytech.futures.databinding.ActivitySettingBinding;
 import com.shinnytech.futures.model.adapter.SettingAdapter;
 import com.shinnytech.futures.model.bean.settingbean.SettingEntity;
@@ -31,10 +31,10 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-import static com.shinnytech.futures.constants.CommonConstants.CHART_SETTING;
-import static com.shinnytech.futures.constants.CommonConstants.SUB_SETTING_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.SYSTEM_SETTING;
-import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_SETTING;
+import static com.shinnytech.futures.constants.SettingConstants.CHART_SETTING;
+import static com.shinnytech.futures.constants.SettingConstants.SUB_SETTING_TYPE;
+import static com.shinnytech.futures.constants.SettingConstants.SYSTEM_SETTING;
+import static com.shinnytech.futures.constants.SettingConstants.TRANSACTION_SETTING;
 
 public class SubSettingActivity extends BaseActivity {
 
@@ -63,15 +63,15 @@ public class SubSettingActivity extends BaseActivity {
             case CHART_SETTING:
                 SettingEntity settingEntity = new SettingEntity();
                 settingEntity.setIcon(R.mipmap.ic_timeline_white_24dp);
-                settingEntity.setContent(CommonConstants.PARA_CHANGE);
+                settingEntity.setContent(SettingConstants.PARA_CHANGE);
                 settingEntity.setJump(true);
                 SettingEntity settingEntity1 = new SettingEntity();
                 settingEntity1.setIcon(R.mipmap.ic_watch_later_white_24dp);
-                settingEntity1.setContent(CommonConstants.KLINE_DURATION_SETTING);
+                settingEntity1.setContent(SettingConstants.KLINE_DURATION_SETTING);
                 settingEntity1.setJump(true);
                 SettingEntity settingEntity4 = new SettingEntity();
                 settingEntity4.setIcon(R.mipmap.ic_watch_later_white_24dp);
-                settingEntity4.setContent(CommonConstants.COMMON_SWITCH_SETTING);
+                settingEntity4.setContent(SettingConstants.COMMON_SWITCH_SETTING);
                 settingEntity4.setJump(true);
                 settingEntities.add(settingEntity);
                 settingEntities.add(settingEntity1);
@@ -80,19 +80,19 @@ public class SubSettingActivity extends BaseActivity {
             case TRANSACTION_SETTING:
                 SettingEntity settingEntity2 = new SettingEntity();
                 settingEntity2.setIcon(R.mipmap.ic_speaker_notes_white_24dp);
-                settingEntity2.setContent(CommonConstants.INSERT_ORDER_CONFIRM);
+                settingEntity2.setContent(SettingConstants.INSERT_ORDER_CONFIRM);
                 settingEntity2.setJump(false);
                 settingEntities.add(settingEntity2);
                 SettingEntity settingEntity5 = new SettingEntity();
                 settingEntity5.setIcon(R.mipmap.ic_speaker_notes_white_24dp);
-                settingEntity5.setContent(CommonConstants.CANCEL_ORDER_CONFIRM);
+                settingEntity5.setContent(SettingConstants.CANCEL_ORDER_CONFIRM);
                 settingEntity5.setJump(false);
                 settingEntities.add(settingEntity5);
                 break;
             case SYSTEM_SETTING:
                 SettingEntity settingEntity3 = new SettingEntity();
                 settingEntity3.setIcon(R.mipmap.ic_backup_white_24dp);
-                settingEntity3.setContent(CommonConstants.UPLOAD_LOG);
+                settingEntity3.setContent(SettingConstants.UPLOAD_LOG);
                 settingEntity3.setJump(true);
                 settingEntities.add(settingEntity3);
                 break;
@@ -112,19 +112,19 @@ public class SubSettingActivity extends BaseActivity {
             @Override
             public void onJump(String content) {
                 switch (content) {
-                    case CommonConstants.PARA_CHANGE:
+                    case SettingConstants.PARA_CHANGE:
                         Intent paraIntent = new Intent(SubSettingActivity.this, ParaChangeActivity.class);
                         startActivity(paraIntent);
                         break;
-                    case CommonConstants.KLINE_DURATION_SETTING:
+                    case SettingConstants.KLINE_DURATION_SETTING:
                         Intent klineIntent = new Intent(SubSettingActivity.this, KlineDurationActivity.class);
                         startActivity(klineIntent);
                         break;
-                    case CommonConstants.COMMON_SWITCH_SETTING:
+                    case SettingConstants.COMMON_SWITCH_SETTING:
                         Intent switchIntent = new Intent(SubSettingActivity.this, CommonSwitchActivity.class);
                         startActivity(switchIntent);
                         break;
-                    case CommonConstants.UPLOAD_LOG:
+                    case SettingConstants.UPLOAD_LOG:
                         upload();
                         break;
                     default:

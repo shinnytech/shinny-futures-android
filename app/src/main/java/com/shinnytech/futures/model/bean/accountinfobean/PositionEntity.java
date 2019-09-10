@@ -1,7 +1,7 @@
 package com.shinnytech.futures.model.bean.accountinfobean;
 
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.io.Serializable;
 

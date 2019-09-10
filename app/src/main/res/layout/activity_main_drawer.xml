@@ -5,14 +5,14 @@
 
     <data></data>
 
-    <android.support.v4.widget.DrawerLayout
+    <androidx.drawerlayout.widget.DrawerLayout
         android:keepScreenOn="true"
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:openDrawer="start">
 
-        <android.support.design.widget.CoordinatorLayout
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -44,7 +44,7 @@
                         android:contentDescription="left"
                         android:src="@mipmap/ic_chevron_left_white_24dp" />
 
-                    <android.support.v7.widget.RecyclerView
+                    <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_quote_navigation"
                         android:layout_weight="1"
                         android:layout_width="0dp"
@@ -60,7 +60,7 @@
                         android:src="@mipmap/ic_chevron_right_white_24dp" />
                 </LinearLayout>
 
-                <android.support.design.widget.BottomNavigationView
+                <com.google.android.material.bottomnavigation.BottomNavigationView
                     android:background="@color/toolbar"
                     app:itemIconTint="@drawable/activity_main_bottom_navigation_selector"
                     app:itemTextColor="@drawable/activity_main_bottom_navigation_selector"
@@ -71,9 +71,9 @@
 
             </LinearLayout>
 
-        </android.support.design.widget.CoordinatorLayout>
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-        <android.support.design.widget.NavigationView
+        <com.google.android.material.navigation.NavigationView
             android:id="@+id/nv_menu_right"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -88,15 +88,15 @@
                     android:id="@+id/navigation_drawer_header_include"
                     layout="@layout/view_drawer_header_right" />
 
-                <android.support.v7.widget.RecyclerView
+                <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/navigation_right_rv"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_below="@id/navigation_drawer_header_include"/>
 
             </RelativeLayout>
-        </android.support.design.widget.NavigationView>
+        </com.google.android.material.navigation.NavigationView>
 
-    </android.support.v4.widget.DrawerLayout>
+    </androidx.drawerlayout.widget.DrawerLayout>
 
 </layout>

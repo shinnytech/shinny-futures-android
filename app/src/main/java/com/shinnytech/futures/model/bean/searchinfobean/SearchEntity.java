@@ -1,6 +1,6 @@
 package com.shinnytech.futures.model.bean.searchinfobean;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Created on 6/20/17.

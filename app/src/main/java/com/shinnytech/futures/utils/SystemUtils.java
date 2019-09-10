@@ -1,9 +1,12 @@
 package com.shinnytech.futures.utils;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Handler;
 
 import java.util.List;
 
@@ -40,13 +43,21 @@ public class SystemUtils {
         /**获取ActivityManager*/
         ActivityManager activityManager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
 
-        /**获得当前运行的task(任务)*/
-        List<ActivityManager.RunningTaskInfo> taskInfoList = activityManager.getRunningTasks(100);
-        for (ActivityManager.RunningTaskInfo taskInfo : taskInfoList) {
-            /**找到本应用的 task，并将它切换到前台*/
-            if (taskInfo.topActivity.getPackageName().equals(context.getPackageName())) {
-                activityManager.moveTaskToFront(taskInfo.id, 0);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            List<ActivityManager.AppTask> list = activityManager.getAppTasks();
+            for (ActivityManager.AppTask appTask : list){
+                appTask.moveToFront();
                 break;
+            }
+        }else {
+            /**获得当前运行的task(任务)*/
+            List<ActivityManager.RunningTaskInfo> taskInfoList = activityManager.getRunningTasks(100);
+            for (ActivityManager.RunningTaskInfo taskInfo : taskInfoList) {
+                /**找到本应用的 task，并将它切换到前台*/
+                if (taskInfo.topActivity.getPackageName().equals(context.getPackageName())) {
+                    activityManager.moveTaskToFront(taskInfo.id, 0);
+                    break;
+                }
             }
         }
     }
@@ -80,14 +91,19 @@ public class SystemUtils {
      * author: chenli
      * description: 退出应用
      */
-    public static void exitApp(Context context){
+    public static void exitApp(Activity context){
         ActivityManager activityManager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             List<ActivityManager.AppTask> taskInfoList = activityManager.getAppTasks();
             for (ActivityManager.AppTask task : taskInfoList) {
                 task.finishAndRemoveTask();
             }
-        }
-        System.exit(0);
+        }else context.finish();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                System.exit(0);
+            }
+        }, 250);
     }
 }

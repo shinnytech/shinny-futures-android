@@ -4,16 +4,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Rect;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.KeyEvent;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.ArrayAdapter;
 
 import com.shinnytech.futures.R;
@@ -37,9 +35,9 @@ import java.util.List;
 import java.util.Map;
 
 import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BANK_FIRST;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BANK_LAST;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_BANK_FIRST;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_BANK_LAST;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_DIRECTION;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_IN;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_OUT;
@@ -55,8 +53,6 @@ public class BankTransferActivity extends BaseActivity {
     private BankTransferAdapter mAdapter;
     private boolean mIsUpdate;
     private Map<String, String> mBankId;
-    private View mRootView;  //activity的根视图
-    private boolean mIsKeyboardShowing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +61,6 @@ public class BankTransferActivity extends BaseActivity {
         if (intent != null) {
             mTitle = intent.getStringExtra(TRANSFER_DIRECTION);
         }
-        mRootView = this.getWindow().getDecorView();
         super.onCreate(savedInstanceState);
     }
 
@@ -164,32 +159,6 @@ public class BankTransferActivity extends BaseActivity {
                 }
             }
         });
-
-        mRootView.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-
-                        Rect r = new Rect();
-                        mRootView.getWindowVisibleDisplayFrame(r);
-                        int screenHeight = mRootView.getRootView().getHeight();
-
-                        int keypadHeight = screenHeight - r.bottom;
-
-                        if (keypadHeight > screenHeight * 0.15) { // 0.15 ratio is perhaps enough to determine keypad height.
-                            // keyboard is opened
-                            if (!mIsKeyboardShowing) {
-                                mIsKeyboardShowing = true;
-                            }
-                        } else {
-                            // keyboard is closed
-                            if (mIsKeyboardShowing) {
-                                mIsKeyboardShowing = false;
-                            }
-                        }
-                    }
-                });
-
     }
 
     private void refreshUI() {
@@ -279,9 +248,4 @@ public class BankTransferActivity extends BaseActivity {
 
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mIsKeyboardShowing) return true;
-        else return super.onKeyDown(keyCode, event);
-    }
 }

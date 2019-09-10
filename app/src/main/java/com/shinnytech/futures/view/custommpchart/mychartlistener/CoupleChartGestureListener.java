@@ -12,11 +12,11 @@ import com.github.mikephil.charting.utils.Transformer;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.amplitude.api.Identify;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.MarketConstants;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ScreenUtils;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_KLINE_WIDTH;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_KLINE_WIDTH;
 
 /**
  * 图表联动交互监听
@@ -84,7 +84,7 @@ public class CoupleChartGestureListener implements OnChartGestureListener {
         float[] srcVals = new float[9];
         Matrix srcMatrix = srcChart.getViewPortHandler().getMatrixTouch();
         srcMatrix.getValues(srcVals);
-        SPUtils.putAndApply(BaseApplication.getContext(), CommonConstants.SCALE_X, srcVals[0]);
+        SPUtils.putAndApply(BaseApplication.getContext(), MarketConstants.SCALE_X, srcVals[0]);
         syncCharts();
     }
 

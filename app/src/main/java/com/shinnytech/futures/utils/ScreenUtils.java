@@ -1,18 +1,9 @@
 package com.shinnytech.futures.utils;
 
-import android.app.Activity;
-import android.app.Application;
 import android.content.Context;
-import android.os.Build;
-import android.support.v4.content.ContextCompat;
-import android.util.TypedValue;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.FrameLayout;
 
-import com.shinnytech.futures.R;
+import androidx.core.content.ContextCompat;
+import android.util.TypedValue;
 
 /**
  * dp和px之间的互相转化

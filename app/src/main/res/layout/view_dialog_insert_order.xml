@@ -7,9 +7,22 @@
     android:orientation="vertical">
 
     <TextView
+        android:textStyle="bold"
+        android:id="@+id/cancel_insert"
+        android:visibility="gone"
         android:layout_gravity="center"
         android:gravity="center"
         android:layout_marginTop="@dimen/margin_10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="平仓手数不足，撤单后下单"
+        android:textColor="@color/text_red"
+        android:textSize="@dimen/font_size_normal" />
+
+    <TextView
+        android:layout_marginTop="@dimen/margin_10dp"
+        android:layout_gravity="center"
+        android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="确认下单吗？"
@@ -44,9 +57,6 @@
             android:id="@+id/order_price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxEms="4"
-            android:maxLines="1"
             android:text="1111"
             android:textColor="@color/black"
             android:textStyle="bold"
@@ -71,6 +81,7 @@
             android:textSize="@dimen/font_size_normal_more" />
 
         <TextView
+            android:id="@+id/order_comma0"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=", "
@@ -82,18 +93,7 @@
             android:id="@+id/order_volume"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxEms="2"
-            android:maxLines="1"
-            android:text="1"
-            android:textColor="@color/text_red"
-            android:textStyle="bold"
-            android:textSize="@dimen/font_size_normal_more" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="手"
+            android:text="1手"
             android:textColor="@color/text_red"
             android:textStyle="bold"
             android:textSize="@dimen/font_size_normal_more" />
@@ -138,15 +138,6 @@
             android:textSize="@dimen/font_size_normal_more"
             android:visibility="gone" />
 
-        <TextView
-            android:id="@+id/order_unit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="手"
-            android:textColor="@color/text_red"
-            android:textStyle="bold"
-            android:textSize="@dimen/font_size_normal_more"
-            android:visibility="gone" />
 
     </LinearLayout>
 
@@ -169,7 +160,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="取消"
-            android:background="@null"
+            android:background="@drawable/dialog_cancel_selector"
             android:textColor="@color/dialog_order_button_text"
             android:textSize="@dimen/font_size_normal_high" />
 
@@ -186,7 +177,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="确定"
-            android:background="@null"
+            android:background="@drawable/dialog_ok_selector"
             android:textColor="@color/dialog_order_button_text"
             android:textSize="@dimen/font_size_normal_high" />
 

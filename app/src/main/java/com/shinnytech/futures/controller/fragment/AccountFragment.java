@@ -1,11 +1,11 @@
 package com.shinnytech.futures.controller.fragment;
 
 import android.content.Intent;
-import android.databinding.DataBindingUtil;
+import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
+import com.google.android.material.tabs.TabLayout;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,17 +27,17 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID_VALUE_ACCOUNT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SOURCE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SWITCH_FROM;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SWITCH_TO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TAB_ORDER;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TAB_ORDER_ALIVE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TAB_POSITION;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TAB_TRADE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_SHOW_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_TAB;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_PAGE_ID;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_PAGE_ID_VALUE_ACCOUNT;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_SOURCE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_SWITCH_FROM;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_SWITCH_TO;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_TAB_ORDER;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_TAB_ORDER_ALIVE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_TAB_POSITION;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_TAB_TRADE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_SHOW_PAGE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_SWITCH_TAB;
 import static com.shinnytech.futures.constants.CommonConstants.MAIN_ACTIVITY_TO_TRANSFER_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_DIRECTION;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSFER_IN;
@@ -48,9 +48,11 @@ public class AccountFragment extends LazyLoadFragment {
     private DataManager sDataManager = DataManager.getInstance();
     private FragmentAccountBinding mBinding;
     private ViewPagerFragmentAdapter mViewPagerFragmentAdapter;
+    private View mView;
 
     @Override
     public void show() {
+        if (mView == null)return;
         LogUtils.e("accountShow", true);
 
         UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
@@ -83,6 +85,8 @@ public class AccountFragment extends LazyLoadFragment {
 
     @Override
     public void refreshTD() {
+        //fragment还没有加载完成
+        if (mView == null)return;
         UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
         if (userEntity == null) return;
         AccountEntity accountEntity = userEntity.getAccounts().get("CNY");
@@ -101,7 +105,8 @@ public class AccountFragment extends LazyLoadFragment {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_account, container, false);
         initData();
         initEvent();
-        return mBinding.getRoot();
+        mView = mBinding.getRoot();
+        return mView;
     }
 
     private void initData() {

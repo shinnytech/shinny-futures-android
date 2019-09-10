@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.ActivityAccountBinding;
@@ -14,7 +14,7 @@ import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 
 import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
 import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE;
 
 /**
  * date: 7/7/17
@@ -78,16 +78,5 @@ public class AccountActivity extends BaseActivity {
             }
         };
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiverLocal, new IntentFilter(TD_BROADCAST_ACTION));
-    }
-
-    /**
-     * date: 2019/3/15
-     * author: chenli
-     * description: 进入登录页如果不登陆返回，则退出本页
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        finish();
-        super.onActivityResult(requestCode, resultCode, data);
     }
 }

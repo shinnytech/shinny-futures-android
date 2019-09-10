@@ -1,6 +1,6 @@
 package com.shinnytech.futures.websocket;
 
-import com.google.gson.Gson;
+import com.alibaba.fastjson.JSON;
 import com.neovisionaries.ws.client.WebSocket;
 import com.neovisionaries.ws.client.WebSocketAdapter;
 import com.neovisionaries.ws.client.WebSocketException;
@@ -133,7 +133,7 @@ public class WebSocketBase extends WebSocketAdapter {
     public void sendPeekMessage(){
         ReqPeekMessageEntity reqPeekMessageEntity = new ReqPeekMessageEntity();
         reqPeekMessageEntity.setAid("peek_message");
-        String peekMessage = new Gson().toJson(reqPeekMessageEntity);
+        String peekMessage = JSON.toJSONString(reqPeekMessageEntity);
         mWebSocketClient.sendText(peekMessage);
         LogUtils.e(peekMessage, false);
     }

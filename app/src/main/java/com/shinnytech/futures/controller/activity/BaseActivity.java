@@ -3,15 +3,15 @@ package com.shinnytech.futures.controller.activity;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.databinding.DataBindingUtil;
-import android.databinding.ViewDataBinding;
+import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ViewDataBinding;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,11 +23,13 @@ import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
+import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
+import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_IS_FIRM;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_IS_FIRM;
 import static com.shinnytech.futures.constants.CommonConstants.OFFLINE;
 
 /**
@@ -142,6 +144,23 @@ public abstract class BaseActivity extends AppCompatActivity {
             finish();
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    /**
+     * date: 2019/1/10
+     * author: chenli
+     * description: 订阅合约行情
+     */
+    protected void sendSubscribeQuote(String ins) {
+        if (ins.contains("&") && ins.contains(" ")) {
+            SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(ins);
+            if (searchEntity != null) {
+                String leg1_symbol = searchEntity.getLeg1_symbol();
+                String leg2_symbol = searchEntity.getLeg2_symbol();
+                ins = ins + "," + leg1_symbol + "," + leg2_symbol;
+            }
+        }
+        BaseApplication.getmMDWebSocket().sendSubscribeQuote(ins);
     }
 
     protected abstract void initData();

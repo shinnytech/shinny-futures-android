@@ -66,20 +66,17 @@ public class MyMarkerView extends RelativeLayout implements IMarker {
         linearLayout.getLayoutParams().height = height;
         if (layoutResource == R.layout.view_marker_current_day) {
             if (DataManager.getInstance().IS_SHOW_VP_CONTENT) {
+                linearLayout.getLayoutParams().width = ScreenUtils.dp2px(BaseApplication.getContext(), 35);
+            } else {
+                linearLayout.getLayoutParams().width = ScreenUtils.dp2px(BaseApplication.getContext(), 55);
+            }
+        }else {
+            if (DataManager.getInstance().IS_SHOW_VP_CONTENT) {
                 linearLayout.getLayoutParams().width = ScreenUtils.dp2px(BaseApplication.getContext(), 40);
             } else {
-                linearLayout.getLayoutParams().width = ScreenUtils.dp2px(BaseApplication.getContext(), 60);
+                linearLayout.getLayoutParams().width = ScreenUtils.dp2px(BaseApplication.getContext(), 50);
             }
         }
-
-        if (layoutResource == R.layout.view_marker_kline) {
-            if (DataManager.getInstance().IS_SHOW_VP_CONTENT) {
-                linearLayout.getLayoutParams().width = ScreenUtils.dp2px(BaseApplication.getContext(), 45);
-            } else {
-                linearLayout.getLayoutParams().width = ScreenUtils.dp2px(BaseApplication.getContext(), 65);
-            }
-        }
-
         linearLayout.requestLayout();
     }
 

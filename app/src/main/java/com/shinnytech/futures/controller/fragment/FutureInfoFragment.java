@@ -2,11 +2,11 @@ package com.shinnytech.futures.controller.fragment;
 
 import android.content.Context;
 import android.content.Intent;
-import android.databinding.DataBindingUtil;
+import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
-import android.support.v7.widget.LinearLayoutManager;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,15 +15,17 @@ import android.widget.TextView;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.SettingConstants;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.controller.activity.SubSettingActivity;
 import com.shinnytech.futures.databinding.FragmentFutureInfoBinding;
 import com.shinnytech.futures.model.adapter.KlineDurationTitleAdapter;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
-import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
-import com.shinnytech.futures.model.bean.eventbusbean.KlineEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.CommonSwitchEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.SwitchInsEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.SwitchDurationEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.UpdateDurationsEvent;
 import com.shinnytech.futures.model.bean.eventbusbean.VisibilityEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.engine.DataManager;
@@ -41,47 +43,47 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_IS_INS_IN_OPTIONAL;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_IS_INS_IN_POSITION;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SOURCE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SWITCH_FROM;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SWITCH_TO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SYMBOL;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TAB_HANDICAP;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TAB_ORDER_ALIVE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TAB_POSITION;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TAB_TRANSACTION;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_SHOW_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_TAB;
-import static com.shinnytech.futures.constants.CommonConstants.CHART_SETTING;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
-import static com.shinnytech.futures.constants.CommonConstants.DAY_FRAGMENT;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_IS_INS_IN_OPTIONAL;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_IS_INS_IN_POSITION;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_PAGE_ID;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_PAGE_ID_VALUE_FUTURE_INFO;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_SOURCE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_SWITCH_FROM;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_SWITCH_TO;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_SYMBOL;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_TAB_HANDICAP;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_TAB_ORDER_ALIVE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_TAB_POSITION;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_TAB_TRANSACTION;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_SHOW_PAGE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_SWITCH_TAB;
+import static com.shinnytech.futures.constants.SettingConstants.CHART_SETTING;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_MD5;
+import static com.shinnytech.futures.constants.MarketConstants.DAY_FRAGMENT;
 import static com.shinnytech.futures.constants.CommonConstants.FUTURE_INFO_FRAGMENT_TO_CHART_SETTING_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.HOUR_FRAGMENT;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_10_MINUTE;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_10_SECOND;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_15_MINUTE;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_15_SECOND;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_1_DAY;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_1_HOUR;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_1_MINUTE;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_20_SECOND;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_28_DAY;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_2_HOUR;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_2_MINUTE;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_30_MINUTE;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_30_SECOND;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_3_MINUTE;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_3_SECOND;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_4_HOUR;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_5_MINUTE;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_5_SECOND;
-import static com.shinnytech.futures.constants.CommonConstants.KLINE_7_DAY;
-import static com.shinnytech.futures.constants.CommonConstants.MINUTE_FRAGMENT;
-import static com.shinnytech.futures.constants.CommonConstants.SECOND_FRAGMENT;
-import static com.shinnytech.futures.constants.CommonConstants.SUB_SETTING_TYPE;
+import static com.shinnytech.futures.constants.MarketConstants.HOUR_FRAGMENT;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_10_MINUTE;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_10_SECOND;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_15_MINUTE;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_15_SECOND;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_1_DAY;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_1_HOUR;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_1_MINUTE;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_20_SECOND;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_28_DAY;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_2_HOUR;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_2_MINUTE;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_30_MINUTE;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_30_SECOND;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_3_MINUTE;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_3_SECOND;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_4_HOUR;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_5_MINUTE;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_5_SECOND;
+import static com.shinnytech.futures.constants.MarketConstants.KLINE_7_DAY;
+import static com.shinnytech.futures.constants.MarketConstants.MINUTE_FRAGMENT;
+import static com.shinnytech.futures.constants.MarketConstants.SECOND_FRAGMENT;
+import static com.shinnytech.futures.constants.SettingConstants.SUB_SETTING_TYPE;
 
 public class FutureInfoFragment extends LazyLoadFragment {
     private FragmentFutureInfoBinding mBinding;
@@ -93,31 +95,27 @@ public class FutureInfoFragment extends LazyLoadFragment {
     private KlineDurationTitleAdapter mKlineDurationTitleAdapter;
     private String mInstrumentId;
     private boolean mIsMD5;
-    private String[] mKlineTitle = CommonConstants.KLINE_DURATION_ALL.split(",");
+    private String[] mKlineTitle = SettingConstants.KLINE_DURATION_ALL.split(",");
     private String[] mKlineDuration = new String[]{KLINE_3_SECOND, KLINE_5_SECOND, KLINE_10_SECOND,
             KLINE_15_SECOND, KLINE_20_SECOND, KLINE_30_SECOND, KLINE_1_MINUTE, KLINE_2_MINUTE, KLINE_3_MINUTE,
             KLINE_5_MINUTE, KLINE_10_MINUTE, KLINE_15_MINUTE, KLINE_30_MINUTE, KLINE_1_HOUR, KLINE_2_HOUR,
             KLINE_4_HOUR, KLINE_1_DAY, KLINE_7_DAY, KLINE_28_DAY};
+    private View mView;
 
     @Override
     public void show() {
+        if (mView == null)return;
         LogUtils.e("futureInfoShow", true);
 
         //每次点击进入合约详情页，设置合约代码
         mInstrumentId = mMainActivity.getmMainActivityPresenter().getmInstrumentId();
-        IdEvent idEvent = new IdEvent();
-        idEvent.setInstrument_id(mInstrumentId);
-        EventBus.getDefault().post(idEvent);
+        SwitchInsEvent switchInsEvent = new SwitchInsEvent();
+        switchInsEvent.setInstrument_id(mInstrumentId);
+        EventBus.getDefault().post(switchInsEvent);
 
-        QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
-        if (quoteEntity == null) return;
-        if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")) {
-            quoteEntity = CloneUtils.clone(quoteEntity);
-            quoteEntity = LatestFileManager.calculateCombineQuoteFull(quoteEntity);
-        }
-        mBinding.setQuote(quoteEntity);
         int indexKline = mBinding.vpKlineContent.getCurrentItem();
         ((LazyLoadFragment) mKlinePagerAdapter.getItem(indexKline)).show();
+
         if (mBinding.vpInfoContent.getVisibility() == View.VISIBLE) {
             int indexInfo = mBinding.vpInfoContent.getCurrentItem();
             ((LazyLoadFragment) mInfoPagerAdapter.getItem(indexInfo)).show();
@@ -127,7 +125,6 @@ public class FutureInfoFragment extends LazyLoadFragment {
             ((PositionFragment) mInfoPagerAdapter.getItem(1)).setInstrument_id(mInstrumentId);
             ((OrderFragment) mInfoPagerAdapter.getItem(2)).setInstrument_id(mInstrumentId);
             ((TransactionFragment) mInfoPagerAdapter.getItem(3)).setInstrument_id(mInstrumentId);
-
         }
         updateMD5ViewVisibility();
 
@@ -161,6 +158,14 @@ public class FutureInfoFragment extends LazyLoadFragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
+        if (quoteEntity == null) return;
+        if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")) {
+            quoteEntity = CloneUtils.clone(quoteEntity);
+            quoteEntity = LatestFileManager.calculateCombineQuoteFull(quoteEntity);
+        }
+        mBinding.setQuote(quoteEntity);
     }
 
     @Override
@@ -171,6 +176,7 @@ public class FutureInfoFragment extends LazyLoadFragment {
 
     @Override
     public void refreshMD() {
+        if (mView == null)return;
         QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
         if (quoteEntity == null) return;
         if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")) {
@@ -192,6 +198,7 @@ public class FutureInfoFragment extends LazyLoadFragment {
 
     @Override
     public void refreshTD() {
+        if (mView == null)return;
         int indexKline = mBinding.vpKlineContent.getCurrentItem();
         LazyLoadFragment lazyLoadFragmentKline = (LazyLoadFragment) mKlinePagerAdapter.getItem(indexKline);
         lazyLoadFragmentKline.refreshTD();
@@ -211,7 +218,8 @@ public class FutureInfoFragment extends LazyLoadFragment {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_future_info, container, false);
         initData();
         initEvent();
-        return mBinding.getRoot();
+        mView = mBinding.getRoot();
+        return mView;
     }
 
     @Override
@@ -221,17 +229,15 @@ public class FutureInfoFragment extends LazyLoadFragment {
     }
 
     private void initData() {
-        EventBus.getDefault().register(this);
-
         mMainActivity = (MainActivity) getActivity();
         sDataManager = DataManager.getInstance();
         sContext = BaseApplication.getContext();
 
         //初始化K线类型
-        String durationPre = (String) SPUtils.get(sContext, CommonConstants.CONFIG_KLINE_DURATION_DEFAULT, "");
+        String durationPre = (String) SPUtils.get(sContext, SettingConstants.CONFIG_KLINE_DURATION_DEFAULT, "");
         String[] durations = durationPre.split(",");
         List<String> list = new ArrayList<>();
-        list.add(CommonConstants.KLINE_DURATION_DAY);
+        list.add(SettingConstants.KLINE_DURATION_DAY);
         for (String data : durations) {
             list.add(data);
         }
@@ -273,6 +279,8 @@ public class FutureInfoFragment extends LazyLoadFragment {
     }
 
     private void initEvent() {
+        EventBus.getDefault().register(this);
+
         mBinding.rvDurationTitle.addOnItemTouchListener(new SimpleRecyclerViewItemClickListener(mBinding.rvDurationTitle, new SimpleRecyclerViewItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
@@ -381,11 +389,6 @@ public class FutureInfoFragment extends LazyLoadFragment {
         if (!mInstrumentId.contains("SHFE") && !mInstrumentId.contains("INE"))
             mBinding.md.setVisibility(View.GONE);
         else {
-            //判断有无五档行情
-            QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
-            if (quoteEntity != null && quoteEntity.getAsk_price5() == null) {
-                SPUtils.putAndApply(sContext, CONFIG_MD5, false);
-            }
             mIsMD5 = (boolean) SPUtils.get(sContext, CONFIG_MD5, true);
             if (mIsMD5) mBinding.md.setVisibility(View.VISIBLE);
             else mBinding.md.setVisibility(View.GONE);
@@ -450,7 +453,7 @@ public class FutureInfoFragment extends LazyLoadFragment {
      */
     public void switchDuration(String durationTitle) {
 
-        if (CommonConstants.KLINE_DURATION_DAY.equals(durationTitle)) {
+        if (SettingConstants.KLINE_DURATION_DAY.equals(durationTitle)) {
             mBinding.vpKlineContent.setCurrentItem(0, false);
             BaseApplication.getmMDWebSocket().sendSetChart(mInstrumentId);
         } else {
@@ -466,23 +469,23 @@ public class FutureInfoFragment extends LazyLoadFragment {
      * author: chenli
      * description: 产生周期参数
      */
-    private KlineEvent generateKlineEvent(String duration, String durationTitle) {
-        KlineEvent klineEvent = new KlineEvent();
-        klineEvent.setKlineType(duration);
+    private SwitchDurationEvent generateKlineEvent(String duration, String durationTitle) {
+        SwitchDurationEvent switchDurationEvent = new SwitchDurationEvent();
+        switchDurationEvent.setKlineType(duration);
         if (durationTitle.contains("秒")) {
-            klineEvent.setFragmentType(SECOND_FRAGMENT);
-            klineEvent.setxValuesType("HH:mm:ss");
+            switchDurationEvent.setFragmentType(SECOND_FRAGMENT);
+            switchDurationEvent.setxValuesType("HH:mm:ss");
         } else if (durationTitle.contains("分")) {
-            klineEvent.setFragmentType(MINUTE_FRAGMENT);
-            klineEvent.setxValuesType("dd/HH:mm");
+            switchDurationEvent.setFragmentType(MINUTE_FRAGMENT);
+            switchDurationEvent.setxValuesType("dd/HH:mm");
         } else if (durationTitle.contains("时")) {
-            klineEvent.setFragmentType(HOUR_FRAGMENT);
-            klineEvent.setxValuesType("dd/HH:mm");
+            switchDurationEvent.setFragmentType(HOUR_FRAGMENT);
+            switchDurationEvent.setxValuesType("dd/HH:mm");
         } else {
-            klineEvent.setFragmentType(DAY_FRAGMENT);
-            klineEvent.setxValuesType("yy/MM/dd");
+            switchDurationEvent.setFragmentType(DAY_FRAGMENT);
+            switchDurationEvent.setxValuesType("yy/MM/dd");
         }
-        return klineEvent;
+        return switchDurationEvent;
     }
 
     /**
@@ -551,13 +554,18 @@ public class FutureInfoFragment extends LazyLoadFragment {
      * description: fragmentPosition/currentDayFragment/KlineFragment页发过来的合约代码
      */
     @Subscribe
-    public void onEvent(IdEvent data) {
+    public void onEvent(SwitchInsEvent data) {
         //持仓列表中可能出现合约一致,方向不同的情形
         String instrument_id_new = data.getInstrument_id();
         if (!instrument_id_new.equals(mInstrumentId)) {
             mInstrumentId = instrument_id_new;
-            //切换合约更新盘口
-            refreshMD();
+            //下半部分还没有初始化下切换合约代码，更新合约
+            if (mBinding.vpInfoContent.getVisibility() == View.GONE){
+                ((HandicapFragment) mInfoPagerAdapter.getItem(0)).setInstrument_id(mInstrumentId);
+                ((PositionFragment) mInfoPagerAdapter.getItem(1)).setInstrument_id(mInstrumentId);
+                ((OrderFragment) mInfoPagerAdapter.getItem(2)).setInstrument_id(mInstrumentId);
+                ((TransactionFragment) mInfoPagerAdapter.getItem(3)).setInstrument_id(mInstrumentId);
+            }
             //切换合约判断是否有五档行情
             updateMD5ViewVisibility();
             //更新标题
@@ -565,11 +573,28 @@ public class FutureInfoFragment extends LazyLoadFragment {
         }
     }
 
-    public FragmentFutureInfoBinding getmBinding() {
-        return mBinding;
+    /**
+     * date: 2019/7/18
+     * author: chenli
+     * description: 五档行情开关
+     */
+    @Subscribe
+    public void onEventMainThread(CommonSwitchEvent data) {
+        if (mIsMD5 != data.isMD5()) updateMD5ViewVisibility();
     }
 
-    public KlineDurationTitleAdapter getmKlineDurationTitleAdapter() {
-        return mKlineDurationTitleAdapter;
+    /**
+     * date: 2019/7/18
+     * author: chenli
+     * description: 更新k线周期列表
+     */
+    @Subscribe
+    public void onEventMainThread(UpdateDurationsEvent data) {
+        mKlineDurationTitleAdapter.update();
+        switchDuration(mKlineDurationTitleAdapter.getDurationTitle());
+    }
+
+    public FragmentFutureInfoBinding getmBinding() {
+        return mBinding;
     }
 }

@@ -28,18 +28,20 @@
     <!-- 前后台切换 -->
     <uses-permission android:name="android.permission.REORDER_TASKS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- 点击通知回到app适配4.4.4版本 -->
+    <uses-permission android:name="android.permission.GET_TASKS" />
 
     <application
         android:name=".application.BaseApplication"
+        android:allowBackup="false"
         android:icon="${app_icon}"
         android:label="@string/app_name"
         android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:allowBackup="false"
         tools:ignore="GoogleAppIndexingWarning">
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
@@ -49,9 +51,9 @@
         </provider>
 
         <service
-            android:priority="1000"
             android:name=".service.ForegroundService"
-            android:exported="false"/>
+            android:exported="false"
+            android:priority="1000" />
 
         <receiver
             android:name=".receiver.NotificationClickReceiver"
@@ -68,8 +70,8 @@
             android:configChanges="keyboardHidden|orientation|screenSize|locale"
             android:theme="@android:style/Theme.Translucent" />
         <activity
-            android:launchMode="singleTask"
             android:name=".controller.activity.MainActivity"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/MainActivityTheme" />
         <activity
@@ -85,50 +87,50 @@
             android:theme="@style/SearchActivityTheme"
             android:windowSoftInputMode="stateVisible" />
         <activity
-            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.AccountActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
         <activity
-            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.FeedBackActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
         <activity
             android:name=".controller.activity.BankTransferActivity"
             android:screenOrientation="portrait"
             android:theme="@style/MainActivityTheme"
             android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
-            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.AboutActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
         <activity
-            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.ChangePasswordActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
         <activity
-            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.BrokerListActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
         <activity
-            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.SettingActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
         <activity
-            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.ParaChangeActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
         <activity
-            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.KlineDurationActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
         <activity
-            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.AddKlineDurationActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
         <activity
-            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.SplashActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -136,18 +138,36 @@
             </intent-filter>
         </activity>
         <activity
-            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.SubSettingActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
         <activity
-            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.OptionalActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
         <activity
-            android:theme="@style/MainActivityTheme"
             android:name=".controller.activity.CommonSwitchActivity"
-            android:screenOrientation="portrait" />
-
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
+        <activity
+            android:name=".controller.activity.ConditionOrderActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
+        <activity
+            android:name=".controller.activity.ManagerConditionOrderActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
+        <activity
+            android:name=".controller.activity.HistoryConditionActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
+        <activity
+            android:name=".controller.activity.StopLossTakeProfitActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme" />
+        <activity android:name=".controller.activity.ShinnyTechActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/MainActivityTheme"></activity>
     </application>
 
 </manifest>

@@ -2,13 +2,11 @@ package com.shinnytech.futures.view.custommpchart.myrenderer;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 
 import com.github.mikephil.charting.animation.ChartAnimator;
 import com.github.mikephil.charting.data.CandleData;
 import com.github.mikephil.charting.data.CandleEntry;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.dataprovider.CandleDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.ICandleDataSet;
@@ -21,9 +19,9 @@ import com.github.mikephil.charting.utils.Utils;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.view.custommpchart.mychart.CombinedChartKline;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyTransformer;
+import com.shinnytech.futures.view.custommpchart.mycomponent.MyValueFormatter;
 
 import java.util.List;
 
@@ -271,6 +269,8 @@ public class MyCandleStickChartRenderer extends CandleStickChartRenderer {
 
             float yOffset = Utils.convertDpToPixel(5f);
 
+            MyValueFormatter formatter = (MyValueFormatter) dataSet.getValueFormatter();
+
             MPPointF iconsOffset = MPPointF.getInstance(dataSet.getIconsOffset());
             iconsOffset.x = Utils.convertDpToPixel(iconsOffset.x);
             iconsOffset.y = Utils.convertDpToPixel(iconsOffset.y);
@@ -320,20 +320,15 @@ public class MyCandleStickChartRenderer extends CandleStickChartRenderer {
             }
 
             if (dataSet.isDrawValuesEnabled()) {
+
                 drawValue(c,
-                        dataSet.getValueFormatter(),
-                        entryMax.getHigh(),
-                        entryMax,
-                        i,
+                        formatter.getCandleLabel(entryMax),
                         xMax,
                         yMax,
                         ContextCompat.getColor(BaseApplication.getContext(), R.color.kline_red));
 
                 drawValue(c,
-                        dataSet.getValueFormatter(),
-                        entryMin.getLow(),
-                        entryMin,
-                        i,
+                        formatter.getCandleLabelLow(entryMin),
                         xMin,
                         yMin,
                         ContextCompat.getColor(BaseApplication.getContext(), R.color.kline_green));
@@ -345,13 +340,12 @@ public class MyCandleStickChartRenderer extends CandleStickChartRenderer {
     }
 
     @Override
-    public void drawValue(Canvas c, IValueFormatter formatter, float value, Entry entry, int dataSetIndex, float x, float y, int color) {
+    public void drawValue(Canvas c, String valueText, float x, float y, int color) {
         mValuePaint.setColor(color);
-        String text = formatter.getFormattedValue(value, entry, dataSetIndex, mViewPortHandler);
-        String textLeft = text + "--->";
+        String textLeft = valueText + "--->";
         int offset = Utils.calcTextWidth(mValuePaint, textLeft);
         if ((x - offset) < mViewPortHandler.offsetLeft()) {
-            String textRight = "<---" + text;
+            String textRight = "<---" + valueText;
             float xNew = x + offset / 2;
             c.drawText(textRight, xNew, y, mValuePaint);
         } else {
@@ -359,7 +353,6 @@ public class MyCandleStickChartRenderer extends CandleStickChartRenderer {
             c.drawText(textLeft, xNew, y, mValuePaint);
         }
     }
-
 
     @Override
     public void drawHighlighted(Canvas c, Highlight[] indices) {
@@ -391,7 +384,7 @@ public class MyCandleStickChartRenderer extends CandleStickChartRenderer {
             float xMax = mViewPortHandler.contentRight();
             float contentBottom = mViewPortHandler.contentBottom();
             //绘制竖线
-            c.drawLine(xp, 40, xp, mChart.getHeight(), mHighlightPaint);
+            c.drawLine(xp, 1, xp, mChart.getHeight(), mHighlightPaint);
 
             //判断是否画横线
             float y = high.getDrawY();

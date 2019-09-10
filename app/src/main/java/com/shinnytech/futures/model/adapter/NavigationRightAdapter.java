@@ -1,8 +1,12 @@
 package com.shinnytech.futures.model.adapter;
 
 import android.content.Context;
-import android.databinding.DataBindingUtil;
-import android.support.v7.widget.RecyclerView;
+import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.RecyclerView;
+import q.rorbin.badgeview.Badge;
+import q.rorbin.badgeview.QBadgeView;
+
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +18,8 @@ import com.shinnytech.futures.model.bean.settingbean.NavigationRightEntity;
 import com.shinnytech.futures.utils.ScreenUtils;
 
 import java.util.List;
+
+import static com.shinnytech.futures.constants.CommonConstants.CONDITIONAL_ORDER;
 
 
 /**
@@ -27,10 +33,27 @@ public class NavigationRightAdapter extends RecyclerView.Adapter<NavigationRight
 
     private Context sContext;
     private List<NavigationRightEntity> mData;
+    private Badge mBadgeView;
 
     public NavigationRightAdapter(Context sContext, List<NavigationRightEntity> mData) {
         this.sContext = sContext;
         this.mData = mData;
+        mBadgeView = new QBadgeView(sContext)
+                .setBadgeNumber(-1)
+                .setBadgePadding(4, true)
+                .setGravityOffset(4, 8, true)
+                .setBadgeBackgroundColor(sContext.getResources().getColor(R.color.launch))
+                .setBadgeGravity(Gravity.CENTER|Gravity.TOP)
+                .setBadgeTextColor(sContext.getResources().getColor(R.color.white));
+
+    }
+
+    public void refreshBadgeNum(int count){
+        if (count != -1)
+            mBadgeView.setBadgeNumber(count)
+                .setBadgeGravity(Gravity.CENTER|Gravity.END);
+        else mBadgeView.setBadgeNumber(count)
+                .setBadgeGravity(Gravity.CENTER|Gravity.TOP);
     }
 
     @Override
@@ -76,6 +99,10 @@ public class NavigationRightAdapter extends RecyclerView.Adapter<NavigationRight
 
             mBinding.icon.setImageResource(icon);
             mBinding.content.setText(content);
+
+            if (CONDITIONAL_ORDER.equals(content)){
+                mBadgeView.bindTarget(mBinding.content);
+            }
 
             //分割线加粗
             if (CommonConstants.LOGIN.equals(content) || CommonConstants.LOGOUT.equals(content)

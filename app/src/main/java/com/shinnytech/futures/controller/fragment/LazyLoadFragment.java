@@ -2,7 +2,7 @@ package com.shinnytech.futures.controller.fragment;
 
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;

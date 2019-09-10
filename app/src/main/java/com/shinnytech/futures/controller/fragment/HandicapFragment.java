@@ -1,15 +1,15 @@
 package com.shinnytech.futures.controller.fragment;
 
-import android.databinding.DataBindingUtil;
+import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.databinding.FragmentHandicapBinding;
-import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.SwitchInsEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
@@ -29,6 +29,7 @@ public class HandicapFragment extends LazyLoadFragment {
     private DataManager sDataManager = DataManager.getInstance();
     private String mInstrumentId;
     private FragmentHandicapBinding mBinding;
+    private View mView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,7 +41,8 @@ public class HandicapFragment extends LazyLoadFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_handicap, container, false);
         EventBus.getDefault().register(this);
-        return mBinding.getRoot();
+        mView = mBinding.getRoot();
+        return mView;
     }
 
     @Override
@@ -54,6 +56,7 @@ public class HandicapFragment extends LazyLoadFragment {
 
     @Override
     public void refreshMD() {
+        if (mView == null)return;
         QuoteEntity quoteEntity = sDataManager.getRtnData().getQuotes().get(mInstrumentId);
         if (quoteEntity == null) return;
         if (mInstrumentId.contains("&") && mInstrumentId.contains(" ")) {
@@ -83,7 +86,7 @@ public class HandicapFragment extends LazyLoadFragment {
      * description: 接收子线合约列表弹出框以及持仓页传过来的合约代码，以便更新盘口信息
      */
     @Subscribe
-    public void onEvent(IdEvent data) {
+    public void onEvent(SwitchInsEvent data) {
         setInstrument_id(data.getInstrument_id());
     }
 

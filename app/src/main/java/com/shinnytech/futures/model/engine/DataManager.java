@@ -15,13 +15,17 @@ import com.shinnytech.futures.model.bean.accountinfobean.TradeBean;
 import com.shinnytech.futures.model.bean.accountinfobean.TradeEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.TransferEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
+import com.shinnytech.futures.model.bean.conditionorderbean.COrderEntity;
+import com.shinnytech.futures.model.bean.conditionorderbean.ConditionEntity;
+import com.shinnytech.futures.model.bean.conditionorderbean.ConditionOrderBean;
+import com.shinnytech.futures.model.bean.conditionorderbean.ConditionOrderEntity;
+import com.shinnytech.futures.model.bean.conditionorderbean.ConditionUserEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.ChartEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.DiffEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.FutureBean;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.utils.SPUtils;
-import com.shinnytech.futures.utils.TimeUtils;
 import com.shinnytech.futures.utils.ToastUtils;
 
 import org.json.JSONArray;
@@ -30,42 +34,94 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import static com.shinnytech.futures.application.BaseApplication.CO_BROADCAST;
 import static com.shinnytech.futures.application.BaseApplication.MD_BROADCAST;
 import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST;
 import static com.shinnytech.futures.application.BaseApplication.sendMessage;
-import static com.shinnytech.futures.application.BaseApplication.showSettlement;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_FAIL_REASON;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_NOTIFY_CONTENT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_FAILED;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_SUCCEEDED;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_NOTIFY;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_ACCOUNT_ID_FIRST;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_ACCOUNT_ID_LAST;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID_FIRST;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BROKER_ID_LAST;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_LOGIN_SUCCESS_TIME_FIRST;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_CONDITION_FAILED;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_CONDITION_SUCCEED;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_LOGIN_FAIL_REASON;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_LOGIN_TYPE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_NOTIFY_CONTENT;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_LOGIN_FAILED;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_LOGIN_SUCCEEDED;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_NOTIFY;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_ACCOUNT_ID_FIRST;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_ACCOUNT_ID_LAST;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_BROKER_ID_FIRST;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_BROKER_ID_LAST;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_LOGIN_SUCCESS_TIME_FIRST;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_LOGIN_TIMEOUT;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMNOW;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMULATION;
-import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
-import static com.shinnytech.futures.constants.CommonConstants.CHANGE_PASSWORD_SUCCEED;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_INIT_TIME;
-import static com.shinnytech.futures.constants.CommonConstants.LOGIN_FAIL;
-import static com.shinnytech.futures.constants.CommonConstants.LOGIN_SUCCEED;
-import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_CHANGE_SUCCESS;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_FAIL;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_SUCCEED;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_WEAK_PASSWORD;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_CHANGE_PASSWORD_INIT;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_CHANGE_PASSWORD_SUCCEED;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_CHANGE_PASSWORD_WEAK;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_CHECK_UNREADY_CTP;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_CONDITION_FAIL_LEFT;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_CONDITION_FAIL_RIGHT;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_CONDITION_SUCCEED;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_LOGIN_FAIL_CTP_LEFT;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_LOGIN_FAIL_CTP_RIGHT;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_LOGIN_FAIL_SIMULATOR;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_LOGIN_PASSWORD_MISMATCH_CTP;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_LOGIN_PASSWORD_MISMATCH_SIMULATOR;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_LOGIN_SUCCEED_CTP;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_LOGIN_SUCCEED_SIMULATOR;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_LOGIN_TIMEOUT_CTP;
+import static com.shinnytech.futures.constants.ServerConstants.CODE_SETTLEMENT;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_CONDITION_KEY_CONDITION_LIST;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_CONDITION_KEY_CONDITION_ORDERS;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_CONDITION_KEY_HIS_CONDITION_ORDERS;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_CONDITION_KEY_ORDER_ID;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_CONDITION_KEY_ORDER_LIST;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_CONDITION_KEY_RTN_CONDITION_ORDERS;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_CONDITION_KEY_TRADING_DAY;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_CONDITION_KEY_USER_ID;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_MARKET_KEY_CHARTS;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_MARKET_KEY_DATA;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_MARKET_KEY_INS_LIST;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_MARKET_KEY_KLINES;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_MARKET_KEY_KLINES_BINDING;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_MARKET_KEY_KLINES_DATA;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_MARKET_KEY_MDHIS_MORE_DATA;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_MARKET_KEY_QUOTES;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_MARKET_KEY_CHARTS_STATE;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_MARKET_KEY_TICKS;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_CODE;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_CONTENT;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_DATA;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_LEVEL;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_NOTIFY;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_TRADE;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_ACCOUNTS;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_BANKS;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_ORDERS;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_POSITIONS;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_SESSION;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_TRADES;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_TRANSFERS;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_USER_ID;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_INIT_TIME;
+import static com.shinnytech.futures.constants.BroadcastConstants.CO_HIS_MESSAGE;
+import static com.shinnytech.futures.constants.BroadcastConstants.CO_MESSAGE;
+import static com.shinnytech.futures.constants.BroadcastConstants.MD_MESSAGE;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_CHANGE_SUCCESS;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_LOGIN_FAIL;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_LOGIN_SUCCEED;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_SETTLEMENT;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_WEAK_PASSWORD;
 
 /**
  * date: 7/9/17
@@ -91,12 +147,12 @@ public class DataManager {
      * date: 2019/4/16
      * description: user_agent
      */
-    public String USER_AGENT = "";
+    public String USER_AGENT = "android-github";
     /**
      * date: 2019/6/24
      * description: client_app_id
      */
-    public String CLIENT_APP_ID = "github";
+    public String CLIENT_APP_ID = "android-github";
     /**
      * date: 2018/11/7
      * description: 用户下单价格类型
@@ -201,6 +257,16 @@ public class DataManager {
      */
     private FutureBean RTN_DATA = new FutureBean();
     /**
+     * date: 2019/8/8
+     * description: 条件单信息
+     */
+    private ConditionOrderBean CONDITION_ORDER_DATA = new ConditionOrderBean();
+    /**
+     * date: 2019/8/12
+     * description: 历史条件单
+     */
+    private ConditionOrderBean CONDITION_ORDER_HIS_DATA = new ConditionOrderBean();
+    /**
      * date: 7/9/17
      * description: 账户登录返回信息实例
      */
@@ -227,12 +293,20 @@ public class DataManager {
         return TRADE_DATA;
     }
 
+    public ConditionOrderBean getConditionOrderBean() {
+        return CONDITION_ORDER_DATA;
+    }
+
     public BrokerEntity getBroker() {
         return BROKER;
     }
 
     public SimpleDateFormat getSimpleDateFormat() {
         return simpleDateFormat;
+    }
+
+    public ConditionOrderBean getHisConditionOrderBean() {
+        return CONDITION_ORDER_HIS_DATA;
     }
 
     /**
@@ -242,7 +316,7 @@ public class DataManager {
      */
     public void refreshFutureBean(JSONObject rtnData) {
         try {
-            JSONArray dataArray = rtnData.getJSONArray("data");
+            JSONArray dataArray = rtnData.getJSONArray(PARSE_MARKET_KEY_DATA);
             DiffEntity diffEntity = RTN_DATA.getData();
             for (int i = 0; i < dataArray.length(); i++) {
                 if (dataArray.isNull(i)) continue;
@@ -252,22 +326,22 @@ public class DataManager {
                     String key0 = iterator.next();
                     if (dataObject.isNull(key0)) continue;
                     switch (key0) {
-                        case "quotes":
+                        case PARSE_MARKET_KEY_QUOTES:
                             parseQuotes(dataObject, diffEntity);
                             break;
-                        case "klines":
+                        case PARSE_MARKET_KEY_KLINES:
                             parseKlines(dataObject, diffEntity);
                             break;
-                        case "ticks":
+                        case PARSE_MARKET_KEY_TICKS:
                             parseTicks(dataObject, diffEntity);
                             break;
-                        case "charts":
+                        case PARSE_MARKET_KEY_CHARTS:
                             parseCharts(dataObject, diffEntity);
                             break;
-                        case "ins_list":
+                        case PARSE_MARKET_KEY_INS_LIST:
                             diffEntity.setIns_list(dataObject.optString(key0));
                             break;
-                        case "mdhis_more_data":
+                        case PARSE_MARKET_KEY_MDHIS_MORE_DATA:
                             diffEntity.setMdhis_more_data(dataObject.optBoolean(key0));
                             break;
                         default:
@@ -282,7 +356,7 @@ public class DataManager {
     }
 
     private void parseCharts(JSONObject dataObject, DiffEntity diffEntity) throws JSONException {
-        JSONObject chartsObject = dataObject.getJSONObject("charts");
+        JSONObject chartsObject = dataObject.getJSONObject(PARSE_MARKET_KEY_CHARTS);
         Map<String, ChartEntity> chartsEntities = diffEntity.getCharts();
         Iterator<String> iterator = chartsObject.keys();
         while (iterator.hasNext()) {
@@ -297,7 +371,7 @@ public class DataManager {
             while (iterator1.hasNext()) {
                 String key1 = iterator1.next();
                 if (chartObject.isNull(key1)) continue;
-                if ("state".equals(key1)) {
+                if (PARSE_MARKET_KEY_CHARTS_STATE.equals(key1)) {
                     JSONObject stateObject = chartObject.optJSONObject(key1);
                     Iterator<String> iterator511 = stateObject.keys();
                     while (iterator511.hasNext()) {
@@ -331,7 +405,7 @@ public class DataManager {
     }
 
     private void parseKlines(JSONObject dataObject, DiffEntity diffEntity) throws JSONException {
-        JSONObject futureKlineObjects = dataObject.getJSONObject("klines");
+        JSONObject futureKlineObjects = dataObject.getJSONObject(PARSE_MARKET_KEY_KLINES);
         Map<String, Map<String, KlineEntity>> futureKlineEntities = diffEntity.getKlines();
         Iterator<String> iterator = futureKlineObjects.keys();
         while (iterator.hasNext()) {
@@ -355,7 +429,7 @@ public class DataManager {
                     String key2 = iterator2.next();
                     if (klineObject.isNull(key2)) continue;
                     switch (key2) {
-                        case "data":
+                        case PARSE_MARKET_KEY_KLINES_DATA:
                             JSONObject dataObjects = klineObject.getJSONObject(key2);
                             Iterator<String> iterator3 = dataObjects.keys();
                             Map<String, KlineEntity.DataEntity> dataEntities = klineEntity.getData();
@@ -387,8 +461,8 @@ public class DataManager {
                                 dataEntities.put(key3, dataEntity);
                             }
                             break;
-                        case "binding":
-                            JSONObject bindingObjects = klineObject.getJSONObject("binding");
+                        case PARSE_MARKET_KEY_KLINES_BINDING:
+                            JSONObject bindingObjects = klineObject.getJSONObject(PARSE_MARKET_KEY_KLINES_BINDING);
                             Iterator<String> iterator5 = bindingObjects.keys();
                             Map<String, KlineEntity.BindingEntity> bindingEntities = klineEntity.getBinding();
                             while (iterator5.hasNext()) {
@@ -430,7 +504,7 @@ public class DataManager {
     }
 
     private void parseQuotes(JSONObject dataObject, DiffEntity diffEntity) throws JSONException {
-        JSONObject quoteObjects = dataObject.getJSONObject("quotes");
+        JSONObject quoteObjects = dataObject.getJSONObject(PARSE_MARKET_KEY_QUOTES);
         Map<String, QuoteEntity> quoteEntities = diffEntity.getQuotes();
         Iterator<String> iterator = quoteObjects.keys();
         while (iterator.hasNext()) {
@@ -468,7 +542,7 @@ public class DataManager {
      */
     public void refreshTradeBean(JSONObject accountBeanObject) {
         try {
-            JSONArray dataArray = accountBeanObject.getJSONArray("data");
+            JSONArray dataArray = accountBeanObject.getJSONArray(PARSE_TRADE_KEY_DATA);
             for (int i = 0; i < dataArray.length(); i++) {
                 if (dataArray.isNull(i)) continue;
                 JSONObject dataObject = dataArray.getJSONObject(i);
@@ -478,10 +552,10 @@ public class DataManager {
                     if (dataObject.isNull(key)) continue;
                     JSONObject data = dataObject.getJSONObject(key);
                     switch (key) {
-                        case "notify":
+                        case PARSE_TRADE_KEY_NOTIFY:
                             parseNotify(data);
                             break;
-                        case "trade":
+                        case PARSE_TRADE_KEY_TRADE:
                             parseTrade(data);
                             break;
                         default:
@@ -501,10 +575,9 @@ public class DataManager {
                 String notifyKey = notifyIterator.next();
                 if (data.isNull(notifyKey)) continue;
                 JSONObject notify = data.getJSONObject(notifyKey);
-                final String content = notify.optString("content");
-                String type = notify.optString("type");
-                String level = notify.optString("level");
-                int code = notify.optInt("code");
+                final String content = notify.optString(PARSE_TRADE_KEY_CONTENT);
+                String level = notify.optString(PARSE_TRADE_KEY_LEVEL);
+                int code = notify.optInt(PARSE_TRADE_KEY_CODE);
 
                 //warning通知上报
                 if ("WARNING".equals(level)){
@@ -517,56 +590,69 @@ public class DataManager {
                     Amplitude.getInstance().logEventWrap(AMP_NOTIFY, jsonObject1);
                 }
 
+                //条件单已被服务器拒绝
+                if (code >= CODE_CONDITION_FAIL_LEFT && code <= CODE_CONDITION_FAIL_RIGHT){
+                    Amplitude.getInstance().logEventWrap(AMP_CONDITION_FAILED, new JSONObject());
+                }
+
+                //条件单下单成功
+                if (code == CODE_CONDITION_SUCCEED){
+                    Amplitude.getInstance().logEventWrap(AMP_CONDITION_SUCCEED, new JSONObject());
+                }
+
                 //修改密码成功通知
-                if (content.equals(CHANGE_PASSWORD_SUCCEED)) {
+                if (code == CODE_CHANGE_PASSWORD_SUCCEED) {
                     sendMessage(TD_MESSAGE_CHANGE_SUCCESS, TD_BROADCAST);
                 }
-                //弱密码通知
-                if ((code == 140) || (code == 131)) {
+                //首次登录修改密码和弱密码提示
+                if ((code == CODE_CHANGE_PASSWORD_INIT) || (code == CODE_CHANGE_PASSWORD_WEAK)) {
                     sendMessage(TD_MESSAGE_WEAK_PASSWORD, TD_BROADCAST);
                 }
 
-                //结算单
-                if ("SETTLEMENT".equals(type)) {
-                    BROKER.setSettlement(content);
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            showSettlement();
-                        }
-                    });
-                } else {
-                    //登录成功提示
-                    if (LOGIN_SUCCEED.equals(content)) {
-                        //游客模式和自动登录不弹出提示
-                        if (!LOGIN_TYPE.equals(AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN))continue;
+                //实盘登陆失败
+                if ((code >= CODE_LOGIN_FAIL_CTP_LEFT && code <= CODE_LOGIN_FAIL_CTP_RIGHT) ||
+                        code == CODE_LOGIN_FAIL_SIMULATOR || code == CODE_LOGIN_PASSWORD_MISMATCH_CTP
+                        || code == CODE_LOGIN_PASSWORD_MISMATCH_SIMULATOR){
+                    JSONObject jsonObject = new JSONObject();
+                    try {
+                        jsonObject.put(AMP_EVENT_LOGIN_TYPE, LOGIN_TYPE);
+                        jsonObject.put(AMP_EVENT_LOGIN_FAIL_REASON, content);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-
-                    //登录失败提示
-                    if (LOGIN_FAIL.equals(content)) {
-                        JSONObject jsonObject = new JSONObject();
-                        try {
-                            jsonObject.put(AMP_EVENT_LOGIN_TYPE, LOGIN_TYPE);
-                            jsonObject.put(AMP_EVENT_LOGIN_FAIL_REASON, content);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        Amplitude.getInstance().logEventWrap(AMP_LOGIN_FAILED, jsonObject);
-                        sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
-                        //实盘不提示"登录失败"，显示ctp给的提示
-                        if (!BROKER_ID.equals(BROKER_ID_SIMULATION) && !TimeUtils.isBetw1620())continue;
-                    }
-
-                    //CTP查询未就绪不显示
-                    if (code == 90)continue;
-
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ToastUtils.showToast(BaseApplication.getContext(), content);
-                        }
-                    });
+                    Amplitude.getInstance().logEventWrap(AMP_LOGIN_FAILED, jsonObject);
+                    sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
                 }
+
+                //实盘登陆超时
+                if (code == CODE_LOGIN_TIMEOUT_CTP ){
+                    sendMessage(TD_MESSAGE_LOGIN_TIMEOUT, TD_BROADCAST);
+                }
+
+                //游客模式和自动登录不弹出登陆成功提示
+                if ((CODE_LOGIN_SUCCEED_CTP == code || CODE_LOGIN_SUCCEED_SIMULATOR == code) &&
+                        !LOGIN_TYPE.equals(AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN)) continue;
+
+                //实盘不提示"用户登录失败!"，显示ctp给的提示
+                if (code >= CODE_LOGIN_FAIL_CTP_LEFT && code <= CODE_LOGIN_FAIL_CTP_RIGHT)continue;
+
+                //CTP查询未就绪不显示
+                if (code == CODE_CHECK_UNREADY_CTP)continue;
+
+                //结算单
+                if (code == CODE_SETTLEMENT) {
+                    BROKER.setSettlement(content);
+                    BROKER.setConfirmed(false);
+                    sendMessage(TD_MESSAGE_SETTLEMENT, TD_BROADCAST);
+                    continue;
+                }
+
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastUtils.showToast(BaseApplication.getContext(), content);
+                    }
+                });
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -588,26 +674,27 @@ public class DataManager {
                     String tradeDataKey = tradeDataIterator.next();
                     if (user.isNull(tradeDataKey)) continue;
                     switch (tradeDataKey) {
-                        case "accounts":
+                        case PARSE_TRADE_KEY_ACCOUNTS:
                             parseAccounts(user, userEntity);
                             break;
-                        case "orders":
+                        case PARSE_TRADE_KEY_ORDERS:
                             parseOrders(user, userEntity);
                             break;
-                        case "positions":
+                        case PARSE_TRADE_KEY_POSITIONS:
                             parsePositions(user, userEntity);
                             break;
-                        case "trades":
+                        case PARSE_TRADE_KEY_TRADES:
                             parseTrades(user, userEntity);
                             break;
-                        case "banks":
+                        case PARSE_TRADE_KEY_BANKS:
                             parseBanks(user, userEntity);
                             break;
-                        case "transfers":
+                        case PARSE_TRADE_KEY_TRANSFERS:
                             parseTransfers(user, userEntity);
                             break;
-                        case "session":
-                            String userId = user.getJSONObject("session").optString("user_id");
+                        case PARSE_TRADE_KEY_SESSION:
+                            String userId = user.getJSONObject(PARSE_TRADE_KEY_SESSION).
+                                    optString(PARSE_TRADE_KEY_USER_ID);
                             if (USER_ID.equals(userId)) {
                                 userEntity.setUser_id(userId);
                                 Identify identify = new Identify()
@@ -648,7 +735,7 @@ public class DataManager {
 
     private void parseTransfers(JSONObject user, UserEntity userEntity) {
         try {
-            JSONObject transferData = user.getJSONObject("transfers");
+            JSONObject transferData = user.getJSONObject(PARSE_TRADE_KEY_TRANSFERS);
             Map<String, TransferEntity> transferEntities = userEntity.getTransfers();
             Iterator<String> transferIterator = transferData.keys();
             while (transferIterator.hasNext()) {
@@ -685,7 +772,7 @@ public class DataManager {
 
     private void parseBanks(JSONObject user, UserEntity userEntity) {
         try {
-            JSONObject bankData = user.getJSONObject("banks");
+            JSONObject bankData = user.getJSONObject(PARSE_TRADE_KEY_BANKS);
             Map<String, BankEntity> bankEntities = userEntity.getBanks();
             Iterator<String> bankIterator = bankData.keys();
             while (bankIterator.hasNext()) {
@@ -723,7 +810,7 @@ public class DataManager {
 
     private void parseTrades(JSONObject user, UserEntity userEntity) {
         try {
-            JSONObject tradeData = user.getJSONObject("trades");
+            JSONObject tradeData = user.getJSONObject(PARSE_TRADE_KEY_TRADES);
             Map<String, TradeEntity> tradeEntities = userEntity.getTrades();
             Iterator<String> tradeIterator = tradeData.keys();
             while (tradeIterator.hasNext()) {
@@ -761,7 +848,7 @@ public class DataManager {
 
     private void parsePositions(JSONObject user, UserEntity userEntity) {
         try {
-            JSONObject positionData = user.getJSONObject("positions");
+            JSONObject positionData = user.getJSONObject(PARSE_TRADE_KEY_POSITIONS);
             Map<String, PositionEntity> positionEntities = userEntity.getPositions();
             Iterator<String> positionIterator = positionData.keys();
             while (positionIterator.hasNext()) {
@@ -800,7 +887,7 @@ public class DataManager {
 
     private void parseOrders(JSONObject user, UserEntity userEntity) {
         try {
-            JSONObject orderData = user.getJSONObject("orders");
+            JSONObject orderData = user.getJSONObject(PARSE_TRADE_KEY_ORDERS);
             final Map<String, OrderEntity> orderEntities = userEntity.getOrders();
             Iterator<String> orderIterator = orderData.keys();
             while (orderIterator.hasNext()) {
@@ -838,7 +925,7 @@ public class DataManager {
 
     private void parseAccounts(JSONObject user, UserEntity userEntity) {
         try {
-            JSONObject accountData = user.getJSONObject("accounts");
+            JSONObject accountData = user.getJSONObject(PARSE_TRADE_KEY_ACCOUNTS);
             Map<String, AccountEntity> accountEntities = userEntity.getAccounts();
             Iterator<String> accountIterator = accountData.keys();
             while (accountIterator.hasNext()) {
@@ -869,6 +956,154 @@ public class DataManager {
                 accountEntities.put(key, accountEntity);
             }
         } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * date: 2019/8/8
+     * author: chenli
+     * description: 刷新条件单信息
+     */
+    public void refreshConditionOrderBean(JSONObject conditionOrderBeanObject, String aid) {
+        try {
+            JSONArray dataArray;
+            String user_id = conditionOrderBeanObject.optString(PARSE_CONDITION_KEY_USER_ID);
+            String trading_day = conditionOrderBeanObject.optString(PARSE_CONDITION_KEY_TRADING_DAY);
+            ConditionUserEntity conditionUserEntity;
+            if (aid.equals(PARSE_CONDITION_KEY_RTN_CONDITION_ORDERS)){
+                CONDITION_ORDER_DATA.setUser_id(user_id);
+                CONDITION_ORDER_DATA.setTrading_day(trading_day);
+                dataArray = conditionOrderBeanObject.getJSONArray(PARSE_CONDITION_KEY_CONDITION_ORDERS);
+                conditionUserEntity = CONDITION_ORDER_DATA.getUsers().get(user_id);
+            }else {
+                CONDITION_ORDER_HIS_DATA.setUser_id(user_id);
+                CONDITION_ORDER_HIS_DATA.setTrading_day(trading_day);
+                dataArray = conditionOrderBeanObject.getJSONArray(PARSE_CONDITION_KEY_HIS_CONDITION_ORDERS);
+                conditionUserEntity = CONDITION_ORDER_HIS_DATA.getUsers().get(user_id);
+            }
+            if (conditionUserEntity == null)conditionUserEntity = new ConditionUserEntity();
+            for (int i = 0; i < dataArray.length(); i++) {
+                if (dataArray.isNull(i)) continue;
+                JSONObject dataObject = dataArray.getJSONObject(i);
+                String order_id = dataObject.optString(PARSE_CONDITION_KEY_ORDER_ID);
+                ConditionOrderEntity conditionOrderEntity = conditionUserEntity.getCondition_orders().get(order_id);
+                if (conditionOrderEntity == null) conditionOrderEntity = new ConditionOrderEntity();
+                Class clConditionOrder = conditionOrderEntity.getClass();
+                Iterator<String> iterator = dataObject.keys();
+                while (iterator.hasNext()) {
+                    String key = iterator.next();
+                    if (dataObject.isNull(key)) continue;
+                    switch (key) {
+                        case PARSE_CONDITION_KEY_CONDITION_LIST:
+                            parseConditionList(conditionOrderEntity, dataObject, key);
+                            break;
+                        case PARSE_CONDITION_KEY_ORDER_LIST:
+                            parseOrderList(conditionOrderEntity, dataObject, key);
+                            break;
+                        default:
+                            try {
+                                Field f = clConditionOrder.getDeclaredField(key);
+                                f.setAccessible(true);
+                                f.set(conditionOrderEntity, dataObject.optString(key));
+                            } catch (NoSuchFieldException e) {
+                                e.printStackTrace();
+                                continue;
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                                continue;
+                            }
+                            break;
+                    }
+                }
+                conditionUserEntity.getCondition_orders().put(order_id, conditionOrderEntity);
+            }
+            if (aid.equals(PARSE_CONDITION_KEY_RTN_CONDITION_ORDERS)){
+                CONDITION_ORDER_DATA.getUsers().put(user_id, conditionUserEntity);
+                sendMessage(CO_MESSAGE, CO_BROADCAST);
+            }else {
+                CONDITION_ORDER_HIS_DATA.getUsers().put(user_id, conditionUserEntity);
+                sendMessage(CO_HIS_MESSAGE, CO_BROADCAST);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * date: 2019/8/8
+     * author: chenli
+     * description: 解析条件
+     */
+    private void parseConditionList(ConditionOrderEntity conditionOrderEntity, JSONObject dataObject, String key){
+        try {
+            JSONArray conditionArray = dataObject.optJSONArray(key);
+            List<ConditionEntity> conditionList = new ArrayList<>();
+            for (int conditionIndex = 0; conditionIndex < conditionArray.length(); conditionIndex++) {
+                if (conditionArray.isNull(conditionIndex)) continue;
+                JSONObject conditionObject = conditionArray.getJSONObject(conditionIndex);
+                ConditionEntity conditionEntity = new ConditionEntity();
+                Class clCondition = conditionEntity.getClass();
+                Iterator<String> iterator = conditionObject.keys();
+                while (iterator.hasNext()) {
+                    String key1 = iterator.next();
+                    if (conditionObject.isNull(key1)) continue;
+                    try {
+                        Field f = clCondition.getDeclaredField(key1);
+                        f.setAccessible(true);
+                        f.set(conditionEntity, conditionObject.optString(key1));
+                    } catch (NoSuchFieldException e) {
+                        e.printStackTrace();
+                        continue;
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                        continue;
+                    }
+
+                }
+                conditionList.add(conditionEntity);
+            }
+            conditionOrderEntity.setCondition_list(conditionList);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * date: 2019/8/8
+     * author: chenli
+     * description: 解析单子
+     */
+    private void parseOrderList(ConditionOrderEntity conditionOrderEntity, JSONObject dataObject, String key){
+        try {
+            JSONArray orderArray = dataObject.optJSONArray(key);
+            List<COrderEntity> orderList = new ArrayList<>();
+            for (int orderIndex = 0; orderIndex < orderArray.length(); orderIndex++) {
+                if (orderArray.isNull(orderIndex)) continue;
+                JSONObject orderObject = orderArray.getJSONObject(orderIndex);
+                COrderEntity orderEntity = new COrderEntity();
+                Class clOrder = orderEntity.getClass();
+                Iterator<String> iterator = orderObject.keys();
+                while (iterator.hasNext()) {
+                    String key1 = iterator.next();
+                    if (orderObject.isNull(key1)) continue;
+                    try {
+                        Field f = clOrder.getDeclaredField(key1);
+                        f.setAccessible(true);
+                        f.set(orderEntity, orderObject.optString(key1));
+                    } catch (NoSuchFieldException e) {
+                        e.printStackTrace();
+                        continue;
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                        continue;
+                    }
+
+                }
+                orderList.add(orderEntity);
+            }
+            conditionOrderEntity.setOrder_list(orderList);
+        }catch (Exception e){
             e.printStackTrace();
         }
     }

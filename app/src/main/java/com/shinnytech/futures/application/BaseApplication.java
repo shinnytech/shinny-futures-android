@@ -1,44 +1,23 @@
 package com.shinnytech.futures.application;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.Application;
-import android.app.Dialog;
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.LifecycleObserver;
-import android.arch.lifecycle.OnLifecycleEvent;
-import android.arch.lifecycle.ProcessLifecycleOwner;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-import android.view.View;
-import android.widget.TextView;
 
 import com.aliyun.sls.android.sdk.ClientConfiguration;
 import com.aliyun.sls.android.sdk.LOGClient;
 import com.aliyun.sls.android.sdk.SLSDatabaseManager;
 import com.aliyun.sls.android.sdk.SLSLog;
 import com.aliyun.sls.android.sdk.core.auth.PlainTextAKSKCredentialProvider;
-import com.lzy.okgo.OkGo;
-import com.lzy.okgo.cache.CacheEntity;
-import com.lzy.okgo.cache.CacheMode;
-import com.lzy.okgo.callback.FileCallback;
-import com.lzy.okgo.cookie.store.SPCookieStore;
-import com.lzy.okgo.interceptor.HttpLoggingInterceptor;
-import com.lzy.okgo.model.HttpHeaders;
-import com.lzy.okgo.model.Response;
 import com.sfit.ctp.info.DeviceInfoManager;
 import com.shinnytech.futures.BuildConfig;
-import com.shinnytech.futures.R;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.amplitude.api.Identify;
 import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.SettingConstants;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
-import com.shinnytech.futures.model.bean.eventbusbean.RedrawEvent;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.service.ForegroundService;
@@ -47,60 +26,52 @@ import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.TimeUtils;
-import com.shinnytech.futures.utils.ToastUtils;
 import com.shinnytech.futures.websocket.MDWebSocket;
 import com.shinnytech.futures.websocket.TDWebSocket;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.tencent.bugly.crashreport.CrashReport;
 
-import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
+import androidx.lifecycle.ProcessLifecycleOwner;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_BACKGROUND;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_CRASH;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_CRASH_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_ERROR_MESSAGE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_ERROR_STACK;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_ERROR_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_INIT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BALANCE_FIRST;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_BALANCE_LAST;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_INIT_TIME_FIRST;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_PACKAGE_ID_FIRST;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_PACKAGE_ID_LAST;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_SURVIVAL_TIME_TOTAL;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_TYPE_FIRST;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_TYPE_FIRST_PURE_NEWBIE_VALUE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_TYPE_FIRST_TRADER_VALUE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_BACKGROUND;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_CRASH;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_CRASH_TYPE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_ERROR_MESSAGE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_ERROR_STACK;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_ERROR_TYPE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_INIT;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_BALANCE_FIRST;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_BALANCE_LAST;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_INIT_TIME_FIRST;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_PACKAGE_ID_FIRST;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_PACKAGE_ID_LAST;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_SURVIVAL_TIME_TOTAL;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_TYPE_FIRST;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_TYPE_FIRST_PURE_NEWBIE_VALUE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_TYPE_FIRST_TRADER_VALUE;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMULATION;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_INIT_TIME;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_INSERT_ORDER_CONFIRM;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_IS_FIRM;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_KLINE_DURATION_DEFAULT;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_MD5;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ORDER_LINE;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PARA_MA;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_POSITION_LINE;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_RECOMMEND;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_SYSTEM_INFO;
 import static com.shinnytech.futures.constants.CommonConstants.JSON_FILE_URL;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_1;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_2;
@@ -108,6 +79,20 @@ import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_3;
 import static com.shinnytech.futures.constants.CommonConstants.MARKET_URL_4;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_INS_LIST;
 import static com.shinnytech.futures.constants.CommonConstants.TRANSACTION_URL;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_AVERAGE_LINE;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_BROKER;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_CANCEL_ORDER_CONFIRM;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_INIT_TIME;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_INSERT_ORDER_CONFIRM;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_IS_CONDITION;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_IS_FIRM;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_KLINE_DURATION_DEFAULT;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_MD5;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_ORDER_LINE;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_PARA_MA;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_POSITION_LINE;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_RECOMMEND;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_SYSTEM_INFO;
 
 /**
  * Created on 12/21/17.
@@ -130,6 +115,12 @@ public class BaseApplication extends Application {
     public static final String TD_BROADCAST = "TD_BROADCAST";
 
     /**
+     * date: 2019/8/10
+     * description: 条件单广播类型
+     */
+    public static final String CO_BROADCAST = "CO_BROADCAST";
+
+    /**
      * date: 7/9/17
      * description: 行情广播信息
      */
@@ -140,6 +131,11 @@ public class BaseApplication extends Application {
      * description: 交易广播信息
      */
     public static final String TD_BROADCAST_ACTION = BaseApplication.class.getName() + "." + TD_BROADCAST;
+    /**
+     * date: 2019/8/10
+     * description: 条件单广播信息
+     */
+    public static final String CO_BROADCAST_ACTION = BaseApplication.class.getName() + "." + CO_BROADCAST;
     private static LocalBroadcastManager mLocalBroadcastManager;
     private static Context sContext;
     private static DataManager sDataManager;
@@ -148,7 +144,6 @@ public class BaseApplication extends Application {
     private static LOGClient sLOGClient;
     private static boolean sBackGround;
     private AppLifecycleObserver mAppLifecycleObserver;
-    private static Context mSettlementContext;
     private static MDWebSocket mMDWebSocket;
     private static TDWebSocket mTDWebSocket;
 
@@ -184,6 +179,13 @@ public class BaseApplication extends Application {
                 intentTransaction.putExtra("msg", message);
                 mLocalBroadcastManager.sendBroadcast(intentTransaction);
                 break;
+            case CO_BROADCAST:
+                Intent intentCondition = new Intent(CO_BROADCAST_ACTION);
+                intentCondition.putExtra("msg", message);
+                mLocalBroadcastManager.sendBroadcast(intentCondition);
+                break;
+            default:
+                break;
         }
     }
 
@@ -204,8 +206,6 @@ public class BaseApplication extends Application {
         initDefaultConfig();
         initThirdParty();
         downloadLatestJsonFile();
-        registerActivityLifecycleCallback();
-
     }
 
     /**
@@ -280,7 +280,7 @@ public class BaseApplication extends Application {
         }
 
         if (!SPUtils.contains(sContext, CONFIG_KLINE_DURATION_DEFAULT)) {
-            SPUtils.putAndApply(sContext, CONFIG_KLINE_DURATION_DEFAULT, CommonConstants.KLINE_DURATION_DEFAULT);
+            SPUtils.putAndApply(sContext, CONFIG_KLINE_DURATION_DEFAULT, SettingConstants.KLINE_DURATION_DEFAULT);
         } else {
             //覆盖之前的配置
             String kline = (String) SPUtils.get(sContext, CONFIG_KLINE_DURATION_DEFAULT, "");
@@ -309,7 +309,7 @@ public class BaseApplication extends Application {
         }
 
         if (!SPUtils.contains(sContext, CONFIG_PARA_MA)) {
-            SPUtils.putAndApply(sContext, CONFIG_PARA_MA, CommonConstants.PARA_MA);
+            SPUtils.putAndApply(sContext, CONFIG_PARA_MA, SettingConstants.PARA_MA);
         }
 
         if (!SPUtils.contains(sContext, CONFIG_INSERT_ORDER_CONFIRM)) {
@@ -334,6 +334,10 @@ public class BaseApplication extends Application {
 
         if (!SPUtils.contains(sContext, CONFIG_MD5)) {
             SPUtils.putAndApply(sContext, CONFIG_MD5, true);
+        }
+
+        if (!SPUtils.contains(sContext, CONFIG_IS_CONDITION)) {
+            SPUtils.putAndApply(sContext, CONFIG_IS_CONDITION, false);
         }
 
     }
@@ -370,7 +374,6 @@ public class BaseApplication extends Application {
         initAMP(AMP_KEY);
         initBugly(BUGLY_KEY);
         initAliLog(AK, SK);
-        initOkGo();
     }
 
     /**
@@ -446,167 +449,35 @@ public class BaseApplication extends Application {
     }
 
     /**
-     * date: 2019/6/18
-     * author: chenli
-     * description: 配置http服务
-     */
-    private void initOkGo() {
-        //构建OkHttpClient.Builder
-        OkHttpClient.Builder builder = new OkHttpClient.Builder();
-
-        //配置log
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor("OkGo");
-        //log打印级别，决定了log显示的详细程度
-        loggingInterceptor.setPrintLevel(HttpLoggingInterceptor.Level.BODY);
-        //log颜色级别，决定了log在控制台显示的颜色
-        loggingInterceptor.setColorLevel(Level.INFO);
-        builder.addInterceptor(loggingInterceptor);
-
-        //配置超时时间
-        //全局的读取超时时间
-        builder.readTimeout(OkGo.DEFAULT_MILLISECONDS, TimeUnit.MILLISECONDS);
-        //全局的写入超时时间
-        builder.writeTimeout(OkGo.DEFAULT_MILLISECONDS, TimeUnit.MILLISECONDS);
-        //全局的连接超时时间
-        builder.connectTimeout(OkGo.DEFAULT_MILLISECONDS, TimeUnit.MILLISECONDS);
-
-        //配置Cookie
-        //使用sp保持cookie，如果cookie不过期，则一直有效
-        builder.cookieJar(new com.lzy.okgo.cookie.CookieJarImpl(new SPCookieStore(sContext)));
-
-        //配置OkGo
-        //---------这里给出的是示例代码,告诉你可以这么传,实际使用的时候,根据需要传,不需要就不传-------------//
-        HttpHeaders headers = new HttpHeaders();
-        headers.put("Accept", "application/json");    //header不支持中文，不允许有特殊字符
-        //-------------------------------------------------------------------------------------//
-        OkGo.getInstance().init(this)                           //必须调用初始化
-                .setOkHttpClient(builder.build())               //建议设置OkHttpClient，不设置将使用默认的
-                .setCacheMode(CacheMode.NO_CACHE)               //全局统一缓存模式，默认不使用缓存，可以不传
-                .setCacheTime(CacheEntity.CACHE_NEVER_EXPIRE)   //全局统一缓存时间，默认永不过期，可以不传
-                .setRetryCount(3)                               //全局统一超时重连次数，默认为三次，那么最差的情况会请求4次(一次原始请求，三次重连请求)，不需要可以设置为0
-                .addCommonHeaders(headers);                      //全局公共头
-    }
-
-    /**
      * date: 7/9/17
      * author: chenli
      * description: 下载合约列表文件
      */
     private void downloadLatestJsonFile() {
-        OkGo.<File>get(CommonConstants.JSON_FILE_URL)
-                .tag(this)
-                .execute(new FileCallback(sContext.getFilesDir().getAbsolutePath(), "latest.json") {
-                    @Override
-                    public void onSuccess(final com.lzy.okgo.model.Response<File> response) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                LogUtils.e("onSuccess", true);
-                                LatestFileManager.initInsList(response.body());
-                                mMDWebSocket.reConnect();
-                                mTDWebSocket.reConnect();
-                            }
-                        }).start();
-                    }
-
-                    @Override
-                    public void onError(Response<File> response) {
-                        super.onError(response);
-                        ToastUtils.showToast(sContext, "合约代码下载失败，请检查网络");
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                LogUtils.e("onError", true);
-                                LatestFileManager.initInsList(new File("latest.json"));
-                                mMDWebSocket.reConnect();
-                                mTDWebSocket.reConnect();
-                            }
-                        }).start();
-                    }
-                });
-    }
-
-    /**
-     * date: 7/21/17
-     * author: chenli
-     * description: 应用前台监听器
-     */
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    private void registerActivityLifecycleCallback() {
-        this.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
+        OkHttpClient mOkHttpClient = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(CommonConstants.JSON_FILE_URL)
+                .build();
+        Call call = mOkHttpClient.newCall(request);
+        call.enqueue(new Callback() {
             @Override
-            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-                if (activity.getParent() != null) {//如果这个视图是嵌入的子视图
-                    mSettlementContext = activity.getParent();
-                } else {
-                    mSettlementContext = activity;
-                }
+            public void onFailure(Call call, IOException e) {
+                String latest = LatestFileManager.readFile("latest.json");
+                if (latest.isEmpty())return;
+                LatestFileManager.initInsList(latest);
+                mMDWebSocket.reConnect();
+                mTDWebSocket.reConnect();
             }
 
             @Override
-            public void onActivityStarted(Activity activity) {
-                if (activity.getParent() != null) {//如果这个视图是嵌入的子视图
-                    mSettlementContext = activity.getParent();
-                } else {
-                    mSettlementContext = activity;
-                }
-            }
-
-            @Override
-            public void onActivityResumed(Activity activity) {
-                if (activity.getParent() != null) {//如果这个视图是嵌入的子视图
-                    mSettlementContext = activity.getParent();
-                } else {
-                    mSettlementContext = activity;
-                }
-            }
-
-            @Override
-            public void onActivityPaused(Activity activity) {
-
-            }
-
-            @Override
-            public void onActivityStopped(Activity activity) {
-
-            }
-
-            @Override
-            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-
-            }
-
-            @Override
-            public void onActivityDestroyed(Activity activity) {
+            public void onResponse(Call call, Response response) throws IOException {
+                String latest = response.body().string();
+                LatestFileManager.initInsList(latest);
+                mMDWebSocket.reConnect();
+                mTDWebSocket.reConnect();
+                LatestFileManager.writeFile("latest.json", latest);
             }
         });
-    }
-
-    /**
-     * date: 2019/6/15
-     * author: chenli
-     * description: 显示结算单
-     */
-    public static void showSettlement(){
-        if (mSettlementContext != null) {
-            final Dialog dialog = new Dialog(mSettlementContext, R.style.responsibilityDialog);
-            View viewDialog = View.inflate(mSettlementContext, R.layout.view_dialog_confirm, null);
-            dialog.setContentView(viewDialog);
-            TextView settlement = viewDialog.findViewById(R.id.settlement_info);
-            settlement.setText(sDataManager.getBroker().getSettlement());
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.setCancelable(false);
-            viewDialog.findViewById(R.id.confirm).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mTDWebSocket.sendReqConfirmSettlement();
-                    dialog.dismiss();
-                }
-            });
-            if (!dialog.isShowing()) {
-                dialog.show();
-            }
-        }
     }
 
     class AppLifecycleObserver implements LifecycleObserver {
@@ -652,7 +523,6 @@ public class BaseApplication extends Application {
             mTDWebSocket.backToForegroundCheck();
         }
 
-        EventBus.getDefault().post(new RedrawEvent());
         Intent intent = new Intent(sContext, ForegroundService.class);
         stopService(intent);
     }

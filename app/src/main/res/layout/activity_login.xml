@@ -3,7 +3,7 @@
 
     <data></data>
 
-    <android.support.design.widget.CoordinatorLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:keepScreenOn="true"
         xmlns:tools="http://schemas.android.com/tools"
         tools:context=".controller.activity.LoginActivity"
@@ -11,15 +11,17 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:layout_marginStart="@dimen/margin_30dp"
-            android:layout_marginEnd="@dimen/margin_30dp"
+            android:layout_marginStart="@dimen/margin_5dp"
+            android:layout_marginEnd="@dimen/margin_5dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <LinearLayout
+                android:layout_marginStart="@dimen/margin_25dp"
+                android:layout_marginEnd="@dimen/margin_25dp"
                 android:layout_marginBottom="@dimen/margin_10dp"
-                android:layout_width="200dp"
+                android:layout_width="match_parent"
                 android:layout_height="45dp"
                 android:orientation="horizontal">
 
@@ -48,7 +50,6 @@
                         android:layout_height="2dp"></View>
                 </LinearLayout>
 
-
                 <LinearLayout
                     android:id="@+id/ll_simulation"
                     android:paddingStart="@dimen/padding_10dp"
@@ -75,9 +76,23 @@
                         android:layout_height="2dp"></View>
                 </LinearLayout>
 
+                <View
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"/>
+
+                <ImageView
+                    android:layout_gravity="center"
+                    android:id="@+id/visitor"
+                    android:src="@drawable/activity_login_visitor_selector"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+
             </LinearLayout>
 
             <TextView
+                android:layout_marginStart="@dimen/margin_25dp"
+                android:layout_marginEnd="@dimen/margin_25dp"
                 android:id="@+id/tv_broker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -88,6 +103,8 @@
                 android:textSize="@dimen/font_size_normal" />
 
             <LinearLayout
+                android:layout_marginStart="@dimen/margin_25dp"
+                android:layout_marginEnd="@dimen/margin_25dp"
                 android:layout_marginBottom="@dimen/margin_5dp"
                 android:id="@+id/ll_broker"
                 android:layout_width="match_parent"
@@ -117,6 +134,8 @@
             </LinearLayout>
 
             <TextView
+                android:layout_marginStart="@dimen/margin_25dp"
+                android:layout_marginEnd="@dimen/margin_25dp"
                 android:id="@+id/tv_account"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -128,6 +147,8 @@
                 android:textSize="@dimen/font_size_normal" />
 
             <LinearLayout
+                android:layout_marginStart="@dimen/margin_25dp"
+                android:layout_marginEnd="@dimen/margin_25dp"
                 android:layout_marginBottom="@dimen/margin_5dp"
                 android:id="@+id/ll_account"
                 android:layout_width="match_parent"
@@ -161,6 +182,8 @@
             </LinearLayout>
 
             <TextView
+                android:layout_marginStart="@dimen/margin_25dp"
+                android:layout_marginEnd="@dimen/margin_25dp"
                 android:id="@+id/tv_password"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -172,6 +195,8 @@
                 android:textSize="@dimen/font_size_normal" />
 
             <LinearLayout
+                android:layout_marginStart="@dimen/margin_25dp"
+                android:layout_marginEnd="@dimen/margin_25dp"
                 android:layout_marginBottom="@dimen/margin_10dp"
                 android:id="@+id/ll_password"
                 android:layout_width="match_parent"
@@ -193,19 +218,20 @@
                     android:textSize="@dimen/font_size_normal" />
 
                 <ImageView
-                    android:id="@+id/delete_password"
+                    android:id="@+id/show_password"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
                     android:layout_gravity="center"
                     android:scaleType="center"
                     android:layout_marginStart="@dimen/margin_10dp"
                     android:layout_marginEnd="@dimen/margin_10dp"
-                    android:src="@mipmap/ic_cancel_white_18dp"
-                    android:visibility="invisible" />
+                    android:src="@mipmap/ic_visibility_off_white_18dp" />
 
             </LinearLayout>
 
             <Button
+                android:layout_marginStart="@dimen/margin_25dp"
+                android:layout_marginEnd="@dimen/margin_25dp"
                 android:layout_marginBottom="@dimen/margin_10dp"
                 android:id="@+id/button_id_login"
                 android:layout_width="match_parent"
@@ -217,20 +243,115 @@
                 android:textSize="@dimen/font_size_normal_high" />
 
             <View
+                android:layout_marginStart="@dimen/margin_25dp"
+                android:layout_marginEnd="@dimen/margin_25dp"
                 android:background="@color/login_gray"
                 android:layout_width="match_parent"
                 android:layout_height="2dp"/>
 
-            <Button
-                android:background="@null"
-                android:id="@+id/visitor"
-                android:gravity="center"
-                android:layout_gravity="center"
-                android:textColor="@color/login_gray"
-                android:text="进入行情"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp" />
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/login_hint_1"
+                android:background="@drawable/activity_login_hint_rectangle_border"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:gravity="start|center_vertical"
+                android:layout_height="45dp">
+                <TextView
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    android:textColor="@color/launch"
+                    android:textSize="@dimen/font_size_normal"
+                    android:text="登录失败提示1："
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+                <TextView
+                    android:gravity="center_vertical"
+                    android:textSize="@dimen/font_size_normal"
+                    android:textColor="@color/text_white"
+                    android:text="是不是选错期货公司了？"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
 
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/login_hint_2"
+                android:background="@drawable/activity_login_hint_rectangle_border"
+                android:layout_marginTop="@dimen/margin_5dp"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:gravity="start|center_vertical"
+                android:layout_height="60dp">
+                <TextView
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    android:textColor="@color/launch"
+                    android:textSize="@dimen/font_size_normal"
+                    android:text="登录失败提示2："
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+                <TextView
+                    android:gravity="center_vertical"
+                    android:textSize="@dimen/font_size_normal"
+                    android:textColor="@color/text_white"
+                    android:text="账号或者密码输错了？\n点密码旁的眼睛确认一下"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/login_hint_3"
+                android:background="@drawable/activity_login_hint_rectangle_border"
+                android:layout_marginTop="@dimen/margin_5dp"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:gravity="start|center_vertical"
+                android:layout_height="75dp">
+                <TextView
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    android:textColor="@color/launch"
+                    android:textSize="@dimen/font_size_normal"
+                    android:text="登录失败提示3："
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+                <TextView
+                    android:gravity="center_vertical"
+                    android:textSize="@dimen/font_size_normal"
+                    android:textColor="@color/text_white"
+                    android:text="您的账号可能不是CTP账号\n或者可能席位不匹配\n请联系期货公司"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/login_hint_4"
+                android:background="@drawable/activity_login_hint_rectangle_border"
+                android:layout_marginTop="@dimen/margin_20dp"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:gravity="start|center_vertical"
+                android:layout_height="60dp">
+                <TextView
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    android:textColor="@color/launch"
+                    android:textSize="@dimen/font_size_normal"
+                    android:text="登录失败提示1："
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+                <TextView
+                    android:gravity="center_vertical"
+                    android:textSize="@dimen/font_size_normal"
+                    android:textColor="@color/text_white"
+                    android:text="期货公司已关机\n请在交易时间登陆"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
         </LinearLayout>
 
         <TextView
@@ -244,5 +365,5 @@
             android:layout_width="match_parent"
             android:layout_height="30dp" />
 
-    </android.support.design.widget.CoordinatorLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

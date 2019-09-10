@@ -1,0 +1,26 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/optional_dialog_width"
+    android:layout_height="@dimen/optional_dialog_height"
+    android:background="@drawable/dialog_quote_recommend_background"
+    android:orientation="vertical">
+
+    <TextView
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:id="@+id/dialog_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_10dp"
+        android:text="@string/query_his_condition"
+        android:textColor="@color/dialog_optional_out_text"
+        android:textSize="@dimen/font_size_normal_more" />
+
+    <ProgressBar
+        android:backgroundTint="@color/text_red"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+
+
+</LinearLayout>

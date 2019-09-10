@@ -1,10 +1,10 @@
 package com.shinnytech.futures.model.adapter;
 
 import android.content.Context;
-import android.databinding.DataBindingUtil;
+import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.RecyclerView;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,16 +20,16 @@ import com.shinnytech.futures.utils.MathUtils;
 import java.util.Date;
 import java.util.List;
 
-import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY;
-import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BUY_ZN_S;
-import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_SELL_ZN_S;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_CLOSE_ZN_S;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_OPEN;
-import static com.shinnytech.futures.constants.CommonConstants.OFFSET_OPEN_ZN_S;
-import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
-import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.STATUS_CANCELED_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.STATUS_FINISHED_ZN;
+import static com.shinnytech.futures.constants.TradeConstants.DIRECTION_BUY;
+import static com.shinnytech.futures.constants.TradeConstants.DIRECTION_BUY_ZN_S;
+import static com.shinnytech.futures.constants.TradeConstants.DIRECTION_SELL_ZN_S;
+import static com.shinnytech.futures.constants.TradeConstants.OFFSET_CLOSE_ZN_S;
+import static com.shinnytech.futures.constants.TradeConstants.OFFSET_OPEN;
+import static com.shinnytech.futures.constants.TradeConstants.OFFSET_OPEN_ZN_S;
+import static com.shinnytech.futures.constants.TradeConstants.STATUS_ALIVE;
+import static com.shinnytech.futures.constants.TradeConstants.STATUS_ALIVE_ZN;
+import static com.shinnytech.futures.constants.TradeConstants.STATUS_CANCELED_ZN;
+import static com.shinnytech.futures.constants.TradeConstants.STATUS_FINISHED_ZN;
 
 /**
  * date: 7/9/17

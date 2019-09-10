@@ -2,15 +2,17 @@ package com.shinnytech.futures.controller.activity;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -19,10 +21,9 @@ import android.widget.FrameLayout;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.SystemUtils;
-import com.shinnytech.futures.utils.TimeUtils;
 import com.shinnytech.futures.utils.ToastUtils;
 
 import java.lang.ref.WeakReference;
@@ -30,14 +31,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
-import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_IS_FIRM;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_FAIL;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_SUCCEED;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_LOGIN_TIMEOUT;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_IS_FIRM;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_LOGIN_FAIL;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_LOGIN_SUCCEED;
 import static com.shinnytech.futures.utils.ScreenUtils.getStatusBarHeight;
 
 public class SplashActivity extends AppCompatActivity {
-    private static final int TO_LOGIN = 0;
     private static final int TIME_OUT = 1;
     private static final int EXIT_APP = 2;
     private BroadcastReceiver mReceiverLogin;
@@ -62,23 +62,14 @@ public class SplashActivity extends AppCompatActivity {
                 public void run() {
                     mHandler.sendEmptyMessage(TIME_OUT);
                 }
-            }, 10000);
+            }, 20000);
         } else finish();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        if (SPUtils.contains(sContext, CommonConstants.CONFIG_LOGIN_DATE)) {
-            String date = (String) SPUtils.get(sContext, CommonConstants.CONFIG_LOGIN_DATE, "");
-            String name = (String) SPUtils.get(sContext, CommonConstants.CONFIG_ACCOUNT, "");
-            String password = (String) SPUtils.get(sContext, CommonConstants.CONFIG_PASSWORD, "");
-            boolean notLogin = password.isEmpty() ||
-                    (name.contains(BROKER_ID_VISITOR) && !TimeUtils.getNowTime().equals(date));
-            if (notLogin) mHandler.sendEmptyMessageDelayed(TO_LOGIN, 1000);
-        }else mHandler.sendEmptyMessageDelayed(TO_LOGIN, 1000);
-
+        checkNetwork();
         registerBroaderCast();
     }
 
@@ -89,6 +80,31 @@ public class SplashActivity extends AppCompatActivity {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiverLogin);
     }
 
+    /**
+     * date: 7/7/17
+     * author: chenli
+     * description: 检查网络的状态
+     */
+    public void checkNetwork() {
+        if (!NetworkUtils.isNetworkConnected(sContext)) {
+            if (mTimer != null) {
+                mTimer.cancel();
+                mTimer = null;
+            }
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setTitle("登录结果");
+            dialog.setMessage("网络故障，无法连接到服务器");
+            dialog.setCancelable(false);
+            dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    mHandler.sendEmptyMessage(EXIT_APP);
+                }
+            });
+            dialog.show();
+        }
+    }
 
     private void changeStatusBarColor(boolean isFirm) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
@@ -135,6 +151,9 @@ public class SplashActivity extends AppCompatActivity {
                         break;
                     case TD_MESSAGE_LOGIN_FAIL:
                         //登录失败
+                        toLogin();
+                    case TD_MESSAGE_LOGIN_TIMEOUT:
+                        //登录超时
                         toLogin();
                         break;
                     default:
@@ -187,18 +206,18 @@ public class SplashActivity extends AppCompatActivity {
             final SplashActivity activity = mActivityReference.get();
             if (activity != null) {
                 switch (msg.what) {
-                    case 0:
-                        activity.toLogin();
-                        break;
                     case 1:
-                        if (BaseApplication.getmTDWebSocket().isOpen())activity.toLogin();
+                        if (BaseApplication.getmTDWebSocket().isOpen()){
+                            ToastUtils.showToast(activity.sContext, "登录失败，请重新登录");
+                            activity.toLogin();
+                        }
                         else {
                             ToastUtils.showToast(activity.sContext, "无法连接到服务器，请尝试重新打开");
                             activity.mHandler.sendEmptyMessageDelayed(EXIT_APP, 2000);
                         }
                         break;
                     case 2:
-                        SystemUtils.exitApp(activity.sContext);
+                        SystemUtils.exitApp(activity);
                         break;
                     default:
                         break;

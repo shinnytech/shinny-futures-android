@@ -83,8 +83,9 @@ public class MyLegendRenderer extends LegendRenderer {
                 else
                     originPosX = mViewPortHandler.contentRight() - xoffset;
 
+                //直接从最左边开始画
                 if (direction == Legend.LegendDirection.LEFT_TO_RIGHT)
-                    originPosX -= mLegend.mNeededWidth;
+                    originPosX = 0;
 
                 break;
 
@@ -176,13 +177,22 @@ public class MyLegendRenderer extends LegendRenderer {
 
                         if (direction == Legend.LegendDirection.RIGHT_TO_LEFT)
                             posX -= calculatedLabelSizes.get(i).width;
-
-                        drawLabel(c, posX, posY + labelLineHeight, e.label);
+                        int color = e.formColor;
+                        drawColoredLabel(c, posX, posY + labelLineHeight, e.label, color);
 
                         if (direction == Legend.LegendDirection.LEFT_TO_RIGHT)
                             posX += calculatedLabelSizes.get(i).width;
 
                         posX += direction == Legend.LegendDirection.RIGHT_TO_LEFT ? -xEntrySpace : xEntrySpace;
+
+                        //换行
+                        if (i != entries.length - 1){
+                            float pos = posX + calculatedLabelSizes.get(i + 1).width;
+                            if (pos > mViewPortHandler.contentWidth()){
+                                posX = originPosX;
+                                posY += labelLineHeight;
+                            }
+                        }
                     } else
                         posX += direction == Legend.LegendDirection.RIGHT_TO_LEFT ? -stackSpace : stackSpace;
                 }
@@ -247,12 +257,12 @@ public class MyLegendRenderer extends LegendRenderer {
 
                         if (direction == Legend.LegendDirection.RIGHT_TO_LEFT)
                             posX -= Utils.calcTextWidth(mLegendLabelPaint, e.label);
-
+                        int color = e.formColor;
                         if (!wasStacked) {
-                            drawLabel(c, posX, posY + labelLineHeight, e.label);
+                            drawColoredLabel(c, posX, posY + labelLineHeight, e.label, color);
                         } else {
                             posY += labelLineHeight + labelLineSpacing;
-                            drawLabel(c, posX, posY + labelLineHeight, e.label);
+                            drawColoredLabel(c, posX, posY + labelLineHeight, e.label, color);
                         }
 
                         // make a step down
@@ -268,5 +278,15 @@ public class MyLegendRenderer extends LegendRenderer {
 
             }
         }
+    }
+
+    /**
+     * date: 2019/7/30
+     * description: 不同字体颜色
+     */
+    private void drawColoredLabel(Canvas c, float x, float y, String label, int color){
+        mLegendLabelPaint.setColor(color);
+        drawLabel(c, x, y, label);
+
     }
 }

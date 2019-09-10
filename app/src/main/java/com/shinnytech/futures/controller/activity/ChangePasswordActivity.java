@@ -7,7 +7,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -21,7 +21,7 @@ import java.lang.ref.WeakReference;
 
 import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
 import static com.shinnytech.futures.constants.CommonConstants.PASSWORD;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_CHANGE_SUCCESS;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_CHANGE_SUCCESS;
 
 public class ChangePasswordActivity extends BaseActivity {
 

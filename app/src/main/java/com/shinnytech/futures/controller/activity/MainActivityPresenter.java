@@ -1,34 +1,48 @@
 package com.shinnytech.futures.controller.activity;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.LinearSmoothScroller;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import androidx.fragment.app.Fragment;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSmoothScroller;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.app.hubert.guide.NewbieGuide;
+import com.app.hubert.guide.core.Controller;
+import com.app.hubert.guide.listener.OnHighlightDrewListener;
+import com.app.hubert.guide.model.GuidePage;
+import com.app.hubert.guide.model.HighlightOptions;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.SettingConstants;
 import com.shinnytech.futures.controller.fragment.AccountFragment;
 import com.shinnytech.futures.controller.fragment.FutureInfoFragment;
 import com.shinnytech.futures.controller.fragment.QuotePagerFragment;
@@ -39,8 +53,8 @@ import com.shinnytech.futures.model.adapter.QuoteNavAdapter;
 import com.shinnytech.futures.model.adapter.ViewPagerFragmentAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
-import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
-import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.SwitchInsEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.ScrollQuotesEvent;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.bean.settingbean.NavigationRightEntity;
 import com.shinnytech.futures.model.engine.DataManager;
@@ -49,6 +63,7 @@ import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener
 import com.shinnytech.futures.utils.DividerGridItemDecorationUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ScreenUtils;
+import com.shinnytech.futures.utils.TDUtils;
 import com.shinnytech.futures.utils.ToastUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -63,18 +78,20 @@ import java.util.TreeMap;
 import static com.shinnytech.futures.constants.CommonConstants.ABOUT;
 import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT;
 import static com.shinnytech.futures.constants.CommonConstants.ACCOUNT_DETAIL;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_MENU;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID_VALUE_MAIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SWITCH_FROM;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SWITCH_TO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TAB_ACCOUNT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_TAB_MARKET;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGOUT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_MENU;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_SWITCH_TAB;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_CONDITION_MENU;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_LOGIN_TYPE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_MENU;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_PAGE_ID;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_PAGE_ID_VALUE_MAIN;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_SWITCH_FROM;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_SWITCH_TO;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_TAB_ACCOUNT;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_TAB_MARKET;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_LOGOUT;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_MENU;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_SWITCH_TAB;
 import static com.shinnytech.futures.constants.CommonConstants.CONDITIONAL_ORDER;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_PASSWORD;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
@@ -105,7 +122,7 @@ import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
  */
 
 public class MainActivityPresenter {
-    public final NavigationRightAdapter mNavigationRightAdapter;
+    private final NavigationRightAdapter mNavigationRightAdapter;
     private final ViewPagerFragmentAdapter mViewPagerFragmentAdapter;
     private ActivityMainDrawerBinding mBinding;
     private MainActivity mMainActivity;
@@ -121,6 +138,7 @@ public class MainActivityPresenter {
     private String mInstrumentId;
     private DataManager sDataManager;
     private boolean mIsUpdate;
+    private Controller mController;
 
     public MainActivityPresenter(final MainActivity mainActivity, Context context,
                                  ActivityMainDrawerBinding binding, TextView toolbarTitle) {
@@ -207,12 +225,12 @@ public class MainActivityPresenter {
         List<NavigationRightEntity> list = new ArrayList<>();
         list.add(menu0);
         list.add(menu1);
+        list.add(menu10);
         list.add(menu9);
         list.add(menu2);
         list.add(menu3);
         list.add(menu4);
         list.add(menu5);
-        list.add(menu10);
         list.add(menu6);
         list.add(menu7);
         list.add(menu8);
@@ -227,6 +245,36 @@ public class MainActivityPresenter {
      * description: 注册各类监听事件
      */
     public void registerListeners() {
+        HighlightOptions options = new HighlightOptions.Builder()
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mController.remove();
+                        mToolbarTitle.performClick();
+                    }
+                })
+                .setOnHighlightDrewListener(new OnHighlightDrewListener() {
+                    @Override
+                    public void onHighlightDrew(Canvas canvas, RectF rectF) {
+                        Paint paint = new Paint();
+                        paint.setColor(Color.argb(255, 255,173,6));
+                        paint.setStyle(Paint.Style.STROKE);
+                        paint.setStrokeWidth(5);
+                        paint.setPathEffect(new DashPathEffect(new float[]{10, 10}, 0));
+                        canvas.drawRect(rectF, paint);
+                    }
+                })
+                .build();
+
+        GuidePage page = GuidePage.newInstance()
+                .addHighLightWithOptions(mToolbarTitle, options)
+                .setLayoutRes(R.layout.activity_main_guide1);
+
+        mController = NewbieGuide.with(mMainActivity)
+                .setLabel("guide1")
+                .addGuidePage(page)
+                .show();
+
         //合约导航左右移动
         mBinding.quoteNavLeft.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -264,7 +312,8 @@ public class MainActivityPresenter {
                 JSONObject jsonObject = new JSONObject();
                 switch (title) {
                     case LOGOUT:
-                        SPUtils.putAndApply(sContext, CommonConstants.CONFIG_PASSWORD, "");
+                        BaseApplication.getmTDWebSocket().reConnect();
+                        SPUtils.putAndApply(sContext, SettingConstants.CONFIG_PASSWORD, "");
                         try {
                             jsonObject.put(AMP_EVENT_LOGIN_TYPE, sDataManager.LOGIN_TYPE);
                         } catch (JSONException e) {
@@ -273,7 +322,6 @@ public class MainActivityPresenter {
                         Amplitude.getInstance().logEventWrap(AMP_LOGOUT, jsonObject);
                         mMainActivity.startActivity(new Intent(mMainActivity, LoginActivity.class));
                         mMainActivity.finish();
-                        BaseApplication.getmTDWebSocket().reConnect();
                         break;
                     case SETTING:
                         try {
@@ -338,7 +386,16 @@ public class MainActivityPresenter {
                         mMainActivity.startActivity(intentBankOut);
                         break;
                     case CONDITIONAL_ORDER:
-                        ToastUtils.showToast(sContext, "敬请期待！");
+                        if (!mMainActivity.checkConditionResponsibility())break;
+                        Amplitude.getInstance().logEventWrap(AMP_CONDITION_MENU, jsonObject);
+                        String name = sDataManager.USER_ID;
+                        String password = (String) SPUtils.get(sContext, CONFIG_PASSWORD, "");
+                        if (TDUtils.isVisitor(name, password)){
+                            ToastUtils.showToast(sContext, "游客模式暂不支持条件单/止盈止损");
+                            break;
+                        }
+                        Intent intentConditionOrder = new Intent(mMainActivity, ManagerConditionOrderActivity.class);
+                        mMainActivity.startActivity(intentConditionOrder);
                         break;
                     case OPEN_ACCOUNT:
                         try {
@@ -398,7 +455,7 @@ public class MainActivityPresenter {
                     View viewDialog = View.inflate(mMainActivity, R.layout.view_dialog_optional_quote, null);
                     Window dialogWindow = mTitleDialog.getWindow();
                     if (dialogWindow != null) {
-                        dialogWindow.getDecorView().setPadding(0, getToolBarHeight(), 0, 0);
+                        dialogWindow.getDecorView().setPadding(0, getToolBarHeight(mMainActivity), 0, 0);
                         WindowManager.LayoutParams lp = dialogWindow.getAttributes();
                         dialogWindow.setGravity(Gravity.TOP);
                         lp.width = WindowManager.LayoutParams.MATCH_PARENT;
@@ -426,9 +483,9 @@ public class MainActivityPresenter {
                                                 String instrumentId = (String) view.getTag();
                                                 if (instrumentId != null && !instrumentId.equals(mInstrumentId)) {
                                                     changeToolbar(instrumentId);
-                                                    IdEvent idEvent = new IdEvent();
-                                                    idEvent.setInstrument_id(instrumentId);
-                                                    EventBus.getDefault().post(idEvent);
+                                                    SwitchInsEvent switchInsEvent = new SwitchInsEvent();
+                                                    switchInsEvent.setInstrument_id(instrumentId);
+                                                    EventBus.getDefault().post(switchInsEvent);
                                                 }
                                             }
                                             mTitleDialog.dismiss();
@@ -583,9 +640,9 @@ public class MainActivityPresenter {
             }
         }
         //滑动行情列表
-        PositionEvent positionEvent = new PositionEvent();
-        positionEvent.setPosition(position);
-        EventBus.getDefault().post(positionEvent);
+        ScrollQuotesEvent scrollQuotesEvent = new ScrollQuotesEvent();
+        scrollQuotesEvent.setPosition(position);
+        EventBus.getDefault().post(scrollQuotesEvent);
     }
 
     /**
@@ -648,13 +705,18 @@ public class MainActivityPresenter {
      */
     public void changeToolbar(String instrumentId) {
         mInstrumentId = instrumentId;
-        MenuItem menuItem = mMainActivity.menu.getItem(1);
+        Menu menu = mMainActivity.mToolbar.getMenu();
+        if (menu == null || menu.size() == 0)return;
+        MenuItem menuItem = menu.findItem(R.id.right_navigation);
+        FrameLayout rootView = (FrameLayout) menuItem.getActionView();
+        ImageView view = rootView.findViewById(R.id.view_menu);
         menuItem.setTitle(MENU_TITLE_COLLECT);
         if (LatestFileManager.getOptionalInsList().containsKey(mInstrumentId)) {
-            menuItem.setIcon(R.mipmap.ic_favorite_white_24dp);
+            view.setImageResource(R.mipmap.ic_favorite_white_24dp);
         } else {
-            menuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
+            view.setImageResource(R.mipmap.ic_favorite_border_white_24dp);
         }
+        mMainActivity.refreshCO();
         mMainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mMainActivity.getSupportActionBar().setHomeButtonEnabled(true);
         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
@@ -702,9 +764,14 @@ public class MainActivityPresenter {
      */
     public void linkToAccount() {
         mBinding.bottomNavigation.setVisibility(View.VISIBLE);
-        MenuItem menuItem = mMainActivity.menu.getItem(1);
-        menuItem.setIcon(R.mipmap.ic_menu);
+        Menu menu = mMainActivity.mToolbar.getMenu();
+        if (menu == null || menu.size() == 0)return;
+        MenuItem menuItem = menu.findItem(R.id.right_navigation);
+        FrameLayout rootView = (FrameLayout) menuItem.getActionView();
+        ImageView view = rootView.findViewById(R.id.view_menu);
+        view.setImageResource(R.mipmap.ic_menu);
         menuItem.setTitle(MENU_TITLE_NAVIGATION);
+        mMainActivity.refreshCO();
         mMainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         mMainActivity.getSupportActionBar().setHomeButtonEnabled(false);
         AccountFragment accountFragment = (AccountFragment) mViewPagerFragmentAdapter.getItem(1);
@@ -733,13 +800,18 @@ public class MainActivityPresenter {
      * description: 账户页链接到合约详情页
      */
     public void linkToFutureInfo() {
-        MenuItem menuItem = mMainActivity.menu.getItem(1);
+        Menu menu = mMainActivity.mToolbar.getMenu();
+        if (menu == null || menu.size() == 0)return;
+        MenuItem menuItem = menu.findItem(R.id.right_navigation);
         menuItem.setTitle(MENU_TITLE_COLLECT);
+        FrameLayout rootView = (FrameLayout) menuItem.getActionView();
+        ImageView view = rootView.findViewById(R.id.view_menu);
         if (LatestFileManager.getOptionalInsList().containsKey(mInstrumentId)) {
-            menuItem.setIcon(R.mipmap.ic_favorite_white_24dp);
+            view.setImageResource(R.mipmap.ic_favorite_white_24dp);
         } else {
-            menuItem.setIcon(R.mipmap.ic_favorite_border_white_24dp);
+            view.setImageResource(R.mipmap.ic_favorite_border_white_24dp);
         }
+        mMainActivity.refreshCO();
         mMainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mMainActivity.getSupportActionBar().setHomeButtonEnabled(true);
         SearchEntity searchEntity = LatestFileManager.getSearchEntities().get(mInstrumentId);
@@ -757,10 +829,10 @@ public class MainActivityPresenter {
      * author: chenli
      * description: 获取toolbar高度px
      */
-    private int getToolBarHeight() {
+    private int getToolBarHeight(Activity activity) {
         TypedValue tv = new TypedValue();
-        if (mMainActivity.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
-            return TypedValue.complexToDimensionPixelSize(tv.data, mMainActivity.getResources().getDisplayMetrics());
+        if (activity.getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            return TypedValue.complexToDimensionPixelSize(tv.data, activity.getResources().getDisplayMetrics());
         }
         return ScreenUtils.dp2px(sContext, 56);
     }
@@ -791,6 +863,10 @@ public class MainActivityPresenter {
 
     public boolean ismIsUpdate() {
         return mIsUpdate;
+    }
+
+    public NavigationRightAdapter getmNavigationRightAdapter() {
+        return mNavigationRightAdapter;
     }
 
     /**

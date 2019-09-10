@@ -1,19 +1,22 @@
 package com.shinnytech.futures.controller.activity;
 
 import android.os.Bundle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.RadioGroup;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.SettingConstants;
 import com.shinnytech.futures.databinding.ActivityParaChangeBinding;
 import com.shinnytech.futures.model.adapter.ParaContentAdapter;
+import com.shinnytech.futures.model.bean.eventbusbean.ParaChangeEvent;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastUtils;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +29,7 @@ public class ParaChangeActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mLayoutID = R.layout.activity_para_change;
-        mTitle = CommonConstants.PARA_CHANGE;
+        mTitle = SettingConstants.PARA_CHANGE;
         super.onCreate(savedInstanceState);
     }
 
@@ -35,7 +38,7 @@ public class ParaChangeActivity extends BaseActivity {
         mBinding = (ActivityParaChangeBinding) mViewDataBinding;
         mBinding.contentRv.setLayoutManager(new LinearLayoutManager(this));
         mBinding.contentRv.setItemAnimator(new DefaultItemAnimator());
-        String data = (String) SPUtils.get(sContext, CommonConstants.CONFIG_PARA_MA, CommonConstants.PARA_MA);
+        String data = (String) SPUtils.get(sContext, SettingConstants.CONFIG_PARA_MA, SettingConstants.PARA_MA);
         mParaContentAdapter = new ParaContentAdapter(this, data.split(","));
         mBinding.contentRv.setAdapter(mParaContentAdapter);
     }
@@ -47,7 +50,7 @@ public class ParaChangeActivity extends BaseActivity {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 switch (checkedId) {
                     case R.id.para_ma:
-                        String data = (String) SPUtils.get(sContext, CommonConstants.CONFIG_PARA_MA, CommonConstants.PARA_MA);
+                        String data = (String) SPUtils.get(sContext, SettingConstants.CONFIG_PARA_MA, SettingConstants.PARA_MA);
                         mParaContentAdapter.setData(data.split(","));
                         break;
 //                    case R.id.para_expma:
@@ -87,7 +90,7 @@ public class ParaChangeActivity extends BaseActivity {
                 }
                 switch (id) {
                     case R.id.para_ma:
-                        SPUtils.putAndApply(BaseApplication.getContext(), CommonConstants.CONFIG_PARA_MA, TextUtils.join(",", paras));
+                        SPUtils.putAndApply(BaseApplication.getContext(), SettingConstants.CONFIG_PARA_MA, TextUtils.join(",", paras));
                         break;
 //                    case R.id.para_expma:
 //                        break;
@@ -96,6 +99,7 @@ public class ParaChangeActivity extends BaseActivity {
                     default:
                         break;
                 }
+                EventBus.getDefault().post(new ParaChangeEvent());
                 ToastUtils.showToast(sContext, "参数已保存");
             }
         });
@@ -105,8 +109,8 @@ public class ParaChangeActivity extends BaseActivity {
             public void onClick(View v) {
                 switch (mBinding.paraNav.getCheckedRadioButtonId()) {
                     case R.id.para_ma:
-                        mParaContentAdapter.setData(CommonConstants.PARA_MA.split(","));
-                        SPUtils.putAndApply(BaseApplication.getContext(), CommonConstants.CONFIG_PARA_MA, CommonConstants.PARA_MA);
+                        mParaContentAdapter.setData(SettingConstants.PARA_MA.split(","));
+                        SPUtils.putAndApply(BaseApplication.getContext(), SettingConstants.CONFIG_PARA_MA, SettingConstants.PARA_MA);
                         break;
 //                    case R.id.para_expma:
 //                        break;
@@ -115,6 +119,7 @@ public class ParaChangeActivity extends BaseActivity {
                     default:
                         return;
                 }
+                EventBus.getDefault().post(new ParaChangeEvent());
                 ToastUtils.showToast(sContext, "恢复默认");
             }
         });

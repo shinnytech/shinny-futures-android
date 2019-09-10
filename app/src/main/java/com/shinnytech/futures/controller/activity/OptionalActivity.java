@@ -3,9 +3,9 @@ package com.shinnytech.futures.controller.activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.constants.CommonConstants;

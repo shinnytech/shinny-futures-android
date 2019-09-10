@@ -4,7 +4,7 @@
 
     <data></data>
 
-    <android.support.design.widget.CoordinatorLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/quote_background"
@@ -91,7 +91,7 @@
 
         </LinearLayout>
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:layout_marginTop="@dimen/layout_height_fragment_quote"
             android:id="@+id/rv_quote"
             android:layout_width="match_parent"
@@ -102,6 +102,6 @@
             android:scrollbarThumbVertical="@color/text_gray_light"
             android:scrollbars="vertical" />
 
-    </android.support.design.widget.CoordinatorLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </layout>

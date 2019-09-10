@@ -1,9 +1,9 @@
 package com.shinnytech.futures.model.adapter;
 
 import android.content.Context;
-import android.databinding.DataBindingUtil;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.SettingConstants;
 import com.shinnytech.futures.databinding.ItemKlineDurationBinding;
 import com.shinnytech.futures.model.listener.ItemTouchHelperListener;
 import com.shinnytech.futures.utils.SPUtils;
@@ -51,7 +51,7 @@ public class KlineDurationAdapter extends RecyclerView.Adapter<KlineDurationAdap
 
     public void saveDurationList() {
         String data = TextUtils.join(",", mData);
-        SPUtils.putAndApply(BaseApplication.getContext(), CommonConstants.CONFIG_KLINE_DURATION_DEFAULT, data);
+        SPUtils.putAndApply(BaseApplication.getContext(), SettingConstants.CONFIG_KLINE_DURATION_DEFAULT, data);
     }
 
     @Override
@@ -137,8 +137,11 @@ public class KlineDurationAdapter extends RecyclerView.Adapter<KlineDurationAdap
                 public void onClick(View v) {
                     try {
                         int index = getLayoutPosition();
-                        if (index == 0)ToastUtils.showToast(sContext, "至少保留一个周期");
-                        if (index > 0 && index < getItemCount()) {
+                        if (index == 0 && getItemCount() == 1){
+                            ToastUtils.showToast(sContext, "至少保留一个周期");
+                            return;
+                        }
+                        if (index >= 0 && index < getItemCount()) {
                             mData.remove(index);
                             notifyItemRemoved(index);
                             saveDurationList();

@@ -22,7 +22,6 @@
 
 
         <com.shinnytech.futures.view.custommpchart.mychart.CombinedChartKline
-            android:visibility="gone"
             android:id="@+id/bottomChart"
             android:layout_width="match_parent"
             android:layout_weight="2"

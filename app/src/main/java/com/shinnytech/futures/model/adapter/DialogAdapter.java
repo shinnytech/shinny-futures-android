@@ -1,8 +1,8 @@
 package com.shinnytech.futures.model.adapter;
 
 import android.content.Context;
-import android.databinding.DataBindingUtil;
-import android.support.v7.widget.RecyclerView;
+import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,7 +86,7 @@ public class DialogAdapter extends RecyclerView.Adapter<DialogAdapter.ItemViewHo
             else mBinding.tvIdDialog.setText(instrumentId);
             itemView.setTag(instrumentId);
 
-            if (mSelected.equals(instrumentId))
+            if (instrumentId.equals(mSelected))
                 mBinding.tvIdDialog.setTextColor(sContext.getResources().getColor(R.color.quote_dialog_text_selected));
             else
                 mBinding.tvIdDialog.setTextColor(sContext.getResources().getColor(R.color.quote_dialog_text));

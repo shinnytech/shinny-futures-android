@@ -1,13 +1,20 @@
 package com.shinnytech.futures.websocket;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import androidx.core.content.ContextCompat;
 
-import com.google.gson.Gson;
+import com.alibaba.fastjson.JSON;
 import com.neovisionaries.ws.client.WebSocket;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.SettingConstants;
 import com.shinnytech.futures.model.bean.accountinfobean.BrokerEntity;
+import com.shinnytech.futures.model.bean.reqbean.ReqControlConditionOrderEntity;
+import com.shinnytech.futures.model.bean.reqbean.ReqConditionEntity;
+import com.shinnytech.futures.model.bean.reqbean.ReqConditionOrderEntity;
+import com.shinnytech.futures.model.bean.reqbean.ReqInsertConditionOrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqCancelOrderEntity;
@@ -15,11 +22,13 @@ import com.shinnytech.futures.model.bean.reqbean.ReqConfirmSettlementEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqInsertOrderEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqLoginEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqPasswordEntity;
+import com.shinnytech.futures.model.bean.reqbean.ReqQueryConditionOrderEntity;
 import com.shinnytech.futures.model.bean.reqbean.ReqTransferEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.TDUtils;
 import com.shinnytech.futures.utils.TimeUtils;
 
 import org.json.JSONException;
@@ -29,24 +38,37 @@ import java.util.List;
 
 import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST;
 import static com.shinnytech.futures.application.BaseApplication.sendMessage;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_CANCEL_ORDER;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_DIRECTION;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_INSTRUMENT_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OFFSET;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PRICE_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_RECONNECT_SERVER_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_TD;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_VOLUME;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_INSERT_ORDER;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_RECONNECT;
-import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_SYSTEM_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_CANCEL_ORDER;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_DIRECTION;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_INSTRUMENT_ID;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_LOGIN_TYPE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_OFFSET;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_PRICE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_PRICE_TYPE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_RECONNECT_SERVER_TYPE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_RECONNECT_SERVER_TYPE_VALUE_TD;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_VOLUME;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_INSERT_ORDER;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_LOGIN;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_RECONNECT;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_AID;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_RTN_BROKERS;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_RTN_CONDITION_ORDERS;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_RTN_DATA;
+import static com.shinnytech.futures.constants.ServerConstants.PARSE_TRADE_KEY_RTN_HIS_CONDITION_ORDERS;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_SYSTEM_INFO;
+import static com.shinnytech.futures.constants.ServerConstants.REQ_CANCEL_ORDER;
+import static com.shinnytech.futures.constants.ServerConstants.REQ_CHANGE_PASSWORD;
+import static com.shinnytech.futures.constants.ServerConstants.REQ_CONFIRM_SETTLEMENT;
+import static com.shinnytech.futures.constants.ServerConstants.REQ_INSERT_CONDITION_ORDER;
+import static com.shinnytech.futures.constants.ServerConstants.REQ_INSERT_ORDER;
+import static com.shinnytech.futures.constants.ServerConstants.REQ_LOGIN;
+import static com.shinnytech.futures.constants.ServerConstants.REQ_QUERY_CONDITION_ORDER;
+import static com.shinnytech.futures.constants.ServerConstants.REQ_TRANSFER;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_BROKER_INFO;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_LOGIN_FAIL;
 
 public class TDWebSocket extends WebSocketBase {
 
@@ -61,14 +83,20 @@ public class TDWebSocket extends WebSocketBase {
         sDataManager.TD_PACK_COUNT++;
         try {
             JSONObject jsonObject = new JSONObject(text);
-            String aid = jsonObject.getString("aid");
+            String aid = jsonObject.getString(PARSE_TRADE_KEY_AID);
             switch (aid) {
-                case "rtn_brokers":
+                case PARSE_TRADE_KEY_RTN_BROKERS:
                     mIndex = 0;
                     loginConfig(text);
                     break;
-                case "rtn_data":
+                case PARSE_TRADE_KEY_RTN_DATA:
                     sDataManager.refreshTradeBean(jsonObject);
+                    break;
+                case PARSE_TRADE_KEY_RTN_CONDITION_ORDERS:
+                    sDataManager.refreshConditionOrderBean(jsonObject, aid);
+                    break;
+                case PARSE_TRADE_KEY_RTN_HIS_CONDITION_ORDERS:
+                    sDataManager.refreshConditionOrderBean(jsonObject, aid);
                     break;
                 default:
                     return;
@@ -104,18 +132,27 @@ public class TDWebSocket extends WebSocketBase {
      * description: 登录设置，自动登录
      */
     private void loginConfig(String message) {
-        BrokerEntity brokerInfo = new Gson().fromJson(message, BrokerEntity.class);
+        BrokerEntity brokerInfo = JSON.parseObject(message, BrokerEntity.class);
         sDataManager.getBroker().setBrokers(brokerInfo.getBrokers());
         sendMessage(TD_MESSAGE_BROKER_INFO, TD_BROADCAST);
 
         Context context = BaseApplication.getContext();
-        if (SPUtils.contains(context, CommonConstants.CONFIG_LOGIN_DATE)) {
-            String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
-            String name = (String) SPUtils.get(context, CommonConstants.CONFIG_ACCOUNT, "");
-            String password = (String) SPUtils.get(context, CommonConstants.CONFIG_PASSWORD, "");
-            String broker = (String) SPUtils.get(context, CommonConstants.CONFIG_BROKER, "");
-            boolean notLogin = password.isEmpty() ||
-                    (name.contains(BROKER_ID_VISITOR) && !date.isEmpty() && !TimeUtils.getNowTime().equals(date));
+        if (SPUtils.contains(context, SettingConstants.CONFIG_LOGIN_DATE)) {
+            String date = (String) SPUtils.get(context, SettingConstants.CONFIG_LOGIN_DATE, "");
+            String name = (String) SPUtils.get(context, SettingConstants.CONFIG_ACCOUNT, "");
+            String password = (String) SPUtils.get(context, SettingConstants.CONFIG_PASSWORD, "");
+            String broker = (String) SPUtils.get(context, SettingConstants.CONFIG_BROKER, "");
+            boolean isPermissionDenied = ContextCompat.checkSelfPermission(BaseApplication.getContext(),
+                Manifest.permission.READ_PHONE_STATE)
+                    != PackageManager.PERMISSION_GRANTED
+                        || ContextCompat.checkSelfPermission(BaseApplication.getContext(),
+                        Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED
+                        || ContextCompat.checkSelfPermission(BaseApplication.getContext(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED;
+            boolean notLogin = password.isEmpty() || isPermissionDenied ||
+                    (TDUtils.isVisitor(name, password) && !date.isEmpty() && !TimeUtils.getNowTime().equals(date));
             if (!notLogin){
                 sDataManager.BROKER_ID = broker;
                 sDataManager.USER_ID = name;
@@ -130,9 +167,8 @@ public class TDWebSocket extends WebSocketBase {
                 }
                 Amplitude.getInstance().logEventWrap(AMP_LOGIN, jsonObject);
                 sendReqLogin(broker, name, password);
-                LogUtils.e("AMP_LOGIN", true);
-            }
-        }
+            }else BaseApplication.sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
+        }else BaseApplication.sendMessage(TD_MESSAGE_LOGIN_FAIL, TD_BROADCAST);
 
     }
 
@@ -144,13 +180,13 @@ public class TDWebSocket extends WebSocketBase {
     public void sendReqLogin(String bid, String user_name, String password) {
         String systemInfo = (String) SPUtils.get(BaseApplication.getContext(), CONFIG_SYSTEM_INFO, "");
         ReqLoginEntity reqLoginEntity = new ReqLoginEntity();
-        reqLoginEntity.setAid("req_login");
+        reqLoginEntity.setAid(REQ_LOGIN);
         reqLoginEntity.setBid(bid);
         reqLoginEntity.setUser_name(user_name);
         reqLoginEntity.setPassword(password);
         reqLoginEntity.setClient_system_info(systemInfo);
         reqLoginEntity.setClient_app_id(sDataManager.CLIENT_APP_ID);
-        String reqLogin = new Gson().toJson(reqLoginEntity);
+        String reqLogin = JSON.toJSONString(reqLoginEntity);
         mWebSocketClient.sendText(reqLogin);
         LogUtils.e(reqLogin, true);
         LatestFileManager.insertLogToDB(reqLogin);
@@ -163,8 +199,8 @@ public class TDWebSocket extends WebSocketBase {
      */
     public void sendReqConfirmSettlement() {
         ReqConfirmSettlementEntity reqConfirmSettlementEntity = new ReqConfirmSettlementEntity();
-        reqConfirmSettlementEntity.setAid("confirm_settlement");
-        String confirmSettlement = new Gson().toJson(reqConfirmSettlementEntity);
+        reqConfirmSettlementEntity.setAid(REQ_CONFIRM_SETTLEMENT);
+        String confirmSettlement = JSON.toJSONString(reqConfirmSettlementEntity);
         mWebSocketClient.sendText(confirmSettlement);
         LogUtils.e(confirmSettlement, true);
         LatestFileManager.insertLogToDB(confirmSettlement);
@@ -192,7 +228,7 @@ public class TDWebSocket extends WebSocketBase {
         Amplitude.getInstance().logEventWrap(AMP_INSERT_ORDER, jsonObject);
         String user_id = DataManager.getInstance().USER_ID;
         ReqInsertOrderEntity reqInsertOrderEntity = new ReqInsertOrderEntity();
-        reqInsertOrderEntity.setAid("insert_order");
+        reqInsertOrderEntity.setAid(REQ_INSERT_ORDER);
         reqInsertOrderEntity.setUser_id(user_id);
         reqInsertOrderEntity.setOrder_id("");
         reqInsertOrderEntity.setExchange_id(exchange_id);
@@ -204,7 +240,7 @@ public class TDWebSocket extends WebSocketBase {
         reqInsertOrderEntity.setLimit_price(price);
         reqInsertOrderEntity.setVolume_condition("ANY");
         reqInsertOrderEntity.setTime_condition("GFD");
-        String reqInsertOrder = new Gson().toJson(reqInsertOrderEntity);
+        String reqInsertOrder = JSON.toJSONString(reqInsertOrderEntity);
         mWebSocketClient.sendText(reqInsertOrder);
         LogUtils.e(reqInsertOrder, true);
         LatestFileManager.insertLogToDB(reqInsertOrder);
@@ -235,10 +271,10 @@ public class TDWebSocket extends WebSocketBase {
             }
         }
         ReqCancelOrderEntity reqCancelOrderEntity = new ReqCancelOrderEntity();
-        reqCancelOrderEntity.setAid("cancel_order");
+        reqCancelOrderEntity.setAid(REQ_CANCEL_ORDER);
         reqCancelOrderEntity.setUser_id(user_id);
         reqCancelOrderEntity.setOrder_id(order_id);
-        String reqInsertOrder = new Gson().toJson(reqCancelOrderEntity);
+        String reqInsertOrder = JSON.toJSONString(reqCancelOrderEntity);
         mWebSocketClient.sendText(reqInsertOrder);
         LogUtils.e(reqInsertOrder, true);
         LatestFileManager.insertLogToDB(reqInsertOrder);
@@ -252,14 +288,14 @@ public class TDWebSocket extends WebSocketBase {
     public void sendReqTransfer(String future_account, String future_password, String bank_id,
                                 String bank_password, String currency, float amount) {
         ReqTransferEntity reqTransferEntity = new ReqTransferEntity();
-        reqTransferEntity.setAid("req_transfer");
+        reqTransferEntity.setAid(REQ_TRANSFER);
         reqTransferEntity.setFuture_account(future_account);
         reqTransferEntity.setFuture_password(future_password);
         reqTransferEntity.setBank_id(bank_id);
         reqTransferEntity.setBank_password(bank_password);
         reqTransferEntity.setCurrency(currency);
         reqTransferEntity.setAmount(amount);
-        String reqTransfer = new Gson().toJson(reqTransferEntity);
+        String reqTransfer = JSON.toJSONString(reqTransferEntity);
         mWebSocketClient.sendText(reqTransfer);
         LogUtils.e(reqTransfer, true);
         LatestFileManager.insertLogToDB(reqTransfer);
@@ -272,13 +308,74 @@ public class TDWebSocket extends WebSocketBase {
      */
     public void sendReqPassword(String new_password, String old_password) {
         ReqPasswordEntity reqPasswordEntity = new ReqPasswordEntity();
-        reqPasswordEntity.setAid("change_password");
+        reqPasswordEntity.setAid(REQ_CHANGE_PASSWORD);
         reqPasswordEntity.setNew_password(new_password);
         reqPasswordEntity.setOld_password(old_password);
-        String reqPassword = new Gson().toJson(reqPasswordEntity);
+        String reqPassword = JSON.toJSONString(reqPasswordEntity);
         mWebSocketClient.sendText(reqPassword);
         LogUtils.e(reqPassword, true);
         LatestFileManager.insertLogToDB(reqPassword);
+    }
+
+    /**
+     * date: 7/9/17
+     * author: chenli
+     * description: 新建条件单
+     */
+    public void sendReqInsertConditionOrder(ReqConditionEntity[] condition_list,
+                                            ReqConditionOrderEntity[] order_list,
+                                            String time_condition_type,
+                                            int GTD_date,
+                                            boolean is_cancel_ori_close_order,
+                                            String condition_logic) {
+        String user_id = DataManager.getInstance().USER_ID;
+        ReqInsertConditionOrderEntity orderEntity = new ReqInsertConditionOrderEntity();
+        orderEntity.setAid(REQ_INSERT_CONDITION_ORDER);
+        orderEntity.setUser_id(user_id);
+        orderEntity.setCondition_list(condition_list);
+        orderEntity.setOrder_list(order_list);
+        orderEntity.setTime_condition_type(time_condition_type);
+        orderEntity.setGtd_date(GTD_date);
+        orderEntity.setIs_cancel_ori_close_order(is_cancel_ori_close_order);
+        orderEntity.setConditions_logic_oper(condition_logic);
+        String reqInsertConditionOrder = JSON.toJSONString(orderEntity);
+        mWebSocketClient.sendText(reqInsertConditionOrder);
+        LogUtils.e(reqInsertConditionOrder, true);
+        LatestFileManager.insertLogToDB(reqInsertConditionOrder);
+    }
+
+    /**
+     * date: 2019/8/10
+     * author: chenli
+     * description: 撤销、暂停、重启条件单
+     */
+    public void sendReqControlConditionOrder(String aid, String order_id){
+        String user_id = DataManager.getInstance().USER_ID;
+        ReqControlConditionOrderEntity orderEntity = new ReqControlConditionOrderEntity();
+        orderEntity.setAid(aid);
+        orderEntity.setUser_id(user_id);
+        orderEntity.setOrder_id(order_id);
+        String reqControlConditionOrder = JSON.toJSONString(orderEntity);
+        mWebSocketClient.sendText(reqControlConditionOrder);
+        LogUtils.e(reqControlConditionOrder, true);
+        LatestFileManager.insertLogToDB(reqControlConditionOrder);
+    }
+
+    /**
+     * date: 2019/8/11
+     * author: chenli
+     * description: 查询历史条件单
+     */
+    public void sendReqQueryConditionOrder(int action_day){
+        String user_id = DataManager.getInstance().USER_ID;
+        ReqQueryConditionOrderEntity orderEntity = new ReqQueryConditionOrderEntity();
+        orderEntity.setAid(REQ_QUERY_CONDITION_ORDER);
+        orderEntity.setUser_id(user_id);
+        orderEntity.setAction_day(action_day);
+        String reqQueryConditionOrder = JSON.toJSONString(orderEntity);
+        mWebSocketClient.sendText(reqQueryConditionOrder);
+        LogUtils.e(reqQueryConditionOrder, true);
+        LatestFileManager.insertLogToDB(reqQueryConditionOrder);
     }
 
     /**

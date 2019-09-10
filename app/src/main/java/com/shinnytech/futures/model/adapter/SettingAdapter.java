@@ -1,16 +1,18 @@
 package com.shinnytech.futures.model.adapter;
 
 import android.content.Context;
-import android.databinding.DataBindingUtil;
-import android.support.v7.widget.RecyclerView;
+import androidx.databinding.DataBindingUtil;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
-import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.SettingConstants;
 import com.shinnytech.futures.databinding.ItemActivitySettingBinding;
-import com.shinnytech.futures.model.bean.eventbusbean.OrderSettingEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.CancelOrderEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.InsertOrderEvent;
 import com.shinnytech.futures.model.bean.settingbean.SettingEntity;
 import com.shinnytech.futures.utils.SPUtils;
 
@@ -97,12 +99,12 @@ public class SettingAdapter extends RecyclerView.Adapter<SettingAdapter.ItemView
             if (jump) mBinding.settingToggle.setVisibility(View.GONE);
             else {
                 switch (content) {
-                    case CommonConstants.INSERT_ORDER_CONFIRM:
-                        boolean checkInsert = (boolean) SPUtils.get(sContext, CommonConstants.CONFIG_INSERT_ORDER_CONFIRM, false);
+                    case SettingConstants.INSERT_ORDER_CONFIRM:
+                        boolean checkInsert = (boolean) SPUtils.get(sContext, SettingConstants.CONFIG_INSERT_ORDER_CONFIRM, false);
                         mBinding.settingToggle.setChecked(checkInsert);
                         break;
-                    case CommonConstants.CANCEL_ORDER_CONFIRM:
-                        boolean checkCancel = (boolean) SPUtils.get(sContext, CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM, false);
+                    case SettingConstants.CANCEL_ORDER_CONFIRM:
+                        boolean checkCancel = (boolean) SPUtils.get(sContext, SettingConstants.CONFIG_CANCEL_ORDER_CONFIRM, false);
                         mBinding.settingToggle.setChecked(checkCancel);
                         break;
                     default:
@@ -154,16 +156,32 @@ public class SettingAdapter extends RecyclerView.Adapter<SettingAdapter.ItemView
          */
         public void saveSettingConfig() {
             switch (mBinding.content.getText().toString()) {
-                case CommonConstants.INSERT_ORDER_CONFIRM:
-                    SPUtils.putAndApply(sContext, CommonConstants.CONFIG_INSERT_ORDER_CONFIRM, mBinding.settingToggle.isChecked());
-                    OrderSettingEvent insertEvent = new OrderSettingEvent();
-                    insertEvent.setInsertPopup(mBinding.settingToggle.isChecked());
+                case SettingConstants.INSERT_ORDER_CONFIRM:
+                    boolean isInsert = mBinding.settingToggle.isChecked();
+                    SPUtils.putAndApply(sContext, SettingConstants.CONFIG_INSERT_ORDER_CONFIRM, isInsert);
+                    InsertOrderEvent insertEvent = new InsertOrderEvent();
+                    insertEvent.setInsertPopup(isInsert);
                     EventBus.getDefault().post(insertEvent);
+                    if (!isInsert){
+                        final Snackbar sb = Snackbar.make(mBinding.content,
+                                "选择“否”，当有未成平仓挂单造成可平手数不足时，则平仓时默认撤销原平仓挂单无需确认",
+                                Snackbar.LENGTH_INDEFINITE);
+                        View view = sb.getView();
+                        view.setPadding(0,0,0,0);
+                        sb.setAction("确定", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        sb.dismiss();
+                                    }
+                                });
+                        sb.show();
+                    }
                     break;
-                case CommonConstants.CANCEL_ORDER_CONFIRM:
-                    SPUtils.putAndApply(sContext, CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM, mBinding.settingToggle.isChecked());
-                    OrderSettingEvent cancelEvent = new OrderSettingEvent();
-                    cancelEvent.setCancelPopup(mBinding.settingToggle.isChecked());
+                case SettingConstants.CANCEL_ORDER_CONFIRM:
+                    boolean isCancel = mBinding.settingToggle.isChecked();
+                    SPUtils.putAndApply(sContext, SettingConstants.CONFIG_CANCEL_ORDER_CONFIRM, isCancel);
+                    CancelOrderEvent cancelEvent = new CancelOrderEvent();
+                    cancelEvent.setCancelPopup(isCancel);
                     EventBus.getDefault().post(cancelEvent);
                     break;
                 default:

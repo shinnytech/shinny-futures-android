@@ -2,15 +2,15 @@ package com.shinnytech.futures.controller.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.databinding.DataBindingUtil;
+import androidx.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.SearchView;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.appcompat.widget.SearchView;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,7 +26,7 @@ import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.databinding.ActivitySearchBinding;
 import com.shinnytech.futures.model.adapter.SearchAdapter;
-import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.SwitchInsEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
@@ -43,13 +43,17 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_INSTRUMENT_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_OPTIONAL_SEARCH;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_IS_FIRM;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_OPTIONAL_DIRECTION;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_OPTIONAL_INSTRUMENT_ID;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_OPTIONAL_SEARCH;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_IS_FIRM;
 import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.SOURCE_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.SOURCE_ACTIVITY_CONDITION_ORDER;
+import static com.shinnytech.futures.constants.CommonConstants.SOURCE_ACTIVITY_FUTURE_INFO;
+import static com.shinnytech.futures.constants.CommonConstants.SOURCE_ACTIVITY_MAIN;
 import static com.shinnytech.futures.utils.ScreenUtils.getStatusBarHeight;
 
 /**
@@ -64,7 +68,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     private SearchAdapter mSearchAdapter;
     private Context sContext;
     private ActivitySearchBinding mBinding;
-    private boolean mIsFromFutureInfoActivity;
+    private String mSourceActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +79,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     }
 
     private void initData() {
-        mIsFromFutureInfoActivity = getIntent().getBooleanExtra("fromFutureInfoActivity", false);
+        mSourceActivity = getIntent().getStringExtra(SOURCE_ACTIVITY);
         sContext = BaseApplication.getContext();
         mBinding.toolbarSearch.setTitle("");
         setSupportActionBar(mBinding.toolbarSearch);
@@ -104,15 +108,25 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
                 //如果用户点击了搜索到的合约信息，就把此条合约保存到搜索历史中
                 if (instrument_id != null && !instrument_id.isEmpty()) {
                     LatestFileManager.getSearchEntitiesHistory().put(instrument_id, searchEntity);
-                    if (mIsFromFutureInfoActivity) {
-                        IdEvent idEvent = new IdEvent();
-                        idEvent.setInstrument_id(instrument_id);
-                        EventBus.getDefault().post(idEvent);
-                    } else {
-                        Intent intent = new Intent(SearchActivity.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtra(INS_BETWEEN_ACTIVITY, instrument_id);
-                        startActivity(intent);
+                    switch (mSourceActivity){
+                        case SOURCE_ACTIVITY_MAIN:
+                            Intent intent = new Intent(SearchActivity.this, MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.putExtra(INS_BETWEEN_ACTIVITY, instrument_id);
+                            startActivity(intent);
+                            break;
+                        case SOURCE_ACTIVITY_FUTURE_INFO:
+                            SwitchInsEvent switchInsEvent = new SwitchInsEvent();
+                            switchInsEvent.setInstrument_id(instrument_id);
+                            EventBus.getDefault().post(switchInsEvent);
+                            break;
+                        case SOURCE_ACTIVITY_CONDITION_ORDER:
+                            Intent intent1 = new Intent();
+                            intent1.putExtra(INS_BETWEEN_ACTIVITY, instrument_id);
+                            setResult(RESULT_OK, intent1);
+                            break;
+                        default:
+                            break;
                     }
                     //关闭键盘后销毁
                     View view = getCurrentFocus();
@@ -196,7 +210,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
      */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        back();
+        if (keyCode == KeyEvent.KEYCODE_BACK) back();
         return super.onKeyDown(keyCode, event);
     }
 

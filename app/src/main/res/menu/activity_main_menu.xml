@@ -4,8 +4,8 @@
     tools:context=".controller.activity.MainActivity">
 
     <item
+        app:actionLayout="@layout/view_main_menu"
         android:id="@+id/right_navigation"
-        android:icon="@mipmap/ic_menu"
         android:orderInCategory="101"
         android:title="navigation"
         app:showAsAction="always" />

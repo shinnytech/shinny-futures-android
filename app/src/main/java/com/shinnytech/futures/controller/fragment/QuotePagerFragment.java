@@ -1,10 +1,10 @@
 package com.shinnytech.futures.controller.fragment;
 
-import android.databinding.DataBindingUtil;
+import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,11 +25,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID_VALUE_MAIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SOURCE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_SHOW_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_RECOMMEND_OPTIONAL;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_PAGE_ID;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_PAGE_ID_VALUE_MAIN;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_SOURCE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_SHOW_PAGE;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_RECOMMEND_OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
@@ -49,6 +49,7 @@ public class QuotePagerFragment extends LazyLoadFragment {
     private MainActivity mMainActivity;
     private String mTitle;
     private boolean mIsInit = true;
+    private View mView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,6 +58,7 @@ public class QuotePagerFragment extends LazyLoadFragment {
 
     @Override
     public void show() {
+        if (mView == null)return;
         LogUtils.e("mainShow", true);
         try {
             if (!mIsInit) {
@@ -81,6 +83,7 @@ public class QuotePagerFragment extends LazyLoadFragment {
 
     @Override
     public void refreshMD() {
+        if (mView == null)return;
         int index = mBinding.quotePager.getCurrentItem();
         LazyLoadFragment lazyLoadFragment = (LazyLoadFragment) mViewPagerFragmentAdapter.getItem(index);
         lazyLoadFragment.refreshMD();
@@ -88,6 +91,7 @@ public class QuotePagerFragment extends LazyLoadFragment {
 
     @Override
     public void refreshTD() {
+        if (mView == null)return;
         int index = mBinding.quotePager.getCurrentItem();
         LazyLoadFragment lazyLoadFragment = (LazyLoadFragment) mViewPagerFragmentAdapter.getItem(index);
         lazyLoadFragment.refreshTD();
@@ -99,7 +103,8 @@ public class QuotePagerFragment extends LazyLoadFragment {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_quote_pager, container, false);
         initData();
         initEvent();
-        return mBinding.getRoot();
+        mView = mBinding.getRoot();
+        return mView;
     }
 
     private void initData() {

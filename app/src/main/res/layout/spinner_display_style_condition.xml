@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:background="@drawable/activity_condition_order_spinner_selector"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/tv_spinner_condition"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical|end"
+        android:textColor="@color/text_white"
+        android:textSize="@dimen/font_size_normal" />
+    <TextView
+        android:layout_width="10dp"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:layout_marginEnd="@dimen/margin_10dp"
+        android:layout_marginStart="@dimen/margin_5dp"
+        android:text="▼"
+        android:textColor="@color/text_white"
+        android:textSize="@dimen/font_size_normal" />
+</LinearLayout>
+

@@ -1,24 +1,20 @@
 package com.shinnytech.futures.controller.fragment;
 
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.databinding.DataBindingUtil;
+import androidx.databinding.DataBindingUtil;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
-import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -42,7 +38,7 @@ import com.shinnytech.futures.model.adapter.QuoteAdapterRecommend;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
-import com.shinnytech.futures.model.bean.eventbusbean.PositionEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.ScrollQuotesEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.QuoteEntity;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
@@ -66,25 +62,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.shinnytech.futures.application.BaseApplication.MD_BROADCAST_ACTION;
-import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_OPTIONAL_INSTRUMENT_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_OPTIONAL_QUOTE;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_RECOMMEND_OPTIONAL;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_OPTIONAL_DIRECTION;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_ADD;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_OPTIONAL_DIRECTION_VALUE_DELETE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_OPTIONAL_INSTRUMENT_ID;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_OPTIONAL_QUOTE;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_RECOMMEND_OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.DALIAN;
 import static com.shinnytech.futures.constants.CommonConstants.DALIANZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.DOMINANT;
-import static com.shinnytech.futures.constants.CommonConstants.LOAD_QUOTE_NUM;
-import static com.shinnytech.futures.constants.CommonConstants.MD_MESSAGE;
+import static com.shinnytech.futures.constants.MarketConstants.LOAD_QUOTE_NUM;
 import static com.shinnytech.futures.constants.CommonConstants.NENGYUAN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL;
 import static com.shinnytech.futures.constants.CommonConstants.RECOMMEND_INS;
 import static com.shinnytech.futures.constants.CommonConstants.SHANGHAI;
-import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE;
+import static com.shinnytech.futures.constants.TradeConstants.STATUS_ALIVE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOU;
 import static com.shinnytech.futures.constants.CommonConstants.ZHENGZHOUZUHE;
 import static com.shinnytech.futures.constants.CommonConstants.ZHONGJIN;
@@ -119,6 +111,7 @@ public class QuoteFragment extends LazyLoadFragment {
     private Dialog mDialog;
     private RecyclerView mRecyclerView;
     private DragDialogAdapter mDragDialogAdapter;
+    private View mView;
 
     /**
      * date: 7/9/17
@@ -145,7 +138,9 @@ public class QuoteFragment extends LazyLoadFragment {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_quote, container, false);
         initData();
         initEvent();
-        return mBinding.getRoot();
+        mView = mBinding.getRoot();
+        if (OPTIONAL.equals(mTitle)) initConfigOptional();
+        return mView;
     }
 
     private void initData() {
@@ -204,13 +199,12 @@ public class QuoteFragment extends LazyLoadFragment {
 
     @Override
     public void show() {
+        if (mView == null)return;
         try {
             LogUtils.e(mTitle+"show", true);
             initInsList();
             refreshMD();
             refreshTD();
-
-            if (OPTIONAL.equals(mTitle)) initConfigOptional();
 
             if (DALIANZUHE.equals(mTitle) || ZHENGZHOUZUHE.equals(mTitle)) {
                 mBinding.tvChangePercent.setText(R.string.quote_fragment_bid_price1);
@@ -574,6 +568,7 @@ public class QuoteFragment extends LazyLoadFragment {
      */
     @Override
     public void refreshMD() {
+        if (mView == null)return;
         //防止相邻合约列表页面刷新
         if (!mToolbarTitle.getText().toString().equals(mTitle) || !mIsUpdate) return;
         try {
@@ -612,10 +607,10 @@ public class QuoteFragment extends LazyLoadFragment {
      */
     @Override
     public void refreshTD() {
+        if (mView == null)return;
         if (!mIsUpdate)return;
 
-        DataManager dataManager = DataManager.getInstance();
-        UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.USER_ID);
+        UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
         if (userEntity == null) return;
 
         List<String> list = new ArrayList<>();
@@ -651,10 +646,10 @@ public class QuoteFragment extends LazyLoadFragment {
 
     //根据合约导航滑动行情列表
     @Subscribe
-    public void onEvent(PositionEvent positionEvent) {
+    public void onEvent(ScrollQuotesEvent scrollQuotesEvent) {
         if (mTitle.equals(mToolbarTitle.getText().toString())) {
             try {
-                int position = positionEvent.getPosition();
+                int position = scrollQuotesEvent.getPosition();
                 ((LinearLayoutManager) mBinding.rvQuote.getLayoutManager()).scrollToPositionWithOffset(position, 0);
                 int visibleItemCount1 = mBinding.rvQuote.getChildCount();
                 int lastPosition1 = (position + visibleItemCount1) > mInsList.size() ? mInsList.size() : (position + visibleItemCount1);

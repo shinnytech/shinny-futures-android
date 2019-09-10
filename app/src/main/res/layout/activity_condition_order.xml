@@ -1,0 +1,675 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto">
+
+<data>
+
+</data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:keepScreenOn="true"
+        android:id="@+id/condition_order"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/include"
+            layout="@layout/view_toolbar" />
+
+        <TextView
+            android:id="@+id/textText_trigger_way"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginStart="20dp"
+            android:gravity="center|start"
+            android:text="@string/trigger_way"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/spinner_trigger_way"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/spinner_trigger_way" />
+
+        <TextView
+            android:id="@+id/textText_trigger_price"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:gravity="center|start"
+            android:text="@string/trigger_price"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/spinner_trigger_price_range"
+            app:layout_constraintStart_toStartOf="@+id/textText_trigger_way"
+            app:layout_constraintTop_toTopOf="@+id/spinner_trigger_price_range" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="80dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="1dp"
+            android:gravity="center|start"
+            android:text="@string/trigger_order_price"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/spinner_trigger_order_price"
+            app:layout_constraintStart_toStartOf="@+id/textView"
+            app:layout_constraintTop_toTopOf="@+id/spinner_trigger_order_price" />
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:gravity="center|start"
+            android:text="@string/trigger_order_volume"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/spinner_trigger_order_volume"
+            app:layout_constraintStart_toStartOf="@+id/textView4"
+            app:layout_constraintTop_toTopOf="@+id/spinner_trigger_order_volume" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:gravity="center|start"
+            android:text="@string/trigger_order_direction"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/spinner_trigger_order_direction"
+            app:layout_constraintStart_toStartOf="@+id/textView9"
+            app:layout_constraintTop_toTopOf="@+id/spinner_trigger_order_direction" />
+
+        <Spinner
+            android:id="@+id/spinner_trigger_way"
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/activity_condition_order_spinner_rectangle"
+            android:entries="@array/trigger_way"
+            android:popupBackground="@color/condition_spinner_drop_background"
+            android:textAlignment="textEnd"
+            app:layout_constraintEnd_toEndOf="@+id/include"
+            app:layout_constraintStart_toEndOf="@+id/textView4"
+            app:layout_constraintTop_toBottomOf="@+id/include" />
+
+        <Spinner
+            android:id="@+id/spinner_trigger_price_range"
+            android:layout_width="70dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/activity_condition_order_spinner_rectangle"
+            android:entries="@array/trigger_price_range"
+            android:popupBackground="@color/condition_spinner_drop_background"
+            android:textAlignment="viewEnd"
+            app:layout_constraintStart_toStartOf="@+id/spinner_trigger_way"
+            app:layout_constraintTop_toBottomOf="@+id/spinner_trigger_way" />
+
+        <EditText
+            android:id="@+id/editText_trigger_price"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/activity_condition_order_spinner_rectangle"
+            android:gravity="center|end"
+            android:inputType="numberSigned|numberDecimal"
+            android:paddingEnd="@dimen/padding_10dp"
+            android:selectAllOnFocus="false"
+            android:singleLine="true"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/spinner_trigger_price_range"
+            app:layout_constraintEnd_toEndOf="@+id/spinner_trigger_way"
+            app:layout_constraintStart_toEndOf="@+id/spinner_trigger_price_range"
+            app:layout_constraintTop_toTopOf="@+id/spinner_trigger_price_range" />
+
+        <EditText
+            android:id="@+id/editText_trigger_range_larger_value"
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/activity_condition_order_spinner_rectangle"
+            android:gravity="center|end"
+            android:inputType="numberSigned|numberDecimal"
+            android:paddingEnd="@dimen/padding_10dp"
+            android:selectAllOnFocus="false"
+            android:singleLine="true"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_trigger_price_range"
+            app:layout_constraintEnd_toStartOf="@+id/textView_trigger_price_range"
+            app:layout_constraintStart_toStartOf="@+id/spinner_trigger_way"
+            app:layout_constraintTop_toTopOf="@+id/textView_trigger_price_range" />
+
+        <TextView
+            android:id="@+id/textView_trigger_price_range"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/activity_condition_order_spinner_rectangle"
+            android:gravity="center"
+            android:paddingStart="@dimen/padding_5dp"
+            android:paddingEnd="@dimen/padding_5dp"
+            android:text="@string/trigger_price_range"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="@+id/spinner_trigger_way"
+            app:layout_constraintStart_toStartOf="@+id/spinner_trigger_way"
+            app:layout_constraintTop_toBottomOf="@+id/spinner_trigger_way" />
+
+        <EditText
+            android:id="@+id/editText_trigger_range_lower_value"
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/activity_condition_order_spinner_rectangle"
+            android:gravity="center|end"
+            android:inputType="numberSigned|numberDecimal"
+            android:paddingEnd="@dimen/padding_10dp"
+            android:selectAllOnFocus="false"
+            android:singleLine="true"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_trigger_price_range"
+            app:layout_constraintEnd_toEndOf="@+id/spinner_trigger_way"
+            app:layout_constraintStart_toEndOf="@+id/textView_trigger_price_range"
+            app:layout_constraintTop_toTopOf="@+id/textView_trigger_price_range" />
+
+        <TextView
+            android:id="@+id/textView_trigger_time"
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/activity_condition_order_spinner_rectangle"
+            android:gravity="center"
+            android:paddingEnd="@dimen/padding_10dp"
+            android:drawableEnd="@mipmap/ic_query_builder_white_18dp"
+            android:text="20190629 13:50:26"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="@+id/spinner_trigger_way"
+            app:layout_constraintStart_toStartOf="@+id/spinner_trigger_way"
+            app:layout_constraintTop_toBottomOf="@+id/spinner_trigger_way" />
+
+        <TextView
+            android:id="@+id/textView_trigger_price_quick"
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/activity_condition_order_spinner_rectangle"
+            android:gravity="center"
+            android:paddingStart="@dimen/padding_5dp"
+            android:paddingEnd="@dimen/padding_5dp"
+            android:text="@string/trigger_price_quick"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="@+id/spinner_trigger_way"
+            app:layout_constraintStart_toStartOf="@+id/spinner_trigger_way"
+            app:layout_constraintTop_toBottomOf="@+id/spinner_trigger_way" />
+
+        <View
+            android:id="@+id/divider4"
+            android:layout_width="0dp"
+            android:layout_height="0.5dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/activity_condition_order_divider"
+            app:layout_constraintEnd_toEndOf="@+id/include"
+            app:layout_constraintStart_toStartOf="@+id/include"
+            app:layout_constraintTop_toBottomOf="@+id/spinner_trigger_price_range" />
+
+        <TextView
+            android:id="@+id/textView9"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:text="@string/trigger_order_offset"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/spinner_trigger_order_offset"
+            app:layout_constraintStart_toStartOf="@+id/textText_trigger_price"
+            app:layout_constraintTop_toTopOf="@+id/spinner_trigger_order_offset" />
+
+        <Spinner
+            android:id="@+id/spinner_trigger_order_offset"
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/activity_condition_order_spinner_rectangle"
+            android:entries="@array/trigger_order_offset"
+            android:popupBackground="@color/condition_spinner_drop_background"
+            android:textAlignment="viewEnd"
+            app:layout_constraintEnd_toEndOf="@+id/spinner_trigger_order_direction"
+            app:layout_constraintStart_toStartOf="@+id/spinner_trigger_order_direction"
+            app:layout_constraintTop_toBottomOf="@+id/spinner_trigger_order_direction" />
+
+        <Spinner
+            android:id="@+id/spinner_trigger_order_volume"
+            android:layout_width="70dp"
+            android:layout_height="35dp"
+            android:background="@drawable/activity_condition_order_spinner_rectangle"
+            android:entries="@array/trigger_order_volume"
+            android:popupBackground="@color/condition_spinner_drop_background"
+            android:textAlignment="viewEnd"
+            app:layout_constraintBottom_toBottomOf="@+id/editText_trigger_order_volume"
+            app:layout_constraintStart_toStartOf="@+id/spinner_trigger_order_price"
+            app:layout_constraintTop_toTopOf="@+id/editText_trigger_order_volume" />
+
+        <EditText
+            android:id="@+id/editText_trigger_order_volume"
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/activity_condition_order_spinner_rectangle"
+            android:gravity="center|end"
+            android:inputType="numberDecimal"
+            android:paddingEnd="@dimen/padding_10dp"
+            android:text="1"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toEndOf="@+id/editText_trigger_order_price"
+            app:layout_constraintStart_toEndOf="@+id/spinner_trigger_order_volume"
+            app:layout_constraintTop_toBottomOf="@+id/editText_trigger_order_price" />
+
+        <Spinner
+            android:id="@+id/spinner_trigger_order_price"
+            android:layout_width="70dp"
+            android:layout_height="35dp"
+            android:background="@drawable/activity_condition_order_spinner_rectangle"
+            android:entries="@array/trigger_order_price"
+            android:popupBackground="@color/condition_spinner_drop_background"
+            android:textAlignment="viewEnd"
+            app:layout_constraintBottom_toBottomOf="@+id/editText_trigger_order_price"
+            app:layout_constraintStart_toStartOf="@+id/spinner_trigger_order_offset"
+            app:layout_constraintTop_toTopOf="@+id/editText_trigger_order_price" />
+
+        <EditText
+            android:id="@+id/editText_trigger_order_price"
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/activity_condition_order_spinner_rectangle"
+            android:gravity="center|end"
+            android:inputType="numberSigned|numberDecimal"
+            android:paddingEnd="@dimen/padding_10dp"
+            android:text="@string/trigger_order_price_market"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toEndOf="@+id/spinner_trigger_order_offset"
+            app:layout_constraintStart_toEndOf="@+id/spinner_trigger_order_price"
+            app:layout_constraintTop_toBottomOf="@+id/spinner_trigger_order_offset" />
+
+        <Spinner
+            android:id="@+id/spinner_trigger_order_direction"
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/activity_condition_order_spinner_rectangle"
+            android:entries="@array/trigger_order_direction"
+            android:popupBackground="@color/condition_spinner_drop_background"
+            android:textAlignment="viewEnd"
+            app:layout_constraintEnd_toEndOf="@+id/textView_trigger_price_quick"
+            app:layout_constraintStart_toStartOf="@+id/textView_trigger_price_quick"
+            app:layout_constraintTop_toBottomOf="@+id/divider4" />
+
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="0dp"
+            android:layout_height="0.5dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/activity_condition_order_divider"
+            app:layout_constraintEnd_toEndOf="@+id/include"
+            app:layout_constraintStart_toStartOf="@+id/include"
+            app:layout_constraintTop_toBottomOf="@+id/editText_trigger_order_volume" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:gravity="center|start"
+            android:text="@string/trigger_period"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/spinner_trigger_expiry"
+            app:layout_constraintStart_toStartOf="@+id/textView5"
+            app:layout_constraintTop_toTopOf="@+id/spinner_trigger_expiry" />
+
+        <Spinner
+            android:id="@+id/spinner_trigger_expiry"
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/activity_condition_order_spinner_rectangle"
+            android:entries="@array/trigger_expiry"
+            android:popupBackground="@color/condition_spinner_drop_background"
+            android:textAlignment="viewEnd"
+            app:layout_constraintEnd_toEndOf="@+id/editText_trigger_order_volume"
+            app:layout_constraintStart_toStartOf="@+id/spinner_trigger_order_volume"
+            app:layout_constraintTop_toBottomOf="@+id/divider2" />
+
+        <Button
+            android:id="@+id/trigger_save"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/activity_condition_order_save_selector"
+            android:gravity="center"
+            android:text="@string/trigger_save"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toEndOf="@+id/include"
+            app:layout_constraintStart_toStartOf="@+id/include"
+            app:layout_constraintTop_toBottomOf="@+id/spinner_trigger_expiry" />
+
+        <TextView
+            android:id="@+id/textView_exhibit_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:gravity="center|start"
+            android:text="螺纹钢"
+            android:textColor="@color/text_yellow"
+            android:textSize="25sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/trigger_save" />
+
+        <TextView
+            android:id="@+id/textView_exhibit_ins"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/activity_condition_order_save_selector"
+            android:clickable="true"
+            android:drawableEnd="@mipmap/ic_exchange_down"
+            android:gravity="center|start"
+            android:paddingStart="@dimen/padding_5dp"
+            android:paddingEnd="@dimen/padding_5dp"
+            android:text="rb1910"
+            android:textColor="@color/text_yellow"
+            android:textSize="25sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_exhibit_name"
+            app:layout_constraintStart_toEndOf="@+id/textView_exhibit_name"
+            app:layout_constraintTop_toTopOf="@+id/textView_exhibit_name" />
+
+        <TextView
+            android:id="@+id/textView_exhibit_price_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center|start"
+            android:text="2909"
+            android:textColor="@color/text_yellow"
+            android:textSize="25sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_exhibit_left_bracket"
+            app:layout_constraintStart_toEndOf="@+id/textView_exhibit_left_bracket"
+            app:layout_constraintTop_toTopOf="@+id/textView_exhibit_left_bracket" />
+
+        <TextView
+            android:id="@+id/textView_exhibit_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center|start"
+            android:text="@string/exhibit_last"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintStart_toEndOf="@+id/textView_exhibit_price_larger"
+            app:layout_constraintTop_toBottomOf="@+id/textView_exhibit_name" />
+
+        <TextView
+            android:id="@+id/textView_exhibit_price_lower"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center|start"
+            android:paddingStart="8dp"
+            android:text="@string/exhibit_range"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_exhibit_price"
+            app:layout_constraintStart_toEndOf="@+id/textView_exhibit_price"
+            app:layout_constraintTop_toTopOf="@+id/textView_exhibit_price" />
+
+        <TextView
+            android:id="@+id/textView_exhibit_price_lower_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:gravity="center|start"
+            android:text="3000"
+            android:textColor="@color/text_red"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_exhibit_price_lower"
+            app:layout_constraintStart_toEndOf="@+id/textView_exhibit_price_lower"
+            app:layout_constraintTop_toTopOf="@+id/textView_exhibit_price_lower" />
+
+        <TextView
+            android:id="@+id/textView_exhibit_price_larger"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:gravity="center|start"
+            android:paddingEnd="8dp"
+            android:text="@string/exhibit_range"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_exhibit_price_larger_value"
+            app:layout_constraintStart_toEndOf="@+id/textView_exhibit_price_larger_value"
+            app:layout_constraintTop_toTopOf="@+id/textView_exhibit_price_larger_value" />
+
+        <TextView
+            android:id="@+id/textView_exhibit_price_larger_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center|start"
+            android:text="2000"
+            android:textColor="@color/text_green"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="@+id/textView_exhibit_name"
+            app:layout_constraintTop_toBottomOf="@+id/textView_exhibit_name" />
+
+        <TextView
+            android:id="@+id/textView17"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:gravity="center|start"
+            android:text="@string/exhibit_period"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_exhibit_order_expery"
+            app:layout_constraintEnd_toStartOf="@+id/textView_exhibit_order_expery"
+            app:layout_constraintTop_toTopOf="@+id/textView_exhibit_order_expery" />
+
+        <TextView
+            android:id="@+id/textView_exhibit_order_expery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center|start"
+            android:text="永久"
+            android:textColor="@color/text_yellow"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toEndOf="@+id/textView_exhibit_order_offset"
+            app:layout_constraintTop_toBottomOf="@+id/textView_exhibit_order_offset" />
+
+        <TextView
+            android:id="@+id/textView_exhibit_order_volume"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:gravity="center|start"
+            android:text="1"
+            android:textColor="@color/text_yellow"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView22"
+            app:layout_constraintStart_toEndOf="@+id/textView22"
+            app:layout_constraintTop_toTopOf="@+id/textView22" />
+
+        <TextView
+            android:id="@+id/textView20"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center|start"
+            android:text="@string/exhibit_volume_unit"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_exhibit_order_volume"
+            app:layout_constraintStart_toEndOf="@+id/textView_exhibit_order_volume"
+            app:layout_constraintTop_toTopOf="@+id/textView_exhibit_order_volume"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <TextView
+            android:id="@+id/textView22"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center|start"
+            android:text="@string/exhibit_volume"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="@+id/textView_exhibit_name"
+            app:layout_constraintTop_toBottomOf="@+id/textView_exhibit_price" />
+
+        <TextView
+            android:id="@+id/textView_exhibit_order_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:gravity="center|start"
+            android:text="市价"
+            android:textColor="@color/text_yellow"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView25"
+            app:layout_constraintStart_toEndOf="@+id/textView25"
+            app:layout_constraintTop_toTopOf="@+id/textView25" />
+
+        <TextView
+            android:id="@+id/textView_exhibit_order_offset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center|start"
+            android:text="开仓"
+            android:textColor="@color/text_yellow"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toEndOf="@+id/textView_exhibit_direction"
+            app:layout_constraintTop_toBottomOf="@+id/textView_exhibit_direction" />
+
+        <TextView
+            android:id="@+id/textView25"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center|start"
+            android:text="@string/exhibit_price"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="@+id/textView22"
+            app:layout_constraintTop_toBottomOf="@+id/textView22" />
+
+        <TextView
+            android:id="@+id/textView_exhibit_left_bracket"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:gravity="center|start"
+            android:text="("
+            android:textColor="@color/text_white"
+            android:textSize="25sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_exhibit_ins"
+            app:layout_constraintStart_toEndOf="@+id/textView_exhibit_ins"
+            app:layout_constraintTop_toTopOf="@+id/textView_exhibit_ins" />
+
+        <TextView
+            android:id="@+id/textView_exhibit_right_bracket"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center|start"
+            android:text=")"
+            android:textColor="@color/text_white"
+            android:textSize="25sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_exhibit_price_value"
+            app:layout_constraintStart_toEndOf="@+id/textView_exhibit_price_value"
+            app:layout_constraintTop_toTopOf="@+id/textView_exhibit_price_value" />
+
+        <TextView
+            android:id="@+id/textView26"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:gravity="center|start"
+            android:text="@string/exhibit_by"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_exhibit_price_lower_value"
+            app:layout_constraintStart_toEndOf="@+id/textView_exhibit_price_lower_value"
+            app:layout_constraintTop_toTopOf="@+id/textView_exhibit_price_lower_value" />
+
+        <TextView
+            android:id="@+id/textView_exhibit_direction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:gravity="center|start"
+            android:text="买"
+            android:textColor="@color/text_red"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView26"
+            app:layout_constraintEnd_toEndOf="@+id/trigger_save"
+            app:layout_constraintTop_toTopOf="@+id/textView26" />
+
+        <TextView
+            android:id="@+id/textView16"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:gravity="center|start"
+            android:text="@string/exhibit_offset"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_exhibit_order_offset"
+            app:layout_constraintEnd_toStartOf="@+id/textView_exhibit_order_offset"
+            app:layout_constraintTop_toTopOf="@+id/textView_exhibit_order_offset" />
+
+        <TextView
+            android:id="@+id/textView_responsibility"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:clickable="true"
+            android:gravity="center|start"
+            android:text="@string/exhibit_responsibility"
+            android:textColor="@drawable/activity_condition_order_responsibility_selector"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/include" />
+
+        <ImageView
+            android:background="@drawable/activity_condition_order_search_selector"
+            android:id="@+id/imageView_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/padding_8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView_exhibit_right_bracket"
+            app:layout_constraintStart_toEndOf="@+id/textView_exhibit_right_bracket"
+            app:layout_constraintTop_toTopOf="@+id/textView_exhibit_right_bracket"
+            app:srcCompat="@mipmap/ic_search" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

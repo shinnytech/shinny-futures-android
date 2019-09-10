@@ -4,17 +4,23 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.SettingConstants;
 import com.shinnytech.futures.databinding.ActivityKlineDurationBinding;
 import com.shinnytech.futures.model.adapter.KlineDurationAdapter;
+import com.shinnytech.futures.model.bean.eventbusbean.UpdateDurationsEvent;
 import com.shinnytech.futures.utils.SPUtils;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,14 +33,14 @@ public class KlineDurationActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mLayoutID = R.layout.activity_kline_duration;
-        mTitle = CommonConstants.KLINE_DURATION_SETTING;
+        mTitle = SettingConstants.KLINE_DURATION_SETTING;
         super.onCreate(savedInstanceState);
     }
 
     @Override
     protected void initData() {
         mBinding = (ActivityKlineDurationBinding) mViewDataBinding;
-        String duration = (String) SPUtils.get(BaseApplication.getContext(), CommonConstants.CONFIG_KLINE_DURATION_DEFAULT, "");
+        String duration = (String) SPUtils.get(BaseApplication.getContext(), SettingConstants.CONFIG_KLINE_DURATION_DEFAULT, "");
         String[] durations = duration.split(",");
         List<String> list = new ArrayList<>();
         for (String data : durations) {
@@ -105,7 +111,7 @@ public class KlineDurationActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CommonConstants.KLINE_DURATION_ACTIVITY_TO_ADD_DURATION_ACTIVITY
                 && resultCode == RESULT_OK) {
-            String duration = (String) SPUtils.get(BaseApplication.getContext(), CommonConstants.CONFIG_KLINE_DURATION_DEFAULT, "");
+            String duration = (String) SPUtils.get(BaseApplication.getContext(), SettingConstants.CONFIG_KLINE_DURATION_DEFAULT, "");
             String[] durations = duration.split(",");
             List<String> list = new ArrayList<>();
             for (String d : durations) {
@@ -113,5 +119,20 @@ public class KlineDurationActivity extends BaseActivity {
             }
             mKlineDurationAdapter.updateList(list);
         }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        UpdateDurationsEvent updateDurationsEvent = new UpdateDurationsEvent();
+        EventBus.getDefault().post(updateDurationsEvent);
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        UpdateDurationsEvent updateDurationsEvent = new UpdateDurationsEvent();
+        EventBus.getDefault().post(updateDurationsEvent);
+        return super.onOptionsItemSelected(item);
     }
 }

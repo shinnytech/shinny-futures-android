@@ -1,7 +1,8 @@
 package com.shinnytech.futures.model.engine;
 
 import android.content.Context;
-import android.support.v4.content.ContextCompat;
+import android.os.Environment;
+import androidx.core.content.ContextCompat;
 
 import com.aliyun.sls.android.sdk.LogEntity;
 import com.aliyun.sls.android.sdk.SLSDatabaseManager;
@@ -21,6 +22,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
@@ -38,17 +40,17 @@ import java.util.TreeMap;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMULATION;
-import static com.shinnytech.futures.constants.CommonConstants.CFFEX;
-import static com.shinnytech.futures.constants.CommonConstants.CFFEX_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.CZCE;
-import static com.shinnytech.futures.constants.CommonConstants.CZCE_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.DCE;
-import static com.shinnytech.futures.constants.CommonConstants.DCE_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.INE;
-import static com.shinnytech.futures.constants.CommonConstants.INE_ZN;
+import static com.shinnytech.futures.constants.MarketConstants.CFFEX;
+import static com.shinnytech.futures.constants.MarketConstants.CFFEX_ZN;
+import static com.shinnytech.futures.constants.MarketConstants.CZCE;
+import static com.shinnytech.futures.constants.MarketConstants.CZCE_ZN;
+import static com.shinnytech.futures.constants.MarketConstants.DCE;
+import static com.shinnytech.futures.constants.MarketConstants.DCE_ZN;
+import static com.shinnytech.futures.constants.MarketConstants.INE;
+import static com.shinnytech.futures.constants.MarketConstants.INE_ZN;
 import static com.shinnytech.futures.constants.CommonConstants.OPTIONAL_INS_LIST;
-import static com.shinnytech.futures.constants.CommonConstants.SHFE;
-import static com.shinnytech.futures.constants.CommonConstants.SHFE_ZN;
+import static com.shinnytech.futures.constants.MarketConstants.SHFE;
+import static com.shinnytech.futures.constants.MarketConstants.SHFE_ZN;
 
 /**
  * date: 3/30/17
@@ -207,10 +209,8 @@ public class LatestFileManager {
      * author: chenli
      * description: 开机初始化合约列表
      */
-    public static void initInsList(File latestFile) {
+    public static void initInsList(String latest) {
         LogUtils.e("合约列表解析开始", true);
-        String latest = readFile(latestFile.getName());
-        if (latest == null) return;
         try {
             jsonObject = new JSONObject(latest);
             Iterator<String> instrumentIds = jsonObject.keys();
@@ -694,7 +694,7 @@ public class LatestFileManager {
     }
 
     /**
-     * 保存合约列表字符串到本地文件
+     * 保存自选列表
      */
     public static void saveInsListToFile(List<String> insList) {
         try {
@@ -707,7 +707,7 @@ public class LatestFileManager {
     }
 
     /**
-     * 读取本地文件合约列表
+     * 读自选列表
      */
     public static List<String> readInsListFromFile() {
         List<String> insList = new ArrayList<>();
@@ -730,7 +730,7 @@ public class LatestFileManager {
      */
 
     public static String readFile(String fileName) {
-        StringBuilder sb = new StringBuilder("");
+        StringBuilder sb = new StringBuilder();
         try {
             //打开文件输入流
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(BaseApplication.getContext().openFileInput(fileName), "UTF-8"));
@@ -751,7 +751,7 @@ public class LatestFileManager {
     public static void writeFile(String fileName, String data) {
         try {
 
-            FileOutputStream fout = BaseApplication.getContext().openFileOutput(fileName, Context.MODE_APPEND);
+            FileOutputStream fout = BaseApplication.getContext().openFileOutput(fileName, Context.MODE_PRIVATE);
 
             byte[] bytes = data.getBytes();
 
@@ -793,6 +793,25 @@ public class LatestFileManager {
         Date date = new Date();
         entity.setTimestamp(new Long(date.getTime()));
         SLSDatabaseManager.getInstance().insertRecordIntoDB(entity);
+    }
+
+    /* Checks if external storage is available for read and write */
+    public static void writeFileToSd(String data) {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            try {
+                File sdCard = Environment.getExternalStorageDirectory();
+                File dir = new File (sdCard.getAbsolutePath() + "/download");
+                dir.mkdirs();
+                File file = new File(dir, "notify.txt");
+                FileWriter writer = new FileWriter(file, true);
+                writer.write(data);
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

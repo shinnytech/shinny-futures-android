@@ -10,6 +10,7 @@ public class BrokerEntity {
     private String aid;
     private String[] brokers;
     private String settlement;
+    private boolean confirmed = false;
 
     public String getSettlement() {
         return settlement;
@@ -35,5 +36,12 @@ public class BrokerEntity {
         this.brokers = brokers;
     }
 
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
+    }
 
 }

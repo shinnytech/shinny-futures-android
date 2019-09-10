@@ -10,7 +10,7 @@
             type="com.shinnytech.futures.model.bean.accountinfobean.AccountEntity"></variable>
     </data>
 
-    <android.support.design.widget.CoordinatorLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:background="@color/quote_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -249,7 +249,7 @@
 
                     <Button
                         android:id="@+id/transfer_in"
-                        android:background="@drawable/fragment_account_transfer_in_rectangle"
+                        android:background="@drawable/fragment_account_transfer_in_selector"
                         android:layout_margin="@dimen/margin_5dp"
                         android:layout_width="match_parent"
                         android:layout_height="30dp"
@@ -333,7 +333,7 @@
 
                     <Button
                         android:id="@+id/transfer_out"
-                        android:background="@drawable/fragment_account_transfer_out_rectangle"
+                        android:background="@drawable/fragment_account_transfer_out_selector"
                         android:layout_margin="@dimen/margin_5dp"
                         android:layout_width="match_parent"
                         android:layout_height="30dp"
@@ -344,39 +344,39 @@
 
             </LinearLayout>
 
-            <android.support.design.widget.TabLayout
+            <com.google.android.material.tabs.TabLayout
                 android:background="@color/toolbar"
                 android:id="@+id/tabLayout"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 app:tabIndicatorColor="@color/text_yellow">
 
-                <android.support.design.widget.TabItem
+                <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="持仓" />
 
-                <android.support.design.widget.TabItem
+                <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="挂单" />
 
-                <android.support.design.widget.TabItem
+                <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="委托" />
 
-                <android.support.design.widget.TabItem
+                <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="成交" />
 
-            </android.support.design.widget.TabLayout>
+            </com.google.android.material.tabs.TabLayout>
 
-            <android.support.v4.view.ViewPager
+            <androidx.viewpager.widget.ViewPager
                 android:id="@+id/vp"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"></android.support.v4.view.ViewPager>
+                android:layout_height="match_parent"></androidx.viewpager.widget.ViewPager>
 
         </LinearLayout>
 
@@ -391,5 +391,5 @@
             android:src="@mipmap/ic_flash_on_white_18dp"
             app:layout_anchorGravity="bottom|right" />
 
-    </android.support.design.widget.CoordinatorLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

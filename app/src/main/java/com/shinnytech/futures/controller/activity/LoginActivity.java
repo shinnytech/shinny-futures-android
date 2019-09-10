@@ -9,20 +9,23 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.databinding.DataBindingUtil;
+import androidx.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,18 +33,18 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.sfit.ctp.info.DeviceInfoManager;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.amplitude.api.Amplitude;
 import com.shinnytech.futures.amplitude.api.Identify;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.SettingConstants;
 import com.shinnytech.futures.databinding.ActivityLoginBinding;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
 import com.shinnytech.futures.utils.Base64;
-import com.shinnytech.futures.utils.LogUtils;
 import com.shinnytech.futures.utils.NetworkUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.SystemUtils;
@@ -57,35 +60,34 @@ import java.util.Random;
 
 import static android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS;
 import static com.shinnytech.futures.application.BaseApplication.TD_BROADCAST_ACTION;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_FAIL_REASON;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_LOGIN_TYPE_VALUE_VISIT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_PAGE_ID_VALUE_LOGIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_SOURCE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_LOGIN_FAILED;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_SHOW_PAGE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_USER_LOGIN_TIME_FIRST;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_LOGIN_TYPE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_LOGIN_TYPE_VALUE_VISIT;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_PAGE_ID;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_PAGE_ID_VALUE_LOGIN;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_SOURCE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_LOGIN;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_SHOW_PAGE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_USER_LOGIN_TIME_FIRST;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_LOGIN_TIMEOUT;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMNOW;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_SIMULATION;
 import static com.shinnytech.futures.constants.CommonConstants.BROKER_ID_VISITOR;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_ACCOUNT;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_BROKER;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_INIT_TIME;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_IS_FIRM;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_PASSWORD;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_SYSTEM_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_VERSION_CODE;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_ACCOUNT;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_BROKER;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_INIT_TIME;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_IS_FIRM;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_LOGIN_DATE;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_PASSWORD;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_SYSTEM_INFO;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_VERSION_CODE;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN_ACTIVITY_TO_BROKER_LIST_ACTIVITY;
 import static com.shinnytech.futures.constants.CommonConstants.LOGIN_ACTIVITY_TO_CHANGE_PASSWORD_ACTIVITY;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_BROKER_INFO;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_FAIL;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_LOGIN_SUCCEED;
-import static com.shinnytech.futures.constants.CommonConstants.TD_MESSAGE_WEAK_PASSWORD;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_BROKER_INFO;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_LOGIN_FAIL;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_LOGIN_SUCCEED;
+import static com.shinnytech.futures.constants.BroadcastConstants.TD_MESSAGE_WEAK_PASSWORD;
 import static com.shinnytech.futures.utils.ScreenUtils.getStatusBarHeight;
 
 /**
@@ -101,8 +103,9 @@ public class LoginActivity extends AppCompatActivity {
     private static final int LOGIN_SUCCESS = 2;
     private static final int LOGIN_FAIL = 3;
     private static final int LOGIN_TO_CHANGE_PASSWORD = 4;
-    private static final int LOGIN_TIME_OUT = 5;
+    private static final int LOGIN_TIMEOUT = 5;
     private static final int EXIT_APP = 6;
+    private static final int MY_PERMISSIONS_REQUEST_DENIED = 7;
     protected Context sContext;
     protected DataManager sDataManager;
     /**
@@ -115,8 +118,12 @@ public class LoginActivity extends AppCompatActivity {
     private Handler mHandler;
     private ActivityLoginBinding mBinding;
     private String mPassword;
-    private long mExitTime = 0;
+    private long mExitTime;
     private boolean mIsFirm;
+    private boolean mIsLoginEnable;
+    private boolean mIsVisitEnable;
+    private boolean mIsShowPassword;
+    private Dialog mLoginDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -134,8 +141,28 @@ public class LoginActivity extends AppCompatActivity {
         sContext = BaseApplication.getContext();
         sDataManager = DataManager.getInstance();
         mHandler = new MyHandler(this);
+        mIsLoginEnable = true;
+        mIsVisitEnable = true;
+        mExitTime = 0;
+        mIsShowPassword = false;
         //登录入口
         sDataManager.LOGIN_TYPE = AMP_EVENT_LOGIN_TYPE_VALUE_AUTO;
+
+        mLoginDialog = new Dialog(this, R.style.Theme_Light_Dialog);
+        View dialogView = View.inflate(this, R.layout.view_dialog_init_optional, null);
+        Window dialogWindow = mLoginDialog.getWindow();
+        if (dialogWindow != null) {
+            dialogWindow.getDecorView().setPadding(0, 0, 0, 0);
+            WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+            dialogWindow.setGravity(Gravity.CENTER);
+            lp.width = (int) getResources().getDimension(R.dimen.optional_dialog_width);
+            lp.height = (int) getResources().getDimension(R.dimen.optional_dialog_height);
+            dialogWindow.setAttributes(lp);
+        }
+        mLoginDialog.setContentView(dialogView);
+        mLoginDialog.setCancelable(false);
+        TextView hint = dialogView.findViewById(R.id.dialog_hint);
+        hint.setText("登录进行中，请稍等片刻......");
     }
 
     /**
@@ -155,6 +182,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 switchFirm();
+                hideHint();
             }
         });
 
@@ -162,13 +190,19 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 switchSimulator();
+                hideHint();
             }
         });
 
         mBinding.visitor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBinding.visitor.setEnabled(false);
+                hideHint();
+                if (!mIsVisitEnable){
+                    ToastUtils.showToast(sContext, "登录请求已发送，请稍候");
+                    return;
+                }
+                mIsVisitEnable = false;
                 //随机生成8位字符串
                 String data = "";
                 Random random = new Random();
@@ -211,6 +245,7 @@ public class LoginActivity extends AppCompatActivity {
         mBinding.broker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                hideHint();
                 try {
                     String broker = mBinding.broker.getText().toString();
                     Intent intentBroker = new Intent(LoginActivity.this, BrokerListActivity.class);
@@ -225,6 +260,7 @@ public class LoginActivity extends AppCompatActivity {
         mBinding.selectBroker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                hideHint();
                 try {
                     String broker = mBinding.broker.getText().toString();
                     Intent intentBroker = new Intent(LoginActivity.this, BrokerListActivity.class);
@@ -239,6 +275,7 @@ public class LoginActivity extends AppCompatActivity {
         mBinding.deleteAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                hideHint();
                 mBinding.account.getEditableText().clear();
                 String account = (String) SPUtils.get(sContext, CONFIG_ACCOUNT, "");
                 if (!account.isEmpty()) {
@@ -248,10 +285,20 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        mBinding.deletePassword.setOnClickListener(new View.OnClickListener() {
+        mBinding.showPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBinding.password.getEditableText().clear();
+                hideHint();
+                if (!mIsShowPassword) {
+                    mBinding.password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                    mIsShowPassword = true;
+                    mBinding.showPassword.setImageDrawable(getResources().getDrawable(R.mipmap.ic_visibility_white_18dp));
+                }else {
+                    mBinding.password.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    mIsShowPassword = false;
+                    mBinding.showPassword.setImageDrawable(getResources().getDrawable(R.mipmap.ic_visibility_off_white_18dp));
+                }
+                mBinding.password.setSelection(mBinding.password.getText().toString().length());
             }
         });
 
@@ -272,28 +319,6 @@ public class LoginActivity extends AppCompatActivity {
                     mBinding.deleteAccount.setVisibility(View.INVISIBLE);
                 } else {
                     mBinding.deleteAccount.setVisibility(View.VISIBLE);
-                }
-
-            }
-        });
-
-        mBinding.password.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (s.length() == 0) {
-                    mBinding.deletePassword.setVisibility(View.INVISIBLE);
-                } else {
-                    mBinding.deletePassword.setVisibility(View.VISIBLE);
                 }
 
             }
@@ -325,6 +350,7 @@ public class LoginActivity extends AppCompatActivity {
         mBinding.buttonIdLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                hideHint();
                 attemptLogin();
             }
         });
@@ -410,6 +436,11 @@ public class LoginActivity extends AppCompatActivity {
             // form field with an error.
             focusView.requestFocus();
         } else {
+            if (!mIsLoginEnable){
+                ToastUtils.showToast(sContext, "登录请求已发送，请稍候");
+                return;
+            }
+            mIsLoginEnable = false;
             if (mBrokerName != null && !(mBrokerName.equals(BROKER_ID_SIMULATION)
                     || mBrokerName.equals(BROKER_ID_SIMNOW))) {
                 Identify identify = new Identify();
@@ -419,18 +450,9 @@ public class LoginActivity extends AppCompatActivity {
                 identify.setOnce(AMP_USER_LOGIN_TIME_FIRST, loginTime);
                 Amplitude.getInstance().identify(identify);
             }
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put(AMP_EVENT_LOGIN_TYPE, AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            Amplitude.getInstance().logEventWrap(AMP_LOGIN, jsonObject);
             sDataManager.BROKER_ID = mBrokerName;
             sDataManager.USER_ID = mPhoneNumber;
             sDataManager.LOGIN_TYPE = AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN;
-            mBinding.buttonIdLogin.setEnabled(false);
-
             //直接保存，解决实盘<->模拟登录不上的问题
             SPUtils.putAndApply(sContext, CONFIG_LOGIN_DATE, "");
             SPUtils.putAndApply(sContext, CONFIG_ACCOUNT, mPhoneNumber);
@@ -438,10 +460,17 @@ public class LoginActivity extends AppCompatActivity {
             SPUtils.putAndApply(sContext, CONFIG_BROKER, mBrokerName);
             SPUtils.putAndApply(sContext, CONFIG_IS_FIRM, mIsFirm);
 
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put(AMP_EVENT_LOGIN_TYPE, AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            Amplitude.getInstance().logEventWrap(AMP_LOGIN, jsonObject);
+
             BaseApplication.getmTDWebSocket().sendReqLogin(mBrokerName, mPhoneNumber, mPassword);
 
-            //超时检测
-            mHandler.sendEmptyMessageDelayed(LOGIN_TIME_OUT, 5000);
+            if (!mLoginDialog.isShowing())mLoginDialog.show();
 
             //关闭键盘
             View view = getWindow().getCurrentFocus();
@@ -479,14 +508,18 @@ public class LoginActivity extends AppCompatActivity {
                                 && mBinding.account.getText().toString().isEmpty())
                             initBrokerAccount();
                         //先登录实盘，登录失败，再点"进入行情"，断线重连
-                        if (!mBinding.visitor.isEnabled() || !mBinding.buttonIdLogin.isEnabled()){
-                            mBinding.visitor.setEnabled(true);
-                            mBinding.buttonIdLogin.setEnabled(true);
+                        if (!mIsVisitEnable || !mIsLoginEnable){
+                            mIsVisitEnable = true;
+                            mIsLoginEnable = true;
                         }
                         break;
                     case TD_MESSAGE_LOGIN_FAIL:
                         //登录失败
                         mHandler.sendEmptyMessage(LOGIN_FAIL);
+                        break;
+                    case TD_MESSAGE_LOGIN_TIMEOUT:
+                        //登录失败
+                        mHandler.sendEmptyMessage(LOGIN_TIMEOUT);
                         break;
                     default:
                         break;
@@ -517,6 +550,7 @@ public class LoginActivity extends AppCompatActivity {
                     break;
             }
         }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     /**
@@ -529,7 +563,7 @@ public class LoginActivity extends AppCompatActivity {
             final float nowVersionCode = DataManager.getInstance().APP_CODE;
             float versionCode = (float) SPUtils.get(sContext, CONFIG_VERSION_CODE, 0.0f);
             if (nowVersionCode > versionCode) {
-                final Dialog dialog = new Dialog(this, R.style.responsibilityDialog);
+                final Dialog dialog = new Dialog(this, R.style.AppTheme);
                 View view = View.inflate(this, R.layout.view_dialog_responsibility, null);
                 dialog.setContentView(view);
                 dialog.setCanceledOnTouchOutside(false);
@@ -603,6 +637,8 @@ public class LoginActivity extends AppCompatActivity {
                         && grantResults[1] == PackageManager.PERMISSION_GRANTED
                         && grantResults[2] == PackageManager.PERMISSION_GRANTED) {
                     getSystemInfo();
+                }else {
+                    mHandler.sendEmptyMessageDelayed(MY_PERMISSIONS_REQUEST_DENIED, 1000);
                 }
                 break;
             default:
@@ -735,6 +771,42 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
+     * date: 2019/8/20
+     * author: chenli
+     * description: 显示不合法登陆提示
+     */
+    private void showFailHint(){
+        mBinding.loginHint1.setVisibility(View.VISIBLE);
+        mBinding.loginHint2.setVisibility(View.VISIBLE);
+        mBinding.loginHint3.setVisibility(View.VISIBLE);
+        mBinding.loginHint4.setVisibility(View.GONE);
+    }
+
+    /**
+     * date: 2019/8/20
+     * author: chenli
+     * description: 隐藏不合法登陆提示
+     */
+    private void hideHint(){
+        mBinding.loginHint1.setVisibility(View.GONE);
+        mBinding.loginHint2.setVisibility(View.GONE);
+        mBinding.loginHint3.setVisibility(View.GONE);
+        mBinding.loginHint4.setVisibility(View.GONE);
+    }
+
+    /**
+     * date: 2019/8/20
+     * author: chenli
+     * description: 显示登陆超时提示
+     */
+    private void showTimeoutHint() {
+        mBinding.loginHint1.setVisibility(View.GONE);
+        mBinding.loginHint2.setVisibility(View.GONE);
+        mBinding.loginHint3.setVisibility(View.GONE);
+        mBinding.loginHint4.setVisibility(View.VISIBLE);
+    }
+
+    /**
      * date: 6/1/18
      * author: chenli
      * description: 点击登录后服务器返回处理
@@ -754,9 +826,12 @@ public class LoginActivity extends AppCompatActivity {
             if (activity != null) {
                 switch (msg.what) {
                     case LOGIN_SUCCESS:
+                        if (activity.sDataManager.LOGIN_TYPE.equals(AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN))
+                            activity.hideHint();
+                        if (activity.mLoginDialog.isShowing())activity.mLoginDialog.dismiss();
                         //重新写一遍账号信息，防止因过慢网速导致的超时触发密码置空
-                        activity.mBinding.visitor.setEnabled(true);
-                        activity.mBinding.buttonIdLogin.setEnabled(true);
+                        activity.mIsVisitEnable = true;
+                        activity.mIsLoginEnable = true;
                         SPUtils.putAndApply(activity.sContext, CONFIG_LOGIN_DATE, TimeUtils.getNowTime());
                         SPUtils.putAndApply(activity.sContext, CONFIG_ACCOUNT, activity.mPhoneNumber);
                         SPUtils.putAndApply(activity.sContext, CONFIG_PASSWORD, activity.mPassword);
@@ -774,31 +849,30 @@ public class LoginActivity extends AppCompatActivity {
                         activity.finish();
                         break;
                     case LOGIN_FAIL:
-                        activity.mBinding.visitor.setEnabled(true);
-                        activity.mBinding.buttonIdLogin.setEnabled(true);
-                        SPUtils.putAndApply(activity.sContext, CommonConstants.CONFIG_PASSWORD, "");
+                        if (activity.sDataManager.LOGIN_TYPE.equals(AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN))
+                            activity.showFailHint();
+                        if (activity.mLoginDialog.isShowing())activity.mLoginDialog.dismiss();
+                        activity.mIsVisitEnable = true;
+                        activity.mIsLoginEnable = true;
+                        SPUtils.putAndApply(activity.sContext, SettingConstants.CONFIG_PASSWORD, "");
+                        break;
+                    case LOGIN_TIMEOUT:
+                        if (activity.sDataManager.LOGIN_TYPE.equals(AMP_EVENT_LOGIN_TYPE_VALUE_LOGIN))
+                            activity.showTimeoutHint();
+                        if (activity.mLoginDialog.isShowing())activity.mLoginDialog.dismiss();
+                        activity.mIsVisitEnable = true;
+                        activity.mIsLoginEnable = true;
+                        SPUtils.putAndApply(activity.sContext, SettingConstants.CONFIG_PASSWORD, "");
                         break;
                     case LOGIN_TO_CHANGE_PASSWORD:
                         Intent intent = new Intent(activity, ChangePasswordActivity.class);
                         activity.startActivityForResult(intent, LOGIN_ACTIVITY_TO_CHANGE_PASSWORD_ACTIVITY);
                         break;
-                    case LOGIN_TIME_OUT:
-                        if (!activity.mBinding.visitor.isEnabled() || !activity.mBinding.buttonIdLogin.isEnabled()){
-                            activity.mBinding.visitor.setEnabled(true);
-                            activity.mBinding.buttonIdLogin.setEnabled(true);
-                            SPUtils.putAndApply(activity.sContext, CommonConstants.CONFIG_PASSWORD, "");
-                            JSONObject jsonObject = new JSONObject();
-                            try {
-                                jsonObject.put(AMP_EVENT_LOGIN_TYPE, activity.sDataManager.LOGIN_TYPE);
-                                jsonObject.put(AMP_EVENT_LOGIN_FAIL_REASON, "登录超时");
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            Amplitude.getInstance().logEvent(AMP_LOGIN_FAILED, jsonObject);
-                        }
-                        break;
                     case EXIT_APP:
-                        SystemUtils.exitApp(activity.sContext);
+                        SystemUtils.exitApp(activity);
+                        break;
+                    case MY_PERMISSIONS_REQUEST_DENIED:
+                        activity.checkPermissions();
                         break;
                     default:
                         break;

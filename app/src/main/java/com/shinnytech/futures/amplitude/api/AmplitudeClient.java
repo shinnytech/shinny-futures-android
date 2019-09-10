@@ -11,7 +11,7 @@ import android.util.Pair;
 import com.shinnytech.futures.BuildConfig;
 import com.shinnytech.futures.amplitude.security.MD5;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.AmpConstants;
 import com.shinnytech.futures.model.bean.accountinfobean.AccountEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
@@ -40,12 +40,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_COMMON_BALANCE;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_COMMON_FAVORITE_COUNT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_COMMON_FLOAT_PROFIT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_COMMON_ORDER_COUNT;
-import static com.shinnytech.futures.constants.CommonConstants.AMP_EVENT_COMMON_POSITION_COUNT;
-import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_COMMON_BALANCE;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_COMMON_FAVORITE_COUNT;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_COMMON_FLOAT_PROFIT;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_COMMON_ORDER_COUNT;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_EVENT_COMMON_POSITION_COUNT;
+import static com.shinnytech.futures.constants.TradeConstants.STATUS_ALIVE;
 
 /**
  * <h1>AmplitudeClient</h1>
@@ -885,10 +885,10 @@ public class AmplitudeClient {
     public void logEventWrap(String event, JSONObject jsonObject){
         try {
             DataManager dataManager = DataManager.getInstance();
-            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_HOUR, TimeUtils.getAmpTimeHour());
-            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_MINUTE, TimeUtils.getAmpTimeMinute());
-            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_SECOND, TimeUtils.getAmpTimeSecond());
-            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_WEEKDAY, TimeUtils.getAmpTimeWeekDay());
+            jsonObject.put(AmpConstants.AMP_EVENT_COMMON_HOUR, TimeUtils.getAmpTimeHour());
+            jsonObject.put(AmpConstants.AMP_EVENT_COMMON_MINUTE, TimeUtils.getAmpTimeMinute());
+            jsonObject.put(AmpConstants.AMP_EVENT_COMMON_SECOND, TimeUtils.getAmpTimeSecond());
+            jsonObject.put(AmpConstants.AMP_EVENT_COMMON_WEEKDAY, TimeUtils.getAmpTimeWeekDay());
             long currentTime = System.currentTimeMillis();
             long offset = currentTime - dataManager.INIT_TIME;
             long offseth = currentTime - dataManager.FOREGROUND_TIME;
@@ -898,23 +898,23 @@ public class AmplitudeClient {
             if (count == null)count = 1l;
             else count++;
             dataManager.COUNT.put(event, count);
-            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_OFFSET, offset);
-            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_OFFSETH, offseth);
-            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_SPAN, span);
-            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_COUNT, count);
-            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_CHANNEL_ID, BuildConfig.CHANNEL_ID);
+            jsonObject.put(AmpConstants.AMP_EVENT_COMMON_OFFSET, offset);
+            jsonObject.put(AmpConstants.AMP_EVENT_COMMON_OFFSETH, offseth);
+            jsonObject.put(AmpConstants.AMP_EVENT_COMMON_SPAN, span);
+            jsonObject.put(AmpConstants.AMP_EVENT_COMMON_COUNT, count);
+            jsonObject.put(AmpConstants.AMP_EVENT_COMMON_CHANNEL_ID, BuildConfig.CHANNEL_ID);
 
-            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_MD_STATUS, BaseApplication.getmMDWebSocket().getWebSocketStatus());
-            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_TD_STATUS, BaseApplication.getmTDWebSocket().getWebSocketStatus());
-            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_MD_SESSION, dataManager.MD_SESSION);
-            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_TD_SESSION, dataManager.TD_SESSION);
-            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_MD_PACK_COUNT, dataManager.MD_PACK_COUNT);
-            jsonObject.put(CommonConstants.AMP_EVENT_COMMON_TD_PACK_COUNT, dataManager.TD_PACK_COUNT);
+            jsonObject.put(AmpConstants.AMP_EVENT_COMMON_MD_STATUS, BaseApplication.getmMDWebSocket().getWebSocketStatus());
+            jsonObject.put(AmpConstants.AMP_EVENT_COMMON_TD_STATUS, BaseApplication.getmTDWebSocket().getWebSocketStatus());
+            jsonObject.put(AmpConstants.AMP_EVENT_COMMON_MD_SESSION, dataManager.MD_SESSION);
+            jsonObject.put(AmpConstants.AMP_EVENT_COMMON_TD_SESSION, dataManager.TD_SESSION);
+            jsonObject.put(AmpConstants.AMP_EVENT_COMMON_MD_PACK_COUNT, dataManager.MD_PACK_COUNT);
+            jsonObject.put(AmpConstants.AMP_EVENT_COMMON_TD_PACK_COUNT, dataManager.TD_PACK_COUNT);
 
             if (!dataManager.USER_ID.isEmpty())
-                jsonObject.put(CommonConstants.AMP_EVENT_COMMON_USER_ID, dataManager.USER_ID);
+                jsonObject.put(AmpConstants.AMP_EVENT_COMMON_USER_ID, dataManager.USER_ID);
             if (!dataManager.BROKER_ID.isEmpty())
-                jsonObject.put(CommonConstants.AMP_EVENT_COMMON_BROKER_ID, dataManager.BROKER_ID);
+                jsonObject.put(AmpConstants.AMP_EVENT_COMMON_BROKER_ID, dataManager.BROKER_ID);
             UserEntity userEntity = dataManager.getTradeBean().getUsers().get(dataManager.USER_ID);
             if (userEntity != null) {
                 AccountEntity accountEntity = userEntity.getAccounts().get("CNY");

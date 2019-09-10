@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import com.github.mikephil.charting.animation.ChartAnimator;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
@@ -48,7 +49,7 @@ class MyLineChartRenderer extends LineChartRenderer {
 
             float xMax = mViewPortHandler.contentRight();
             //绘制竖线
-            c.drawLine(xp, 40, xp, mChart.getHeight(), mHighlightPaint);
+            c.drawLine(xp, 1, xp, mChart.getHeight(), mHighlightPaint);
 
             //判断是否画横线
             float y = high.getDrawY();
@@ -73,7 +74,7 @@ class MyLineChartRenderer extends LineChartRenderer {
                 //ma均线数据为空
                 if (dataSet.getEntryCount() == 0) return;
 
-                if (!shouldDrawValues(dataSet))
+                if (!shouldDrawValues(dataSet) || dataSet.getEntryCount() < 1)
                     continue;
 
                 // apply the text-styling defined by the DataSet
@@ -91,6 +92,7 @@ class MyLineChartRenderer extends LineChartRenderer {
 
                 float[] positions = trans.generateTransformedValuesLine(dataSet, mAnimator.getPhaseX(), mAnimator
                         .getPhaseY(), mXBounds.min, mXBounds.max);
+                ValueFormatter formatter = dataSet.getValueFormatter();
 
                 MPPointF iconsOffset = MPPointF.getInstance(dataSet.getIconsOffset());
                 iconsOffset.x = Utils.convertDpToPixel(iconsOffset.x);
@@ -110,8 +112,7 @@ class MyLineChartRenderer extends LineChartRenderer {
                     Entry entry = dataSet.getEntryForIndex(j / 2 + mXBounds.min);
 
                     if (dataSet.isDrawValuesEnabled()) {
-                        drawValue(c, dataSet.getValueFormatter(), entry.getY(), entry, i, x,
-                                y - valOffset, dataSet.getValueTextColor(j / 2));
+                        drawValue(c, formatter.getPointLabel(entry), x, y - valOffset, dataSet.getValueTextColor(j / 2));
                     }
 
                     if (entry.getIcon() != null && dataSet.isDrawIconsEnabled()) {

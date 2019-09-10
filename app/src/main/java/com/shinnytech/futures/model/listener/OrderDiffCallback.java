@@ -1,18 +1,18 @@
 package com.shinnytech.futures.model.listener;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.util.DiffUtil;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.DiffUtil;
 
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.utils.MathUtils;
 
 import java.util.List;
 
-import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
-import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.STATUS_CANCELED_ZN;
-import static com.shinnytech.futures.constants.CommonConstants.STATUS_FINISHED_ZN;
+import static com.shinnytech.futures.constants.TradeConstants.STATUS_ALIVE;
+import static com.shinnytech.futures.constants.TradeConstants.STATUS_ALIVE_ZN;
+import static com.shinnytech.futures.constants.TradeConstants.STATUS_CANCELED_ZN;
+import static com.shinnytech.futures.constants.TradeConstants.STATUS_FINISHED_ZN;
 
 /**
  * Created on 7/27/17.

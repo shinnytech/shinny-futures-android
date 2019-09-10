@@ -8,8 +8,6 @@ import android.widget.Toast;
 
 import com.shinnytech.futures.R;
 
-import static com.shinnytech.futures.constants.CommonConstants.LOGIN_FAIL;
-
 /**
  * date: 5/31/17
  * author: chenli

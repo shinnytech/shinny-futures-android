@@ -11,7 +11,6 @@
     <!-- 圓角，Layout佈局圓角幅度設定值 -->
     <corners android:radius="30dp" />
     <!-- 外框，框線粗細，框線顏色 -->
-    <solid
-        android:width="1dp"
-        android:color="@color/black_dark_more" />
+
+    <solid android:color="@color/launch"></solid>
 </shape>

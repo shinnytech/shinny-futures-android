@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".controller.activity.MainActivity">
+
+    <item
+        app:actionLayout="@layout/view_condition_menu"
+        android:id="@+id/right_navigation"
+        android:orderInCategory="101"
+        android:title="navigation"
+        app:showAsAction="always" />
+
+</menu>

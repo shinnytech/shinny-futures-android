@@ -3,7 +3,9 @@ package com.shinnytech.futures.controller.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.View;
 
 import com.shinnytech.futures.R;
@@ -34,7 +36,7 @@ public class BrokerListActivity extends BaseActivity {
     protected void initData() {
         mBinding = (ActivityBrokerListBinding) mViewDataBinding;
         mBinding.rv.setLayoutManager(
-                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+                new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
         mBinding.rv.addItemDecoration(
                 new DividerItemDecorationUtils(this, DividerItemDecorationUtils.VERTICAL_LIST));
         List<String> brokers = LatestFileManager

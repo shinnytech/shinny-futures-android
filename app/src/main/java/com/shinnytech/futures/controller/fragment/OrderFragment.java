@@ -2,13 +2,13 @@ package com.shinnytech.futures.controller.fragment;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.databinding.DataBindingUtil;
+import androidx.databinding.DataBindingUtil;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,15 +22,15 @@ import android.widget.TextView;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.SettingConstants;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.controller.activity.MainActivityPresenter;
 import com.shinnytech.futures.databinding.FragmentOrderBinding;
 import com.shinnytech.futures.model.adapter.OrderAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.OrderEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
-import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
-import com.shinnytech.futures.model.bean.eventbusbean.OrderSettingEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.CancelOrderEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.SwitchInsEvent;
 import com.shinnytech.futures.model.bean.searchinfobean.SearchEntity;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.engine.LatestFileManager;
@@ -50,8 +50,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_LOGIN_DATE;
-import static com.shinnytech.futures.constants.CommonConstants.STATUS_ALIVE;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_LOGIN_DATE;
+import static com.shinnytech.futures.constants.TradeConstants.STATUS_ALIVE;
 
 /**
  * date: 5/10/17
@@ -77,6 +77,7 @@ public class OrderFragment extends LazyLoadFragment {
     private boolean mIsOrdersAlive;
     private String mInstrumentId;
     private boolean mIsInAccountFragment;
+    private View mView;
 
     public static OrderFragment newInstance(boolean mIsOrdersAlive, boolean isInAccountFragment) {
         OrderFragment fragment = new OrderFragment();
@@ -102,19 +103,20 @@ public class OrderFragment extends LazyLoadFragment {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_order, container, false);
         initData();
         initEvent();
-        return mBinding.getRoot();
+        mView = mBinding.getRoot();
+        return mView;
     }
 
     protected void initData() {
         mIsUpdate = true;
         mBinding.rv.setLayoutManager(
-                new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+                new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false));
         mBinding.rv.addItemDecoration(
                 new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
         mAdapter = new OrderAdapter(getActivity(), mOldData);
         mAdapter.setHighlightIns(mInstrumentId);
         mBinding.rv.setAdapter(mAdapter);
-        mIsShowCancelPop = (boolean) SPUtils.get(BaseApplication.getContext(), CommonConstants.CONFIG_CANCEL_ORDER_CONFIRM, true);
+        mIsShowCancelPop = (boolean) SPUtils.get(BaseApplication.getContext(), SettingConstants.CONFIG_CANCEL_ORDER_CONFIRM, true);
         EventBus.getDefault().register(this);
     }
 
@@ -186,6 +188,7 @@ public class OrderFragment extends LazyLoadFragment {
     @Override
     public void refreshTD() {
         try {
+            if (mView == null)return;
             if (!mIsUpdate) return;
             UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
@@ -221,7 +224,7 @@ public class OrderFragment extends LazyLoadFragment {
      */
     private void checkPassword(final View view, final OrderEntity orderEntity) {
         final Context context = BaseApplication.getContext();
-        String date = (String) SPUtils.get(context, CommonConstants.CONFIG_LOGIN_DATE, "");
+        String date = (String) SPUtils.get(context, SettingConstants.CONFIG_LOGIN_DATE, "");
         if (TimeUtils.getNowTime().equals(date)) {
             initPopUp(view, orderEntity);
         } else {
@@ -241,7 +244,7 @@ public class OrderFragment extends LazyLoadFragment {
                 @Override
                 public void onClick(View v) {
                     String password = editText.getText().toString();
-                    String passwordLocal = (String) SPUtils.get(context, CommonConstants.CONFIG_PASSWORD, "");
+                    String passwordLocal = (String) SPUtils.get(context, SettingConstants.CONFIG_PASSWORD, "");
                     if (passwordLocal.equals(password)) {
                         dialog.dismiss();
                         SPUtils.putAndApply(context, CONFIG_LOGIN_DATE, TimeUtils.getNowTime());
@@ -360,7 +363,7 @@ public class OrderFragment extends LazyLoadFragment {
      * description: 接收持仓点击、自选点击、搜索页点击发来的合约，用于更新高亮合约
      */
     @Subscribe
-    public void onEvent(IdEvent data) {
+    public void onEvent(SwitchInsEvent data) {
         if (!mIsInAccountFragment) {
             mInstrumentId = data.getInstrument_id();
             mAdapter.updateHighlightIns(mInstrumentId);
@@ -373,7 +376,7 @@ public class OrderFragment extends LazyLoadFragment {
      * description: 撤单开关切换
      */
     @Subscribe
-    public void onEventSetting(OrderSettingEvent data) {
+    public void onEventSetting(CancelOrderEvent data) {
         mIsShowCancelPop = data.isCancelPopup();
     }
 

@@ -1,9 +1,9 @@
 package com.shinnytech.futures.model.adapter;
 
 import android.content.Context;
-import android.databinding.DataBindingUtil;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.RecyclerView;
+import androidx.databinding.DataBindingUtil;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.SettingConstants;
 import com.shinnytech.futures.databinding.ItemAddDurationBinding;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.utils.ToastUtils;
@@ -103,7 +103,7 @@ public class AddDurationAdapter extends RecyclerView.Adapter<AddDurationAdapter.
                         mBinding.tvDuration.setTag("0");
                         mDataPre.remove(mBinding.tvDuration.getText().toString());
                     }
-                    SPUtils.putAndApply(BaseApplication.getContext(), CommonConstants.CONFIG_KLINE_DURATION_DEFAULT, TextUtils.join(",", mDataPre));
+                    SPUtils.putAndApply(BaseApplication.getContext(), SettingConstants.CONFIG_KLINE_DURATION_DEFAULT, TextUtils.join(",", mDataPre));
                 }
             });
         }

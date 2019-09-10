@@ -2,13 +2,13 @@
 
 <data></data>
 
-    <android.support.v4.view.ViewPager
+    <androidx.viewpager.widget.ViewPager
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/quote_pager"
         tools:context="com.shinnytech.futures.controller.fragment.QuotePagerFragment">
 
-    </android.support.v4.view.ViewPager>
+    </androidx.viewpager.widget.ViewPager>
 
 </layout>

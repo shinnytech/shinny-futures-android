@@ -1,36 +1,61 @@
 package com.shinnytech.futures.controller.fragment;
 
-import android.databinding.DataBindingUtil;
+import android.content.Context;
+import android.content.Intent;
+import androidx.databinding.DataBindingUtil;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.shinnytech.futures.R;
+import com.shinnytech.futures.amplitude.api.Amplitude;
+import com.shinnytech.futures.application.BaseApplication;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.controller.activity.MainActivityPresenter;
+import com.shinnytech.futures.controller.activity.ManagerConditionOrderActivity;
+import com.shinnytech.futures.controller.activity.StopLossTakeProfitActivity;
 import com.shinnytech.futures.databinding.FragmentPositionBinding;
 import com.shinnytech.futures.model.adapter.PositionAdapter;
 import com.shinnytech.futures.model.bean.accountinfobean.PositionEntity;
 import com.shinnytech.futures.model.bean.accountinfobean.UserEntity;
-import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.SwitchInsEvent;
 import com.shinnytech.futures.model.engine.DataManager;
 import com.shinnytech.futures.model.listener.PositionDiffCallback;
 import com.shinnytech.futures.model.listener.SimpleRecyclerViewItemClickListener;
 import com.shinnytech.futures.utils.CloneUtils;
 import com.shinnytech.futures.utils.DividerItemDecorationUtils;
+import com.shinnytech.futures.utils.SPUtils;
+import com.shinnytech.futures.utils.ScreenUtils;
+import com.shinnytech.futures.utils.TDUtils;
+import com.shinnytech.futures.utils.ToastUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static com.shinnytech.futures.constants.AmpConstants.AMP_CONDITION_POSITION;
+import static com.shinnytech.futures.constants.AmpConstants.AMP_CONDITION_STOP_LOSS;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_PASSWORD;
+import static com.shinnytech.futures.constants.CommonConstants.DIRECTION_BETWEEN_ACTIVITY;
+import static com.shinnytech.futures.constants.TradeConstants.DIRECTION_BUY;
+import static com.shinnytech.futures.constants.TradeConstants.DIRECTION_BUY_ZN;
+import static com.shinnytech.futures.constants.TradeConstants.DIRECTION_SELL;
+import static com.shinnytech.futures.constants.TradeConstants.DIRECTION_SELL_ZN;
+import static com.shinnytech.futures.constants.CommonConstants.INS_BETWEEN_ACTIVITY;
+import static com.shinnytech.futures.constants.CommonConstants.VOLUME_BETWEEN_ACTIVITY;
 
 /**
  * date: 5/10/17
@@ -49,6 +74,7 @@ public class PositionFragment extends LazyLoadFragment {
     private boolean mIsUpdate;
     private String mInstrumentId;
     private boolean mIsInAccountFragment;
+    private View mView;
 
     public static PositionFragment newInstance(boolean isInAccountFragment) {
         PositionFragment fragment = new PositionFragment();
@@ -72,13 +98,14 @@ public class PositionFragment extends LazyLoadFragment {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_position, container, false);
         initData();
         initEvent();
-        return mBinding.getRoot();
+        mView = mBinding.getRoot();
+        return mView;
     }
 
     protected void initData() {
         mIsUpdate = true;
         mBinding.rv.setLayoutManager(
-                new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+                new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false));
         mBinding.rv.addItemDecoration(
                 new DividerItemDecorationUtils(getActivity(), DividerItemDecorationUtils.VERTICAL_LIST));
         mAdapter = new PositionAdapter(getActivity(), mOldData);
@@ -105,9 +132,9 @@ public class PositionFragment extends LazyLoadFragment {
                                 sDataManager.IS_SHOW_VP_CONTENT = true;
                                 mainActivityPresenter.switchToFutureInfo(instrument_id);
                             } else {
-                                IdEvent idEvent = new IdEvent();
-                                idEvent.setInstrument_id(instrument_id);
-                                EventBus.getDefault().post(idEvent);
+                                SwitchInsEvent switchInsEvent = new SwitchInsEvent();
+                                switchInsEvent.setInstrument_id(instrument_id);
+                                EventBus.getDefault().post(switchInsEvent);
                                 mAdapter.updateHighlightIns(instrument_id);
                                 FutureInfoFragment futureInfoFragment = (FutureInfoFragment) mainActivityPresenter.getmViewPagerFragmentAdapter().getItem(2);
                                 futureInfoFragment.getmBinding().vpInfoContent.setCurrentItem(3, false);
@@ -117,6 +144,15 @@ public class PositionFragment extends LazyLoadFragment {
 
                     @Override
                     public void onItemLongClick(View view, int position) {
+                        if (position >= 0 && position < mAdapter.getItemCount()) {
+                            PositionEntity positionEntity = mAdapter.getData().get(position);
+                            if (positionEntity == null) return;
+                            String instrument_id = positionEntity.getExchange_id() + "." + positionEntity.getInstrument_id();
+                            TextView direction = view.findViewById(R.id.position_direction);
+                            TextView volume = view.findViewById(R.id.position_volume);
+                            initPopUp(view, instrument_id, direction.getText().toString(),
+                                    volume.getText().toString());
+                        }
                     }
                 }));
 
@@ -175,6 +211,7 @@ public class PositionFragment extends LazyLoadFragment {
     @Override
     public void refreshTD() {
         try {
+            if (mView == null)return;
             if (!mIsUpdate) return;
             UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
             if (userEntity == null) return;
@@ -211,6 +248,82 @@ public class PositionFragment extends LazyLoadFragment {
     }
 
     /**
+     * date: 2019/8/11
+     * author: chenli
+     * description: 止盈止损单
+     */
+    private void initPopUp(final View view, final String ins, final String directionTitle, final String volume) {
+        final View popUpView = View.inflate(getActivity(), R.layout.popup_fragment_position, null);
+        final PopupWindow popWindow = new PopupWindow(popUpView,
+                ViewGroup.LayoutParams.MATCH_PARENT, ScreenUtils.dp2px(getActivity(), 42), true);
+        //设置动画，淡入淡出
+        popWindow.setAnimationStyle(R.style.anim_menu_quote);
+        //点击空白处popupWindow消失
+        popWindow.setBackgroundDrawable(new ColorDrawable(0x00000000));
+        TextView manager = popUpView.findViewById(R.id.condition_order_manager);
+        TextView sltp = popUpView.findViewById(R.id.condition_order_sltp);
+        //设置popupWindow显示的位置，参数依次是参照View，x轴的偏移量，y轴的偏移量
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
+        popWindow.showAsDropDown(view, outMetrics.widthPixels / 4 * 3, 0);
+        final String direction;
+        switch (directionTitle){
+            case DIRECTION_BUY_ZN:
+                direction = DIRECTION_BUY;
+                break;
+            case DIRECTION_SELL_ZN:
+                direction = DIRECTION_SELL;
+                break;
+            default:
+                direction = "";
+                break;
+        }
+        Context sContext = BaseApplication.getContext();
+        String name = sDataManager.USER_ID;
+        String password = (String) SPUtils.get(sContext, CONFIG_PASSWORD, "");
+        boolean isVisitor = TDUtils.isVisitor(name, password);
+
+        sltp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity mainActivity = (MainActivity) getActivity();
+                if (!mainActivity.checkConditionResponsibility())return;
+
+                if (isVisitor){
+                    ToastUtils.showToast(sContext, "游客模式暂不支持条件单/止盈止损");
+                    popWindow.dismiss();
+                    return;
+                }
+                Intent intent = new Intent(getActivity(), StopLossTakeProfitActivity.class);
+                intent.putExtra(INS_BETWEEN_ACTIVITY,ins);
+                intent.putExtra(DIRECTION_BETWEEN_ACTIVITY, direction);
+                intent.putExtra(VOLUME_BETWEEN_ACTIVITY, volume);
+                startActivity(intent);
+                popWindow.dismiss();
+                Amplitude.getInstance().logEventWrap(AMP_CONDITION_STOP_LOSS, new JSONObject());
+            }
+        });
+
+        manager.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity mainActivity = (MainActivity) getActivity();
+                if (!mainActivity.checkConditionResponsibility())return;
+
+                if (isVisitor){
+                    ToastUtils.showToast(sContext, "游客模式暂不支持条件单/止盈止损");
+                    popWindow.dismiss();
+                    return;
+                }
+                Intent intent = new Intent(getActivity(), ManagerConditionOrderActivity.class);
+                startActivity(intent);
+                popWindow.dismiss();
+                Amplitude.getInstance().logEventWrap(AMP_CONDITION_POSITION, new JSONObject());
+            }
+        });
+    }
+
+    /**
      * date: 2019/7/3
      * author: chenli
      * description: 设置合约id
@@ -225,7 +338,7 @@ public class PositionFragment extends LazyLoadFragment {
      * description: 接收持仓点击、自选点击、搜索页点击发来的合约，用于更新高亮合约
      */
     @Subscribe
-    public void onEvent(IdEvent data) {
+    public void onEvent(SwitchInsEvent data) {
         mInstrumentId = data.getInstrument_id();
         mAdapter.updateHighlightIns(mInstrumentId);
     }

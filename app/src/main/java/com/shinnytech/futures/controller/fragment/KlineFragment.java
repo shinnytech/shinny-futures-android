@@ -7,20 +7,17 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.SparseArray;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.CombinedChart;
-import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.LegendEntry;
 import com.github.mikephil.charting.components.LimitLine;
@@ -36,23 +33,19 @@ import com.github.mikephil.charting.data.CombinedData;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
-import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.jobs.MoveViewJob;
-import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
-import com.github.mikephil.charting.utils.Transformer;
-import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.shinnytech.futures.R;
 import com.shinnytech.futures.application.BaseApplication;
-import com.shinnytech.futures.constants.CommonConstants;
+import com.shinnytech.futures.constants.MarketConstants;
+import com.shinnytech.futures.constants.SettingConstants;
 import com.shinnytech.futures.controller.activity.MainActivity;
 import com.shinnytech.futures.controller.activity.MainActivityPresenter;
-import com.shinnytech.futures.model.bean.eventbusbean.AverageEvent;
-import com.shinnytech.futures.model.bean.eventbusbean.IdEvent;
-import com.shinnytech.futures.model.bean.eventbusbean.KlineEvent;
-import com.shinnytech.futures.model.bean.eventbusbean.SetUpEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.CommonSwitchEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.ParaChangeEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.SwitchDurationEvent;
+import com.shinnytech.futures.model.bean.eventbusbean.SwitchInsEvent;
 import com.shinnytech.futures.model.bean.futureinfobean.ChartEntity;
 import com.shinnytech.futures.model.bean.futureinfobean.KlineEntity;
 import com.shinnytech.futures.model.engine.LatestFileManager;
@@ -61,10 +54,10 @@ import com.shinnytech.futures.utils.MathUtils;
 import com.shinnytech.futures.utils.SPUtils;
 import com.shinnytech.futures.view.custommpchart.mychartlistener.CoupleChartGestureListener;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyMarkerView;
+import com.shinnytech.futures.view.custommpchart.mycomponent.MyValueFormatter;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyXAxis;
 import com.shinnytech.futures.view.custommpchart.mycomponent.MyYAxis;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.ByteArrayOutputStream;
@@ -77,10 +70,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.shinnytech.futures.constants.CommonConstants.CHART_ID;
-import static com.shinnytech.futures.constants.CommonConstants.CONFIG_AVERAGE_LINE;
-import static com.shinnytech.futures.constants.CommonConstants.DAY_FRAGMENT;
-import static com.shinnytech.futures.constants.CommonConstants.VIEW_WIDTH;
+import static com.shinnytech.futures.constants.MarketConstants.CHART_ID;
+import static com.shinnytech.futures.constants.SettingConstants.CONFIG_AVERAGE_LINE;
+import static com.shinnytech.futures.constants.MarketConstants.DAY_FRAGMENT;
+import static com.shinnytech.futures.constants.MarketConstants.VIEW_WIDTH;
 import static java.lang.Float.NaN;
 
 /**
@@ -108,7 +101,6 @@ public class KlineFragment extends BaseChartFragment {
      * description: K线图类型--日线、小时线、5分钟线
      */
     private static final String FRAGMENT_KLINE_TYPE = "kline_type";
-    public static float mScaleX;
     public boolean mIsDrag;
     /**
      * date: 2018/11/19
@@ -125,24 +117,10 @@ public class KlineFragment extends BaseChartFragment {
      * description: 均线颜色
      */
     private int[] mColorMas;
-    private int mIncreasingColor;
-    private int mDecreasingColor;
-    private int mViewWidth;
-    private int mLeftIndex;
     private int mRightIndex;
-    private int mLastIndex;
-    private int mBaseIndex;
     private ChartEntity mChartEntity;
-    private KlineEntity mKlineEntity;
     private List<Integer> mas;
-
-    private String yValue = "";
-    private boolean mIsLongPress = false;
-    private GestureDetector mDetectorTop;
-    private GestureDetector mDetectorMiddle;
-    private View.OnTouchListener touchListenerTop;
-    private View.OnTouchListener touchListenerMiddle;
-    private String mXValsFormat = "";
+    private String mXValsFormat;
     private KlineMarkerView mKlineMarkerView;
 
     /**
@@ -196,8 +174,6 @@ public class KlineFragment extends BaseChartFragment {
     @Override
     protected void initData() {
         super.initData();
-        mIncreasingColor = ContextCompat.getColor(getActivity(), R.color.kline_red);
-        mDecreasingColor = ContextCompat.getColor(getActivity(), R.color.kline_green);
         int ma1 = ContextCompat.getColor(getActivity(), R.color.kline_ma1);
         int ma2 = ContextCompat.getColor(getActivity(), R.color.kline_ma2);
         int ma3 = ContextCompat.getColor(getActivity(), R.color.kline_ma3);
@@ -210,7 +186,7 @@ public class KlineFragment extends BaseChartFragment {
         mIsDrag = true;
         mLatestLimitLines = new HashMap<>();
         mas = new ArrayList<>();
-        String data = (String) SPUtils.get(BaseApplication.getContext(), CommonConstants.CONFIG_PARA_MA, CommonConstants.PARA_MA);
+        String data = (String) SPUtils.get(BaseApplication.getContext(), SettingConstants.CONFIG_PARA_MA, SettingConstants.PARA_MA);
         for (String para :
                 data.split(",")) {
             try {
@@ -258,24 +234,10 @@ public class KlineFragment extends BaseChartFragment {
         leftAxis.setGridColor(mColorGrid);
         leftAxis.setTextColor(mColorText);
         leftAxis.setLabelCount(6, true);
-        leftAxis.setValueFormatter(new MyYAxisValueFormatter());
+        leftAxis.setValueFormatter(new TopChartLeftYAxisValueFormatter());
 
         MyYAxis rightAxis = (MyYAxis) mTopChartViewBase.getAxisRight();
         rightAxis.setEnabled(false);
-
-        List<LegendEntry> legendEntries = new ArrayList<>();
-        for (int i = 0; i < mas.size(); i++) {
-            int para = mas.get(i);
-            LegendEntry ma = new LegendEntry("MA" + para, Legend.LegendForm.SQUARE,
-                    NaN, NaN, null, mColorMas[i]);
-            legendEntries.add(ma);
-        }
-        Legend legend = mTopChartViewBase.getLegend();
-        legend.setCustom(legendEntries);
-        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
-        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
-        legend.setTextColor(Color.WHITE);
-
 
         mMiddleChartViewBase.setScaleYEnabled(false);
         mMiddleChartViewBase.setDrawBorders(false);
@@ -285,12 +247,11 @@ public class KlineFragment extends BaseChartFragment {
         middleBottomAxis.setDrawGridLines(true);
         middleBottomAxis.setDrawAxisLine(true);
         middleBottomAxis.setAxisLineWidth(0.7f);
-        middleBottomAxis.setDrawLabels(true);
+        middleBottomAxis.setDrawLabels(false);
         middleBottomAxis.enableGridDashedLine(3, 6, 0);
         middleBottomAxis.setGridColor(mColorGrid);
         middleBottomAxis.setAxisLineColor(mColorGrid);
         middleBottomAxis.setTextColor(mColorText);
-        middleBottomAxis.setValueFormatter(new KlineFragment.MyXAxisValueFormatter(xVals));
 
         MyYAxis middleLeftAxis = (MyYAxis) mMiddleChartViewBase.getAxisLeft();
         middleLeftAxis.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
@@ -299,7 +260,7 @@ public class KlineFragment extends BaseChartFragment {
         middleLeftAxis.enableGridDashedLine(3, 6, 0);
         middleLeftAxis.setGridColor(mColorGrid);
         middleLeftAxis.setTextColor(mColorText);
-        middleLeftAxis.setLabelCount(4, true);
+        middleLeftAxis.setLabelCount(2, true);
         middleLeftAxis.setAxisMinimum(0);
         middleLeftAxis.setSpaceBottom(0);
 
@@ -308,242 +269,65 @@ public class KlineFragment extends BaseChartFragment {
         middleRightAxis.setDrawAxisLine(false);
         middleRightAxis.setDrawGridLines(false);
 
-        Legend middleLegend = mMiddleChartViewBase.getLegend();
-        middleLegend.setEnabled(false);
+        mBottomChartViewBase.setScaleYEnabled(false);
+        mBottomChartViewBase.setDrawBorders(false);
+
+        MyXAxis bottomBottomAxis = (MyXAxis) mBottomChartViewBase.getXAxis();
+        bottomBottomAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        bottomBottomAxis.setDrawGridLines(true);
+        bottomBottomAxis.setDrawAxisLine(true);
+        bottomBottomAxis.setAxisLineWidth(0.7f);
+        bottomBottomAxis.setDrawLabels(true);
+        bottomBottomAxis.enableGridDashedLine(3, 6, 0);
+        bottomBottomAxis.setGridColor(mColorGrid);
+        bottomBottomAxis.setAxisLineColor(mColorGrid);
+        bottomBottomAxis.setTextColor(mColorText);
+        bottomBottomAxis.setValueFormatter(new KlineFragment.MyXAxisValueFormatter(xVals));
+
+        MyYAxis bottomLeftAxis = (MyYAxis) mBottomChartViewBase.getAxisLeft();
+        bottomLeftAxis.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
+        bottomLeftAxis.setDrawGridLines(true);
+        bottomLeftAxis.setDrawAxisLine(false);
+        bottomLeftAxis.enableGridDashedLine(3, 6, 0);
+        bottomLeftAxis.setGridColor(mColorGrid);
+        bottomLeftAxis.setTextColor(mColorText);
+        bottomLeftAxis.setLabelCount(4, true);
+        bottomLeftAxis.setValueFormatter(new BottomChartLeftYAxisValueFormatter());
+
+        MyYAxis bottomRightAxis = (MyYAxis) mBottomChartViewBase.getAxisRight();
+        bottomRightAxis.setDrawLabels(false);
+        bottomRightAxis.setDrawAxisLine(false);
+        bottomRightAxis.setDrawGridLines(false);
 
         // 将K线控的滑动事件传递给交易量控件
         mTopChartViewBase.setOnChartGestureListener(
-                new CoupleChartGestureListener(mTopChartViewBase, new Chart[]{mMiddleChartViewBase}));
+                new CoupleChartGestureListener(mTopChartViewBase, new Chart[]{mMiddleChartViewBase, mBottomChartViewBase}));
         // 将交易量控件的滑动事件传递给K线控件
         mMiddleChartViewBase.setOnChartGestureListener(
-                new CoupleChartGestureListener(mMiddleChartViewBase, new Chart[]{mTopChartViewBase}));
+                new CoupleChartGestureListener(mMiddleChartViewBase, new Chart[]{mTopChartViewBase, mBottomChartViewBase}));
+        mBottomChartViewBase.setOnChartGestureListener(
+                new CoupleChartGestureListener(mBottomChartViewBase, new Chart[]{mTopChartViewBase, mMiddleChartViewBase}));
 
         //初始化柱子宽度
-        mScaleX = (float) SPUtils.get(BaseApplication.getContext(), CommonConstants.SCALE_X, 0.0f);
+        float scaleX = (float) SPUtils.get(BaseApplication.getContext(), MarketConstants.SCALE_X, 2.4f);
         float[] topVals = new float[9];
         float[] middleVals = new float[9];
+        float[] bottomVals = new float[9];
         Matrix topMatrix = mTopChartViewBase.getViewPortHandler().getMatrixTouch();
         Matrix middleMatrix = mMiddleChartViewBase.getViewPortHandler().getMatrixTouch();
+        Matrix bottomMatrix = mBottomChartViewBase.getViewPortHandler().getMatrixTouch();
         topMatrix.getValues(topVals);
         middleMatrix.getValues(middleVals);
-        topVals[Matrix.MSCALE_X] = mScaleX;
-        middleVals[Matrix.MSCALE_X] = mScaleX;
+        bottomMatrix.getValues(bottomVals);
+        topVals[Matrix.MSCALE_X] = scaleX;
+        middleVals[Matrix.MSCALE_X] = scaleX;
+        bottomVals[Matrix.MSCALE_X] = scaleX;
         topMatrix.setValues(topVals);
         middleMatrix.setValues(middleVals);
+        bottomMatrix.setValues(bottomVals);
         mTopChartViewBase.getViewPortHandler().refresh(topMatrix, mTopChartViewBase, false);
-        mMiddleChartViewBase.getViewPortHandler().refresh(topMatrix, mMiddleChartViewBase, false);
-
-        mDetectorTop = new GestureDetector(this.getContext(), new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public void onLongPress(MotionEvent e) {
-                super.onLongPress(e);
-                int height = (int) mTopChartViewBase.getViewPortHandler().contentHeight();
-                ((KlineMarkerView) mTopChartViewBase.getMarker()).resize(height);
-                mIsLongPress = true;
-                Highlight h = mTopChartViewBase.getHighlightByTouchPoint(e.getX(), e.getY());
-                if (h != null) {
-                    h.setDraw(e.getX(), e.getY());
-                    mTopChartViewBase.highlightValue(h, true);
-                    mTopChartViewBase.disableScroll();
-                }
-            }
-
-            @Override
-            public boolean onSingleTapUp(MotionEvent e) {
-                mIsLongPress = false;
-                mTopChartViewBase.highlightValue(null, true);
-                mTopChartViewBase.enableScroll();
-                return super.onSingleTapUp(e);
-            }
-
-            @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                // TODO Auto-generated method stub
-                // e1：第1个ACTION_DOWN MotionEvent
-                // e2：最后一个ACTION_MOVE MotionEvent
-                // velocityX：X轴上的移动速度（像素/秒）
-                // velocityY：Y轴上的移动速度（像素/秒）
-                // Y轴的坐标位移大于FLING_MIN_DISTANCE，且移动速度大于FLING_MIN_VELOCITY个像素/秒
-
-                String ins = "";
-                if (Math.abs(e1.getX() - e2.getX()) > FLING_MAX_DISTANCE_X) return false;
-                //向上
-                if (e1.getY() - e2.getY() > FLING_MIN_DISTANCE_Y && Math.abs(velocityY) > FLING_MIN_VELOCITY) {
-                    ins = getNextInstrumentId(true);
-                }
-                //向下
-                if (e2.getY() - e1.getY() > FLING_MIN_DISTANCE_Y && Math.abs(velocityY) > FLING_MIN_VELOCITY) {
-                    ins = getNextInstrumentId(false);
-                }
-
-                if (!ins.isEmpty()) {
-                    IdEvent idEvent = new IdEvent();
-                    idEvent.setInstrument_id(ins);
-                    EventBus.getDefault().post(idEvent);
-                }
-                return false;
-            }
-        });
-
-        mDetectorMiddle = new GestureDetector(this.getContext(), new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public void onLongPress(MotionEvent e) {
-                super.onLongPress(e);
-                mIsLongPress = true;
-                Highlight h = mMiddleChartViewBase.getHighlightByTouchPoint(e.getX(), e.getY());
-                if (h != null) {
-                    h.setDraw(e.getX(), e.getY());
-                    mMiddleChartViewBase.highlightValue(h, true);
-                    mMiddleChartViewBase.disableScroll();
-                }
-            }
-
-            @Override
-            public boolean onSingleTapUp(MotionEvent e) {
-                mIsLongPress = false;
-                mMiddleChartViewBase.highlightValue(null, true);
-                mMiddleChartViewBase.enableScroll();
-                return super.onSingleTapUp(e);
-            }
-        });
-
-        touchListenerTop = new View.OnTouchListener() {
-            private float startX = 0.0f;
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                mDetectorTop.onTouchEvent(event);
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        startX = event.getX();
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        if (!mIsLongPress && (event.getX() - startX) > mMiddleChartViewBase.getViewPortHandler().contentRight() / 7) {
-                            float startIndex = mLeftIndex - mBaseIndex;
-                            if (Math.abs(mMiddleChartViewBase.getLowestVisibleX() - startIndex) < 50) {
-                                if (xVals.size() >= mViewWidth) {
-                                    mViewWidth = mViewWidth + 100;
-                                    BaseApplication.getmMDWebSocket().sendSetChartKline(instrument_id, mViewWidth, mKlineType);
-                                }
-                            }
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                if (mIsLongPress && event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (event.getY() > mTopChartViewBase.getViewPortHandler().contentHeight()) {
-                        touchListenerMiddle.onTouch(v, event);
-                    } else {
-                        float y = event.getY();
-                        float offset = mTopChartViewBase.getViewPortHandler().contentHeight();
-                        if (y < 0) y = y + offset;
-                        Highlight h = mTopChartViewBase.getHighlightByTouchPoint(event.getX(), y);
-                        if (h != null) {
-                            h.setDraw(event.getX(), y);
-                            mTopChartViewBase.highlightValue(h, true);
-                            mTopChartViewBase.disableScroll();
-                        }
-                    }
-                    return true;
-                }
-                return false;
-            }
-        };
-        mTopChartViewBase.setOnTouchListener(touchListenerTop);
-
-        touchListenerMiddle = new View.OnTouchListener() {
-            private float startX = 0.0f;
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                mDetectorMiddle.onTouchEvent(event);
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        startX = event.getX();
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        if (!mIsLongPress && (event.getX() - startX) > mMiddleChartViewBase.getViewPortHandler().contentRight() / 7) {
-                            float startIndex = mLeftIndex - mBaseIndex;
-                            if (Math.abs(mMiddleChartViewBase.getLowestVisibleX() - startIndex) < 50) {
-                                if (xVals.size() >= mViewWidth) {
-                                    mViewWidth = mViewWidth + 100;
-                                    BaseApplication.getmMDWebSocket().sendSetChartKline(instrument_id, mViewWidth, mKlineType);
-                                }
-                            }
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                if (mIsLongPress && event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (event.getY() < 0) {
-                        touchListenerTop.onTouch(v, event);
-                    } else {
-                        float y = event.getY();
-                        float offset = mTopChartViewBase.getViewPortHandler().contentHeight();
-                        if (y > offset) y = y - offset;
-                        Highlight h = mMiddleChartViewBase.getHighlightByTouchPoint(event.getX(), y);
-                        if (h != null) {
-                            h.setDraw(event.getX(), y);
-                            mMiddleChartViewBase.highlightValue(h, true);
-                            mMiddleChartViewBase.disableScroll();
-                        }
-                    }
-                    return true;
-                }
-                return false;
-            }
-        };
-        mMiddleChartViewBase.setOnTouchListener(touchListenerMiddle);
-
-        mTopChartViewBase.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
-            @Override
-            public void onValueSelected(Entry e, Highlight h) {
-                Transformer transformer = mTopChartViewBase.getTransformer(YAxis.AxisDependency.LEFT);
-                float yMaxValue = mTopChartViewBase.getYChartMax();
-                float yMinValue = mTopChartViewBase.getYChartMin();
-                float xValue = h.getX();
-                float yMin = (float) transformer.getPixelForValues(xValue, yMaxValue).y;
-                float yMax = (float) transformer.getPixelForValues(xValue, yMinValue).y;
-                float touchY = h.getDrawY();//手指接触点在srcChart上的Y坐标，即手势监听器中保存数据
-                float yData = (yMax - touchY) / (yMax - yMin) * (yMaxValue - yMinValue) + yMinValue;
-                yValue = LatestFileManager.saveScaleByPtick(yData + "", instrument_id);
-                float y = touchY - mTopChartViewBase.getHeight();
-                Highlight hl = mMiddleChartViewBase.getHighlightByTouchPoint(h.getXPx(), h.getYPx());
-                if (hl != null) hl.setDraw(h.getX(), y);
-                mMiddleChartViewBase.highlightValue(hl);
-            }
-
-            @Override
-            public void onNothingSelected() {
-                mMiddleChartViewBase.highlightValue(null);
-            }
-        });
-
-        mMiddleChartViewBase.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
-            @Override
-            public void onValueSelected(Entry e, Highlight h) {
-                Transformer transformer = mMiddleChartViewBase.getTransformer(YAxis.AxisDependency.LEFT);
-                float yMaxValue = mMiddleChartViewBase.getYChartMax();
-                float xValue = h.getX();
-                float yMin = (float) transformer.getPixelForValues(xValue, yMaxValue).y;
-                float yMax = (float) transformer.getPixelForValues(xValue, 0).y;
-                float touchY = h.getDrawY();//手指接触点在srcChart上的Y坐标，即手势监听器中保存数据
-                int yData = (int) ((yMax - touchY) / (yMax - yMin) * yMaxValue);
-                yValue = yData + "";
-                float y = touchY + mTopChartViewBase.getHeight();
-                Highlight hl = mTopChartViewBase.getHighlightByTouchPoint(h.getXPx(), h.getYPx());
-                if (hl != null) hl.setDraw(h.getX(), y);
-                mTopChartViewBase.highlightValue(hl);
-            }
-
-            @Override
-            public void onNothingSelected() {
-                mTopChartViewBase.highlightValue(null);
-            }
-        });
-
+        mMiddleChartViewBase.getViewPortHandler().refresh(middleMatrix, mMiddleChartViewBase, false);
+        mBottomChartViewBase.getViewPortHandler().refresh(bottomMatrix, mBottomChartViewBase, false);
     }
 
     /**
@@ -561,6 +345,9 @@ public class KlineFragment extends BaseChartFragment {
                 CombinedData middleCombinedData = mMiddleChartViewBase.getCombinedData();
                 LineData middleLineData = middleCombinedData.getLineData();
                 BarData middleBarData = middleCombinedData.getBarData();
+                CombinedData bottomCombinedData = mBottomChartViewBase.getCombinedData();
+                LineData bottomLineData = bottomCombinedData.getLineData();
+                BarData bottomBarData = bottomCombinedData.getBarData();
 
                 String left_id_t = mChartEntity.getLeft_id();
                 String right_id_t = mChartEntity.getRight_id();
@@ -582,6 +369,9 @@ public class KlineFragment extends BaseChartFragment {
                         mLineData.removeEntry(mLastIndex - mBaseIndex, i);
                     middleLineData.removeEntry(mLastIndex - mBaseIndex, 0);
                     middleBarData.removeEntry(mLastIndex - mBaseIndex, 0);
+                    bottomLineData.removeEntry(mLastIndex - mBaseIndex, 0);
+                    bottomLineData.removeEntry(mLastIndex - mBaseIndex, 1);
+                    bottomBarData.removeEntry(mLastIndex - mBaseIndex, 0);
                     generateCandleAndLineDataEntry(mLeftIndex, mLastIndex);
                     refreshLatestLine(dataEntity);
                 } else if (right_index_t > mRightIndex && left_index_t > mLeftIndex) {
@@ -595,10 +385,13 @@ public class KlineFragment extends BaseChartFragment {
                     for (int i = this.mLeftIndex - 1; i >= left_index_t; i--) {
                         generateCandleAndLineDataEntry(left_index_t, i);
                     }
+                    reGenerateMACDEntries(left_index_t, last_index_t);
                 }
                 this.mLastIndex = last_index_t;
                 this.mRightIndex = right_index_t;
                 this.mLeftIndex = left_index_t;
+
+                if (!mIsLongPress) refreshChartLegend(mLastIndex - mBaseIndex);
 
                 topCombinedData.notifyDataChanged();
                 mTopChartViewBase.notifyDataSetChanged();
@@ -608,9 +401,15 @@ public class KlineFragment extends BaseChartFragment {
 
                 middleCombinedData.notifyDataChanged();
                 mMiddleChartViewBase.notifyDataSetChanged();
-                mMiddleChartViewBase.getXAxis().setAxisMaximum(topCombinedData.getXMax() + 2.5f);
-                mMiddleChartViewBase.getXAxis().setAxisMinimum(topCombinedData.getXMin() - 0.5f);
+                mMiddleChartViewBase.getXAxis().setAxisMaximum(middleCombinedData.getXMax() + 2.5f);
+                mMiddleChartViewBase.getXAxis().setAxisMinimum(middleCombinedData.getXMin() - 0.5f);
                 mMiddleChartViewBase.invalidate();
+
+                bottomCombinedData.notifyDataChanged();
+                mBottomChartViewBase.notifyDataSetChanged();
+                mBottomChartViewBase.getXAxis().setAxisMaximum(bottomCombinedData.getXMax() + 2.5f);
+                mBottomChartViewBase.getXAxis().setAxisMinimum(bottomCombinedData.getXMin() - 0.5f);
+                mBottomChartViewBase.invalidate();
             } else {
                 LogUtils.e("K线图初始化", true);
                 Map<String, KlineEntity> klineEntities = sDataManager.getRtnData().getKlines().get(instrument_id);
@@ -644,14 +443,20 @@ public class KlineFragment extends BaseChartFragment {
                 CombinedData middleCombinedData = new CombinedData();
                 List<Entry> oiEntries = new ArrayList<>();
                 List<BarEntry> volumeEntries = new ArrayList<>();
-
+                CombinedData bottomCombinedData = new CombinedData();
+                List<Entry> difEntries = new ArrayList<>();
+                List<Entry> deaEntries = new ArrayList<>();
+                List<BarEntry> macdEntries = new ArrayList<>();
                 for (int i = mLeftIndex; i <= mLastIndex; i++) {
                     KlineEntity.DataEntity dataEntity = dataEntities.get(String.valueOf(i));
                     if (dataEntity == null) continue;
-                    List<Entry> entries = generateMultiDataEntry(i, dataEntity);
+                    List<Entry> entries = generateMultiDataEntry(i, dataEntity, mLeftIndex);
                     candleEntries.add((CandleEntry) entries.get(0));
                     oiEntries.add(entries.get(1));
                     volumeEntries.add((BarEntry) entries.get(2));
+                    difEntries.add(entries.get(3));
+                    deaEntries.add(entries.get(4));
+                    macdEntries.add((BarEntry) entries.get(5));
                 }
 
                 CandleData candleData = generateCandleData(candleEntries);
@@ -659,28 +464,48 @@ public class KlineFragment extends BaseChartFragment {
                 mLineData = generateMALineData();
                 if (mIsAverage) topCombinedData.setData(mLineData);
                 else topCombinedData.setData(new LineData());
-                mTopChartViewBase.setData(topCombinedData);//当前屏幕会显示所有的数据
 
-                LineDataSet oiDataSet = generateLineDataSet(oiEntries, ContextCompat.getColor(getActivity(), R.color.text_white),
+                LineDataSet oiDataSet = generateLineDataSet(oiEntries, mOIColor,
                         "OI", false, YAxis.AxisDependency.RIGHT);
-                BarDataSet volumeDataSet = generateBarDataSet(volumeEntries, ContextCompat.getColor(getActivity(), R.color.text_white),
-                        "Volume", true);
+                BarDataSet volumeDataSet = generateBarDataSet(volumeEntries, "Volume", true,
+                        mDecreasingColor, mIncreasingColor);
                 LineData oiData = new LineData(oiDataSet);
                 BarData volumeData = new BarData(volumeDataSet);
                 middleCombinedData.setData(oiData);
                 middleCombinedData.setData(volumeData);
-                mMiddleChartViewBase.setData(middleCombinedData);//当前屏幕会显示所有的数据
 
+                LineDataSet difDataSet = generateLineDataSet(difEntries, mDiffColor,
+                        "difChart", false, YAxis.AxisDependency.LEFT);
+                LineDataSet deaDataSet = generateLineDataSet(deaEntries, mDeaColor,
+                        "deaChart", false, YAxis.AxisDependency.LEFT);
+                LineData bottomLineData = new LineData(difDataSet, deaDataSet);
+                BarDataSet macdDataSet = generateBarDataSet(macdEntries,
+                        "macdChart", true, mIncreasingColor, mDecreasingColor);
+                BarData bottomBarData = new BarData(macdDataSet);
+                bottomBarData.setBarWidth(0.01f);
+                bottomCombinedData.setData(bottomLineData);
+                bottomCombinedData.setData(bottomBarData);
+
+                refreshChartLegend(mLastIndex - mBaseIndex);
+
+                mTopChartViewBase.setData(topCombinedData);//当前屏幕会显示所有的数据
                 mTopChartViewBase.getXAxis().setAxisMaximum(topCombinedData.getXMax() + 2.5f);
                 mTopChartViewBase.getXAxis().setAxisMinimum(topCombinedData.getXMin() - 0.5f);
                 mTopChartViewBase.setVisibleXRangeMinimum(4);
                 generateLatestLine(dataEntities.get(right_id_t));
                 mTopChartViewBase.moveViewToX(mLastIndex - mBaseIndex);
 
+                mMiddleChartViewBase.setData(middleCombinedData);//当前屏幕会显示所有的数据
                 mMiddleChartViewBase.getXAxis().setAxisMaximum(middleCombinedData.getXMax() + 2.5f);
                 mMiddleChartViewBase.getXAxis().setAxisMinimum(middleCombinedData.getXMin() - 0.5f);
                 mMiddleChartViewBase.setVisibleXRangeMinimum(4);
                 mMiddleChartViewBase.moveViewToX(mLastIndex - mBaseIndex);
+
+                mBottomChartViewBase.setData(bottomCombinedData);//当前屏幕会显示所有的数据
+                mBottomChartViewBase.getXAxis().setAxisMaximum(bottomCombinedData.getXMax() + 2.5f);
+                mBottomChartViewBase.getXAxis().setAxisMinimum(bottomCombinedData.getXMin() - 0.5f);
+                mBottomChartViewBase.setVisibleXRangeMinimum(4);
+                mBottomChartViewBase.moveViewToX(mLastIndex - mBaseIndex);
 
                 if (mIsPosition) addPositionLimitLines();
                 if (mIsPending) addOrderLimitLines();
@@ -703,7 +528,45 @@ public class KlineFragment extends BaseChartFragment {
         xVals.clear();
         mTopChartViewBase.clear();
         mMiddleChartViewBase.clear();
-        mViewWidth = CommonConstants.VIEW_WIDTH;
+        mBottomChartViewBase.clear();
+        mViewWidth = MarketConstants.VIEW_WIDTH;
+    }
+
+    /**
+     * date: 2019/7/30
+     * author: chenli
+     * description: 重新计算MACD
+     */
+    private void reGenerateMACDEntries(int left_index, int last_index) {
+        mBottomChartViewBase.getLineData().getDataSetByIndex(0).clear();
+        mBottomChartViewBase.getLineData().getDataSetByIndex(1).clear();
+        mBottomChartViewBase.getBarData().getDataSetByIndex(0).clear();
+
+        for (int i = left_index; i <= last_index; i++) {
+            Map<String, KlineEntity.DataEntity> dataEntities = mKlineEntity.getData();
+            KlineEntity.DataEntity dataEntity = dataEntities.get(String.valueOf(i));
+            if (dataEntity == null) continue;
+            float close = Float.valueOf(dataEntity.getClose());
+            float emas = close;
+            float emal = close;
+            float dif = 0;
+            float dea = 0;
+            float macd = 0;
+            if (i != left_index && mEMAs.get(i - mBaseIndex - 1) != null) {
+                emas = mEMAs.get(i - mBaseIndex - 1) * (mS - 1) / (mS + 1) + close * 2 / (mS + 1);
+                emal = mEMAl.get(i - mBaseIndex - 1) * (mL - 1) / (mL + 1) + close * 2 / (mL + 1);
+                dif = emas - emal;
+                dea = mDEA.get(i - mBaseIndex - 1) * (mN - 1) / (mN + 1) + dif * 2 / (mN + 1);
+                macd = (dif - dea) * 2;
+            }
+            mEMAs.put(i - mBaseIndex, emas);
+            mEMAl.put(i - mBaseIndex, emal);
+            mDEA.put(i - mBaseIndex, dea);
+            mBottomChartViewBase.getLineData().getDataSetByIndex(0).addEntry(new Entry(i - mBaseIndex, dif));
+            mBottomChartViewBase.getLineData().getDataSetByIndex(1).addEntry(new Entry(i - mBaseIndex, dea));
+            mBottomChartViewBase.getBarData().getDataSetByIndex(0).addEntry(new BarEntry(i - mBaseIndex, macd, macd));
+        }
+
     }
 
     /**
@@ -718,10 +581,13 @@ public class KlineFragment extends BaseChartFragment {
         mCalendar.setTimeInMillis(Long.valueOf(dataEntity.getDatetime()) / 1000000);
         xVals.put(index - mBaseIndex, mSimpleDateFormat.format(mCalendar.getTime()));
 
-        List<Entry> entries = generateMultiDataEntry(index, dataEntity);
+        List<Entry> entries = generateMultiDataEntry(index, dataEntity, left_index);
         mTopChartViewBase.getCandleData().getDataSetByIndex(0).addEntryOrdered((CandleEntry) entries.get(0));
         mMiddleChartViewBase.getLineData().getDataSetByIndex(0).addEntryOrdered(entries.get(1));
         mMiddleChartViewBase.getBarData().getDataSetByIndex(0).addEntryOrdered((BarEntry) entries.get(2));
+        mBottomChartViewBase.getLineData().getDataSetByIndex(0).addEntryOrdered(entries.get(3));
+        mBottomChartViewBase.getLineData().getDataSetByIndex(1).addEntryOrdered(entries.get(4));
+        mBottomChartViewBase.getBarData().getDataSetByIndex(0).addEntryOrdered((BarEntry) entries.get(5));
 
         for (int i = 0; i < mas.size(); i++) {
             int para = mas.get(i);
@@ -737,7 +603,7 @@ public class KlineFragment extends BaseChartFragment {
      * author: chenli
      * description: K线图初始化时生成单个数据
      */
-    private List<Entry> generateMultiDataEntry(int i, KlineEntity.DataEntity dataEntity) {
+    private List<Entry> generateMultiDataEntry(int i, KlineEntity.DataEntity dataEntity, int left_index) {
         List<Entry> entries = new ArrayList<>();
         mCalendar.setTimeInMillis(Long.valueOf(dataEntity.getDatetime()) / 1000000);
         xVals.put(i - mBaseIndex, mSimpleDateFormat.format(mCalendar.getTime()));
@@ -748,9 +614,27 @@ public class KlineFragment extends BaseChartFragment {
         float volume = Float.valueOf(dataEntity.getVolume());
         float oi = Float.valueOf(dataEntity.getClose_oi());
         float sub = open - close;
+        float emas = close;
+        float emal = close;
+        float dif = 0;
+        float dea = 0;
+        float macd = 0;
+        if (i != left_index && mEMAs.get(i - mBaseIndex - 1) != null) {
+            emas = mEMAs.get(i - mBaseIndex - 1) * (mS - 1) / (mS + 1) + close * 2 / (mS + 1);
+            emal = mEMAl.get(i - mBaseIndex - 1) * (mL - 1) / (mL + 1) + close * 2 / (mL + 1);
+            dif = emas - emal;
+            dea = mDEA.get(i - mBaseIndex - 1) * (mN - 1) / (mN + 1) + dif * 2 / (mN + 1);
+            macd = (dif - dea) * 2;
+        }
+        mEMAs.put(i - mBaseIndex, emas);
+        mEMAl.put(i - mBaseIndex, emal);
+        mDEA.put(i - mBaseIndex, dea);
         entries.add(new CandleEntry(i - mBaseIndex, high, low, open, close));
         entries.add(new Entry(i - mBaseIndex, oi));
         entries.add(new BarEntry(i - mBaseIndex, volume, sub));
+        entries.add(new Entry(i - mBaseIndex, dif));
+        entries.add(new Entry(i - mBaseIndex, dea));
+        entries.add(new BarEntry(i - mBaseIndex, macd, macd));
         return entries;
     }
 
@@ -767,15 +651,15 @@ public class KlineFragment extends BaseChartFragment {
         set.setDecreasingPaintStyle(Paint.Style.FILL);
         set.setIncreasingColor(mIncreasingColor);
         set.setIncreasingPaintStyle(Paint.Style.STROKE);
-        set.setNeutralColor(ContextCompat.getColor(getActivity(), R.color.text_white));
+        set.setNeutralColor(mHighlightColor);
         set.setShadowColorSameAsCandle(true);
         set.setHighlightLineWidth(0.7f);
-        set.setHighLightColor(ContextCompat.getColor(getActivity(), R.color.text_white));
+        set.setHighLightColor(mHighlightColor);
         set.setDrawValues(true);
         set.setValueTextColor(Color.RED);
         set.setValueTextSize(9f);
         set.setDrawIcons(false);
-        set.setValueFormatter(new MyValueFormatter());
+        set.setValueFormatter(new TopChartLeftYAxisValueFormatter());
         CandleData candleData = new CandleData();
         candleData.addDataSet(set);
         return candleData;
@@ -873,14 +757,14 @@ public class KlineFragment extends BaseChartFragment {
      * author: chenli
      * description: 生成成交量数据集
      */
-    private BarDataSet generateBarDataSet(List<BarEntry> entries, int color, String label, boolean isHighlight) {
+    private BarDataSet generateBarDataSet(List<BarEntry> entries, String label, boolean isHighlight, int... colors) {
         BarDataSet set = new BarDataSet(entries, label);
-        set.setColors(mDecreasingColor, mIncreasingColor);
+        set.setColors(colors);
         set.setBarBorderWidth(0);
         set.setDrawValues(false);
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
         if (isHighlight) {
-            set.setHighLightColor(color);
+            set.setHighLightColor(mHighlightColor);
         } else {
             set.setHighlightEnabled(false);
         }
@@ -937,16 +821,49 @@ public class KlineFragment extends BaseChartFragment {
     }
 
     /**
+     * date: 2019/7/31
+     * author: chenli
+     * description: 刷新图标值
+     */
+    @Override
+    protected void refreshChartLegend(int index) {
+        refreshTopChartLegend(index);
+        super.refreshChartLegend(index);
+    }
+
+    /**
+     * date: 2019/7/31
+     * author: chenli
+     * description: 刷新均线图标值
+     */
+    private void refreshTopChartLegend(int index) {
+        List<LegendEntry> legendEntries = new ArrayList<>();
+        for (int i = 0; i < mas.size(); i++) {
+            int para = mas.get(i);
+            Entry entry = mLineData.getDataSetByIndex(i).getEntryForXValue(index, 0.0f);
+            String data = ":";
+            if (entry != null) data = data + MathUtils.round(entry.getY()+"", 2);
+            LegendEntry ma = new LegendEntry("MA" + para + data, Legend.LegendForm.NONE,
+                    NaN, NaN, null, mColorMas[i]);
+            legendEntries.add(ma);
+        }
+        Legend legend = mTopChartViewBase.getLegend();
+        legend.setCustom(legendEntries);
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
+    }
+
+    /**
      * date: 2018/12/18
      * author: chenli
      * description: 不改页情况下k线周期更新
      */
     @Subscribe
-    public void onEvent(KlineEvent klineEvent) {
-        String klineType = klineEvent.getKlineType();
+    public void onEvent(SwitchDurationEvent switchDurationEvent) {
+        String klineType = switchDurationEvent.getKlineType();
         mKlineType = klineType;
-        mXValsFormat = klineEvent.getxValuesType();
-        mFragmentType = klineEvent.getFragmentType();
+        mXValsFormat = switchDurationEvent.getxValuesType();
+        mFragmentType = switchDurationEvent.getFragmentType();
         mSimpleDateFormat = new SimpleDateFormat(mXValsFormat, Locale.CHINA);
         clearKline();
         BaseApplication.getmMDWebSocket().sendSetChartKline(instrument_id, VIEW_WIDTH, mKlineType);
@@ -960,7 +877,7 @@ public class KlineFragment extends BaseChartFragment {
      * description: 接收自选合约列表弹出框、持仓页、上下滑动传过来的合约代码，以便更新K线图
      */
     @Subscribe
-    public void onEvent(IdEvent data) {
+    public void onEvent(SwitchInsEvent data) {
         String instrument_id_new = data.getInstrument_id();
         if (instrument_id_new.equals(instrument_id)) return;
         setInstrument_id(instrument_id_new);
@@ -982,7 +899,7 @@ public class KlineFragment extends BaseChartFragment {
      * description: 接收“设置”按钮最新的设置信息，以便根据用户要求显示持仓、挂单、均线
      */
     @Subscribe
-    public void onEventMainThread(SetUpEvent data) {
+    public void onEventMainThread(CommonSwitchEvent data) {
         //k线还没初始化
         if (mTopChartViewBase.getCombinedData() == null) return;
         if (mIsPending != data.isPending()) {
@@ -1018,13 +935,13 @@ public class KlineFragment extends BaseChartFragment {
      * description: 重绘均线
      */
     @Subscribe
-    public void onEvent(AverageEvent averageEvent) {
+    public void onEvent(ParaChangeEvent paraChangeEvent) {
         String average = (String) SPUtils.get(BaseApplication.getContext(),
-                CommonConstants.CONFIG_PARA_MA, CommonConstants.PARA_MA);
+                SettingConstants.CONFIG_PARA_MA, SettingConstants.PARA_MA);
         String[] averageArray = average.split(",");
         List<String> list = new ArrayList<>();
         for (String para : averageArray) {
-            if (!"0".equals(para))list.add(para);
+            if (!"0".equals(para)) list.add(para);
         }
         String averageF = TextUtils.join(",", list);
         String averagePre = TextUtils.join(",", mas);
@@ -1040,19 +957,7 @@ public class KlineFragment extends BaseChartFragment {
                 }
             }
 
-            List<LegendEntry> legendEntries = new ArrayList<>();
-            for (int i = 0; i < mas.size(); i++) {
-                int para = mas.get(i);
-                LegendEntry ma = new LegendEntry("MA" + para, Legend.LegendForm.SQUARE,
-                        NaN, NaN, null, mColorMas[i]);
-                legendEntries.add(ma);
-            }
-            Legend legend = mTopChartViewBase.getLegend();
-            legend.setCustom(legendEntries);
-            legend.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
-            legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
-            legend.setTextColor(Color.WHITE);
-
+            refreshChartLegend(mLastIndex - mBaseIndex);
             clearKline();
             drawKline();
         }
@@ -1113,7 +1018,7 @@ public class KlineFragment extends BaseChartFragment {
             refreshFragmentType();
         }
 
-        public void refreshFragmentType(){
+        public void refreshFragmentType() {
             if (DAY_FRAGMENT.equals(mFragmentType)) {
                 dateTime.setVisibility(GONE);
                 simpleDateFormat = new SimpleDateFormat("yyyyMMdd", Locale.CHINA);
@@ -1128,6 +1033,7 @@ public class KlineFragment extends BaseChartFragment {
             if (e instanceof CandleEntry) {
                 Map<String, KlineEntity.DataEntity> dataEntities = mKlineEntity.getData();
                 CandleEntry candleEntry = (CandleEntry) e;
+                refreshChartLegend((int) e.getX());
                 String xValue = MathUtils.round(String.valueOf(candleEntry.getX() + mBaseIndex), 0);
                 KlineEntity.DataEntity dataEntity = dataEntities.get(xValue);
                 String xValuePre = MathUtils.subtract(xValue, "1");
@@ -1248,7 +1154,7 @@ public class KlineFragment extends BaseChartFragment {
      * version:
      * state: done
      */
-    public class MyXAxisValueFormatter implements IAxisValueFormatter {
+    public class MyXAxisValueFormatter extends MyValueFormatter {
 
         private SparseArray<String> mValues;
 
@@ -1257,39 +1163,8 @@ public class KlineFragment extends BaseChartFragment {
         }
 
         @Override
-        public String getFormattedValue(float value, AxisBase axis) {
-            // "value" represents the position of the label on the axis (x or y)
+        public String getFormattedValue(float value) {
             return mValues.get((int) value);
-        }
-    }
-
-    /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 格式化左Y轴数据
-     * version:
-     * state: done
-     */
-    public class MyYAxisValueFormatter implements IAxisValueFormatter {
-
-        @Override
-        public String getFormattedValue(float value, AxisBase axis) {
-            return LatestFileManager.saveScaleByPtick(String.valueOf(value), instrument_id);
-        }
-    }
-
-    /**
-     * date: 7/9/17
-     * author: chenli
-     * description: 格式化最高最低价标识
-     * version:
-     * state: done
-     */
-    public class MyValueFormatter implements IValueFormatter {
-
-        @Override
-        public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
-            return LatestFileManager.saveScaleByPtick(String.valueOf(value), instrument_id);
         }
     }
 }

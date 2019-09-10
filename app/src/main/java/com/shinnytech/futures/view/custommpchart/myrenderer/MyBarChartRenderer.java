@@ -6,7 +6,6 @@ import android.graphics.RectF;
 
 import com.github.mikephil.charting.animation.ChartAnimator;
 import com.github.mikephil.charting.buffer.BarBuffer;
-import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
@@ -14,7 +13,6 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.dataprovider.BarDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.renderer.BarChartRenderer;
-import com.github.mikephil.charting.utils.MPPointD;
 import com.github.mikephil.charting.utils.Transformer;
 import com.github.mikephil.charting.utils.Utils;
 import com.github.mikephil.charting.utils.ViewPortHandler;
@@ -187,17 +185,12 @@ public class MyBarChartRenderer extends BarChartRenderer {
 
             //判断是否画横线
             float y = high.getDrawY();
-            float yMax = getYPixelForValues(xp, 0);
+            float yMax = mChart.getHeight();
             float xMax = mChart.getWidth();
             if (y >= 0 && y <= yMax) {//在区域内即绘制横线
                 //绘制横线
                 c.drawLine(0, y, xMax, y, mHighlightPaint);
             }
         }
-    }
-
-    protected float getYPixelForValues(float x, float y) {
-        MPPointD pixels = mChart.getTransformer(YAxis.AxisDependency.LEFT).getPixelForValues(x, y);
-        return (float) pixels.y;
     }
 }

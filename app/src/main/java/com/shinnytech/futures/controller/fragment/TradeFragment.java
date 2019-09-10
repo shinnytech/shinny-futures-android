@@ -1,11 +1,11 @@
 package com.shinnytech.futures.controller.fragment;
 
-import android.databinding.DataBindingUtil;
+import androidx.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +35,7 @@ public class TradeFragment extends LazyLoadFragment {
     private boolean mIsUpdate = true;
     private List<TradeEntity> mOldData = new ArrayList<>();
     private List<TradeEntity> mNewData = new ArrayList<>();
+    private View mView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,6 +58,7 @@ public class TradeFragment extends LazyLoadFragment {
 
     @Override
     public void refreshTD() {
+        if (mView == null)return;
         if (!mIsUpdate) return;
         try {
             UserEntity userEntity = sDataManager.getTradeBean().getUsers().get(sDataManager.USER_ID);
@@ -84,7 +86,8 @@ public class TradeFragment extends LazyLoadFragment {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_trade, container, false);
         initData();
         initEvent();
-        return mBinding.getRoot();
+        mView = mBinding.getRoot();
+        return mView;
     }
 
     private void initData() {

@@ -1,25 +1,15 @@
 <resources>
     <!--related to main activity-->
     <string name="main_activity_exit">再按一次退出程序</string>
-    <string name="main_activity_openDrawer">open</string>
-    <string name="main_activity_closeDrawer">close</string>
 
     <!--related to future info activity -->
-    <string name="future_info_activity_current_day">分时</string>
-    <string name="future_info_activity_day">1日</string>
-    <string name="future_info_activity_hour">1时</string>
-    <string name="future_info_activity_minute">5分</string>
-    <string name="future_info_activity_second">3秒</string>
-    <string name="future_info_activity_set">设置</string>
     <string name="future_info_activity_handicap_up">盘口▴</string>
     <string name="future_info_activity_position_up">持仓▴</string>
     <string name="future_info_activity_order_up_alive">挂单▴</string>
-    <string name="future_info_activity_order_up">委托▴</string>
     <string name="future_info_activity_transaction_up">交易▴</string>
     <string name="future_info_activity_handicap_down">盘口▾</string>
     <string name="future_info_activity_position_down">持仓▾</string>
     <string name="future_info_activity_order_down_alive">挂单▾</string>
-    <string name="future_info_activity_order_down">委托▾</string>
     <string name="future_info_activity_transaction_down">交易▾</string>
     <string name="future_info_activity_position_set_up">持仓线</string>
     <string name="future_info_activity_order_set_up">挂单线</string>
@@ -28,7 +18,6 @@
     <string name="future_info_activity_bid">买</string>
     <string name="future_info_activity_ask">卖</string>
     <string name="future_info_activity_position">仓</string>
-    <string name="future_info_activity_slash">/</string>
     <string name="future_info_activity_percent">%</string>
 
     <!--Strings related to change password activity-->
@@ -37,15 +26,12 @@
     <!-- Strings related to login activity -->
     <string name="login_activity_btn_login">登录</string>
     <string name="login_activity_title_login">登录</string>
-    <string name="login_activity_action_sign_in_short">登录</string>
     <string name="login_activity_error_invalid_password">密码不能为空</string>
     <string name="login_activity_error_field_required">用户名不能为空</string>
-    <string name="login_activity_error_incorrect_password">用户名/密码错误</string>
 
     <!--related to search activity -->
     <string name="search_activity_name">SearchQuote</string>
     <string name="search_activity_hint">合约代码\\拼音\\中文\\交易所</string>
-    <string name="search_activity_title">主力合约</string>
 
     <!--related to account activity-->
     <string name="account_activity_user">用户</string>
@@ -53,14 +39,12 @@
     <string name="account_activity_static_balance">=静态权益</string>
     <string name="account_activity_close_profit">+平仓盈亏</string>
     <string name="account_activity_position_profit">+持仓盈亏</string>
-    <string name="account_activity_premium">+权利金</string>
     <string name="account_activity_commission">-手续费</string>
     <string name="account_activity_balance">=动态权益</string>
     <string name="account_activity_margin_using">-占用保证金</string>
     <string name="account_activity_margin_frozen">-冻结保证金</string>
     <string name="account_activity_commission_frozen">-冻结手续费</string>
     <string name="account_activity_premium_frozen">-冻结权利金</string>
-    <string name="account_activity_credit">+信用额度</string>
     <string name="account_activity_available">=可用资金</string>
     <string name="account_activity_deposit">入金金额</string>
     <string name="account_activity_withdraw">出金金额</string>
@@ -98,8 +82,6 @@
     <string name="order_fragment_direction">开平</string>
     <string name="order_fragment_volume">数量</string>
     <string name="order_fragment_date">时间</string>
-    <string name="order_fragment_all">所有委托</string>
-    <string name="order_fragment_undone">未成交单</string>
 
     <!--related to position fragment-->
     <string name="position_fragment_instrument_id">合约</string>
@@ -121,9 +103,6 @@
     <string name="transaction_fragment_p_tick">最小变动</string>
     <string name="transaction_fragment_price">价格</string>
     <string name="transaction_fragment_volume">手数</string>
-    <string name="transaction_fragment_ask_price1">卖</string>
-    <string name="transaction_fragment_last_price">新</string>
-    <string name="transaction_fragment_bid_price1">买</string>
     <string name="transaction_fragment_bid_direction">买多</string>
     <string name="transaction_fragment_ask_direction">卖空</string>
     <string name="transaction_fragment_close_direction">平仓</string>
@@ -131,29 +110,22 @@
 
     <!--related to quote fragment-->
     <string name="quote_fragment_up_down_rate">涨跌幅% ⇲</string>
-    <string name="quote_fragment_up_down">涨跌 ⇲</string>
     <string name="quote_fragment_open_interest">持仓量 ⇲</string>
-    <string name="quote_fragment_open_volume">成交量 ⇲</string>
     <string name="quote_fragment_latest">最新价</string>
     <string name="quote_fragment_name">合约名称</string>
     <string name="quote_fragment_ask_price1">卖价 ⇲</string>
-    <string name="quote_fragment_ask_volume1">卖量 ⇲</string>
     <string name="quote_fragment_bid_price1">买价 ⇲</string>
-    <string name="quote_fragment_bid_volume1">买量 ⇲</string>
 
     <!--related to dialog change quote view-->
-    <string name="select_from_optional">从自选列表中选择合约</string>
     <string name="init_optional">正在给您推荐自选合约</string>
     <string name="drag_optional">自选合约管理</string>
     <string name="recommend_optional">选择您感兴趣的标的</string>
     <string name="enter">进入软件</string>
 
     <!--related to confirm activity-->
-    <string name="confirm_activity_title">账单确认</string>
-    <string name="confirm_activity_not_now">暂不确认</string>
     <string name="confirm_activity_settlement">确认账单</string>
 
-    <string name="large_text">
+    <string name="responsibility_text">
         "免责条款声明\n\n"
 
         "上海信易信息科技股份有限公司（其中包括但不限于公司的董事、执行官、雇员、顾问和代理商）明确拒绝对快期软件做"
@@ -170,83 +142,145 @@
         "上海信易信息科技股份有限公司\n\n"
 
     </string>
-    <string name="welcome_activity_disagree">不同意</string>
-    <string name="welcome_activity_agree">同意</string>
-    <string name="title_activity_settings">Settings</string>
 
-    <!-- Strings related to Settings -->
+    <string name="condition_responsibility_text">
+        快期云条件单/止盈止损功能 免责声明\n\n
 
-    <!-- Example General settings -->
-    <string name="pref_header_general">General</string>
+        1.快期云条件单/止盈止损功能重要机制说明\n\n\t\t
 
-    <string name="pref_title_social_recommendations">Enable social recommendations</string>
-    <string name="pref_description_social_recommendations">Recommendations for people to contact
-        based on your message history
+            1.1条件单/止盈止损功能是保存在云服务器端并运行的一种期货交易软件辅助功能。\n\n\t\t
+
+            1.2因现阶段互联网行业技术水平限制，无法保证客户端或云服务器端的硬件/软件完全按照预期运转。\n\n\t\t
+
+            1.3因服务器、网络、软件等故障导致功能失效，所造成的任何损失皆由用户自行承担。\n\n\t\t
+
+            1.4您选择使用快期小Q条件单/止盈止损功能即表示您同意错误或遗漏存在。\n\n\t\t
+
+            1.5您选择使用快期小Q条件单/止盈止损功能即表示您同意授权云端登录保存期货交易账户、自动确认期货账户结算单、根据设置的条件自动下单。\n\n\t\t
+
+            1.6快期小Q条件单/止盈止损功能，设定委托发出的条件，当条件满足时，交易系统将委托单自动报入交易所，当条件不满足时，委托单保留在云端服务器中。\n\n\t\t
+
+            1.7由于交易所交易规则所限，软件中包括但不限于各种自助和预设触发条件的下单功能所发生的交易委托不一定能够成交。\n\n\t\t
+
+            1.8上期所合约需要根据实际情况用户自行选择平今还是平仓。\n\n\t\t
+
+            1.9如果平仓的条件单/止盈止损功能选择的是全部，则触发时平该目标合约该方向的全部持仓。\n\n\t\t
+
+            1.10用户需注意报单价为合约最小变动单位的整数倍，该要点同样适用于报单价同触发价的情况。\n\n\t\t
+
+            1.11云端平仓条件单及云端止损单触发，如果仓位可用不足，会自动撤掉原有平仓挂单。\n\n\t\t
+
+            1.12如果用户修改交易密码时，不是使用快期小Q手机版进行修改的，有可能导致当日或者隔日，条件单不触发或者触发后无法报单的问题。\n\n\t\t
+
+            1.13请使用者尽量避免在不活跃月份上使用市价或涨跌停价。\n\n\t\t
+
+            1.14请使用者在条件单保存前仔细核对条件和触发后的报单内容。\n\n\t\t
+
+            1.15软件里展示的k线图、指标等图表，以及开平仓提示等内容仅供参考，这是我们根据交易所发布的报价数据，用自有的统计算法进行深加工而成的，上海信易信息科技股份有限公司和交易所对于任何因使用或无法使用此项服务而直接或间接引起的赔偿、损失、债务或是任何交易结果均不承担责任和义务。\n\n\t\t
+
+            1.16随着软件功能升级，此机制说明会不断完善。\n\n
+
+        2.市价相关介绍\n\n\t\t
+
+            2.1快期小Q内的市价定义为：交易所支持市价的合约以市价报单时执行IOC，即可成多少成多少，剩余撤单。\n\n\t\t
+
+            2.2交易所不支持市价的合约，如选择市价报单则为该合约的停板价。\n\n\t\t
+
+            2.3如果条件单/止盈止损功能选择的是反手，则触发时以市价平该目标合约该方向的全部持仓，并以市价将该合约的当时持仓手数全部反向开仓。\n\n\t\t
+
+            2.4市价报单风险告知如下：\n\n\t\t
+
+                风险１：市价下单，在盘口行情突然发生快速变化的情况下，会成交在最新的对价上，与你下单时看到的价格会有差异。\n\n\t\t
+
+                风险２：市价下单，交易不活跃的合约的时候有可能遇到钓鱼单而造成损失：在你涨停板买入的时候恰巧遇到涨停板卖出的挂单，或者在你跌停板卖出的时候恰巧遇到跌停板买入的挂单，都会成交在停板价上，导致你产生巨大的损失。\n\n\t\t
+
+                风险3：条件单/止盈止损功能在行情不活跃或快速发生变化的情况下，不保证成交价为指定价。\n\n\t\t
+
+                风险4：交易所发布的行情数据是快照方式的，最高价/最低价有可能会漏掉，导致有的情况下最高价/最低价上的止损单和条件单无法触发。\n\n\t\t
+
+            以上只列举市价下单部分可能发生的风险，但不是使用软件的全部风险。使用我公司软件下单导致的交易结果，我公司不承担任何风险与责任，请详细了解软件机制后谨慎使用。\n\n
+
+        3.时间相关介绍\n\n\t\t
+
+            3.1“当日有效”指的是当前交易日而非自然日，当日有效条件单时间期限截止到当天下午收盘；如要设置次交易日或未来触发的条件单，则应保存为“永久有效”。\n\n\t\t
+
+            3.2“时间触发”条件单的触发时间为自然日日期。比如要设置2019年8月12日22:30:00夜盘触发的条件单，虽然实际的交易日为2019年8月13日，设置时日期仍应是2019年8月12日22:30:00。\n\n
+
+        4.平今平昨的优先规则\n\n\t\t
+
+            4.1如果报单合约所属交易所的规则支持平今和平昨区分，那么所有平仓条件单/止盈止损皆为平今优先。\n\n
+
+        5.应急处理流程\n\n\t\t
+
+            5.1如果出现不可预知的行情服务器故障，交易服务器故障，条件单服务器故障，快期将暂停所有条件单。服务器修复后用户需要自行启动条件单才能触发。\n\n
+
+        6.其他免责声明\n\n\t\t
+
+            6.1上海信易信息科技股份有限公司明确拒绝所有因软件/硬件导致的亏损索赔，纠纷。\n\n\t\t
+
+            6.2上海信易信息科技股份有限公司明确拒绝所有因服务器或线路故障导致的亏损索赔，纠纷。\n\n
+
+        此声明永久有效，上海信易拥有该协议的最终解释权，并可根据实际情况对该协议进行修改。\n\n
+
+        上海信易信息科技股份有限公司\n\n
+
     </string>
+    <string name="welcome_activity_agree">同意</string>
+    <string name="welcome_activity_disagree">不同意</string>
+    <string name="future_info_activity_slash">/</string>
 
-    <string name="pref_title_display_name">Display name</string>
-    <string name="pref_default_display_name">John Smith</string>
+    <!--related to conditional order-->
+    <string name="trigger_way">触发方式</string>
+    <string name="trigger_way_price">价格触发</string>
+    <string name="trigger_way_time">时间触发</string>
+    <string name="trigger_way_open">开盘抢单</string>
+    <string name="trigger_way_range">区间价格</string>
+    <string name="trigger_price">触发价</string>
+    <string name="trigger_price_range">\u2264最新价\u2264</string>
+    <string name="trigger_price_quick">下一个开盘节点触发</string>
+    <string name="trigger_larger_equal">\u2265</string>
+    <string name="trigger_larger">&gt;</string>
+    <string name="trigger_lower_equal">\u2264</string>
+    <string name="trigger_lower">&lt;</string>
+    <string name="trigger_order_price">触发报单价</string>
+    <string name="trigger_order_price_market">市价</string>
+    <string name="trigger_order_price_consideration">对价</string>
+    <string name="trigger_order_price_over">超价</string>
+    <string name="trigger_order_price_contingent">最新</string>
+    <string name="trigger_order_price_limit">指定</string>
+    <string name="trigger_order_volume">触发报单量</string>
+    <string name="trigger_order_volume_custom">指定</string>
+    <string name="trigger_order_volume_all">全部</string>
+    <string name="trigger_order_offset">开平</string>
+    <string name="trigger_order_offset_open">开</string>
+    <string name="trigger_order_offset_close">平</string>
+    <string name="trigger_order_offset_close_today">平今</string>
+    <string name="trigger_order_offset_close_reverse">反手</string>
+    <string name="trigger_order_direction">方向</string>
+    <string name="trigger_order_direction_buy">买</string>
+    <string name="trigger_order_direction_sell">卖</string>
+    <string name="trigger_period">有效期</string>
+    <string name="trigger_expiry_always">永久有效</string>
+    <string name="trigger_expiry_one_day">当日有效</string>
+    <string name="trigger_save">保存</string>
+    <string name="exhibit_ins">合约</string>
+    <string name="exhibit_last">最新价</string>
+    <string name="exhibit_range">\u2264</string>
+    <string name="exhibit_larger">&lt;</string>
+    <string name="exhibit_lower">&lt;</string>
+    <string name="exhibit_volume">手数:</string>
+    <string name="exhibit_volume_unit">手</string>
+    <string name="exhibit_offset">开平:</string>
+    <string name="exhibit_by">时</string>
+    <string name="exhibit_price">价格:</string>
+    <string name="exhibit_period">有效:</string>
+    <string name="exhibit_responsibility">《条件单免责条款》</string>
 
-    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
-    <string-array name="pref_example_list_titles">
-        <item>Always</item>
-        <item>When possible</item>
-        <item>Never</item>
-    </string-array>
-    <string-array name="pref_example_list_values">
-        <item>1</item>
-        <item>0</item>
-        <item>-1</item>
-    </string-array>
+    <string name="condition_order_cancel">取消</string>
+    <string name="condition_order_ok">确定</string>
+    <string name="query_his_condition">正在查询历史条件单</string>
+    <string name="trigger_take_profit">止盈触发</string>
+    <string name="trigger_stop_loss">止损触发</string>
 
-    <!-- Example settings for Data & Sync -->
-    <string name="pref_header_data_sync">Data &amp; sync</string>
-
-    <string name="pref_title_sync_frequency">Sync frequency</string>
-    <string-array name="pref_sync_frequency_titles">
-        <item>15 minutes</item>
-        <item>30 minutes</item>
-        <item>1 hour</item>
-        <item>3 hours</item>
-        <item>6 hours</item>
-        <item>Never</item>
-    </string-array>
-    <string-array name="pref_sync_frequency_values">
-        <item>15</item>
-        <item>30</item>
-        <item>60</item>
-        <item>180</item>
-        <item>360</item>
-        <item>-1</item>
-    </string-array>
-
-    <string-array name="list_preference_entries">
-        <item>Entry 1</item>
-        <item>Entry 2</item>
-        <item>Entry 3</item>
-    </string-array>
-
-    <string-array name="list_preference_entry_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-    </string-array>
-
-    <string-array name="multi_select_list_preference_default_value" />
-
-    <string name="pref_title_system_sync_settings">System sync settings</string>
-
-    <!-- Example settings for Notifications -->
-    <string name="pref_header_notifications">Notifications</string>
-
-    <string name="pref_title_new_message_notifications">New message notifications</string>
-
-    <string name="pref_title_ringtone">Ringtone</string>
-    <string name="pref_ringtone_silent">Silent</string>
-
-    <string name="pref_title_vibrate">Vibrate</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

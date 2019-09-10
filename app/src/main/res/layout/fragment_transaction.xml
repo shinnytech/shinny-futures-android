@@ -30,6 +30,17 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <Button
+                android:textColor="@color/text_yellow"
+                android:text="条件"
+                android:textSize="15sp"
+                android:layout_marginTop="@dimen/margin_5dp"
+                android:id="@+id/to_condition_order"
+                android:background="@drawable/fragment_transaction_condition_order_selector"
+                android:layout_width="80dp"
+                android:layout_height="40dp">
+            </Button>
+
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_weight="1"
@@ -199,56 +210,6 @@
                     android:textSize="@dimen/font_size_small_high" />
 
             </LinearLayout>
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_weight="1"
-                android:layout_width="match_parent"
-                android:layout_height="0dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="@string/transaction_fragment_using_ratio"
-                    android:textColor="@color/text_white"
-                    android:textSize="@dimen/font_size_small_high" />
-
-                <TextView
-                    android:id="@+id/tv_id_transaction_using_ratio"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="end|center"
-                    android:text='@{MathUtils.subZeroAndDot(MathUtils.round(MathUtils.multiply("100", MathUtils.divide(account.margin, account.balance)), 2)) + "%"}'
-                    android:textColor="@color/text_white"
-                    android:textSize="@dimen/font_size_small_high" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_weight="1"
-                android:layout_width="match_parent"
-                android:layout_height="0dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="@string/transaction_fragment_p_tick"
-                    android:textColor="@color/text_white"
-                    android:textSize="@dimen/font_size_small_high" />
-
-                <TextView
-                    android:id="@+id/tv_id_transaction_p_tick"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="end|center"
-                    android:text="-"
-                    android:textColor="@color/text_white"
-                    android:textSize="@dimen/font_size_small_high" />
-            </LinearLayout>
-
 
         </LinearLayout>
 
@@ -353,12 +314,13 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
+                    android:clickable="true"
                     android:id="@+id/bid_open_position"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginEnd="@dimen/margin_10dp"
                     android:layout_weight="1"
-                    android:background="@drawable/fragment_transaction_bid_rectangle"
+                    android:background="@drawable/fragment_transaction_bid_selector"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:padding="@dimen/padding_5dp">
@@ -389,7 +351,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="@drawable/fragment_transaction_ask_rectangle"
+                    android:background="@drawable/fragment_transaction_ask_selector"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:padding="@dimen/padding_5dp">
@@ -423,7 +385,7 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:layout_margin="@dimen/margin_5dp"
-                android:background="@drawable/fragment_transaction_close_rectangle"
+                android:background="@drawable/fragment_transaction_close_selector"
                 android:gravity="center"
                 android:orientation="vertical"
                 android:padding="@dimen/padding_5dp">

@@ -1,6 +1,6 @@
 package com.shinnytech.futures.model.listener;
 
-import android.support.v7.util.DiffUtil;
+import androidx.recyclerview.widget.DiffUtil;
 
 import com.shinnytech.futures.model.bean.accountinfobean.TransferEntity;
 
